@@ -1,6 +1,8 @@
 import { listen } from "@tauri-apps/api/event";
 import { useEffect, useState } from "react";
 
+const numberOfElements = 10;
+
 function RandomNumber() {
     let [number, setNumber] = useState(0);
     let [vec, setVec] = useState([0]);
@@ -12,10 +14,12 @@ function RandomNumber() {
     useEffect(() => {
         // the generic argument of listen is the type of the payload.
         let unsubscribe = listen<number>("random-integer", (event) => {
-            console.log("random-integer event");
             let number = event.payload;
 
             vec.unshift(number)
+            if (vec.length > numberOfElements) {
+                vec.pop();
+            }
             // by calling set number we tell react to update the DOM.
             setNumber(number);
             setVec(vec);
