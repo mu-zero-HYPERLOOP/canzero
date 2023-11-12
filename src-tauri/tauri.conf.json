@@ -7,7 +7,7 @@
     "withGlobalTauri": false
   },
   "package": {
-    "productName": "Control_Panel",
+    "productName": "control_panel",
     "version": "0.0.0"
   },
   "tauri": {
@@ -16,6 +16,9 @@
       "shell": {
         "all": false,
         "open": true
+      },
+      "fs": {
+        "all": true
       }
     },
     "bundle": {
