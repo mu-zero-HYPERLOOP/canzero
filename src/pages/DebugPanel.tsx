@@ -5,7 +5,7 @@ import { TreeView } from '@mui/x-tree-view/TreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 
 function DebugPanel() {
-    return (<><h1>Welcome to the Debug Panel!</h1> <FirstComponent/> <RandomNumber/> </>);
+    return (<><FirstComponent/> <RandomNumber/> </>);
 };
 
 export default DebugPanel;
