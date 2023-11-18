@@ -3,8 +3,20 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { TreeView } from '@mui/x-tree-view/TreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import TraceGrid from "../components/TraceGrid";
+import { listen } from "@tauri-apps/api/event";
+import { useEffect } from 'react';
 
 function DebugPanel() {
+    useEffect(() => {
+        const unsubscribe = listen<any>("rx-frame", (event) => {
+          // Log the received event data
+          console.log("Received rx-frame event:", event.payload);
+        });
+    
+        return () => {
+          unsubscribe.then((f) => f());
+        };
+      }, []); // Empty dependency array ensures this effect runs once when the component mounts
 
     return (
         <>
