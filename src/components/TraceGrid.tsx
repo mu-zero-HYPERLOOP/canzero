@@ -6,7 +6,7 @@ import Collapse from "@mui/material/Collapse";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
-import Button from "@mui/material/Button";
+import GridButtons from "./GridButtons";
 
 const numberOfElements = 20;
 
@@ -97,9 +97,6 @@ function TraceGrid({}: TraceGridProps) {
     }
   };
 
-  const handleStopStartText = subscriptionActive ? "Stop" : "Start";
-  const buttonColor = subscriptionActive ? "secondary" : "success"; // Change color to green when starting
-
   const sortedRows = [...rows].sort((a, b) => {
     if (sortOrder === "asc") {
       return (a.SignalFrame?.id || 0) - (b.SignalFrame?.id || 0);
@@ -111,11 +108,10 @@ function TraceGrid({}: TraceGridProps) {
   return (
     <div style={{ margin: "auto", padding: "10px", borderRadius: "8px", maxWidth: "calc(100vw - 20px)" }}>
       <h2 style={{ textAlign: "center" }}>Serialized Frames Table</h2>
-      <div style={{ marginBottom: "10px" }}>
-        <Button variant="contained" color={buttonColor} onClick={handleToggleSubscription}>
-          {handleStopStartText}
-        </Button>
-      </div>
+      <GridButtons
+        subscriptionActive={subscriptionActive}
+        handleToggleSubscription={handleToggleSubscription}
+      />
       <div style={{ maxHeight: "500px", overflowY: "auto" }}> {/* Set your preferred max height */}
         <table style={{ width: "100%", borderCollapse: "collapse", maxHeight: "400px", overflowY: "auto" }}>
           <thead style={{ position: "sticky", top: 0, zIndex: 1, background: "#fff" }}>
