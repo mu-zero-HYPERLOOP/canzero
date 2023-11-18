@@ -4,6 +4,7 @@
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use std::{time::Duration};
 use tauri::Manager;
+use serde::{Serialize, Deserialize};
 
 #[tauri::command]
 fn emergency() {
@@ -29,13 +30,30 @@ fn connect_pod() {
     //TODO: connect_pod behaviour
 }
 
+#[derive(Serialize)]
+struct GraphData {
+    passed_values: Vec<f64>,
+    event_handle: String,
+}
+
+#[tauri::command]
+fn initialize_graph() -> GraphData {
+    println!("get_graph_data was invoked");
+    GraphData {
+        passed_values : vec![1.0, 5.0, 7.0, 2.0, 7.0, 9.0, 1.0],
+        event_handle : String::from("abcde")
+    }
+}
+
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
             random_integer(app.handle());
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![emergency, launch_pod, land_pod, connect_pod])
+        .invoke_handler(tauri::generate_handler![
+                        emergency, 
+                        launch_pod, land_pod, connect_pod, initialize_graph])
         .run(tauri::generate_context!())
         .expect("Error while running tauri application");
 }

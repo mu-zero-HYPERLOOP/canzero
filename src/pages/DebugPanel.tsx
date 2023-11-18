@@ -3,9 +3,10 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { TreeView } from '@mui/x-tree-view/TreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
+import Graph from "../components/Graph";
 
 function DebugPanel() {
-    return (<><FirstComponent/> <RandomNumber/> </>);
+    return (<><FirstComponent/> <Graph/> </>);
 };
 
 export default DebugPanel;
