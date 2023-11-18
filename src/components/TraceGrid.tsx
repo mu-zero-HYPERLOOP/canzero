@@ -93,7 +93,7 @@ function TraceGrid({}: TraceGridProps) {
     if (subscriptionActive) {
       invoke("unlisten_to_trace");
     } else {
-      invoke("listen_to_trace");
+      invoke("listen_to_trace").then(e => console.log(e));
     }
   };
 

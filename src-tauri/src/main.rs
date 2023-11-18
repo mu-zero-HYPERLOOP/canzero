@@ -66,7 +66,7 @@ fn main() {
     // setup tauri
     tauri::Builder::default()
         .manage(TraceState::new())
-        .invoke_handler(tauri::generate_handler![emergency, launch_pod, land_pod, connect_pod])
+        .invoke_handler(tauri::generate_handler![emergency, launch_pod, land_pod, connect_pod, listen_to_trace, unlisten_to_trace])
         .setup(|app| {
             println!("Hello, Tauri!");
             random_integer(app.handle());
