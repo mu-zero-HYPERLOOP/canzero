@@ -1,13 +1,14 @@
 // TraceGrid.tsx
 import React, { useEffect, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
+import { invoke } from '@tauri-apps/api/tauri'
 import Collapse from "@mui/material/Collapse";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import Button from "@mui/material/Button";
 
-const numberOfElements = 10;
+const numberOfElements = 20;
 
 interface TraceGridProps {
   // Add any additional props as needed
@@ -69,7 +70,7 @@ function TraceGrid({}: TraceGridProps) {
     };
 
     if (subscriptionActive) {
-      const unsubscribe = listen<SerializedFrame>("rx-frame", handleRxFrame);
+      const unsubscribe = listen<SerializedFrame>("trace", handleRxFrame);
 
       return () => {
         unsubscribe.then((f) => f());
@@ -87,6 +88,13 @@ function TraceGrid({}: TraceGridProps) {
 
   const handleToggleSubscription = () => {
     setSubscriptionActive(!subscriptionActive);
+
+    // Call Tauri commands based on subscription state
+    if (subscriptionActive) {
+      invoke("unlisten_to_trace");
+    } else {
+      invoke("listen_to_trace");
+    }
   };
 
   const handleStopStartText = subscriptionActive ? "Stop" : "Start";
@@ -109,8 +117,8 @@ function TraceGrid({}: TraceGridProps) {
         </Button>
       </div>
       <div style={{ maxHeight: "500px", overflowY: "auto" }}> {/* Set your preferred max height */}
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
+        <table style={{ width: "100%", borderCollapse: "collapse", maxHeight: "400px", overflowY: "auto" }}>
+          <thead style={{ position: "sticky", top: 0, zIndex: 1, background: "#fff" }}>
             <tr>
               <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left", cursor: "pointer" }} onClick={handleSort}>
                 ID
