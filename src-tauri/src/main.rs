@@ -37,10 +37,11 @@ struct GraphData {
 }
 
 #[tauri::command]
-fn initialize_graph() -> GraphData {
+fn initialize_graph(source: u32) -> GraphData {
     println!("get_graph_data was invoked");
+    println!("{}", source);
     GraphData {
-        passed_values : vec![1.0, 5.0, 7.0, 2.0, 7.0, 9.0, 1.0],
+        passed_values : (1..=100).map(f64::from).collect(),
         event_handle : String::from("abcde")
     }
 }
@@ -66,7 +67,7 @@ fn random_integer(app_handle: tauri::AppHandle) {
             StdRng::from_rng(rng).unwrap()
         };
         loop {
-            tokio::time::sleep(Duration::from_millis(1000)).await;
+            tokio::time::sleep(Duration::from_millis(250)).await;
             let x = rng.gen::<u32>();
             println!("emit event : {x}");
             app_handle.emit_all("random-integer", x).unwrap();

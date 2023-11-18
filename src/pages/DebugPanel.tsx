@@ -4,9 +4,17 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { TreeView } from '@mui/x-tree-view/TreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import Graph from "../components/Graph";
+import Stack from "@mui/material/Stack/Stack";
 
 function DebugPanel() {
-    return (<><FirstComponent/> <Graph/> </>);
+    return (<><FirstComponent/> 
+    <Stack spacing={2}>
+      <Graph/>
+      <Graph/>
+      <Graph/>
+      <Graph/>
+    </Stack>
+    </>);
 };
 
 export default DebugPanel;
