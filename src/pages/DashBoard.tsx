@@ -105,7 +105,7 @@ export default function Dashboard() {
                         Dashboard
                     </Typography>
                     <Button variant="contained" size="large" color="secondary" onClick={() => {
-                        //invoke('connect');
+                        invoke('connect_pod');
                     }}>Connect</Button>
                 </Toolbar>
             </AppBar>

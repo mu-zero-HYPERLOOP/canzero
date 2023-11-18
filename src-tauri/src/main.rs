@@ -34,7 +34,6 @@ fn land_pod() {
 #[tauri::command]
 fn connect_pod() {
     println!("Connect")
-    //TODO: connect_pod behaviour
 }
 
 fn main() {
