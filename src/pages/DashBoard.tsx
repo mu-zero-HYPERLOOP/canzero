@@ -14,6 +14,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import RouteElement from './RouteElement';
 import {ListRouter} from './PageList';
 import {Button} from '@mui/material';
+import logo from '../assets/mu-zero-hyperloop-logo.png'
 import {invoke} from '@tauri-apps/api';
 
 
@@ -102,7 +103,17 @@ export default function Dashboard() {
                         noWrap
                         sx={{flexGrow: 1}}
                     >
-                        Dashboard
+                        <Box
+                            component="img"
+                            sx={{
+                                height: 50,
+                                width: 114,
+                                maxHeight: { xs: 233, md: 167 },
+                                maxWidth: { xs: 350, md: 250 },
+                            }}
+                            alt="The house from the offer."
+                            src={logo}
+                        />
                     </Typography>
                     <Button variant="contained" size="large" color="secondary" onClick={() => {
                         invoke('connect_pod');
