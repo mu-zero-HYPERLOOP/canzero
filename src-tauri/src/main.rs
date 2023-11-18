@@ -1,16 +1,18 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use can::frame::Frame;
 use rand::{rngs::StdRng, Rng, SeedableRng};
+use stream_object::StreamObject;
 use std::{time::Duration};
 use serialize::serialized_frame::SerializedFrame;
-use std::{boxed::Box, sync::Arc};
 use tauri::Manager;
 
 use crate::can::CNL;
 
 mod can;
 mod serialize;
+mod stream_object;
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
@@ -36,10 +38,29 @@ fn connect_pod() {
     println!("Connect")
 }
 
+
+#[tauri::command]
+fn listen_to_trace(state : tauri::State<TraceState>) -> Vec<SerializedFrame>{
+    state.trace_so.listen()
+}
+
+struct TraceState {
+    trace_so : StreamObject<SerializedFrame>,
+}
+
+impl TraceState {
+    pub fn new() -> Self {
+        Self {
+            trace_so : StreamObject::new("trace", vec![]),
+        }
+    }
+}
+
 fn main() {
     println!("Hello, World!");
     // setup tauri
     tauri::Builder::default()
+        .manage(TraceState::new())
         .invoke_handler(tauri::generate_handler![emergency, launch_pod, land_pod, connect_pod])
         .setup(|app| {
             println!("Hello, Tauri!");
@@ -55,9 +76,7 @@ fn main() {
 
                 loop {
                     let frame = cnl.get_rx_message_receiver().recv().await.unwrap();
-                    app_handle
-                        .emit_all("rx-frame", SerializedFrame::from(frame))
-                        .unwrap();
+                    app_handle.state::<TraceState>().trace_so.push_value(&app_handle, SerializedFrame::from(frame));
                 }
             });
             Ok(())

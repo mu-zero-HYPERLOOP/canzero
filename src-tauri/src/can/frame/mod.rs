@@ -12,9 +12,18 @@ pub mod type_frame;
 pub mod undefined_frame;
 
 
+#[derive(Clone)]
 pub enum Frame {
     SignalFrame(SignalFrame),
     TypeFrame(TypeFrame),
     UndefinedFrame(UndefinedFrame),
     ErrorFrame(ErrorFrame),
+}
+
+impl serde::Serialize for Frame {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer {
+        todo!()
+    }
 }

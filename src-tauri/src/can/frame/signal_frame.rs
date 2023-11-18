@@ -1,5 +1,6 @@
 use can_config_rs::config;
 
+#[derive(Clone)]
 pub struct SignalFrame {
     id: u32,
     ide: bool,
@@ -54,6 +55,7 @@ impl SignalFrame {
 
 }
 
+#[derive(Clone)]
 pub struct Signal {
     signal_ref: config::SignalRef,
     value: SignalValue,
@@ -75,6 +77,7 @@ impl Signal {
 }
 
 
+#[derive(Clone)]
 pub enum SignalValue {
     Unsigned(u64),
     Signed(i64),

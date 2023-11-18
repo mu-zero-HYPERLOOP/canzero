@@ -3,7 +3,7 @@ use std::ops::Index;
 use can_config_rs::config;
 
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TypeFrame {
     id: u32,
     ide: bool,
