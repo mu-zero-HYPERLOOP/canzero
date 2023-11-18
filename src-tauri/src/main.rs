@@ -44,6 +44,11 @@ fn listen_to_trace(state : tauri::State<TraceState>) -> Vec<SerializedFrame>{
     state.trace_so.listen()
 }
 
+#[tauri::command]
+fn unlisten_to_trace(state : tauri::State<TraceState>) {
+    state.trace_so.unlisten()
+}
+
 struct TraceState {
     trace_so : StreamObject<SerializedFrame>,
 }
