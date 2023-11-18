@@ -1,13 +1,18 @@
-import RandomNumber from "../components/RandomNumber";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { TreeView } from '@mui/x-tree-view/TreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
+import TraceGrid from "../components/TraceGrid";
 
 function DebugPanel() {
-    return (<><FirstComponent/> <RandomNumber/> </>);
-};
 
+    return (
+        <>
+            <FirstComponent/> 
+            <TraceGrid />
+        </>
+    );
+};
 export default DebugPanel;
 
 
