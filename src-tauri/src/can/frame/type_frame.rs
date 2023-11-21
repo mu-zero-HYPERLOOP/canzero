@@ -11,10 +11,11 @@ pub struct TypeFrame {
     dlc: u8,
     value: Vec<FrameType>,
     message_ref : config::MessageRef,
+    data: u64,
 }
 
 impl TypeFrame {
-    pub fn new(id : u32, ide : bool, rtr : bool, dlc : u8, value : Vec<FrameType>, message_ref : config::MessageRef) -> Self {
+    pub fn new(id : u32, ide : bool, rtr : bool, dlc : u8, value : Vec<FrameType>, message_ref : config::MessageRef, data : u64) -> Self {
         Self {
             id,
             ide,
@@ -22,6 +23,7 @@ impl TypeFrame {
             dlc,
             value,
             message_ref,
+            data,
         }
     }
     pub fn id(&self) -> u32 {
@@ -39,8 +41,14 @@ impl TypeFrame {
     pub fn value(&self) -> &Vec<FrameType> {
         &self.value
     }
-    pub fn message(&self) -> &config::MessageRef {
-        &self.message_ref
+    pub fn name(&self) -> &str {
+        self.message_ref.name()
+    }
+    pub fn description(&self) -> Option<&str> {
+        self.message_ref.description()
+    }
+    pub fn data(&self) -> u64 {
+        self.data
     }
 
 }

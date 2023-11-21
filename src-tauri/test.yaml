@@ -29,6 +29,36 @@ nodes:
           - sample_count: u32
         callee:
           - master
+      test1:
+        arguments: 
+          - sample_count: u32
+        callee:
+          - master
+      test2:
+        arguments: 
+          - sample_count: u32
+        callee:
+          - master
+      test3:
+        arguments: 
+          - sample_count: u32
+        callee:
+          - master
+      test4:
+        arguments: 
+          - sample_count: u32
+        callee:
+          - master
+      test5:
+        arguments: 
+          - sample_count: u32
+        callee:
+          - master
+      test6:
+        arguments: 
+          - sample_count: u32
+        callee:
+          - master
   master:
     description : Master node running the main state machine
     object_dictionary:

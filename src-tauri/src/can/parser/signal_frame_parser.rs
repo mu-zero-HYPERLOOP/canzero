@@ -130,7 +130,8 @@ impl SignalFrameParser {
                 .iter()
                 .map(|parser| parser.parse(data))
                 .collect(),
-            self.message_ref.clone(), // performance hit because of atomic op
+            self.message_ref.clone(),
+            frame.get_data_u64()
         ))
     }
 }

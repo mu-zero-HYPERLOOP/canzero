@@ -288,8 +288,6 @@ impl TypeParser {
                     .0 & 
                     (0xFFFFFFFFFFFFFFFF as u64).overflowing_shr(64 - bit_size)
                     .0;
-                println!("data = {data}");
-                println!("value = {value}");
 
                 let dvalue = value as f64 * scale - offset;
                 TypeValue::Real(dvalue)
@@ -354,6 +352,7 @@ impl TypeFrameParser {
             frame.get_dlc(),
             composite_type_value,
             self.message_ref.clone(),
+            frame.get_data_u64(),
         ))
     }
 }

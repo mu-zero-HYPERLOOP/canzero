@@ -8,7 +8,7 @@ use crate::can::frame::{
     Frame,
 };
 
-#[derive(Clone, Serialize)]
+#[derive(Clone, Serialize, PartialEq, Debug)]
 #[allow(dead_code)]
 pub enum SerializedFrame {
     SignalFrame(SerializedSignalFrame),
@@ -32,14 +32,15 @@ impl From<Frame> for SerializedFrame {
     }
 }
 
-#[derive(Clone, Serialize)]
+#[derive(Clone, Serialize, PartialEq, Debug)]
 #[allow(dead_code)]
 pub struct SerializedSignalFrame {
-    id: u32,
-    ide: bool,
-    rtr: bool,
-    dlc: u8,
-    signals: Vec<SerializedSignal>,
+    pub id: u32,
+    pub ide: bool,
+    pub rtr: bool,
+    pub dlc: u8,
+    pub signals: Vec<SerializedSignal>,
+    pub data : u64,
 }
 impl From<SignalFrame> for SerializedSignalFrame {
     fn from(value: SignalFrame) -> Self {
@@ -53,15 +54,16 @@ impl From<SignalFrame> for SerializedSignalFrame {
                 .into_iter()
                 .map(|signal| SerializedSignal::from(signal))
                 .collect(),
+            data : value.data(),
         }
     }
 }
 
-#[derive(Clone, Serialize)]
+#[derive(Clone, Serialize, PartialEq, Debug)]
 #[allow(dead_code)]
 pub struct SerializedSignal {
-    name: String,
-    value: String,
+    pub name: String,
+    pub value: String,
 }
 impl From<Signal> for SerializedSignal {
     fn from(value: Signal) -> Self {
@@ -76,14 +78,17 @@ impl From<Signal> for SerializedSignal {
     }
 }
 
-#[derive(Clone, Serialize)]
+#[derive(Clone, Serialize, PartialEq, Debug)]
 #[allow(dead_code)]
 pub struct SerializedTypeFrame {
-    id: u32,
-    ide: bool,
-    rtr: bool,
-    dlc: u8,
-    attributes: Vec<SerializedAttribute>,
+    pub id: u32,
+    pub ide: bool,
+    pub rtr: bool,
+    pub dlc: u8,
+    pub attributes: Vec<SerializedAttribute>,
+    pub name: String,
+    pub description: Option<String>,
+    pub data : u64,
 }
 impl From<TypeFrame> for SerializedTypeFrame {
     fn from(value: TypeFrame) -> Self {
@@ -135,11 +140,17 @@ impl From<TypeFrame> for SerializedTypeFrame {
                 .iter()
                 .map(frame_type_to_serialized_attribute)
                 .collect(),
+            name: value.name().to_owned(),
+            description: match value.description() {
+                Some(desc) => Some(desc.to_owned()),
+                None => None,
+            },
+            data : value.data(),
         }
     }
 }
 
-#[derive(Clone, Serialize)]
+#[derive(Clone, Serialize, PartialEq, Debug)]
 pub enum SerializedAttribute {
     Unsigned {
         name: String,
@@ -163,16 +174,16 @@ pub enum SerializedAttribute {
     },
 }
 
-#[derive(Clone, Serialize)]
-pub struct SerializedUndefinedFrame(UndefinedFrame);
+#[derive(Clone, Serialize, PartialEq, Debug)]
+pub struct SerializedUndefinedFrame(pub UndefinedFrame);
 impl From<UndefinedFrame> for SerializedUndefinedFrame {
     fn from(value: UndefinedFrame) -> Self {
         SerializedUndefinedFrame(value)
     }
 }
 
-#[derive(Clone, Serialize)]
-pub struct SerializedErrorFrame(ErrorFrame);
+#[derive(Clone, Serialize, PartialEq, Debug)]
+pub struct SerializedErrorFrame(pub ErrorFrame);
 impl From<ErrorFrame> for SerializedErrorFrame {
     fn from(value: ErrorFrame) -> Self {
         SerializedErrorFrame(value)

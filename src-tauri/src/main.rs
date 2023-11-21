@@ -1,18 +1,18 @@
-// Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use can::frame::Frame;
+use std::{cell::Cell, ops::Deref, sync::Arc, time::Duration};
+
+use can::trace::TraceObjectEvent;
 use rand::{rngs::StdRng, Rng, SeedableRng};
-use stream_object::StreamObject;
-use std::{time::Duration};
 use serialize::serialized_frame::SerializedFrame;
 use tauri::Manager;
+use tokio::sync::Mutex;
 
 use crate::can::CNL;
 
 mod can;
+mod observers;
 mod serialize;
-mod stream_object;
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
@@ -38,25 +38,45 @@ fn connect_pod() {
     println!("Connect")
 }
 
+#[tauri::command]
+async fn listen_to_trace(state: tauri::State<'_, CNLState>) -> Result<Vec<TraceObjectEvent>, ()> {
+    println!("listen to trace");
+    let trace = state.lock().await.trace().clone();
+    trace.listen();
+    Ok(trace.get())
+}
 
 #[tauri::command]
-fn listen_to_trace(state : tauri::State<TraceState>) -> Vec<SerializedFrame>{
-    state.trace_so.listen()
+async fn unlisten_to_trace(state: tauri::State<'_, CNLState>) -> Result<(), ()> {
+    println!("unlisten from trace");
+    state
+        .lock()
+        .await
+        .trace()
+        .unlisten()
+        .await;
+    Ok(())
 }
 
-#[tauri::command]
-fn unlisten_to_trace(state : tauri::State<TraceState>) {
-    state.trace_so.unlisten()
+struct CNLState {
+    pub cnl: Mutex<CNL>,
 }
 
-struct TraceState {
-    trace_so : StreamObject<SerializedFrame>,
+impl Deref for CNLState {
+    type Target = Mutex<CNL>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.cnl
+    }
 }
 
-impl TraceState {
-    pub fn new() -> Self {
+impl CNLState {
+    pub fn create(config_path: &str, app_handle: &tauri::AppHandle) -> Self {
+        let network_config = can_yaml_config_rs::parse_yaml_config_from_file(config_path).unwrap();
+        let mut cnl = CNL::create(&network_config, app_handle);
+        cnl.start();
         Self {
-            trace_so : StreamObject::new("trace", vec![]),
+            cnl: Mutex::new(cnl),
         }
     }
 }
@@ -65,33 +85,28 @@ fn main() {
     println!("Hello, World!");
     // setup tauri
     tauri::Builder::default()
-        .manage(TraceState::new())
-        .invoke_handler(tauri::generate_handler![emergency, launch_pod, land_pod, connect_pod, listen_to_trace, unlisten_to_trace])
         .setup(|app| {
             println!("Hello, Tauri!");
             random_integer(app.handle());
             let app_handle = app.handle();
             tauri::async_runtime::spawn(async move {
-                // read config
-                let network =
-                    can_yaml_config_rs::parse_yaml_config_from_file("./test.yaml").unwrap();
-                // start CaNetwork Layer
-                let mut cnl = CNL::create(&network);
-                cnl.start();
-
-                loop {
-                    let frame = cnl.get_rx_message_receiver().recv().await.unwrap();
-                    app_handle.state::<TraceState>().trace_so.push_value(&app_handle, SerializedFrame::from(frame));
-                }
+                app_handle.manage(CNLState::create("./test.yaml", &app_handle));
             });
             Ok(())
         })
+        .invoke_handler(tauri::generate_handler![
+            emergency,
+            launch_pod,
+            land_pod,
+            connect_pod,
+            listen_to_trace,
+            unlisten_to_trace
+        ])
         .run(tauri::generate_context!())
         .expect("Error while running tauri application");
 }
 
 fn random_integer(app_handle: tauri::AppHandle) {
-
     tauri::async_runtime::spawn(async move {
         let mut rng = {
             let rng = rand::thread_rng();
@@ -100,7 +115,6 @@ fn random_integer(app_handle: tauri::AppHandle) {
         loop {
             tokio::time::sleep(Duration::from_millis(1000)).await;
             let x = rng.gen::<u32>();
-            println!("emit event : {x}");
             app_handle.emit_all("random-integer", x).unwrap();
         }
     });

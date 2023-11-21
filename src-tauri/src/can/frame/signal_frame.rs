@@ -8,6 +8,7 @@ pub struct SignalFrame {
     dlc: u8,
     signals: Vec<Signal>,
     message_ref: config::MessageRef,
+    data : u64,
 }
 
 impl SignalFrame {
@@ -18,6 +19,7 @@ impl SignalFrame {
         dlc: u8,
         signals: Vec<Signal>,
         message_ref: config::MessageRef,
+        data:  u64
     ) -> Self {
         Self {
             id,
@@ -26,6 +28,7 @@ impl SignalFrame {
             dlc,
             signals,
             message_ref,
+            data,
         }
     }
     pub fn id(&self) -> u32 {
@@ -51,6 +54,9 @@ impl SignalFrame {
     }
     pub fn description(&self) -> Option<&str> {
         self.message_ref.description()
+    }
+    pub fn data(&self) -> u64 {
+        self.data
     }
 
 }

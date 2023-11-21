@@ -1,91 +1,103 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
+use crate::can::frame::error_frame::ErrorFrame;
+use crate::can::frame::undefined_frame::UndefinedFrame;
+
+use super::can_frame::CanError;
+use super::can_frame::CanFrame;
 use super::frame::Frame;
+use super::handler::empty_frame_handler::EmptyFrameHandler;
+use super::handler::get_resp_frame_handler::GetRespFrameHandler;
+use super::handler::set_resp_frame_handler::SetRespFrameHandler;
+use super::handler::MessageHandler;
+use super::parser::type_frame_parser::TypeFrameParser;
 use super::parser::MessageParser;
-use super::parser::error_frame_parser::ErrorFrameParser;
-use super::parser::undefined_frame_parser::UndefinedFrameParser;
-use tokio::sync::mpsc::Sender;
-use tokio::sync::mpsc::Receiver;
+use super::trace::TraceObject;
+use can_config_rs::config::Network;
 
 use can_config_rs::config;
 
 pub struct RxCom {
-    parser_lookup : Arc<HashMap<(u32, bool), MessageParser>>,
-    tx : Sender<Frame>,
-    rx : Receiver<Frame>,
+    parser_lookup: Arc<HashMap<(u32, bool), MessageHandler>>,
+    trace : Arc<TraceObject>,
 }
 
 impl RxCom {
-    pub fn create(network_config : &config::NetworkRef) -> Self {
-
-        let (tx, rx) = tokio::sync::mpsc::channel(16);
-        
-        let mut parser_lookup = HashMap::new();
+    pub fn create(network_config: &config::NetworkRef, trace : &Arc<TraceObject>) -> Self {
+        let mut lookup = HashMap::new();
         for message_config in network_config.messages() {
             let key = match message_config.id() {
                 config::MessageId::StandardId(id) => (*id, false),
                 config::MessageId::ExtendedId(id) => (*id, true),
             };
-            let parser = MessageParser::create_for_message(&message_config);
-            parser_lookup.insert(key, parser);
+            if network_config.get_resp_message().id() == message_config.id() {
+                lookup.insert(
+                    key,
+                    MessageHandler::GetRespFrameHandler(GetRespFrameHandler::create(
+                        TypeFrameParser::new(message_config),
+                    )),
+                );
+            } else if (network_config as &Network).set_resp_message().id() == message_config.id() {
+                lookup.insert(
+                    key,
+                    MessageHandler::SetRespFrameHandler(SetRespFrameHandler::create(
+                        TypeFrameParser::new(message_config),
+                    )),
+                );
+            } else {
+                lookup.insert(
+                    key,
+                    MessageHandler::EmptyFrameHandler(EmptyFrameHandler::create(
+                        MessageParser::create_for_message(message_config),
+                    )),
+                );
+            }
         }
 
         Self {
-            parser_lookup : Arc::new(parser_lookup),
-            tx,
-            rx,
+            parser_lookup: Arc::new(lookup),
+            trace : trace.clone(),
         }
     }
-    pub fn start(&mut self, can : &Arc<super::CAN>) {
-        let can_receiver = Arc::new(CanReceiver::new(can, &self.parser_lookup, &self.tx));
-        tokio::spawn(async move {
-            can_receiver.start().await;
-        });
-    }
-    
-    pub fn get_rx_message_reciever(&mut self) -> &mut Receiver<Frame> {
-        &mut self.rx
+    pub fn start(&mut self, can: &Arc<super::CAN>) {
+        tokio::spawn(can_receiver(
+            can.clone(),
+            self.parser_lookup.clone(),
+            self.trace.clone()
+        ));
     }
 }
 
-pub struct CanReceiver {
-    can : Arc<super::CAN>,
-    parser_lookup : Arc<HashMap<(u32, bool), MessageParser>>,
-    tx : Sender<Frame>,
+type Lookup = HashMap<(u32, bool), MessageHandler>;
+type LookupRef = Arc<Lookup>;
 
-}
-
-impl CanReceiver {
-    pub fn new(can : &Arc<super::CAN>, parser_lookup : &Arc<HashMap<(u32, bool),MessageParser>>, tx : &Sender<Frame>) -> Self {
-        Self {
-            can : can.clone(),
-            parser_lookup : parser_lookup.clone(),
-            tx : tx.clone(),
-        }
-    }
-    async fn start(&self) {
-        // concept 1 : construct some lookup based on the config
-        let undefined_frame_parser = UndefinedFrameParser::new();
-        let error_frame_parser = ErrorFrameParser::new();
-
-        loop {
-            let frame = self.can.receive().await;
-            let frame = match frame {
-                Ok(normal_frame) => {
-                    // lookup parser
-                    let key = (normal_frame.get_id(), normal_frame.get_ide_flag());
-                    match self.parser_lookup.get(&key) {
-                        Some(parser) => parser.parse(&normal_frame),
-                        None => undefined_frame_parser.parse(&normal_frame),
-                    }
+async fn can_receiver(can: Arc<super::CAN>, lookup: LookupRef, trace : Arc<TraceObject>) {
+    async fn receive_msg(frame: Result<CanFrame, CanError>, lookup: LookupRef, trace : Arc<TraceObject>) {
+        let frame = match frame {
+            Ok(frame) => {
+                let key = (frame.get_id(), frame.get_ide_flag());
+                match lookup.get(&key) {
+                    Some(parser) => parser.handle(&frame),
+                    None => Frame::UndefinedFrame(UndefinedFrame::new(
+                        frame.get_id(),
+                        frame.get_ide_flag(),
+                        frame.get_rtr_flag(),
+                        frame.get_dlc(),
+                        frame.get_data_u64(),
+                    )),
                 }
-                Err(error_frame) => error_frame_parser.parse(&error_frame),
-            };
-            self.tx.send(frame).await.expect("failed to forward parsed frame");
-            
-            
-        }
+            }
+            Err(_error) => {
+                //TODO implement error
+                Frame::ErrorFrame(ErrorFrame {})
+            }
+        };
+        trace.push_frame(frame).await;
+    }
+
+    loop {
+        let frame = can.receive().await;
+        tokio::spawn(receive_msg(frame, lookup.clone(), trace.clone()));
     }
 }
-

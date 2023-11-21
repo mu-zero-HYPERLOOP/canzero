@@ -1,4 +1,4 @@
-use crate::can::{frame::Frame, can_frame::CanError};
+use crate::can::{frame::{Frame, error_frame::ErrorFrame}, can_frame::CanError};
 
 
 #[derive(Clone)]
@@ -11,7 +11,11 @@ impl ErrorFrameParser {
     }
 
     pub fn parse(&self, frame : &CanError) -> Frame{
-        // TODO construct error frame and return it.
-        todo!()
+        let data = match frame {
+            CanError::Io(_) => 0,
+            CanError::Disconnect(_) => 0,
+            CanError::Can(erno) => erno,
+        };
+        Frame::ErrorFrame( ErrorFrame::new(data))
     }
 }
