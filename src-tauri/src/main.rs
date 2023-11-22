@@ -4,7 +4,6 @@ use std::{cell::Cell, ops::Deref, sync::Arc, time::Duration};
 
 use can::trace::TraceObjectEvent;
 use rand::{rngs::StdRng, Rng, SeedableRng};
-use serialize::serialized_frame::SerializedFrame;
 use tauri::Manager;
 use tokio::sync::Mutex;
 
@@ -12,7 +11,6 @@ use crate::can::CNL;
 
 mod can;
 mod observers;
-mod serialize;
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]

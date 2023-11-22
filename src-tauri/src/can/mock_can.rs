@@ -28,7 +28,7 @@ impl MockCan {
 
     pub async fn receive(&self) -> Result<CanFrame, CanError> {
         // await for random amount of time.
-        let timeout : u64 = self.rng.lock().expect("failed to acquire mock can lock").gen_range(500..1000);
+        let timeout : u64 = self.rng.lock().expect("failed to acquire mock can lock").gen_range(50..100);
         tokio::time::sleep(Duration::from_millis(timeout)).await;
         
         let message_index = self.rng.lock().expect("failed to acquire mock can lock").gen_range(0..self.network_ref.messages().len());

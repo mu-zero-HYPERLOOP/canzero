@@ -1,4 +1,6 @@
 
+use serde::Serialize;
+
 use crate::can::frame::type_frame::TypeFrame;
 use crate::can::frame::signal_frame::SignalFrame;
 use crate::can::frame::undefined_frame::UndefinedFrame;
@@ -9,10 +11,20 @@ pub mod signal_frame;
 pub mod type_frame;
 pub mod undefined_frame;
 
+/**
+ * Serializes to 
+ * {
+ *   SignalFrame? : SignalFrame
+ *   TypeFrame? : TypeFrame,
+ *   UndefinedFrame? : UndefinedFrame,
+ *   ErrorFrame? : ErrorFrame,
+ * }
+ */
+
 
 pub type UniqueFrameKey = (u32, bool);
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, PartialEq)]
 pub enum Frame {
     SignalFrame(SignalFrame),
     TypeFrame(TypeFrame),

@@ -8,10 +8,12 @@ export interface SignalFrame {
   signals: Signal[];
   name : string,
   description? : string,
+  data : number,
 }
 
 export interface Signal {
   name: string;
-  value: string;
+  description? : string,
+  value: number;
 }
 

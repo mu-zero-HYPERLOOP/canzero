@@ -11,11 +11,6 @@ impl ErrorFrameParser {
     }
 
     pub fn parse(&self, frame : &CanError) -> Frame{
-        let data = match frame {
-            CanError::Io(_) => 0,
-            CanError::Disconnect(_) => 0,
-            CanError::Can(erno) => erno,
-        };
-        Frame::ErrorFrame( ErrorFrame::new(data))
+        Frame::ErrorFrame( ErrorFrame::new(frame))
     }
 }

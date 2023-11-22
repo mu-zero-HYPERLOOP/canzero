@@ -5,3 +5,4 @@ export interface ErrorFrame {
   description : string,
   data : number,
 }
+

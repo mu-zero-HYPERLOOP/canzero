@@ -88,9 +88,8 @@ async fn can_receiver(can: Arc<super::CAN>, lookup: LookupRef, trace : Arc<Trace
                     )),
                 }
             }
-            Err(_error) => {
-                //TODO implement error
-                Frame::ErrorFrame(ErrorFrame {})
+            Err(error) => {
+                Frame::ErrorFrame(ErrorFrame::new(&error))
             }
         };
         trace.push_frame(frame).await;

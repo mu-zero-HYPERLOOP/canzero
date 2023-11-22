@@ -5,13 +5,14 @@ export interface TypeFrame {
   ide: boolean;
   rtr: boolean;
   dlc: number;
-  data : number,
-  attributes: TypeFrame[];
   name : string,
   description? : string,
+  data : number,
+  attributes: FrameAttribute[];
 }
 
 export interface FrameAttribute {
   name: string;
   value: number | string | FrameAttribute[];
 }
+
