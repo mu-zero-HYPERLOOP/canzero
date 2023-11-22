@@ -6,11 +6,7 @@ import GamesIcon from '@mui/icons-material/Games';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import clsx from 'clsx';
-import {
-
-    Link as RouterLink,
-    LinkProps as RouterLinkProps,
-} from 'react-router-dom';
+import {Link as RouterLink, LinkProps as RouterLinkProps, useNavigate,} from 'react-router-dom';
 import {Box, ListItemButton, Typography} from '@mui/material';
 import {TreeItem, TreeItemContentProps, TreeItemProps, TreeView, useTreeItem} from '@mui/x-tree-view';
 
@@ -40,11 +36,11 @@ const CustomContent = React.forwardRef(function CustomContent(
         selected,
         focused,
         handleExpansion,
-        handleSelection,
         preventSelection,
     } = useTreeItem(nodeId);
 
     const icon = iconProp || expansionIcon || displayIcon;
+    const navigate = useNavigate();
 
     const handleMouseDown = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         preventSelection(event);
@@ -56,14 +52,11 @@ const CustomContent = React.forwardRef(function CustomContent(
         handleExpansion(event);
     };
 
-    const handleSelectionClick = (
-        event: React.MouseEvent<HTMLDivElement, MouseEvent>,
-    ) => {
-        handleSelection(event);
+    const handleSelectionClick = () => {
+        navigate(nodeId)
     };
 
     return (
-        // eslint-disable-next-line jsx-a11y/no-static-element-interactions
         <div
             className={clsx(className, classes.root, {
                 [classes.expanded]: expanded,
@@ -74,7 +67,6 @@ const CustomContent = React.forwardRef(function CustomContent(
             onMouseDown={handleMouseDown}
             ref={ref as React.Ref<HTMLDivElement>}
         >
-            {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
             <div onClick={handleExpansionClick} className={classes.iconContainer}>
                 {icon}
             </div>
@@ -86,9 +78,10 @@ const CustomContent = React.forwardRef(function CustomContent(
                 {label}
             </Typography>
         </div>
+
     );
 });
-
+//
 const CustomTreeItem = React.forwardRef(function CustomTreeItem(
     props: TreeItemProps,
     ref: React.Ref<HTMLLIElement>,
@@ -101,17 +94,17 @@ const Link = React.forwardRef<HTMLAnchorElement, RouterLinkProps>(function Link(
     itemProps,
     ref,
 ) {
-    return <RouterLink ref={ref} {...itemProps} role={undefined} />;
+    return <RouterLink ref={ref} {...itemProps} role={undefined}/>;
 });
 
 function ListItemButtonLink(props: ListItemLinkProps) {
-    const { icon, primary, to } = props;
+    const {icon, primary, to} = props;
 
     return (
         <li>
             <ListItemButton component={Link} to={to}>
                 {icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
-                <ListItemText primary={primary} />
+                <ListItemText primary={primary}/>
             </ListItemButton>
         </li>
     );
@@ -119,10 +112,10 @@ function ListItemButtonLink(props: ListItemLinkProps) {
 
 export const RouterList = (
     <React.Fragment>
-            <ListItemButtonLink to="/" primary="Control Panel" icon={<GamesIcon/>}/>
-            <ListItemButtonLink to="/DebugPanel" primary="Debug Panel" icon={<TerminalIcon/>}/>
+        <ListItemButtonLink to="/" primary="Control Panel" icon={<GamesIcon/>}/>
+        <ListItemButtonLink to="/DebugPanel" primary="Debug Panel" icon={<TerminalIcon/>}/>
     </React.Fragment>
-    );
+);
 
 export function NodeList(nodes: string[]) {
     return (
@@ -135,8 +128,9 @@ export function NodeList(nodes: string[]) {
                 >
                     {nodes.map((node) =>
                         <CustomTreeItem nodeId={node} label={node}>
-                            <CustomTreeItem nodeId={node + 1} label="Object" />
-                            <CustomTreeItem nodeId={node + 2} label="Command" />
+                            {/*Label has to euqal the page name!*/}
+                            <CustomTreeItem nodeId={node + "/Object"} label="Object"/>
+                            <CustomTreeItem nodeId={node + "/Command"} label="Command"/>
                         </CustomTreeItem>)}
 
                 </TreeView>
