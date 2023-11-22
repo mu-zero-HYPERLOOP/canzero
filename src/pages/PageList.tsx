@@ -128,7 +128,7 @@ export function NodeList(nodes: string[]) {
                 >
                     {nodes.map((node) =>
                         <CustomTreeItem nodeId={node} label={node}>
-                            {/*Label has to euqal the page name!*/}
+                            {/*Page name has to equal the nodeId!*/}
                             <CustomTreeItem nodeId={node + "/Object"} label="Object"/>
                             <CustomTreeItem nodeId={node + "/Command"} label="Command"/>
                         </CustomTreeItem>)}
