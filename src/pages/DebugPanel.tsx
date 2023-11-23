@@ -8,12 +8,10 @@ import Stack from "@mui/material/Stack/Stack";
 
 function DebugPanel() {
     return (<><FirstComponent/> 
-    <Stack spacing={2}>
-      <Graph/>
-      <Graph/>
-      <Graph/>
-      <Graph/>
-    </Stack>
+      <Stack spacing={2}>
+        <Graph name="abcde"/>
+        <Graph name="abcde"/>
+      </Stack>
     </>);
 };
 
