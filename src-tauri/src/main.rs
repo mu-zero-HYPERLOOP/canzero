@@ -1,9 +1,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-
-use std::time::Duration;
-
 use rand::{rngs::StdRng, Rng, SeedableRng};
+use std::time::Duration;
 use tauri::Manager;
+use serde::Serialize;
 
 use crate::{state::cnl_state::CNLState, commands::{trace::{listen_to_trace, unlisten_to_trace}, network_information}};
 
@@ -28,7 +27,7 @@ fn launch_pod() {
 #[tauri::command]
 fn land_pod() {
     println!("Land")
-    //TODO: stop_pod behaviour
+    //TODO: stop_pod behaviourany
 }
 
 #[tauri::command]
@@ -36,6 +35,26 @@ fn connect_pod() {
     println!("Connect")
 }
 
+#[derive(Serialize)]
+struct InitialGraphData {
+    values: Vec<Graphable>,
+}
+
+#[derive(Serialize, Clone)]
+struct Graphable {
+    x: f64,
+    y: f64,
+}
+
+#[tauri::command]
+fn initialize_graph(node_name: String, oe_name: String) -> InitialGraphData {
+    println!("get_graph_data was invoked");
+    InitialGraphData {
+        values : (1..=500)
+            .map(|n| Graphable { x: f64::from(n),  y: 0f64 })
+            .collect(),
+    }
+}
 
 fn main() {
     println!("Hello, World!");
@@ -61,6 +80,7 @@ fn main() {
             network_information::node_information,
             network_information::object_entry_information,
             network_information::command_information,
+            initialize_graph,
         ])
         .run(tauri::generate_context!())
         .expect("Error while running tauri application");
