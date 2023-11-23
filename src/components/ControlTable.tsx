@@ -32,7 +32,7 @@ const rows = [
 ];
 
 function getColor(value:number) {
-    let colormap = interpolate(['#388e3c', '#FFD500', '#F62000']);
+    let colormap = interpolate(['#2E9B33', '#FFD500', '#E32E13']);
     let percent = (value - 20) / (47 - 20)
     return colormap(percent)
 }
