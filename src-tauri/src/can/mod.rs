@@ -14,7 +14,7 @@ pub mod trace;
 
 use std::sync::Arc;
 
-use self::{rx::RxCom, trace::TraceObject};
+use self::{rx::RxCom, trace::TraceObject, network::{NetworkObject, node_object::NodeObject}};
 
 use can_config_rs::config;
 
@@ -30,6 +30,7 @@ pub struct CNL {
     can1: Arc<CAN>,
     trace : Arc<TraceObject>,
     rx: RxCom,
+    network : Arc<NetworkObject>,
 }
 
 impl CNL {
@@ -47,8 +48,10 @@ impl CNL {
 
         let trace = Arc::new(TraceObject::create(app_handle));
 
-        let rx = RxCom::create(network_config, &trace);
-        Self { can0, can1, rx, trace}
+        let network = Arc::new(NetworkObject::create(network_config));
+
+        let rx = RxCom::create(network_config, &trace, &network);
+        Self { can0, can1, rx, trace, network}
     }
     pub fn start(&mut self) {
         self.rx.start(&self.can0);
@@ -57,5 +60,9 @@ impl CNL {
 
     pub fn trace(&self) -> &Arc<TraceObject> {
         &self.trace
+    }
+
+    pub fn nodes(&self) -> &Vec<Arc<NodeObject>> {
+        self.network.nodes()
     }
 }

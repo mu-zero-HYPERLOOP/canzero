@@ -20,6 +20,18 @@ impl ObjectEntryObject {
     pub fn description(&self) -> Option<&str> {
         self.object_entry_ref.description()
     }
+    pub fn id(&self) -> u32 {
+        self.object_entry_ref.id()
+    }
+
+    pub fn push_value(&self, value : TypeValue) {
+        //TODO gets notified when a new value for the object entry is received
+        // THIS method can't be mutable (&mut self) we have to use interior 
+        // mutablity to access fields mutable (common pattern in concurrent rust)
+    }
+    pub fn ty(&self) -> &config::TypeRef {
+        &self.object_entry_ref.ty()
+    }
 }
 
 struct ObjectEntryEvent {

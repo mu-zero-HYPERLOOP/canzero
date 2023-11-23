@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use can_config_rs::config;
 
 use super::{object_entry_object::ObjectEntryObject, command_object::CommandObject};
@@ -6,17 +8,20 @@ use super::{object_entry_object::ObjectEntryObject, command_object::CommandObjec
 
 pub struct NodeObject {
     node_ref : config::NodeRef,
-    object_entries : Vec<ObjectEntryObject>,
-    commands : Vec<CommandObject>,
+    object_entries : Vec<Arc<ObjectEntryObject>>,
+    commands : Vec<Arc<CommandObject>>,
 }
 
 impl NodeObject{ 
     pub fn create(node_config : &config::NodeRef) -> Self{
         Self {
-            object_entries : node_config.object_entries().iter().map(|object_entry| ObjectEntryObject::create(object_entry)).collect(),
-            commands : node_config.commands().iter().map(|command| CommandObject::create(command)).collect(),
+            object_entries : node_config.object_entries().iter().map(|object_entry| Arc::new(ObjectEntryObject::create(object_entry))).collect(),
+            commands : node_config.commands().iter().map(|command| Arc::new(CommandObject::create(command))).collect(),
             node_ref : node_config.clone()
         }
+    }
+    pub fn id(&self) -> u16 {
+        self.node_ref.id()
     }
     pub fn name(&self) -> &str {
         self.node_ref.name()
@@ -24,10 +29,10 @@ impl NodeObject{
     pub fn description(&self) -> Option<&String> {
         self.node_ref.description()
     }
-    pub fn object_entries(&self) -> &Vec<ObjectEntryObject> {
+    pub fn object_entries(&self) -> &Vec<Arc<ObjectEntryObject>> {
         &self.object_entries
     }
-    pub fn commands(&self) -> &Vec<CommandObject> {
+    pub fn commands(&self) -> &Vec<Arc<CommandObject>> {
         &self.commands
     }
 

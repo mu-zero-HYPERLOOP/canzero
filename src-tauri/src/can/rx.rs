@@ -11,6 +11,7 @@ use super::handler::empty_frame_handler::EmptyFrameHandler;
 use super::handler::get_resp_frame_handler::GetRespFrameHandler;
 use super::handler::set_resp_frame_handler::SetRespFrameHandler;
 use super::handler::MessageHandler;
+use super::network::NetworkObject;
 use super::parser::type_frame_parser::TypeFrameParser;
 use super::parser::MessageParser;
 use super::trace::TraceObject;
@@ -24,7 +25,7 @@ pub struct RxCom {
 }
 
 impl RxCom {
-    pub fn create(network_config: &config::NetworkRef, trace : &Arc<TraceObject>) -> Self {
+    pub fn create(network_config: &config::NetworkRef, trace : &Arc<TraceObject>, network : &Arc<NetworkObject>) -> Self {
         let mut lookup = HashMap::new();
         for message_config in network_config.messages() {
             let key = match message_config.id() {
@@ -36,6 +37,7 @@ impl RxCom {
                     key,
                     MessageHandler::GetRespFrameHandler(GetRespFrameHandler::create(
                         TypeFrameParser::new(message_config),
+                        network,
                     )),
                 );
             } else if (network_config as &Network).set_resp_message().id() == message_config.id() {
@@ -78,7 +80,7 @@ async fn can_receiver(can: Arc<super::CAN>, lookup: LookupRef, trace : Arc<Trace
             Ok(frame) => {
                 let key = (frame.get_id(), frame.get_ide_flag());
                 match lookup.get(&key) {
-                    Some(parser) => parser.handle(&frame),
+                    Some(handler) => handler.handle(&frame),
                     None => Frame::UndefinedFrame(UndefinedFrame::new(
                         frame.get_id(),
                         frame.get_ide_flag(),
