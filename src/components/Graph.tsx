@@ -2,6 +2,7 @@ import { invoke } from '@tauri-apps/api/tauri'
 import { LineChart } from '@mui/x-charts/LineChart';
 import { listen } from "@tauri-apps/api/event";
 import { useEffect, useState, useRef } from "react";
+import ReactApexChart from 'apexcharts';
 
 function Graph() {
   console.log("graph executed");
@@ -43,17 +44,38 @@ function Graph() {
     }, []);
 
   let xRange = Array.from(Array(vec.length), (_, index) => index);
+
+  let options = {
+              chart: {
+                height: 350,
+                type: 'line',
+                zoom: {
+                  enabled: false
+                }
+              },
+              dataLabels: {
+                enabled: false
+              },
+              stroke: {
+                curve: 'straight'
+              },
+              title: {
+                text: 'Product Trends by Month',
+                align: 'left'
+              },
+              grid: {
+                row: {
+                  colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
+                  opacity: 0.5
+                },
+              },
+              xaxis: {
+                categories: xRange,
+              },
+              series: vec,
+            };
   
-  return <LineChart
-     xAxis={[{ data: xRange }]}
-      series={[
-        {
-          data: vec,
-        },
-      ]}
-      width={500}
-      height={300}
-  />
+  return (<ReactApexChart options={options} series={options.vec} type="line" height={350} />);
 }
 
 export default Graph;

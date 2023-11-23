@@ -67,7 +67,7 @@ fn random_integer(app_handle: tauri::AppHandle) {
             StdRng::from_rng(rng).unwrap()
         };
         loop {
-            tokio::time::sleep(Duration::from_millis(250)).await;
+            tokio::time::sleep(Duration::from_millis(1000)).await;
             let x = rng.gen::<u32>();
             println!("emit event : {x}");
             app_handle.emit_all("random-integer", x).unwrap();
