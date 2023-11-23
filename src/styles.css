@@ -107,3 +107,8 @@ button {
     background-color: #0f0f0f69;
   }
 }
+
+.ControlTable th,
+td {
+  border: 1px solid rgba(224, 224, 224, 1);
+}

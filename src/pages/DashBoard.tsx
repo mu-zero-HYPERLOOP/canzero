@@ -117,7 +117,7 @@ export default function Dashboard() {
                             src={logo}
                         />
                     </Typography>
-                    <Button variant="contained" size="large" color="secondary" onClick={() => {
+                    <Button variant="contained" size="large" color="secondary" style={{maxWidth: '150px', maxHeight: '45px', minWidth: '150px', minHeight: '45px'}} onClick={() => {
                         invoke('connect_pod');
                     }}>Connect</Button>
                 </Toolbar>
