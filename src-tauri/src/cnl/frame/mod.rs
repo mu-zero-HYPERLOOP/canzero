@@ -1,10 +1,10 @@
 
 use serde::Serialize;
 
-use crate::can::frame::type_frame::TypeFrame;
-use crate::can::frame::signal_frame::SignalFrame;
-use crate::can::frame::undefined_frame::UndefinedFrame;
-use crate::can::frame::error_frame::ErrorFrame;
+use crate::cnl::frame::type_frame::TypeFrame;
+use crate::cnl::frame::signal_frame::SignalFrame;
+use crate::cnl::frame::undefined_frame::UndefinedFrame;
+use crate::cnl::frame::error_frame::ErrorFrame;
 
 pub mod error_frame;
 pub mod signal_frame;

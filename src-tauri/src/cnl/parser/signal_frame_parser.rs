@@ -1,6 +1,6 @@
 use can_config_rs::config;
 
-use crate::can::{
+use crate::cnl::{
     can_frame::CanFrame,
     frame::{
         signal_frame::{Signal, SignalFrame, SignalValue},

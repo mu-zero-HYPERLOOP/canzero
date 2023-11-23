@@ -1,16 +1,16 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::{cell::Cell, ops::Deref, sync::Arc, time::Duration};
+use std::time::Duration;
 
-use can::trace::TraceObjectEvent;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use tauri::Manager;
-use tokio::sync::Mutex;
 
-use crate::can::CNL;
+use crate::{state::cnl_state::CNLState, commands::{trace::{listen_to_trace, unlisten_to_trace}, network_information}};
 
-mod can;
+mod cnl;
 mod observers;
+mod commands;
+mod state;
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
@@ -36,48 +36,6 @@ fn connect_pod() {
     println!("Connect")
 }
 
-#[tauri::command]
-async fn listen_to_trace(state: tauri::State<'_, CNLState>) -> Result<Vec<TraceObjectEvent>, ()> {
-    println!("listen to trace");
-    let trace = state.lock().await.trace().clone();
-    trace.listen();
-    Ok(trace.get())
-}
-
-#[tauri::command]
-async fn unlisten_to_trace(state: tauri::State<'_, CNLState>) -> Result<(), ()> {
-    println!("unlisten from trace");
-    state
-        .lock()
-        .await
-        .trace()
-        .unlisten()
-        .await;
-    Ok(())
-}
-
-struct CNLState {
-    pub cnl: Mutex<CNL>,
-}
-
-impl Deref for CNLState {
-    type Target = Mutex<CNL>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.cnl
-    }
-}
-
-impl CNLState {
-    pub fn create(config_path: &str, app_handle: &tauri::AppHandle) -> Self {
-        let network_config = can_yaml_config_rs::parse_yaml_config_from_file(config_path).unwrap();
-        let mut cnl = CNL::create(&network_config, app_handle);
-        cnl.start();
-        Self {
-            cnl: Mutex::new(cnl),
-        }
-    }
-}
 
 fn main() {
     println!("Hello, World!");
@@ -98,7 +56,11 @@ fn main() {
             land_pod,
             connect_pod,
             listen_to_trace,
-            unlisten_to_trace
+            unlisten_to_trace,
+            network_information::network_information,
+            network_information::node_information,
+            network_information::object_entry_information,
+            network_information::command_information,
         ])
         .run(tauri::generate_context!())
         .expect("Error while running tauri application");

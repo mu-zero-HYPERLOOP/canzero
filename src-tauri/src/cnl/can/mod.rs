@@ -1,9 +1,7 @@
 
 use tokio::{sync::{mpsc::Receiver, Mutex}, sync::mpsc::Sender, runtime::Handle};
 
-use self::{
-    socket::OwnedCanSocket,
-};
+use self::socket::OwnedCanSocket;
 
 use super::can_frame::{CanFrame, CanError};
 

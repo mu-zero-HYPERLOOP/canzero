@@ -1,13 +1,13 @@
 use can_config_rs::config;
 
-use crate::can::frame::type_frame::TypeValue;
+use crate::cnl::frame::type_frame::TypeValue;
 
 pub struct CommandObject {
     command_ref: config::CommandRef,
 }
 
 impl CommandObject {
-    pub fn create(command_config: &config::CommandRef) -> Self {
+    pub fn create(command_config: &config::CommandRef, app_handle : &tauri::AppHandle) -> Self {
         Self {
             command_ref: command_config.clone(),
         }

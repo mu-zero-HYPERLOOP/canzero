@@ -1,4 +1,4 @@
-use crate::can::{frame::{Frame, error_frame::ErrorFrame}, can_frame::CanError};
+use crate::cnl::{frame::{Frame, error_frame::ErrorFrame}, can_frame::CanError};
 
 
 #[derive(Clone)]

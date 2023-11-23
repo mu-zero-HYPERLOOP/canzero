@@ -1,4 +1,4 @@
-use crate::can::{
+use crate::cnl::{
     can_frame::CanFrame,
     frame::{undefined_frame::UndefinedFrame, Frame},
 };

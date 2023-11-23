@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use can_config_rs::config;
 
-use crate::can::{
+use crate::cnl::{
     can_frame::CanFrame,
     frame::{type_frame::TypeValue, Frame},
     network::NetworkObject,

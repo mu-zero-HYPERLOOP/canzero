@@ -14,7 +14,11 @@ pub mod trace;
 
 use std::sync::Arc;
 
-use self::{rx::RxCom, trace::TraceObject, network::{NetworkObject, node_object::NodeObject}};
+use self::{
+    network::{node_object::NodeObject, NetworkObject},
+    rx::RxCom,
+    trace::TraceObject,
+};
 
 use can_config_rs::config;
 
@@ -28,9 +32,10 @@ pub type CAN = mock_can::MockCan;
 pub struct CNL {
     can0: Arc<CAN>,
     can1: Arc<CAN>,
-    trace : Arc<TraceObject>,
+    trace: Arc<TraceObject>,
     rx: RxCom,
-    network : Arc<NetworkObject>,
+    network: Arc<NetworkObject>,
+    baudrate: u32,
 }
 
 impl CNL {
@@ -48,10 +53,17 @@ impl CNL {
 
         let trace = Arc::new(TraceObject::create(app_handle));
 
-        let network = Arc::new(NetworkObject::create(network_config));
+        let network = Arc::new(NetworkObject::create(network_config, app_handle));
 
         let rx = RxCom::create(network_config, &trace, &network);
-        Self { can0, can1, rx, trace, network}
+        Self {
+            can0,
+            can1,
+            rx,
+            trace,
+            network,
+            baudrate: network_config.baudrate(),
+        }
     }
     pub fn start(&mut self) {
         self.rx.start(&self.can0);
@@ -64,5 +76,8 @@ impl CNL {
 
     pub fn nodes(&self) -> &Vec<Arc<NodeObject>> {
         self.network.nodes()
+    }
+    pub fn baudrate(&self) -> u32 {
+        self.baudrate
     }
 }

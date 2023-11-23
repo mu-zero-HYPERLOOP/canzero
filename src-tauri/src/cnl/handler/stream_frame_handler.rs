@@ -1,12 +1,12 @@
-use crate::can::{frame::Frame, can_frame::CanFrame, parser::type_frame_parser::TypeFrameParser};
+use crate::cnl::{frame::Frame, can_frame::CanFrame, parser::type_frame_parser::TypeFrameParser};
 
 
 
-pub struct CommandRespFrameHandler {
+pub struct StreamFrameHandler {
     parser : TypeFrameParser,
 }
 
-impl CommandRespFrameHandler {
+impl StreamFrameHandler {
     pub fn create(parser : TypeFrameParser) -> Self {
         Self {
             parser,
@@ -17,7 +17,6 @@ impl CommandRespFrameHandler {
         let Frame::TypeFrame(type_frame) = &frame else {
             panic!();
         };
-
         frame
     }
 }

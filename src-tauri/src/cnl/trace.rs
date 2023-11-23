@@ -25,6 +25,8 @@ impl TraceObject {
     }
 
     pub async fn push_frame(&self, frame: Frame) {
+        // TODO Issue #7 
+        // We should calculate a timestamp here and forward it correctly to the view
         let key = frame.unique_key();
         let prev = self
             .trace

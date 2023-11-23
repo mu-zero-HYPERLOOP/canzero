@@ -2,7 +2,7 @@ use std::{collections::HashMap, cmp::Ordering};
 
 use can_config_rs::config::{self, Type};
 
-use crate::can::{
+use crate::cnl::{
     can_frame::CanFrame,
     frame::{
         type_frame::{CompositeTypeValue, FrameType, TypeFrame, TypeValue},

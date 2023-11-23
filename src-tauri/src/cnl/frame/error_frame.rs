@@ -1,6 +1,6 @@
 use serde::{Serialize, ser::SerializeMap};
 
-use crate::can::can_frame::CanError;
+use crate::cnl::can_frame::CanError;
 
 
 /**

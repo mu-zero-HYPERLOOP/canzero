@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use crate::can::frame::error_frame::ErrorFrame;
-use crate::can::frame::undefined_frame::UndefinedFrame;
+use crate::cnl::frame::error_frame::ErrorFrame;
+use crate::cnl::frame::undefined_frame::UndefinedFrame;
 
 use super::can_frame::CanError;
 use super::can_frame::CanFrame;

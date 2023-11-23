@@ -14,12 +14,12 @@ pub struct NetworkObject {
 }
 
 impl NetworkObject {
-    pub fn create(network_config: &config::NetworkRef) -> Self {
+    pub fn create(network_config: &config::NetworkRef, app_handle : &tauri::AppHandle) -> Self {
         Self {
             nodes: network_config
                 .nodes()
                 .iter()
-                .map(|node_config| Arc::new(NodeObject::create(node_config)))
+                .map(|node_config| Arc::new(NodeObject::create(node_config, app_handle)))
                 .collect(),
             network_ref: network_config.clone(),
         }
