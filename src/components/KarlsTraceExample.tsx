@@ -19,6 +19,8 @@ import SignalFrameDetail from "./SignalFrameDetail";
 import { UndefinedFrame } from "../types/UndefinedFrame";
 import { ErrorFrame } from "../types/ErrorFrame";
 
+import TraceSearchBar from "./TraceSearchBar";
+
 
 const TableHeaderCell = styled(TableCell)(({ theme }) =>
   theme.unstable_sx({
@@ -194,6 +196,7 @@ function Row({ frame }: RowProps) {
 function KarlsTraceExample() {
 
   const [rows, setRows] = useState<Frame[]>([]);
+  const [filteredRows, setFilteredRows] = useState<Frame[]>([]);
 
   function handle_event(frame: Frame) {
     setRows((rows) => {
@@ -244,11 +247,28 @@ function KarlsTraceExample() {
     }
   }, []);
 
-
+  const filterRows = (searchText: string) => {
+    if (searchText === "") {
+      setFilteredRows(rows);
+    } else {
+      const filtered = rows.filter((frame) => {
+        const frameName =
+          (frame.TypeFrame?.name ||
+            frame.SignalFrame?.name ||
+            frame.ErrorFrame?.name ||
+            "") as string; // Handle all possible frame types and cast to string
+        return frameName.includes(searchText);
+      });
+      setFilteredRows(filtered);
+    }
+  };
 
   // maxHeight : 800 sucks asss
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+      <Box sx={{ padding: "10px", textAlign: "center" }}>
+        <TraceSearchBar onSearch={filterRows} />
+      </Box>
       <TableContainer sx={{ maxHeight: 800 }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead sx={{
@@ -263,8 +283,8 @@ function KarlsTraceExample() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((frame) => {
-              return <Row frame={frame} />
+            {filteredRows.map((frame, index) => {
+              return <Row frame={frame} key={index} />;
             })}
           </TableBody>
         </Table>
