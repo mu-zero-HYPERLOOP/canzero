@@ -122,7 +122,7 @@ export default function Dashboard() {
                     }}>Connect</Button>
                 </Toolbar>
             </AppBar>
-            <Drawer variant="permanent" open={open}>
+            <Drawer variant="permanent" open={open} onDoubleClick={toggleDrawer}>
                 <Toolbar
                     sx={{
                         display: 'flex',
