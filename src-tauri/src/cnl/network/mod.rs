@@ -14,7 +14,7 @@ pub struct NetworkObject {
 }
 
 impl NetworkObject {
-    pub fn create(network_config: &config::NetworkRef, app_handle : &tauri::AppHandle) -> Self {
+    pub fn create(network_config: &config::NetworkRef, app_handle: &tauri::AppHandle) -> Self {
         Self {
             nodes: network_config
                 .nodes()

@@ -11,7 +11,7 @@ use crate::cnl::{
 
 pub struct GetRespFrameHandler {
     parser: TypeFrameParser,
-    network : Arc<NetworkObject>,
+    network: Arc<NetworkObject>,
 }
 
 impl GetRespFrameHandler {
@@ -24,13 +24,13 @@ impl GetRespFrameHandler {
                 let _object_entry_name = object_entry.name();
             }
         }
-        Self { 
+        Self {
             parser,
-            network : network.clone(),
+            network: network.clone(),
         }
     }
 
-    fn parse_object_entry_value(data : u32, ty : &config::Type) -> TypeValue{
+    fn parse_object_entry_value(data: u32, ty: &config::Type) -> TypeValue {
         // TODO implement parsing of object entry data into a TypeValue!
 
         TypeValue::Unsigned(0)
@@ -42,6 +42,7 @@ impl GetRespFrameHandler {
     // format can be assumed to be the same for every frame!
     pub fn handle(&self, frame: &CanFrame) -> Frame {
         // a small example of how to parse the type frame!
+        println!("can-frame = {}", frame.get_data_u64());
         let frame = self.parser.parse(frame);
         let Frame::TypeFrame(type_frame) = &frame else {
             panic!("GetRespFrameHandler invoked with the wrong message, can only be invoked for get respond messages");
@@ -71,6 +72,7 @@ impl GetRespFrameHandler {
         let TypeValue::Unsigned(value) = type_frame.value()[1].value() else {
             panic!("invalid get resp message format");
         };
+        println!("sof {sof} eof {eof} toggle {toggle} oe_id {object_entry_id} client_id {client_id} server_id {server_id} value {value}");
 
         // TODO lookup correct object entry!
         // this just selects a random one!

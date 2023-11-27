@@ -7,7 +7,7 @@ pub struct CommandObject {
 }
 
 impl CommandObject {
-    pub fn create(command_config: &config::CommandRef, app_handle : &tauri::AppHandle) -> Self {
+    pub fn create(command_config: &config::CommandRef, app_handle: &tauri::AppHandle) -> Self {
         Self {
             command_ref: command_config.clone(),
         }
@@ -25,14 +25,14 @@ impl CommandObject {
 
 pub struct InvokeCommandBuilder<'a> {
     command_object: &'a CommandObject,
-    arguments : Vec<(String, TypeValue)>,
+    arguments: Vec<(String, TypeValue)>,
 }
 
 impl<'a> InvokeCommandBuilder<'a> {
     pub fn new(command_object: &'a CommandObject) -> Self {
-        InvokeCommandBuilder { 
-            arguments : vec![],
-            command_object 
+        InvokeCommandBuilder {
+            arguments: vec![],
+            command_object,
         }
     }
     pub fn argument(&mut self, name: &str, value: TypeValue) {

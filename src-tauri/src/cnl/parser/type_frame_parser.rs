@@ -1,4 +1,4 @@
-use std::{collections::HashMap, cmp::Ordering};
+use std::{cmp::Ordering, collections::HashMap};
 
 use can_config_rs::config::{self, Type};
 
@@ -37,11 +37,11 @@ enum TypeParser {
         attrib_parsers: Vec<TypeParser>,
     },
     EnumParser {
-        name : String,
-        bit_offset : u32,
-        bit_size : u32,
-        ty : config::TypeRef,
-        entries : Vec<(String, u64)>,
+        name: String,
+        bit_offset: u32,
+        bit_size: u32,
+        ty: config::TypeRef,
+        entries: Vec<(String, u64)>,
     },
     ArrayParser {},
 }
@@ -85,14 +85,19 @@ impl TypeParser {
                         },
                         Type::Enum {
                             name,
-                            description : _,
+                            description: _,
                             size,
                             entries,
-                            visibility : _,
+                            visibility: _,
                         } => {
                             attrib_parsers.push(TypeParser::new_enum_parser(
-                                    name, primitive_encoding.ty(), signal, *size, entries));
-                        },
+                                name,
+                                primitive_encoding.ty(),
+                                signal,
+                                *size,
+                                entries,
+                            ));
+                        }
                         _ => panic!(),
                     }
                 }
@@ -141,14 +146,19 @@ impl TypeParser {
                         },
                         Type::Enum {
                             name,
-                            description : _,
+                            description: _,
                             size,
                             entries,
-                            visibility : _,
+                            visibility: _,
                         } => {
                             composite_attrib_parsers.push(TypeParser::new_enum_parser(
-                                    name, primitive_encoding.ty(), signal, *size, entries));
-                        },
+                                name,
+                                primitive_encoding.ty(),
+                                signal,
+                                *size,
+                                entries,
+                            ));
+                        }
                         _ => panic!(),
                     }
                 }
@@ -160,15 +170,21 @@ impl TypeParser {
             attrib_parsers: composite_attrib_parsers,
         }
     }
-    pub fn new_enum_parser(name: &str, ty: &config::TypeRef, signal_ref : &config::SignalRef, bit_size: u8, entries : &Vec<(String, u64)>) -> TypeParser {
+    pub fn new_enum_parser(
+        name: &str,
+        ty: &config::TypeRef,
+        signal_ref: &config::SignalRef,
+        bit_size: u8,
+        entries: &Vec<(String, u64)>,
+    ) -> TypeParser {
         let mut entries = entries.clone();
         // sort by value
-        entries.sort_by(|(_,a),(_,b)| {
+        entries.sort_by(|(_, a), (_, b)| {
             if a < b {
                 return Ordering::Less;
-            }else if a > b {
+            } else if a > b {
                 return Ordering::Greater;
-            }else {
+            } else {
                 return Ordering::Equal;
             }
         });
@@ -177,11 +193,10 @@ impl TypeParser {
             name: name.to_owned(),
             bit_offset: signal_ref.byte_offset() as u32,
             bit_size: bit_size as u32,
-            ty : ty.clone(),
-            entries : entries.clone(),
+            ty: ty.clone(),
+            entries: entries.clone(),
         }
     }
-
 
     pub fn new_unsigned_parser(name: &str, signal_ref: &config::SignalRef, size: u8) -> TypeParser {
         TypeParser::UnsignedParser {
@@ -236,7 +251,13 @@ impl TypeParser {
                 ty: _,
                 attrib_parsers: _,
             } => name,
-            TypeParser::EnumParser { name, bit_offset, bit_size, ty, entries } => name,
+            TypeParser::EnumParser {
+                name,
+                bit_offset,
+                bit_size,
+                ty,
+                entries,
+            } => name,
             TypeParser::RootParser { attrib_parsers: _ } => {
                 panic!("there is no name asociated with the root parser")
             }
@@ -253,11 +274,8 @@ impl TypeParser {
                 bit_offset,
                 bit_size,
             } => {
-                let value = data
-                    .overflowing_shr(64 - bit_offset - bit_size)
-                    .0 & 
-                    (0xFFFFFFFFFFFFFFFF as u64).overflowing_shr(64 - bit_size)
-                    .0;
+                let value = data.overflowing_shr(64 - bit_offset - bit_size).0
+                    & (0xFFFFFFFFFFFFFFFF as u64).overflowing_shr(64 - bit_size).0;
 
                 TypeValue::Unsigned(value)
             }
@@ -266,11 +284,8 @@ impl TypeParser {
                 bit_offset,
                 bit_size,
             } => {
-                let value = data
-                    .overflowing_shr(64 - bit_offset - bit_size)
-                    .0 & 
-                    (0xFFFFFFFFFFFFFFFF as u64).overflowing_shr(64 - bit_size)
-                    .0;
+                let value = data.overflowing_shr(64 - bit_offset - bit_size).0
+                    & (0xFFFFFFFFFFFFFFFF as u64).overflowing_shr(64 - bit_size).0;
 
                 let ivalue = unsafe { std::mem::transmute::<u64, i64>(value) };
                 TypeValue::Signed(ivalue)
@@ -283,11 +298,8 @@ impl TypeParser {
                 scale,
                 offset,
             } => {
-                let value = data
-                    .overflowing_shr(64 - bit_offset - bit_size)
-                    .0 & 
-                    (0xFFFFFFFFFFFFFFFF as u64).overflowing_shr(64 - bit_size)
-                    .0;
+                let value = data.overflowing_shr(64 - bit_offset - bit_size).0
+                    & (0xFFFFFFFFFFFFFFFF as u64).overflowing_shr(64 - bit_size).0;
 
                 let dvalue = value as f64 * scale - offset;
                 TypeValue::Real(dvalue)
@@ -310,12 +322,15 @@ impl TypeParser {
                     .collect();
                 TypeValue::Root(attribs)
             }
-            TypeParser::EnumParser { name : _, bit_offset, bit_size, ty, entries } => {
-                let value = data
-                    .overflowing_shr(64 - bit_offset - bit_size)
-                    .0 & 
-                    (0xFFFFFFFFFFFFFFFF as u64).overflowing_shr(64 - bit_size)
-                    .0;
+            TypeParser::EnumParser {
+                name: _,
+                bit_offset,
+                bit_size,
+                ty,
+                entries,
+            } => {
+                let value = data.overflowing_shr(64 - bit_offset - bit_size).0
+                    & (0xFFFFFFFFFFFFFFFF as u64).overflowing_shr(64 - bit_size).0;
                 let opt = entries.iter().find(|e| e.1 == value);
                 match opt {
                     Some((name, _)) => TypeValue::Enum(ty.clone(), name.clone()),

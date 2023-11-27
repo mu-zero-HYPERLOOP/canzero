@@ -186,9 +186,9 @@ impl Serialize for TypeFrame {
         };
 
         #[derive(Serialize)]
-        struct SerializedAttribute<'a, T : Serialize>{
-            name : &'a str,
-            value : &'a T,
+        struct SerializedAttribute<'a, T: Serialize> {
+            name: &'a str,
+            value: &'a T,
         }
 
         struct SerializedAttributes<'a>(&'a Vec<FrameType>);
@@ -200,23 +200,27 @@ impl Serialize for TypeFrame {
             {
                 let mut seq = serializer.serialize_seq(None)?;
 
-                fn rec<S : Serializer>(frame_type : &FrameType, seq : &mut S::SerializeSeq, pre : &str) -> Result<(), S::Error>{
+                fn rec<S: Serializer>(
+                    frame_type: &FrameType,
+                    seq: &mut S::SerializeSeq,
+                    pre: &str,
+                ) -> Result<(), S::Error> {
                     match &frame_type.value {
-                        TypeValue::Unsigned(v) => seq.serialize_element(&SerializedAttribute{
-                            name : &format!("{pre}{}",frame_type.name),
-                            value : v,
+                        TypeValue::Unsigned(v) => seq.serialize_element(&SerializedAttribute {
+                            name: &format!("{pre}{}", frame_type.name),
+                            value: v,
                         }),
-                        TypeValue::Signed(v) => seq.serialize_element(&SerializedAttribute{
-                            name : &format!("{pre}{}",frame_type.name),
-                            value : v,
+                        TypeValue::Signed(v) => seq.serialize_element(&SerializedAttribute {
+                            name: &format!("{pre}{}", frame_type.name),
+                            value: v,
                         }),
-                        TypeValue::Real(v) => seq.serialize_element(&SerializedAttribute{
-                            name : &format!("{pre}{}",frame_type.name),
-                            value : v,
+                        TypeValue::Real(v) => seq.serialize_element(&SerializedAttribute {
+                            name: &format!("{pre}{}", frame_type.name),
+                            value: v,
                         }),
-                        TypeValue::Enum(_, v) => seq.serialize_element(&SerializedAttribute{
-                            name : &format!("{pre}{}",frame_type.name),
-                            value : v,
+                        TypeValue::Enum(_, v) => seq.serialize_element(&SerializedAttribute {
+                            name: &format!("{pre}{}", frame_type.name),
+                            value: v,
                         }),
                         TypeValue::Composite(composite) => {
                             for attrib in &composite.attributes {

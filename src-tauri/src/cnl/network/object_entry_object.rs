@@ -34,7 +34,7 @@ impl ObjectEntryObject {
         //TODO gets notified when a new value for the object entry is received
         // THIS method can't be mutable (&mut self) we have to use interior
         // mutablity to access fields mutable (common pattern in concurrent rust)
-        // we should store the value in some efficient data structure 
+        // we should store the value in some efficient data structure
         // where :
         // it's fast to get the most recent value!
         // it's fast to get all values in order!
@@ -44,7 +44,6 @@ impl ObjectEntryObject {
     pub fn ty(&self) -> &config::TypeRef {
         &self.object_entry_ref.ty()
     }
-
 
     // Latest Events Issue #12
 
@@ -67,7 +66,7 @@ impl ObjectEntryObject {
         //TODO unregister a listener of the history
     }
     pub fn history(&self) {
-        //TODO return the complete history of values of the ObjectEntry (including timestamp) 
+        //TODO return the complete history of values of the ObjectEntry (including timestamp)
     }
 }
 

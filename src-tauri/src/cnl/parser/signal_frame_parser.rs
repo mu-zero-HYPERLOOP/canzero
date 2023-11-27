@@ -36,11 +36,10 @@ impl SignalParser {
                 byte_offset,
                 byte_size,
             } => {
-                let value = data
-                    .overflowing_shr(64 - byte_offset - byte_size)
-                    .0 & 
-                    (0xFFFFFFFFFFFFFFFF as u64).overflowing_shr(64 - byte_size)
-                    .0;
+                let value = data.overflowing_shr(64 - byte_offset - byte_size).0
+                    & (0xFFFFFFFFFFFFFFFF as u64)
+                        .overflowing_shr(64 - byte_size)
+                        .0;
 
                 Signal::new(signal_ref.clone(), SignalValue::Unsigned(value))
             }
@@ -49,11 +48,10 @@ impl SignalParser {
                 byte_offset,
                 byte_size,
             } => {
-                let value = data
-                    .overflowing_shr(64 - byte_offset - byte_size)
-                    .0 & 
-                    (0xFFFFFFFFFFFFFFFF as u64).overflowing_shr(64 - byte_size)
-                    .0;
+                let value = data.overflowing_shr(64 - byte_offset - byte_size).0
+                    & (0xFFFFFFFFFFFFFFFF as u64)
+                        .overflowing_shr(64 - byte_size)
+                        .0;
 
                 let ivalue = unsafe { std::mem::transmute::<u64, i64>(value) };
 
@@ -66,11 +64,10 @@ impl SignalParser {
                 offset,
                 scale,
             } => {
-                let value = data
-                    .overflowing_shr(64 - byte_offset - byte_size)
-                    .0 & 
-                    (0xFFFFFFFFFFFFFFFF as u64).overflowing_shr(64 - byte_size)
-                    .0;
+                let value = data.overflowing_shr(64 - byte_offset - byte_size).0
+                    & (0xFFFFFFFFFFFFFFFF as u64)
+                        .overflowing_shr(64 - byte_size)
+                        .0;
                 let dvalue = value as f64 * scale - offset;
 
                 Signal::new(signal_ref.clone(), SignalValue::Real(dvalue))
@@ -131,7 +128,7 @@ impl SignalFrameParser {
                 .map(|parser| parser.parse(data))
                 .collect(),
             self.message_ref.clone(),
-            frame.get_data_u64()
+            frame.get_data_u64(),
         ))
     }
 }

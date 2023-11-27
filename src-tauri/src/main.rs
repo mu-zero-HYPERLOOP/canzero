@@ -1,14 +1,20 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 use rand::{rngs::StdRng, Rng, SeedableRng};
+use serde::Serialize;
 use std::time::Duration;
 use tauri::Manager;
-use serde::Serialize;
 
-use crate::{state::cnl_state::CNLState, commands::{trace::{listen_to_trace, unlisten_to_trace}, network_information}};
+use crate::{
+    commands::{
+        network_information,
+        trace::{listen_to_trace, unlisten_to_trace},
+    },
+    state::cnl_state::CNLState,
+};
 
 mod cnl;
-mod observers;
 mod commands;
+mod observers;
 mod state;
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
@@ -50,8 +56,11 @@ struct Graphable {
 fn initialize_graph(node_name: String, oe_name: String) -> InitialGraphData {
     println!("get_graph_data was invoked");
     InitialGraphData {
-        values : (1..=500)
-            .map(|n| Graphable { x: f64::from(n),  y: 0f64 })
+        values: (1..=500)
+            .map(|n| Graphable {
+                x: f64::from(n),
+                y: 0f64,
+            })
             .collect(),
     }
 }

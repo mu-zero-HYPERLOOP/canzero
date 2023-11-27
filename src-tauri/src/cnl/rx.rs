@@ -21,11 +21,15 @@ use can_config_rs::config;
 
 pub struct RxCom {
     parser_lookup: Arc<HashMap<(u32, bool), MessageHandler>>,
-    trace : Arc<TraceObject>,
+    trace: Arc<TraceObject>,
 }
 
 impl RxCom {
-    pub fn create(network_config: &config::NetworkRef, trace : &Arc<TraceObject>, network : &Arc<NetworkObject>) -> Self {
+    pub fn create(
+        network_config: &config::NetworkRef,
+        trace: &Arc<TraceObject>,
+        network: &Arc<NetworkObject>,
+    ) -> Self {
         let mut lookup = HashMap::new();
         for message_config in network_config.messages() {
             let key = match message_config.id() {
@@ -59,14 +63,14 @@ impl RxCom {
 
         Self {
             parser_lookup: Arc::new(lookup),
-            trace : trace.clone(),
+            trace: trace.clone(),
         }
     }
     pub fn start(&mut self, can: &Arc<super::CAN>) {
         tokio::spawn(can_receiver(
             can.clone(),
             self.parser_lookup.clone(),
-            self.trace.clone()
+            self.trace.clone(),
         ));
     }
 }
@@ -74,8 +78,12 @@ impl RxCom {
 type Lookup = HashMap<(u32, bool), MessageHandler>;
 type LookupRef = Arc<Lookup>;
 
-async fn can_receiver(can: Arc<super::CAN>, lookup: LookupRef, trace : Arc<TraceObject>) {
-    async fn receive_msg(frame: Result<CanFrame, CanError>, lookup: LookupRef, trace : Arc<TraceObject>) {
+async fn can_receiver(can: Arc<super::CAN>, lookup: LookupRef, trace: Arc<TraceObject>) {
+    async fn receive_msg(
+        frame: Result<CanFrame, CanError>,
+        lookup: LookupRef,
+        trace: Arc<TraceObject>,
+    ) {
         let frame = match frame {
             Ok(frame) => {
                 let key = (frame.get_id(), frame.get_ide_flag());
@@ -90,9 +98,7 @@ async fn can_receiver(can: Arc<super::CAN>, lookup: LookupRef, trace : Arc<Trace
                     )),
                 }
             }
-            Err(error) => {
-                Frame::ErrorFrame(ErrorFrame::new(&error))
-            }
+            Err(error) => Frame::ErrorFrame(ErrorFrame::new(&error)),
         };
         trace.push_frame(frame).await;
     }

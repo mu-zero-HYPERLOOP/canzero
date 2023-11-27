@@ -1,20 +1,15 @@
-use crate::cnl::{frame::Frame, can_frame::CanFrame, parser::MessageParser};
-
-
+use crate::cnl::{can_frame::CanFrame, frame::Frame, parser::MessageParser};
 
 pub struct EmptyFrameHandler {
-    parser : MessageParser,
+    parser: MessageParser,
 }
 
 impl EmptyFrameHandler {
-    
-    pub fn create(parser : MessageParser) -> Self {
-        Self {
-            parser
-        }
+    pub fn create(parser: MessageParser) -> Self {
+        Self { parser }
     }
-    
-    pub fn handle(&self, frame : &CanFrame) -> Frame {
+
+    pub fn handle(&self, frame: &CanFrame) -> Frame {
         self.parser.parse(frame)
     }
 }

@@ -4,7 +4,6 @@ use tokio::sync::Mutex;
 
 use crate::cnl::CNL;
 
-
 pub struct CNLState {
     pub cnl: Mutex<CNL>,
 }

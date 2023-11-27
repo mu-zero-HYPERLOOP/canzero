@@ -1,4 +1,8 @@
-use self::{empty_frame_handler::EmptyFrameHandler, get_resp_frame_handler::GetRespFrameHandler, set_resp_frame_handler::SetRespFrameHandler, command_resp_frame_handler::CommandRespFrameHandler, stream_frame_handler::StreamFrameHandler};
+use self::{
+    command_resp_frame_handler::CommandRespFrameHandler, empty_frame_handler::EmptyFrameHandler,
+    get_resp_frame_handler::GetRespFrameHandler, set_resp_frame_handler::SetRespFrameHandler,
+    stream_frame_handler::StreamFrameHandler,
+};
 
 use super::{can_frame::CanFrame, frame::Frame};
 
@@ -17,7 +21,7 @@ pub enum MessageHandler {
 }
 
 impl MessageHandler {
-    pub fn handle(&self, frame : &CanFrame) -> Frame {
+    pub fn handle(&self, frame: &CanFrame) -> Frame {
         match &self {
             MessageHandler::EmptyFrameHandler(handler) => handler.handle(frame),
             MessageHandler::GetRespFrameHandler(handler) => handler.handle(frame),
@@ -27,5 +31,3 @@ impl MessageHandler {
         }
     }
 }
-
-

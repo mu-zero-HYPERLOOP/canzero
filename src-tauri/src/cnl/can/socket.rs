@@ -10,7 +10,6 @@ pub use libc::{
 
 use crate::can::can_frame::{CanError, CanFrame};
 
-
 #[derive(Clone)]
 struct CanSocket {
     fd: c_int,
@@ -88,21 +87,19 @@ pub struct OwnedCanSocket {
 }
 
 pub struct CanSocketRef {
-    socket : CanSocket,
+    socket: CanSocket,
 }
 
 impl OwnedCanSocket {
     pub fn open(ifname: &str) -> Result<Self, std::io::Error> {
-
-
         Ok(OwnedCanSocket {
             socket: CanSocket::open(ifname)?,
         })
     }
-    
+
     pub fn as_ref(&self) -> CanSocketRef {
         CanSocketRef {
-            socket : self.socket.clone()
+            socket: self.socket.clone(),
         }
     }
 
@@ -124,7 +121,6 @@ impl CanSocketRef {
         self.socket.transmit(frame)
     }
 }
-
 
 impl Drop for OwnedCanSocket {
     fn drop(&mut self) {

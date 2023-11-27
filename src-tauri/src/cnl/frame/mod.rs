@@ -1,10 +1,9 @@
-
 use serde::Serialize;
 
-use crate::cnl::frame::type_frame::TypeFrame;
-use crate::cnl::frame::signal_frame::SignalFrame;
-use crate::cnl::frame::undefined_frame::UndefinedFrame;
 use crate::cnl::frame::error_frame::ErrorFrame;
+use crate::cnl::frame::signal_frame::SignalFrame;
+use crate::cnl::frame::type_frame::TypeFrame;
+use crate::cnl::frame::undefined_frame::UndefinedFrame;
 
 pub mod error_frame;
 pub mod signal_frame;
@@ -12,7 +11,7 @@ pub mod type_frame;
 pub mod undefined_frame;
 
 /**
- * Serializes to 
+ * Serializes to
  * {
  *   SignalFrame? : SignalFrame
  *   TypeFrame? : TypeFrame,
@@ -20,7 +19,6 @@ pub mod undefined_frame;
  *   ErrorFrame? : ErrorFrame,
  * }
  */
-
 
 pub type UniqueFrameKey = (u32, bool);
 
@@ -33,7 +31,7 @@ pub enum Frame {
 }
 
 impl Frame {
-    pub fn name(&self) -> &str{
+    pub fn name(&self) -> &str {
         match &self {
             Frame::SignalFrame(signal_frame) => signal_frame.name(),
             Frame::TypeFrame(type_frame) => type_frame.name(),
@@ -50,4 +48,3 @@ impl Frame {
         }
     }
 }
-

@@ -3,7 +3,7 @@ use std::{
     time::Duration,
 };
 
-use serde::{Serialize, ser::SerializeSeq};
+use serde::{ser::SerializeSeq, Serialize};
 use tauri::Manager;
 use tokio::sync::{mpsc, Mutex};
 
@@ -17,15 +17,19 @@ struct Batch<T: Serialize + Clone> {
     batch: Vec<T>,
 }
 
-impl<T> Serialize for Batch<T> where T : Serialize + Clone {
+impl<T> Serialize for Batch<T>
+where
+    T: Serialize + Clone,
+{
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: serde::Serializer {
-            let mut seq = serializer.serialize_seq(Some(self.batch.len()))?;
-            for value in &self.batch {
-                seq.serialize_element(value)?;
-            }
-            seq.end()
+        S: serde::Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.batch.len()))?;
+        for value in &self.batch {
+            seq.serialize_element(value)?;
+        }
+        seq.end()
     }
 }
 

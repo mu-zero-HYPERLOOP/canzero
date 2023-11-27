@@ -11,7 +11,7 @@ pub struct NodeObject {
 }
 
 impl NodeObject {
-    pub fn create(node_config: &config::NodeRef, app_handle : &tauri::AppHandle) -> Self {
+    pub fn create(node_config: &config::NodeRef, app_handle: &tauri::AppHandle) -> Self {
         Self {
             object_entries: node_config
                 .object_entries()

@@ -1,8 +1,7 @@
-
-#[cfg(feature="socket-can")]
+#[cfg(feature = "socket-can")]
 use libc::can_frame;
 
-#[cfg(feature="socket-can")]
+#[cfg(feature = "socket-can")]
 use libc::{CAN_EFF_FLAG, CAN_EFF_MASK, CAN_RTR_FLAG, CAN_SFF_MASK};
 
 #[derive(Debug)]
@@ -27,7 +26,7 @@ unsafe impl Send for CanError {}
 unsafe impl Sync for CanError {}
 
 impl CanFrame {
-    pub fn new(id: u32, ide: bool, rtr: bool, dlc: u8, data : u64) -> Self {
+    pub fn new(id: u32, ide: bool, rtr: bool, dlc: u8, data: u64) -> Self {
         Self {
             id,
             ide,
@@ -57,7 +56,7 @@ impl CanFrame {
         }
     }
 
-    #[cfg(feature="socket-can")]
+    #[cfg(feature = "socket-can")]
     pub fn from_raw(frame: can_frame) -> Self {
         let ide = frame.can_id & CAN_EFF_FLAG != 0;
         let id = if ide {
@@ -74,20 +73,20 @@ impl CanFrame {
         }
     }
 
-    #[cfg(feature="socket-can")]
+    #[cfg(feature = "socket-can")]
     pub fn to_raw(&self) -> can_frame {
-        let mut canframe : can_frame= unsafe {std::mem::zeroed()};
+        let mut canframe: can_frame = unsafe { std::mem::zeroed() };
         if self.ide {
             canframe.can_id |= CAN_EFF_FLAG;
             canframe.can_id |= self.id & CAN_SFF_MASK;
-        }else{ 
+        } else {
             canframe.can_id |= self.id & CAN_EFF_MASK;
         }
         if self.rtr {
             canframe.can_id |= CAN_RTR_FLAG;
         }
         canframe.can_dlc = self.dlc;
-        canframe.data = unsafe {std::mem::transmute::<u64,[u8;8]>(self.data)};
+        canframe.data = unsafe { std::mem::transmute::<u64, [u8; 8]>(self.data) };
         canframe
     }
 

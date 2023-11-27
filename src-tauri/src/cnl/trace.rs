@@ -25,7 +25,7 @@ impl TraceObject {
     }
 
     pub async fn push_frame(&self, frame: Frame) {
-        // TODO Issue #7 
+        // TODO Issue #7
         // We should calculate a timestamp here and forward it correctly to the view
         let key = frame.unique_key();
         let prev = self
@@ -38,9 +38,7 @@ impl TraceObject {
             _ => {
                 // if nothing is listening to the observable the frame data is dropped completely
                 // otherwise the data is forwarded to the view!
-                self.observable
-                    .notify(TraceObjectEvent(frame))
-                    .await;
+                self.observable.notify(TraceObjectEvent(frame)).await;
             }
         }
     }
@@ -50,12 +48,13 @@ impl TraceObject {
     }
 
     pub fn get(&self) -> Vec<TraceObjectEvent> {
-        let trace_state : Vec<TraceObjectEvent> = self.trace
-                .lock()
-                .expect("failed to acquire TraceObject lock")
-                .iter()
-                .map(|(_key, value)| TraceObjectEvent(value.clone()))
-                .collect();
+        let trace_state: Vec<TraceObjectEvent> = self
+            .trace
+            .lock()
+            .expect("failed to acquire TraceObject lock")
+            .iter()
+            .map(|(_key, value)| TraceObjectEvent(value.clone()))
+            .collect();
         trace_state
     }
 

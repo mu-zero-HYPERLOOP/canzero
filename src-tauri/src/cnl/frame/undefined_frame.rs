@@ -1,6 +1,5 @@
 use serde::Serialize;
 
-
 #[derive(Clone, Serialize, PartialEq, Debug)]
 pub struct UndefinedFrame {
     id: u32,

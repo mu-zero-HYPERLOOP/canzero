@@ -1,9 +1,12 @@
-
-use tokio::{sync::{mpsc::Receiver, Mutex}, sync::mpsc::Sender, runtime::Handle};
+use tokio::{
+    runtime::Handle,
+    sync::mpsc::Sender,
+    sync::{mpsc::Receiver, Mutex},
+};
 
 use self::socket::OwnedCanSocket;
 
-use super::can_frame::{CanFrame, CanError};
+use super::can_frame::{CanError, CanFrame};
 
 mod socket;
 
@@ -16,7 +19,7 @@ pub struct CAN {
     socket: OwnedCanSocket,
     rx: Mutex<Receiver<CanFrame>>,
     err_rx: Mutex<Receiver<CanError>>,
-    tx : Sender<CanFrame>,
+    tx: Sender<CanFrame>,
 }
 
 impl CAN {
@@ -33,41 +36,59 @@ impl CAN {
         let (txtx, mut txrx) = tokio::sync::mpsc::channel::<CanFrame>(16);
 
         let socket_ref = socket.as_ref();
-        tokio::task::spawn_blocking(move|| loop {
+        tokio::task::spawn_blocking(move || loop {
             let frame = socket_ref.receive();
             Handle::current().block_on(async {
                 match frame {
                     Ok(frame) => {
-                        tx.send(frame).await.expect("failed to forward canframe receiver closed early");
+                        tx.send(frame)
+                            .await
+                            .expect("failed to forward canframe receiver closed early");
                     }
                     Err(err) => {
-                        err_tx.send(err).await.expect("failed to forward canerror receiver closed early");
+                        err_tx
+                            .send(err)
+                            .await
+                            .expect("failed to forward canerror receiver closed early");
                     }
                 }
             });
         });
 
         let socket_ref = socket.as_ref();
-        tokio::task::spawn_blocking(move|| loop {
+        tokio::task::spawn_blocking(move || loop {
             let frame = Handle::current().block_on(async {
-                txrx.recv().await.expect("failed to transmit canframe sender closed early")
+                txrx.recv()
+                    .await
+                    .expect("failed to transmit canframe sender closed early")
             });
-            socket_ref.transmit(&frame).expect("failed to write to socket");
+            socket_ref
+                .transmit(&frame)
+                .expect("failed to write to socket");
         });
 
-        Ok(CAN { tx : txtx, socket, rx : Mutex::new(rx), err_rx : Mutex::new(err_rx) })
+        Ok(CAN {
+            tx: txtx,
+            socket,
+            rx: Mutex::new(rx),
+            err_rx: Mutex::new(err_rx),
+        })
     }
 
     pub async fn send(&self, frame: CanFrame) {
-        self.tx.send(frame).await.expect("failed to forward canframe to can module for transmission");
+        self.tx
+            .send(frame)
+            .await
+            .expect("failed to forward canframe to can module for transmission");
     }
 
     pub async fn receive(&self) -> Result<CanFrame, CanError> {
-        let frame = self.rx.lock().await
-            .recv().await;
+        let frame = self.rx.lock().await.recv().await;
         match frame {
             Some(frame) => Ok(frame),
-            None => Err(CanError::Disconnect(format!("can receive thread closed rx channel")))
+            None => Err(CanError::Disconnect(format!(
+                "can receive thread closed rx channel"
+            ))),
         }
     }
 
