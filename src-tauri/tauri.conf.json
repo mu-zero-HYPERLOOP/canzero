@@ -4,7 +4,8 @@
     "beforeBuildCommand": "npm run build",
     "devPath": "http://localhost:1420",
     "distDir": "../dist",
-    "withGlobalTauri": false
+    "withGlobalTauri": false,
+    "features" : ["mock-can"]
   },
   "package": {
     "productName": "control_panel",
@@ -31,6 +32,9 @@
         "icons/128x128@2x.png",
         "icons/icon.icns",
         "icons/icon.ico"
+      ],
+      "resources": [
+        "test.yaml"
       ]
     },
     "security": {

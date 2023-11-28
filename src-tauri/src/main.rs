@@ -66,6 +66,7 @@ fn initialize_graph(node_name: String, oe_name: String) -> InitialGraphData {
 }
 
 fn main() {
+    let _ = fix_path_env::fix();
     println!("Hello, World!");
     // setup tauri
     tauri::Builder::default()

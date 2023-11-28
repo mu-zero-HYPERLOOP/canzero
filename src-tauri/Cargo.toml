@@ -23,6 +23,7 @@ nix = {version = "0.27.1", features = ["net"], optional = true }
 can-config-rs = { git = "https://github.com/mu-zero-HYPERLOOP/can-config-rs.git" }
 can-yaml-config-rs = { git = "https://github.com/mu-zero-HYPERLOOP/can-yaml-config-rs.git" }
 sorted-vec = "0.8.3"
+fix-path-env = { git = "https://github.com/tauri-apps/fix-path-env-rs.git"}
 
 [features]
 default = ["mock-can"]
