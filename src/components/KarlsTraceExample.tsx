@@ -1,9 +1,7 @@
 import { Box, Collapse, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, styled } from "@mui/material";
 import { invoke } from "@tauri-apps/api";
 import { listen } from "@tauri-apps/api/event";
-
 import React, { useEffect, useState, useRef } from "react";
-import Frame from "../types/Frame";
 import FrameName from "./FrameName";
 import FrameId from "./FrameId";
 import FrameData from "./FrameData";
