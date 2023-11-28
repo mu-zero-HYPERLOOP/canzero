@@ -21,13 +21,13 @@ pub enum MessageHandler {
 }
 
 impl MessageHandler {
-    pub fn handle(&self, frame: &CanFrame) -> Frame {
+    pub async fn handle(&self, frame: &CanFrame) -> Frame {
         match &self {
-            MessageHandler::EmptyFrameHandler(handler) => handler.handle(frame),
-            MessageHandler::GetRespFrameHandler(handler) => handler.handle(frame),
-            MessageHandler::SetRespFrameHandler(handler) => handler.handle(frame),
-            MessageHandler::CommandRespFrameHandler(handler) => handler.handle(frame),
-            MessageHandler::StreamFrameHandler(handler) => handler.handle(frame),
+            MessageHandler::EmptyFrameHandler(handler) => handler.handle(frame).await,
+            MessageHandler::GetRespFrameHandler(handler) => handler.handle(frame).await,
+            MessageHandler::SetRespFrameHandler(handler) => handler.handle(frame).await,
+            MessageHandler::CommandRespFrameHandler(handler) => handler.handle(frame).await,
+            MessageHandler::StreamFrameHandler(handler) => handler.handle(frame).await,
         }
     }
 }

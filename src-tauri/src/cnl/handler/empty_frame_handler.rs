@@ -9,7 +9,7 @@ impl EmptyFrameHandler {
         Self { parser }
     }
 
-    pub fn handle(&self, frame: &CanFrame) -> Frame {
+    pub async fn handle(&self, frame: &CanFrame) -> Frame {
         self.parser.parse(frame)
     }
 }

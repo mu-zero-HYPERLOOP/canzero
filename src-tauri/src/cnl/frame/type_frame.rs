@@ -246,3 +246,25 @@ impl Serialize for TypeFrame {
         map.end()
     }
 }
+
+impl Serialize for TypeValue {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer {
+        match &self {
+            TypeValue::Unsigned(v) => serializer.serialize_u64(*v),
+            TypeValue::Signed(v) => serializer.serialize_i64(*v),
+            TypeValue::Real(v) => serializer.serialize_f64(*v),
+            TypeValue::Composite(composite) => {
+                let mut map = serializer.serialize_map(Some(composite.attributes.len()))?;
+                for attrib in &composite.attributes {
+                    map.serialize_entry(attrib.name(), attrib.value())?;
+                }
+                map.end()
+            }
+            TypeValue::Root(_) => panic!(),
+            TypeValue::Enum(_, v) => serializer.serialize_str(v),
+            TypeValue::Array(_) => todo!(),
+        }
+    }
+}

@@ -112,7 +112,7 @@ impl GetRespFrameHandler {
     // for each frame a lookup is done to get the correct handler afterwards.
     // This handler is only invoked for the get resp message of the config therefor the
     // format can be assumed to be the same for every frame!
-    pub fn handle(&self, frame: &CanFrame) -> Frame {
+    pub async fn handle(&self, frame: &CanFrame) -> Frame {
         // a small example of how to parse the type frame!
         let frame = self.parser.parse(frame);
         let Frame::TypeFrame(type_frame) = &frame else {
@@ -171,7 +171,7 @@ impl GetRespFrameHandler {
         .1;
 
         // notify the object entry (object) about the new value
-        object_entry.push_value(value);
+        object_entry.push_value(value).await;
 
         // has to return the parsed frame, because the frame is needed for the trace page!
         frame

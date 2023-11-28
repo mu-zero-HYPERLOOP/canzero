@@ -54,6 +54,12 @@ impl CNL {
         let trace = Arc::new(TraceObject::create(app_handle));
 
         let network = Arc::new(NetworkObject::create(network_config, app_handle));
+        
+        // for node in network.nodes() {
+        //     for oe in node.object_entries() {
+        //         oe.listen_to_latest();
+        //     }
+        // }
 
         let rx = RxCom::create(network_config, &trace, &network);
         Self {

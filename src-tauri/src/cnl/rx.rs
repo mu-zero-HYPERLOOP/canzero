@@ -89,7 +89,7 @@ async fn can_receiver(can: Arc<super::CAN>, lookup: LookupRef, trace: Arc<TraceO
             Ok(frame) => {
                 let key = (frame.get_id(), frame.get_ide_flag());
                 match lookup.get(&key) {
-                    Some(handler) => handler.handle(&frame),
+                    Some(handler) => handler.handle(&frame).await,
                     None => Frame::UndefinedFrame(UndefinedFrame::new(
                         frame.get_id(),
                         frame.get_ide_flag(),
