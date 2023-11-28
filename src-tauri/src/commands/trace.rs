@@ -7,7 +7,7 @@ pub async fn listen_to_trace(
     println!("listen to trace");
     let trace = state.lock().await.trace().clone();
     trace.listen();
-    Ok(trace.get())
+    Ok(trace.get().await)
 }
 
 #[tauri::command]

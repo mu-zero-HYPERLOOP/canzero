@@ -2,12 +2,14 @@ import { Box, Collapse, IconButton, Paper, Table, TableBody, TableCell, TableCon
 import { invoke } from "@tauri-apps/api";
 import { listen } from "@tauri-apps/api/event";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Frame from "../types/Frame";
 import FrameName from "./FrameName";
 import FrameId from "./FrameId";
 import FrameData from "./FrameData";
 import FrameDlc from "./FrameDlc";
+import FrameTime from "./FrameTime";
+import { TraceObjectEvent } from "../types/TraceObjectEvent";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { TypeFrame } from "../types/TypeFrame";
@@ -59,9 +61,11 @@ const ErrorFrameCell = styled(TableCell)(({ theme }) =>
 
 interface SignalFrameRowProps {
   frame: SignalFrame,
+  timestamp: number,
+  deltaTime: number,
 }
 
-function SignalFrameRow({ frame }: SignalFrameRowProps) {
+function SignalFrameRow({ frame, timestamp, deltaTime }: SignalFrameRowProps) {
   const [open, setOpen] = React.useState(false);
   return (
     <React.Fragment>
@@ -79,6 +83,7 @@ function SignalFrameRow({ frame }: SignalFrameRowProps) {
         <SignalFrameCell align="left"><FrameId frame={frame} /></SignalFrameCell>
         <SignalFrameCell align="left"><FrameData frame={frame} /></SignalFrameCell>
         <SignalFrameCell align="left"><FrameDlc frame={frame} /></SignalFrameCell>
+        <SignalFrameCell align="left"><FrameTime timestamp={timestamp} deltaTime={deltaTime} /></SignalFrameCell>
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
@@ -95,10 +100,12 @@ function SignalFrameRow({ frame }: SignalFrameRowProps) {
 
 interface TypeFrameRowProps {
   frame: TypeFrame,
+  timestamp: number,
+  deltaTime: number,
 }
 
 
-function TypeFrameRow({ frame }: TypeFrameRowProps) {
+function TypeFrameRow({ frame, timestamp, deltaTime }: TypeFrameRowProps) {
   const [open, setOpen] = React.useState(false);
   return (
     <React.Fragment>
@@ -116,6 +123,7 @@ function TypeFrameRow({ frame }: TypeFrameRowProps) {
         <TypeFrameCell align="left"><FrameId frame={frame} /></TypeFrameCell>
         <TypeFrameCell align="left"><FrameData frame={frame} /></TypeFrameCell>
         <TypeFrameCell align="left"><FrameDlc frame={frame} /></TypeFrameCell>
+        <TypeFrameCell align="left"><FrameTime timestamp={timestamp} deltaTime={deltaTime} /></TypeFrameCell>
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
@@ -132,11 +140,13 @@ function TypeFrameRow({ frame }: TypeFrameRowProps) {
 
 interface UndefinedFrameRowProps {
   frame: UndefinedFrame
+  timestamp: number,
+  deltaTime: number,
 }
 
 
 
-function UndefinedFrameRow({ frame }: UndefinedFrameRowProps) {
+function UndefinedFrameRow({ frame, timestamp, deltaTime }: UndefinedFrameRowProps) {
   return (
     <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
       <UndefinedFrameCell>
@@ -149,16 +159,19 @@ function UndefinedFrameRow({ frame }: UndefinedFrameRowProps) {
       <UndefinedFrameCell align="left"><FrameId frame={frame} /></UndefinedFrameCell>
       <UndefinedFrameCell align="left"><FrameData frame={frame} /></UndefinedFrameCell>
       <UndefinedFrameCell align="left"><FrameDlc frame={frame} /></UndefinedFrameCell>
+      <UndefinedFrameCell align="left"><FrameTime timestamp={timestamp} deltaTime={deltaTime} /></UndefinedFrameCell>
     </TableRow>
   );
 }
 
 interface ErrorFrameRowProps {
   frame: ErrorFrame,
+  timestamp: number,
+  deltaTime: number,
 }
 
 
-function ErrorFrameRow({ frame }: ErrorFrameRowProps) {
+function ErrorFrameRow({ frame, timestamp, deltaTime }: ErrorFrameRowProps) {
   return (
     <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
       <ErrorFrameCell>
@@ -171,73 +184,78 @@ function ErrorFrameRow({ frame }: ErrorFrameRowProps) {
       <ErrorFrameCell align="left" />
       <ErrorFrameCell align="left"><FrameData frame={frame} /></ErrorFrameCell>
       <ErrorFrameCell align="left" />
+      <ErrorFrameCell align="left"><FrameTime timestamp={timestamp} deltaTime={deltaTime} /></ErrorFrameCell>
     </TableRow>
   );
 }
 
 interface RowProps {
-  frame: Frame
+  evt: TraceObjectEvent
 }
 
-function Row({ frame }: RowProps) {
-  if (frame.TypeFrame != undefined) {
-    return <TypeFrameRow frame={frame.TypeFrame} />
-  } else if (frame.SignalFrame != undefined) {
-    return <SignalFrameRow frame={frame.SignalFrame} />
-  } else if (frame.UndefinedFrame != undefined) {
-    return <UndefinedFrameRow frame={frame.UndefinedFrame} />
-  } else if (frame.ErrorFrame != undefined) {
-    return <ErrorFrameRow frame={frame.ErrorFrame} />
+function Row({ evt }: RowProps) {
+  if (evt.frame.TypeFrame != undefined) {
+    return <TypeFrameRow frame={evt.frame.TypeFrame}
+      timestamp={evt.timestamp} deltaTime={evt.delta_time} />
+  } else if (evt.frame.SignalFrame != undefined) {
+    return <SignalFrameRow frame={evt.frame.SignalFrame}
+      timestamp={evt.timestamp} deltaTime={evt.delta_time} />
+  } else if (evt.frame.UndefinedFrame != undefined) {
+    return <UndefinedFrameRow frame={evt.frame.UndefinedFrame}
+      timestamp={evt.timestamp} deltaTime={evt.delta_time} />
+  } else if (evt.frame.ErrorFrame != undefined) {
+    return <ErrorFrameRow frame={evt.frame.ErrorFrame}
+      timestamp={evt.timestamp} deltaTime={evt.delta_time} />
   }
 }
 
 function KarlsTraceExample() {
 
-  const [rows, setRows] = useState<Frame[]>([]);
-  const [filteredRows, setFilteredRows] = useState<Frame[]>([]);
+  const rowsRef = useRef<TraceObjectEvent[]>([]);
+  const [filteredRows, setFilteredRows] = useState<TraceObjectEvent[]>([]);
+  const searchStringRef = useRef("");
 
-  function handle_event(frame: Frame) {
-    setRows((rows) => {
-      let index = rows.findIndex((f) => {
-        if (f.TypeFrame != undefined && frame.TypeFrame != undefined) {
-          return f.TypeFrame.id === frame.TypeFrame.id &&
-            f.TypeFrame.ide === frame.TypeFrame.ide;
-        } else if (f.SignalFrame != undefined && frame.SignalFrame) {
-          return f.SignalFrame.id === frame.SignalFrame.id &&
-            f.SignalFrame.ide === frame.SignalFrame.ide;
-        } else if (f.UndefinedFrame != undefined && frame.UndefinedFrame != undefined) {
-          return f.UndefinedFrame.id === frame.UndefinedFrame.id &&
-            f.UndefinedFrame.ide === frame.UndefinedFrame.ide;
-        } else if (f.ErrorFrame != undefined && frame.ErrorFrame != undefined) {
-          return f.ErrorFrame.data === frame.ErrorFrame.data;
-        } else {
-          return false;
-        }
-      });
-      if (index == -1) {
-        let new_rows = rows.slice();
-        new_rows.push(frame);
-        return new_rows;
+  function handle_event(event: TraceObjectEvent) {
+    let index = rowsRef.current.findIndex((f) => {
+      if (f.frame.TypeFrame != undefined && event.frame.TypeFrame != undefined) {
+        return f.frame.TypeFrame.id === event.frame.TypeFrame.id &&
+          f.frame.TypeFrame.ide === event.frame.TypeFrame.ide;
+      } else if (f.frame.SignalFrame != undefined && event.frame.SignalFrame) {
+        return f.frame.SignalFrame.id === event.frame.SignalFrame.id &&
+          f.frame.SignalFrame.ide === event.frame.SignalFrame.ide;
+      } else if (f.frame.UndefinedFrame != undefined && event.frame.UndefinedFrame != undefined) {
+        return f.frame.UndefinedFrame.id === event.frame.UndefinedFrame.id &&
+          f.frame.UndefinedFrame.ide === event.frame.UndefinedFrame.ide;
+      } else if (f.frame.ErrorFrame != undefined && event.frame.ErrorFrame != undefined) {
+        return f.frame.ErrorFrame.data === event.frame.ErrorFrame.data;
       } else {
-        let new_rows = rows.slice();
-        new_rows[index] = frame;
-        return new_rows;
+        return false;
       }
     });
+    if (index == -1) {
+      rowsRef.current.push(event);
+    } else {
+      rowsRef.current[index] = event;
+    }
   }
 
   useEffect(() => {
-    invoke<Frame[]>("listen_to_trace").then((frames) => {
-      for (let frame of frames) {
-        console.log(frame);
-        handle_event(frame);
+    invoke<TraceObjectEvent[]>("listen_to_trace").then((traceObjectEvents) => {
+      for (let traceObjectEvent of traceObjectEvents) {
+        console.log("initial frame: " + traceObjectEvent.frame);
+        handle_event(traceObjectEvent);
       }
+      filterRows(searchStringRef.current);
     });
 
-    let trace_event_listener = listen<Frame[]>("trace", (event) => {
-      for (let frame of event.payload) {
-        handle_event(frame);
+    let trace_event_listener = listen<TraceObjectEvent[]>("trace", (event) => {
+      console.log("trace listener triggered with:");
+      console.log(event.payload);
+      for (let traceObjectEvent of event.payload) {
+        console.log(traceObjectEvent);
+        handle_event(traceObjectEvent);
       }
+      filterRows(searchStringRef.current);
     });
     return () => {
       invoke("unlisten_to_trace")
@@ -246,14 +264,15 @@ function KarlsTraceExample() {
   }, []);
 
   const filterRows = (searchText: string) => {
+    searchStringRef.current = searchText;
     if (searchText === "") {
-      setFilteredRows(rows);
+      setFilteredRows(rowsRef.current.slice());
     } else {
-      const filtered = rows.filter((frame) => {
+      const filtered = rowsRef.current.filter((o) => {
         const frameName =
-          (frame.TypeFrame?.name ||
-            frame.SignalFrame?.name ||
-            frame.ErrorFrame?.name ||
+          (o.frame.TypeFrame?.name ||
+            o.frame.SignalFrame?.name ||
+            o.frame.ErrorFrame?.name ||
             "") as string; // Handle all possible frame types and cast to string
         return frameName.includes(searchText);
       });
@@ -278,11 +297,12 @@ function KarlsTraceExample() {
               <TableHeaderCell align="left">Id</TableHeaderCell>
               <TableHeaderCell align="left">Data</TableHeaderCell>
               <TableHeaderCell align="left">Dlc</TableHeaderCell>
+              <TableHeaderCell align="left">Time</TableHeaderCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredRows.map((frame, index) => {
-              return <Row frame={frame} key={index} />;
+            {filteredRows.map((evt, index) => {
+              return <Row evt={evt} key={index} />;
             })}
           </TableBody>
         </Table>
