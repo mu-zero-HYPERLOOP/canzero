@@ -103,6 +103,7 @@ impl MockCan {
         }
     }
 
+    #[allow(unused)]
     pub async fn send(&self, frame: CanFrame) {
         println!("mock-can : sending {frame:?}");
     }

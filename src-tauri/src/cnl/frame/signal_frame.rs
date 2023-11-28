@@ -1,6 +1,7 @@
 use can_config_rs::config;
 use serde::{ser::SerializeMap, Serialize};
 
+
 /**
  * Serialized Into
  *
@@ -23,6 +24,7 @@ use serde::{ser::SerializeMap, Serialize};
  * }
  *
  */
+
 
 #[derive(Clone)]
 pub struct SignalFrame {
@@ -71,6 +73,8 @@ impl SignalFrame {
     pub fn ide(&self) -> bool {
         self.ide
     }
+
+    #[allow(unused)]
     pub fn rtr(&self) -> bool {
         self.rtr
     }
@@ -125,8 +129,8 @@ impl Serialize for Signal {
         S: serde::Serializer,
     {
         let mut map = serializer.serialize_map(None)?;
-        map.serialize_entry("value", self.value());
-        map.serialize_entry("name", self.name());
+        map.serialize_entry("value", self.value())?;
+        map.serialize_entry("name", self.name())?;
         match self.signal_ref.description() {
             Some(desc) => map.serialize_entry("description", desc)?,
             None => (),
@@ -159,7 +163,7 @@ impl Serialize for SignalFrame {
         map.serialize_entry("rtr", &self.rtr)?;
         map.serialize_entry("dlc", &self.dlc)?;
         map.serialize_entry("signals", &self.signals)?;
-        map.serialize_entry("name", &self.message_ref.name());
+        map.serialize_entry("name", &self.message_ref.name())?;
         match self.message_ref.description() {
             Some(desc) => map.serialize_entry("description", desc)?,
             None => (),

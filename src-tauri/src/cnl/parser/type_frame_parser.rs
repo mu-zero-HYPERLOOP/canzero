@@ -1,4 +1,4 @@
-use std::{cmp::Ordering, collections::HashMap};
+use std::cmp::Ordering;
 
 use can_config_rs::config::{self, Type};
 
@@ -43,6 +43,8 @@ enum TypeParser {
         ty: config::TypeRef,
         entries: Vec<(String, u64)>,
     },
+
+    #[allow(unused)]
     ArrayParser {},
 }
 

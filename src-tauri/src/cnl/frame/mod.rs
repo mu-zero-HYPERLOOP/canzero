@@ -31,6 +31,8 @@ pub enum Frame {
 }
 
 impl Frame {
+
+    #[allow(unused)]
     pub fn name(&self) -> &str {
         match &self {
             Frame::SignalFrame(signal_frame) => signal_frame.name(),
@@ -44,7 +46,7 @@ impl Frame {
             Frame::SignalFrame(signal_frame) => (signal_frame.id(), signal_frame.ide()),
             Frame::TypeFrame(type_frame) => (type_frame.id(), type_frame.ide()),
             Frame::UndefinedFrame(undefined_frame) => (undefined_frame.id(), undefined_frame.ide()),
-            Frame::ErrorFrame(error) => (42, false),
+            Frame::ErrorFrame(_error) => (42, false),
         }
     }
 }

@@ -12,7 +12,6 @@ use crate::cnl::frame::type_frame::TypeValue;
 
 pub struct ObjectEntryObject {
     object_entry_ref: config::ObjectEntryRef,
-    app_handle: tauri::AppHandle,
     store: Arc<Mutex<ObjectEntryStore>>,
     start_time: std::time::Instant,
     latest_observable: ObjectEntryLatestObservable,
@@ -25,7 +24,6 @@ impl ObjectEntryObject {
     ) -> Self {
         Self {
             object_entry_ref: object_entry_config.clone(),
-            app_handle: app_handle.clone(),
             store: Arc::new(Mutex::new(ObjectEntryStore::new())),
             start_time: std::time::Instant::now(),
             latest_observable: ObjectEntryLatestObservable::new(
@@ -79,6 +77,8 @@ impl ObjectEntryObject {
 
     // Latest Events Issue #12
 
+
+    #[allow(unused)] //FIXME
     pub fn listen_to_latest(&self) {
         self.latest_observable.listen(&self.store);
     }
@@ -140,6 +140,8 @@ impl ObjectEntryStore {
         Self { history: vec![] }
     }
 
+
+    #[allow(unused)] //FIXME
     pub fn complete_history(&self) -> &Vec<ObjectEntryEvent> {
         &self.history
     }
@@ -149,9 +151,6 @@ impl ObjectEntryStore {
     }
     pub fn push_event(&mut self, value: ObjectEntryEvent) {
         self.history.push(value);
-    }
-    pub fn is_empty(&self) -> bool {
-        self.history.is_empty()
     }
 }
 
@@ -198,6 +197,9 @@ impl ObjectEntryLatestObservable {
             self.start_notify_task(store);
         }
     }
+
+
+    #[allow(unused)] //FIXME
     pub async fn unlisten(&self) {
         let prev_count = self
             .listen_count

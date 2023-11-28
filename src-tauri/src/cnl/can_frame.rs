@@ -6,8 +6,11 @@ use libc::{CAN_EFF_FLAG, CAN_EFF_MASK, CAN_RTR_FLAG, CAN_SFF_MASK};
 
 #[derive(Debug)]
 pub enum CanError {
+    #[allow(unused)]
     Io(std::io::Error),
+    #[allow(unused)]
     Disconnect(String),
+    #[allow(unused)]
     Can(u64),
 }
 
@@ -36,6 +39,8 @@ impl CanFrame {
         }
     }
 
+
+    #[allow(unused)]
     pub fn new_remote(id: u32, dlc: u8) -> Self {
         let ide = if id <= 4087 { false } else { true };
         Self {

@@ -52,6 +52,7 @@ struct Graphable {
     y: f64,
 }
 
+#[allow(unused)]
 #[tauri::command]
 fn initialize_graph(node_name: String, oe_name: String) -> InitialGraphData {
     InitialGraphData {

@@ -7,7 +7,7 @@ pub struct CommandObject {
 }
 
 impl CommandObject {
-    pub fn create(command_config: &config::CommandRef, app_handle: &tauri::AppHandle) -> Self {
+    pub fn create(command_config: &config::CommandRef, _app_handle: &tauri::AppHandle) -> Self {
         Self {
             command_ref: command_config.clone(),
         }
@@ -18,12 +18,16 @@ impl CommandObject {
     pub fn description(&self) -> Option<&String> {
         self.command_ref.description()
     }
+
+    #[allow(unused)] //FIXME
     pub fn build_invoke(&self) -> InvokeCommandBuilder {
         InvokeCommandBuilder::new(self)
     }
 }
 
 pub struct InvokeCommandBuilder<'a> {
+
+    #[allow(unused)] //FIXME
     command_object: &'a CommandObject,
     arguments: Vec<(String, TypeValue)>,
 }
@@ -35,6 +39,8 @@ impl<'a> InvokeCommandBuilder<'a> {
             command_object,
         }
     }
+
+    #[allow(unused)] //FIXME
     pub fn argument(&mut self, name: &str, value: TypeValue) {
         self.arguments.push((name.to_owned(), value));
     }
@@ -43,6 +49,8 @@ impl<'a> InvokeCommandBuilder<'a> {
     }
 }
 
+
+#[allow(unused)] //FIXME
 enum CommandEvent {
     Resp,
     Req(u32),

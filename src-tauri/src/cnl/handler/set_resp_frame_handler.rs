@@ -10,7 +10,7 @@ impl SetRespFrameHandler {
     }
     pub async fn handle(&self, frame: &CanFrame) -> Frame {
         let frame = self.parser.parse(frame);
-        let Frame::TypeFrame(type_frame) = &frame else {
+        let Frame::TypeFrame(_type_frame) = &frame else {
             panic!();
         };
         frame

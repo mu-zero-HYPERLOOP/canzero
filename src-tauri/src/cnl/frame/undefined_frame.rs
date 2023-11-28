@@ -26,6 +26,8 @@ impl UndefinedFrame {
     pub fn ide(&self) -> bool {
         self.ide
     }
+
+    #[allow(unused)]
     pub fn rtr(&self) -> bool {
         self.rtr
     }

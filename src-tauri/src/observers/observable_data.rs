@@ -92,6 +92,8 @@ where
         }
     }
 
+
+    #[allow(unused)]
     pub fn notify_batch(&self, batch: Vec<T>) {
         self.app_handle.emit_all(&self.event_name, batch).unwrap();
     }

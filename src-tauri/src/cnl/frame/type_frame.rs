@@ -74,6 +74,7 @@ impl TypeFrame {
     pub fn ide(&self) -> bool {
         self.ide
     }
+    #[allow(unused)]
     pub fn rtr(&self) -> bool {
         self.rtr
     }
@@ -120,6 +121,8 @@ pub enum TypeValue {
     Composite(CompositeTypeValue),
     Root(Vec<FrameType>),
     Enum(config::TypeRef, String),
+
+    #[allow(unused)]
     Array(ArrayTypeValue),
 }
 
@@ -139,8 +142,15 @@ impl CompositeTypeValue {
     pub fn attributes(&self) -> &Vec<FrameType> {
         &self.attributes
     }
+
+    #[allow(unused)]
     pub fn at(&self, index: &str) -> Option<&FrameType> {
         self.attributes.iter().find(|a| a.name() == index)
+    }
+
+    #[allow(unused)]
+    pub fn ty(&self) -> &config::TypeRef {
+        &self.ty
     }
 }
 
@@ -150,6 +160,8 @@ pub struct ArrayTypeValue {
 }
 
 impl ArrayTypeValue {
+
+    #[allow(unused)]
     pub fn new(values: Vec<TypeValue>) -> Self {
         Self { values }
     }
