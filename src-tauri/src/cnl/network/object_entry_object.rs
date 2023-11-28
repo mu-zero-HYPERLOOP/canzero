@@ -15,6 +15,8 @@ pub struct ObjectEntryObject {
     store: Arc<Mutex<ObjectEntryStore>>,
     start_time: std::time::Instant,
     latest_observable: ObjectEntryLatestObservable,
+    latest_event_name : String,
+    history_event_name : String,
 }
 
 impl ObjectEntryObject {
@@ -22,19 +24,19 @@ impl ObjectEntryObject {
         object_entry_config: &config::ObjectEntryRef,
         app_handle: &tauri::AppHandle,
     ) -> Self {
+        let latest_event_name = format!("{}_{}_latest", object_entry_config.node().name(), object_entry_config.name());
+        let history_event_name = format!("{}_{}_history", object_entry_config.node().name(), object_entry_config.name());
         Self {
             object_entry_ref: object_entry_config.clone(),
             store: Arc::new(Mutex::new(ObjectEntryStore::new())),
             start_time: std::time::Instant::now(),
             latest_observable: ObjectEntryLatestObservable::new(
-                &format!(
-                    "{}_{}_latest",
-                    object_entry_config.node().name(),
-                    object_entry_config.name()
-                ),
+                &latest_event_name,
                 Duration::from_millis(500),
                 &app_handle,
             ),
+            latest_event_name,
+            history_event_name,
         }
     }
     pub fn name(&self) -> &str {
@@ -48,6 +50,13 @@ impl ObjectEntryObject {
     }
     pub fn unit(&self) -> Option<&str> {
         self.object_entry_ref.unit()
+    }
+    pub fn latest_event_name(&self) -> &str {
+        &self.latest_event_name
+    }
+
+    pub fn history_event_name(&self) -> &str {
+        &self.history_event_name
     }
 
     pub async fn push_value(&self, value: TypeValue) {
@@ -91,11 +100,12 @@ impl ObjectEntryObject {
 
     // History Events Issue #13
 
+    #[allow(unused)] //FIXME
     pub fn listen_to_history(&self) {
         //TODO register a listener to the history
     }
 
-    pub fn unlisten_from_history(&self) {
+    pub async fn unlisten_from_history(&self) {
         //TODO unregister a listener of the history
     }
 
