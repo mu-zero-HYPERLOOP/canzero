@@ -42,6 +42,7 @@ impl RxCom {
                     MessageHandler::GetRespFrameHandler(GetRespFrameHandler::create(
                         TypeFrameParser::new(message_config),
                         network,
+                        network_config.get_resp_message()
                     )),
                 );
             } else if (network_config as &Network).set_resp_message().id() == message_config.id() {

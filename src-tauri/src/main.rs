@@ -54,7 +54,6 @@ struct Graphable {
 
 #[tauri::command]
 fn initialize_graph(node_name: String, oe_name: String) -> InitialGraphData {
-    println!("get_graph_data was invoked");
     InitialGraphData {
         values: (1..=500)
             .map(|n| Graphable {

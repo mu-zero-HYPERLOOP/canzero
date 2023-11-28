@@ -253,10 +253,10 @@ impl TypeParser {
             } => name,
             TypeParser::EnumParser {
                 name,
-                bit_offset,
-                bit_size,
-                ty,
-                entries,
+                bit_offset : _,
+                bit_size : _,
+                ty : _,
+                entries : _,
             } => name,
             TypeParser::RootParser { attrib_parsers: _ } => {
                 panic!("there is no name asociated with the root parser")

@@ -1,5 +1,5 @@
 use std::{
-    sync::{Arc, Mutex, MutexGuard},
+    sync::{Arc, Mutex},
     time::Duration,
 };
 
@@ -8,7 +8,7 @@ use rand::{rngs::ThreadRng, Rng};
 
 use super::can_frame::{CanError, CanFrame};
 
-fn randomGetResp(rng: &mut ThreadRng, network_config: &config::NetworkRef) -> CanFrame {
+fn random_get_resp(rng: &mut ThreadRng, network_config: &config::NetworkRef) -> CanFrame {
     let object_entries: Vec<&Arc<config::ObjectEntry>> = network_config
         .nodes()
         .iter()
@@ -43,14 +43,15 @@ fn randomGetResp(rng: &mut ThreadRng, network_config: &config::NetworkRef) -> Ca
 
     let mut value = 0;
     value |= (((0xFFFFFFFFFFFFFFFF as u64 >> (64 - sof_signal.size())) & (sof))
-        << sof_signal.size())
+        << (64 - sof_signal.size()))
         >> sof_signal.byte_offset();
     value |= (((0xFFFFFFFFFFFFFFFF as u64 >> (64 - eof_signal.size())) & (eof))
-        << eof_signal.size())
+        << (64 - eof_signal.size()))
         >> eof_signal.byte_offset();
     value |= (((0xFFFFFFFFFFFFFFFF as u64 >> (64 - toggle_signal.size())) & (toggle))
         << (64 - toggle_signal.size()))
         >> toggle_signal.byte_offset();
+
     value |= (((0xFFFFFFFFFFFFFFFF as u64 >> (64 - object_entry_id_signal.size()))
         & (object_entry_id as u64))
         << (64 - object_entry_id_signal.size()))
@@ -68,7 +69,7 @@ fn randomGetResp(rng: &mut ThreadRng, network_config: &config::NetworkRef) -> Ca
     CanFrame::new(id, ide, false, 8, value)
 }
 
-fn randomStreamFrame(rng: &mut ThreadRng, network_config: &config::NetworkRef) -> CanFrame {
+fn random_stream_frame(rng: &mut ThreadRng, network_config: &config::NetworkRef) -> CanFrame {
     let streams: Vec<&Arc<config::stream::Stream>> = network_config
         .nodes()
         .iter()
@@ -118,8 +119,8 @@ impl MockCan {
         let mut rng = self.rng.lock().expect("failed to acquire mock can lock");
         let t: u32 = rng.gen_range(0..=1);
         match t {
-            0 => Ok(randomGetResp(&mut rng, &self.network_ref)),
-            1 => Ok(randomStreamFrame(&mut rng, &self.network_ref)),
+            0 => Ok(random_get_resp(&mut rng, &self.network_ref)),
+            1 => Ok(random_stream_frame(&mut rng, &self.network_ref)),
             _ => panic!(),
         }
 
