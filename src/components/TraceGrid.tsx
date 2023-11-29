@@ -28,23 +28,24 @@ const StyledPaper = styled(Paper)({
   overflow: 'hidden',
 });
 
-const TableHeaderCell = styled(TableCell)(({ theme }) => ({
-  backgroundColor: theme.palette.grey['800'], // Dark background for header
+const TableHeaderCell = styled(TableCell)({
+  backgroundColor: 'gray', // Black background for header
   color: '#FFFFFF', // White text
-  borderColor: '#000000', // Black borders
-}));
+  position: 'relative', // For positioning the sorting icons
+  cursor: 'pointer', // Change cursor to pointer on hover
+});
 
 const SignalFrameCell = styled(TableCell)(({ theme }) =>
   theme.unstable_sx({
-    color: "primary",
-    backgroundColor: "grey",
+    color: 'primary',
+    backgroundColor: "#D3D3D3",
   }),
 );
 
 const TypeFrameCell = styled(TableCell)(({ theme }) =>
   theme.unstable_sx({
-    color: "primary",
-    backgroundColor: "white",
+    color: 'primary',
+    backgroundColor: "#D3D3D3",
   }),
 );
 
@@ -62,6 +63,11 @@ const ErrorFrameCell = styled(TableCell)(({ theme }) =>
   }),
 );
 
+const IconButtonStyled = styled(IconButton)({
+  background: 'white',
+  color: '#00d6ba', // Color for icons
+});
+
 
 
 interface SignalFrameRowProps {
@@ -76,13 +82,13 @@ function SignalFrameRow({ frame, timestamp, deltaTime }: SignalFrameRowProps) {
     <React.Fragment>
       <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
         <TableCell>
-          <IconButton
+          <IconButtonStyled
             aria-label="expand row"
             size="small"
             onClick={() => setOpen(!open)}
           >
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
+          </IconButtonStyled>
         </TableCell>
         <SignalFrameCell align="left"><FrameName frame={frame} /></SignalFrameCell>
         <SignalFrameCell align="left"><FrameId frame={frame} /></SignalFrameCell>
@@ -91,7 +97,7 @@ function SignalFrameRow({ frame, timestamp, deltaTime }: SignalFrameRowProps) {
         <SignalFrameCell align="left"><FrameTime timestamp={timestamp} deltaTime={deltaTime} /></SignalFrameCell>
       </TableRow>
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0, background: 'white' }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
               <SignalFrameDetail frame={frame} />
@@ -116,13 +122,13 @@ function TypeFrameRow({ frame, timestamp, deltaTime }: TypeFrameRowProps) {
     <React.Fragment>
       <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
         <TypeFrameCell>
-          <IconButton
+          <IconButtonStyled
             aria-label="expand row"
             size="small"
             onClick={() => setOpen(!open)}
           >
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
+          </IconButtonStyled>
         </TypeFrameCell>
         <TypeFrameCell align="left"><FrameName frame={frame} /></TypeFrameCell>
         <TypeFrameCell align="left"><FrameId frame={frame} /></TypeFrameCell>
@@ -131,7 +137,7 @@ function TypeFrameRow({ frame, timestamp, deltaTime }: TypeFrameRowProps) {
         <TypeFrameCell align="left"><FrameTime timestamp={timestamp} deltaTime={deltaTime} /></TypeFrameCell>
       </TableRow>
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0,  background: 'white' }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
               <TypeFrameDetail frame={frame} />
@@ -155,7 +161,7 @@ function UndefinedFrameRow({ frame, timestamp, deltaTime }: UndefinedFrameRowPro
   return (
     <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
       <UndefinedFrameCell>
-        <IconButton
+        <IconButtonStyled
           aria-label="expand row"
           size="small"
         />
@@ -180,7 +186,7 @@ function ErrorFrameRow({ frame, timestamp, deltaTime }: ErrorFrameRowProps) {
   return (
     <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
       <ErrorFrameCell>
-        <IconButton
+        <IconButtonStyled
           aria-label="expand row"
           size="small"
         />
@@ -214,10 +220,28 @@ function Row({ evt }: RowProps) {
   }
 }
 
-function KarlsTraceExample() {
+// Define a state to manage the sorting direction
+const useSortState = () => {
+  const [sortField, setSortField] = useState(null);
+  const [sortDirection, setSortDirection] = useState('asc');
+
+  const toggleSortDirection = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  return { sortField, sortDirection, toggleSortDirection };
+};
+
+function TraceGrid() {
 
   const rowsRef = useRef<TraceObjectEvent[]>([]);
   const [filteredRows, setFilteredRows] = useState<TraceObjectEvent[]>([]);
+  const { sortField, sortDirection, toggleSortDirection } = useSortState();
   const searchStringRef = useRef("");
 
   function handle_event(event: TraceObjectEvent) {
@@ -293,21 +317,34 @@ function KarlsTraceExample() {
       </Box>
       <TableContainer sx={{ maxHeight: 800 }}>
         <Table stickyHeader aria-label="sticky table">
-          <TableHead sx={{
-            backgroundColor: "primary",
-          }}>
+          <TableHead>
             <TableRow >
               <TableHeaderCell />
-              <TableHeaderCell align="left">Name</TableHeaderCell>
-              <TableHeaderCell align="left">Id</TableHeaderCell>
-              <TableHeaderCell align="left">Data</TableHeaderCell>
-              <TableHeaderCell align="left">Dlc</TableHeaderCell>
-              <TableHeaderCell align="left">Time</TableHeaderCell>
+              <TableHeaderCell align="left" onClick={() => toggleSortDirection('Name')}>
+                Name
+                {sortField === 'Name' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
+              </TableHeaderCell>
+              <TableHeaderCell align="left" onClick={() => toggleSortDirection('Id')}>
+                Id
+                {sortField === 'Id' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
+              </TableHeaderCell>
+              <TableHeaderCell align="left" onClick={() => toggleSortDirection('Data')}>
+                Data
+                {sortField === 'Data' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
+              </TableHeaderCell>
+              <TableHeaderCell align="left" onClick={() => toggleSortDirection('Dlc')}>
+                Dlc
+                {sortField === 'Dlc' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
+              </TableHeaderCell>
+              <TableHeaderCell align="left" onClick={() => toggleSortDirection('Time')}>
+                Time
+                {sortField === 'Time' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
+              </TableHeaderCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {filteredRows.map((evt, index) => {
-              return <Row evt={evt} key={index} />;
+              return <Row evt={evt} key={index} /> 
             })}
           </TableBody>
         </Table>
@@ -316,4 +353,4 @@ function KarlsTraceExample() {
   );
 }
 
-export default KarlsTraceExample;
+export default TraceGrid;

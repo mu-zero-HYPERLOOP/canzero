@@ -1,9 +1,9 @@
-import KarlsTraceExample from "../components/TraceGrid";
+import TraceGrid from "../components/TraceGrid";
 
 function DebugPanel() {
     return (
         <>
-            <KarlsTraceExample />
+            <TraceGrid />
         </>
     );
 };

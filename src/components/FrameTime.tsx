@@ -19,12 +19,12 @@ function FrameTime({ timestamp, deltaTime }: FrameTimeProps) {
           '& .MuiSwitch-switchBase.Mui-checked': {
               '&+.MuiSwitch-track': {
               opacity: 1,
-              backgroundColor: 'black',
+              backgroundColor: 'white',
             }
           },
           '& .MuiSwitch-track': {
             opacity: 1,
-            backgroundColor: 'black',
+            backgroundColor: 'white',
           },
           '& .MuiSwitch-thumb': {
             backgroundColor: '#00d6ba'
