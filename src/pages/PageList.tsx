@@ -75,6 +75,7 @@ const CustomContent = React.forwardRef(function CustomContent(
       </div>
       <Typography
         onClick={handleSelectionClick}
+        onDoubleClick={handleExpansionClick}
         component="div"
         className={classes.label}
       >
@@ -176,7 +177,7 @@ export function NodeList() {
           defaultExpandIcon={<ChevronRightIcon />}
         >
           {nodes.map((node) =>
-            <CustomTreeItem nodeId={node.name} label={node.name}>
+            <CustomTreeItem nodeId={node.name} label={node.name} >
               <NodeEntries nodeInfo={node} />
             </CustomTreeItem>)}
 
