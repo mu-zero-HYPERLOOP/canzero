@@ -225,7 +225,7 @@ const useSortState = () => {
   const [sortField, setSortField] = useState('Name');
   const [sortDirection, setSortDirection] = useState('asc');
 
-  const toggleSortDirection = (field) => {
+  const toggleSortDirection = (field: React.SetStateAction<string>) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
