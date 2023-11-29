@@ -10,6 +10,8 @@ import FrameTime from "./FrameTime";
 import { TraceObjectEvent } from "../types/TraceObjectEvent";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import { TypeFrame } from "../types/TypeFrame";
 import TypeFrameDetail from "./TypeFrameDetail";
 import { SignalFrame } from "../types/SignalFrame";
@@ -27,8 +29,9 @@ const StyledPaper = styled(Paper)({
 });
 
 const TableHeaderCell = styled(TableCell)(({ theme }) => ({
-  backgroundColor: 'linear-gradient(to right, #00d6ba, ' + theme.palette.grey[800] + ')',
-  color: '#000000', // White text
+  backgroundColor: theme.palette.grey['800'], // Dark background for header
+  color: '#FFFFFF', // White text
+  borderColor: '#000000', // Black borders
 }));
 
 const SignalFrameCell = styled(TableCell)(({ theme }) =>
