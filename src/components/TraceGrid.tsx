@@ -222,7 +222,7 @@ function Row({ evt }: RowProps) {
 
 // Define a state to manage the sorting direction
 const useSortState = () => {
-  const [sortField, setSortField] = useState(null);
+  const [sortField, setSortField] = useState('Name');
   const [sortDirection, setSortDirection] = useState('asc');
 
   const toggleSortDirection = (field) => {
