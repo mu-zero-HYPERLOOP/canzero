@@ -1,4 +1,4 @@
-import KarlsTraceExample from "../components/KarlsTraceExample";
+import KarlsTraceExample from "../components/TraceGrid";
 
 function DebugPanel() {
     return (

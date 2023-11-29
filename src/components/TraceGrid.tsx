@@ -1,179 +1,316 @@
-// TraceGrid.tsx
-import React, { useEffect, useState } from "react";
+import { Box, Collapse, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, styled } from "@mui/material";
+import { invoke } from "@tauri-apps/api";
 import { listen } from "@tauri-apps/api/event";
-import { invoke } from '@tauri-apps/api/tauri'
-import Collapse from "@mui/material/Collapse";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
-import GridButtons from "./GridButtons";
+import React, { useEffect, useState, useRef } from "react";
+import FrameName from "./FrameName";
+import FrameId from "./FrameId";
+import FrameData from "./FrameData";
+import FrameDlc from "./FrameDlc";
+import FrameTime from "./FrameTime";
+import { TraceObjectEvent } from "../types/TraceObjectEvent";
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import { TypeFrame } from "../types/TypeFrame";
+import TypeFrameDetail from "./TypeFrameDetail";
+import { SignalFrame } from "../types/SignalFrame";
+import SignalFrameDetail from "./SignalFrameDetail";
+import { UndefinedFrame } from "../types/UndefinedFrame";
+import { ErrorFrame } from "../types/ErrorFrame";
 
-const numberOfElements = 20;
+import TraceSearchBar from "./TraceSearchBar";
 
-interface TraceGridProps {
-  // Add any additional props as needed
+// Main Paper component with gradient background
+const StyledPaper = styled(Paper)({
+  background: 'black',
+  color: '#FFFFFF',
+  overflow: 'hidden',
+});
+
+const TableHeaderCell = styled(TableCell)(({ theme }) => ({
+  backgroundColor: 'linear-gradient(to right, #00d6ba, ' + theme.palette.grey[800] + ')',
+  color: '#000000', // White text
+}));
+
+const SignalFrameCell = styled(TableCell)(({ theme }) =>
+  theme.unstable_sx({
+    color: "primary",
+    backgroundColor: "grey",
+  }),
+);
+
+const TypeFrameCell = styled(TableCell)(({ theme }) =>
+  theme.unstable_sx({
+    color: "primary",
+    backgroundColor: "white",
+  }),
+);
+
+const UndefinedFrameCell = styled(TableCell)(({ theme }) =>
+  theme.unstable_sx({
+    color: "primary",
+    backgroundColor: "yellow",
+  }),
+);
+
+const ErrorFrameCell = styled(TableCell)(({ theme }) =>
+  theme.unstable_sx({
+    color: "primary",
+    backgroundColor: "red",
+  }),
+);
+
+
+
+interface SignalFrameRowProps {
+  frame: SignalFrame,
+  timestamp: number,
+  deltaTime: number,
 }
 
-interface SerializedSignalFrame {
-  id: number;
-  ide: boolean;
-  rtr: boolean;
-  dlc: number;
-  signals: SerializedSignal[];
-}
-
-interface SerializedSignal {
-  name: string;
-  value: string;
-}
-
-interface SerializedTypeFrame {
-  id: number;
-  ide: boolean;
-  rtr: boolean;
-  dlc: number;
-  attributes: SerializedAttribute[];
-}
-
-interface SerializedAttribute {
-  name: string;
-  value: number | string | SerializedAttribute[];
-}
-
-interface SerializedFrame {
-  SignalFrame?: SerializedSignalFrame;
-  TypeFrame?: SerializedTypeFrame;
-  UndefinedFrame?: undefined;
-  //ErrorFrame?: ErrorFrame;
-}
-
-function TraceGrid({}: TraceGridProps) {
-  const [rows, setRows] = useState<SerializedFrame[]>([]);
-  const [expandedRow, setExpandedRow] = useState<number | null>(null);
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [subscriptionActive, setSubscriptionActive] = useState(false); // Change initial state to false
-
-  useEffect(() => {
-    let vec: SerializedFrame[] = [];
-
-    const updateRows = (newVec: SerializedFrame[]) => {
-      vec = newVec;
-      setRows([...vec]);
-    };
-
-    const handleRxFrame = (event: any) => {
-      if (subscriptionActive) {
-        let newVec = vec.slice(0, numberOfElements - 1);
-        newVec.unshift(event.payload);
-        updateRows(newVec);
-      }
-    };
-
-    if (subscriptionActive) {
-      const unsubscribe = listen<SerializedFrame>("trace", handleRxFrame);
-
-      return () => {
-        unsubscribe.then((f) => f());
-      };
-    }
-  }, [subscriptionActive]); // Include subscriptionActive in the dependency array
-
-  const handleExpandRow = (rowIndex: number) => {
-    setExpandedRow((prevRow) => (prevRow === rowIndex ? null : rowIndex));
-  };
-
-  const handleSort = () => {
-    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-  };
-
-  const handleToggleSubscription = () => {
-    setSubscriptionActive(!subscriptionActive);
-
-    // Call Tauri commands based on subscription state
-    if (subscriptionActive) {
-      invoke("unlisten_to_trace");
-    } else {
-      invoke("listen_to_trace").then(e => console.log(e));
-    }
-  };
-
-  const sortedRows = [...rows].sort((a, b) => {
-    if (sortOrder === "asc") {
-      return (a.SignalFrame?.id || 0) - (b.SignalFrame?.id || 0);
-    } else {
-      return (b.SignalFrame?.id || 0) - (a.SignalFrame?.id || 0);
-    }
-  });
-
+function SignalFrameRow({ frame, timestamp, deltaTime }: SignalFrameRowProps) {
+  const [open, setOpen] = React.useState(false);
   return (
-    <div style={{ margin: "auto", padding: "10px", borderRadius: "8px", maxWidth: "calc(100vw - 20px)" }}>
-      <h2 style={{ textAlign: "center" }}>Serialized Frames Table</h2>
-      <GridButtons
-        subscriptionActive={subscriptionActive}
-        handleToggleSubscription={handleToggleSubscription}
-      />
-      <div style={{ maxHeight: "500px", overflowY: "auto" }}> {/* Set your preferred max height */}
-        <table style={{ width: "100%", borderCollapse: "collapse", maxHeight: "400px", overflowY: "auto" }}>
-          <thead style={{ position: "sticky", top: 0, zIndex: 1, background: "#fff" }}>
-            <tr>
-              <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left", cursor: "pointer" }} onClick={handleSort}>
-                ID
-                {sortOrder === "asc" ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />}
-              </th>
-              <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>Frame Data</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedRows.map((frame, index) => (
-              <React.Fragment key={index}>
-                <tr>
-                  <td style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>
-                    {/* Display the ID of each frame */}
-                    {frame.SignalFrame && frame.SignalFrame.id}
-                    {frame.TypeFrame && frame.TypeFrame.id}
-                    {/* Add similar blocks for other frame types (UndefinedFrame, ErrorFrame) */}
-                  </td>
-                  <td style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      {/* Display relevant information based on frame type */}
-                      {frame.SignalFrame && (
-                        <div>
-                          <p>ID: {frame.SignalFrame.id}</p>
-                          <p>IDE: {frame.SignalFrame.ide.toString()}</p>
-                          {/* Add more fields as needed */}
-                        </div>
-                      )}
-                      {/* Add similar blocks for other frame types (TypeFrame, UndefinedFrame, ErrorFrame) */}
-                      <ExpandMoreIcon onClick={() => handleExpandRow(index)} style={{ cursor: "pointer" }} />
-                    </div>
-                    <Collapse in={expandedRow === index} timeout="auto" unmountOnExit>
-                      {/* Your content for the dropdown here */}
-                      <div style={{ width: "90%", background: "#f0f0f0", padding: "10px" }}>
-                        {/* Display additional content for the selected row */}
-                        {frame.TypeFrame && (
-                          <div>
-                            <p>ID: {frame.TypeFrame.id}</p>
-                            {/* Add more fields as needed */}
-                          </div>
-                        )}
-                        {/* Add similar blocks for other frame types (UndefinedFrame, ErrorFrame) */}
-                      </div>
-                    </Collapse>
-                  </td>
-                </tr>
-              </React.Fragment>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <React.Fragment>
+      <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+        <TableCell>
+          <IconButton
+            aria-label="expand row"
+            size="small"
+            onClick={() => setOpen(!open)}
+          >
+            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          </IconButton>
+        </TableCell>
+        <SignalFrameCell align="left"><FrameName frame={frame} /></SignalFrameCell>
+        <SignalFrameCell align="left"><FrameId frame={frame} /></SignalFrameCell>
+        <SignalFrameCell align="left"><FrameData frame={frame} /></SignalFrameCell>
+        <SignalFrameCell align="left"><FrameDlc frame={frame} /></SignalFrameCell>
+        <SignalFrameCell align="left"><FrameTime timestamp={timestamp} deltaTime={deltaTime} /></SignalFrameCell>
+      </TableRow>
+      <TableRow>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+          <Collapse in={open} timeout="auto" unmountOnExit>
+            <Box sx={{ margin: 1 }}>
+              <SignalFrameDetail frame={frame} />
+            </Box>
+          </Collapse>
+        </TableCell>
+      </TableRow>
+    </React.Fragment>
   );
 }
 
-export default TraceGrid;
+interface TypeFrameRowProps {
+  frame: TypeFrame,
+  timestamp: number,
+  deltaTime: number,
+}
+
+
+function TypeFrameRow({ frame, timestamp, deltaTime }: TypeFrameRowProps) {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <React.Fragment>
+      <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+        <TypeFrameCell>
+          <IconButton
+            aria-label="expand row"
+            size="small"
+            onClick={() => setOpen(!open)}
+          >
+            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          </IconButton>
+        </TypeFrameCell>
+        <TypeFrameCell align="left"><FrameName frame={frame} /></TypeFrameCell>
+        <TypeFrameCell align="left"><FrameId frame={frame} /></TypeFrameCell>
+        <TypeFrameCell align="left"><FrameData frame={frame} /></TypeFrameCell>
+        <TypeFrameCell align="left"><FrameDlc frame={frame} /></TypeFrameCell>
+        <TypeFrameCell align="left"><FrameTime timestamp={timestamp} deltaTime={deltaTime} /></TypeFrameCell>
+      </TableRow>
+      <TableRow>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+          <Collapse in={open} timeout="auto" unmountOnExit>
+            <Box sx={{ margin: 1 }}>
+              <TypeFrameDetail frame={frame} />
+            </Box>
+          </Collapse>
+        </TableCell>
+      </TableRow>
+    </React.Fragment>
+  );
+}
+
+interface UndefinedFrameRowProps {
+  frame: UndefinedFrame
+  timestamp: number,
+  deltaTime: number,
+}
+
+
+
+function UndefinedFrameRow({ frame, timestamp, deltaTime }: UndefinedFrameRowProps) {
+  return (
+    <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+      <UndefinedFrameCell>
+        <IconButton
+          aria-label="expand row"
+          size="small"
+        />
+      </UndefinedFrameCell>
+      <UndefinedFrameCell align="left" />
+      <UndefinedFrameCell align="left"><FrameId frame={frame} /></UndefinedFrameCell>
+      <UndefinedFrameCell align="left"><FrameData frame={frame} /></UndefinedFrameCell>
+      <UndefinedFrameCell align="left"><FrameDlc frame={frame} /></UndefinedFrameCell>
+      <UndefinedFrameCell align="left"><FrameTime timestamp={timestamp} deltaTime={deltaTime} /></UndefinedFrameCell>
+    </TableRow>
+  );
+}
+
+interface ErrorFrameRowProps {
+  frame: ErrorFrame,
+  timestamp: number,
+  deltaTime: number,
+}
+
+
+function ErrorFrameRow({ frame, timestamp, deltaTime }: ErrorFrameRowProps) {
+  return (
+    <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+      <ErrorFrameCell>
+        <IconButton
+          aria-label="expand row"
+          size="small"
+        />
+      </ErrorFrameCell>
+      <ErrorFrameCell align="left"><FrameName frame={frame} /></ErrorFrameCell>
+      <ErrorFrameCell align="left" />
+      <ErrorFrameCell align="left"><FrameData frame={frame} /></ErrorFrameCell>
+      <ErrorFrameCell align="left" />
+      <ErrorFrameCell align="left"><FrameTime timestamp={timestamp} deltaTime={deltaTime} /></ErrorFrameCell>
+    </TableRow>
+  );
+}
+
+interface RowProps {
+  evt: TraceObjectEvent
+}
+
+function Row({ evt }: RowProps) {
+  if (evt.frame.TypeFrame != undefined) {
+    return <TypeFrameRow frame={evt.frame.TypeFrame}
+      timestamp={evt.timestamp} deltaTime={evt.delta_time} />
+  } else if (evt.frame.SignalFrame != undefined) {
+    return <SignalFrameRow frame={evt.frame.SignalFrame}
+      timestamp={evt.timestamp} deltaTime={evt.delta_time} />
+  } else if (evt.frame.UndefinedFrame != undefined) {
+    return <UndefinedFrameRow frame={evt.frame.UndefinedFrame}
+      timestamp={evt.timestamp} deltaTime={evt.delta_time} />
+  } else if (evt.frame.ErrorFrame != undefined) {
+    return <ErrorFrameRow frame={evt.frame.ErrorFrame}
+      timestamp={evt.timestamp} deltaTime={evt.delta_time} />
+  }
+}
+
+function KarlsTraceExample() {
+
+  const rowsRef = useRef<TraceObjectEvent[]>([]);
+  const [filteredRows, setFilteredRows] = useState<TraceObjectEvent[]>([]);
+  const searchStringRef = useRef("");
+
+  function handle_event(event: TraceObjectEvent) {
+    let index = rowsRef.current.findIndex((f) => {
+      if (f.frame.TypeFrame != undefined && event.frame.TypeFrame != undefined) {
+        return f.frame.TypeFrame.id === event.frame.TypeFrame.id &&
+          f.frame.TypeFrame.ide === event.frame.TypeFrame.ide;
+      } else if (f.frame.SignalFrame != undefined && event.frame.SignalFrame) {
+        return f.frame.SignalFrame.id === event.frame.SignalFrame.id &&
+          f.frame.SignalFrame.ide === event.frame.SignalFrame.ide;
+      } else if (f.frame.UndefinedFrame != undefined && event.frame.UndefinedFrame != undefined) {
+        return f.frame.UndefinedFrame.id === event.frame.UndefinedFrame.id &&
+          f.frame.UndefinedFrame.ide === event.frame.UndefinedFrame.ide;
+      } else if (f.frame.ErrorFrame != undefined && event.frame.ErrorFrame != undefined) {
+        return f.frame.ErrorFrame.data === event.frame.ErrorFrame.data;
+      } else {
+        return false;
+      }
+    });
+    if (index == -1) {
+      rowsRef.current.push(event);
+    } else {
+      rowsRef.current[index] = event;
+    }
+  }
+
+  useEffect(() => {
+    invoke<TraceObjectEvent[]>("listen_to_trace").then((traceObjectEvents) => {
+      for (let traceObjectEvent of traceObjectEvents) {
+        console.log("initial frame: " + traceObjectEvent.frame);
+        handle_event(traceObjectEvent);
+      }
+      filterRows(searchStringRef.current);
+    });
+
+    let trace_event_listener = listen<TraceObjectEvent[]>("trace", (event) => {
+      console.log("trace listener triggered with:");
+      console.log(event.payload);
+      for (let traceObjectEvent of event.payload) {
+        console.log(traceObjectEvent);
+        handle_event(traceObjectEvent);
+      }
+      filterRows(searchStringRef.current);
+    });
+    return () => {
+      invoke("unlisten_to_trace")
+      trace_event_listener.then((f) => f());
+    }
+  }, []);
+
+  const filterRows = (searchText: string) => {
+    searchStringRef.current = searchText;
+    if (searchText === "") {
+      setFilteredRows(rowsRef.current.slice());
+    } else {
+      const filtered = rowsRef.current.filter((o) => {
+        const frameName =
+          (o.frame.TypeFrame?.name ||
+            o.frame.SignalFrame?.name ||
+            o.frame.ErrorFrame?.name ||
+            "") as string; // Handle all possible frame types and cast to string
+        return frameName.includes(searchText);
+      });
+      setFilteredRows(filtered);
+    }
+  };
+
+  // maxHeight : 800 sucks asss
+  return (
+    <StyledPaper sx={{ width: '100%' }}>
+      <Box sx={{ padding: "10px", textAlign: "center" }}>
+        <TraceSearchBar onSearch={filterRows} />
+      </Box>
+      <TableContainer sx={{ maxHeight: 800 }}>
+        <Table stickyHeader aria-label="sticky table">
+          <TableHead sx={{
+            backgroundColor: "primary",
+          }}>
+            <TableRow >
+              <TableHeaderCell />
+              <TableHeaderCell align="left">Name</TableHeaderCell>
+              <TableHeaderCell align="left">Id</TableHeaderCell>
+              <TableHeaderCell align="left">Data</TableHeaderCell>
+              <TableHeaderCell align="left">Dlc</TableHeaderCell>
+              <TableHeaderCell align="left">Time</TableHeaderCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredRows.map((evt, index) => {
+              return <Row evt={evt} key={index} />;
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </StyledPaper>
+  );
+}
+
+export default KarlsTraceExample;

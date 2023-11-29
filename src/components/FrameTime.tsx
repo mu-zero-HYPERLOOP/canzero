@@ -19,15 +19,15 @@ function FrameTime({ timestamp, deltaTime }: FrameTimeProps) {
           '& .MuiSwitch-switchBase.Mui-checked': {
               '&+.MuiSwitch-track': {
               opacity: 1,
-              backgroundColor: 'lightgray',
+              backgroundColor: 'black',
             }
           },
           '& .MuiSwitch-track': {
             opacity: 1,
-            backgroundColor: 'lightgray',
+            backgroundColor: 'black',
           },
           '& .MuiSwitch-thumb': {
-            backgroundColor: 'lightblue'
+            backgroundColor: '#00d6ba'
           },
         }} />
       <Typography>rel.</Typography>

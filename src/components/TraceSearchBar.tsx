@@ -2,10 +2,39 @@ import React, { useState } from "react";
 import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/Search";
+import { styled } from "@mui/material/styles";
 
 interface TraceSearchBarProps {
   onSearch: (value: string) => void;
 }
+
+
+const CustomTextField = styled(TextField)({
+  '& label': {
+    color: '#00d6ba', // Initial label color
+  },
+  '& label.Mui-focused': {
+    color: '#00d6ba', // Label color when text field is focused
+  },
+  '& .MuiInput-underline:after': {
+    borderBottomColor: '#00d6ba',
+  },
+  '& .MuiOutlinedInput-root': {
+    '& fieldset': {
+      borderColor: '#00d6ba',
+    },
+    '&:hover fieldset': {
+      borderColor: '#00d6ba',
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: '#00d6ba', // Border color when text field is focused
+    },
+    '& input': {
+      color: '#FFFFFF', // Input text color
+    },
+  },
+});
+
 
 function TraceSearchBar({ onSearch }: TraceSearchBarProps) {
   const [searchText, setSearchText] = useState<string>("");
@@ -16,7 +45,7 @@ function TraceSearchBar({ onSearch }: TraceSearchBarProps) {
   };
 
   return (
-    <TextField
+    <CustomTextField
       label="Search"
       variant="outlined"
       fullWidth
@@ -25,7 +54,7 @@ function TraceSearchBar({ onSearch }: TraceSearchBarProps) {
       InputProps={{
         startAdornment: (
           <InputAdornment position="start">
-            <SearchIcon />
+            <SearchIcon style={{ color: '#FFFFFF' }} />
           </InputAdornment>
         ),
       }}
