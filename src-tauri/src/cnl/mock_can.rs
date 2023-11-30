@@ -114,7 +114,7 @@ impl MockCan {
             .rng
             .lock()
             .expect("failed to acquire mock can lock")
-            .gen_range(50..100);
+            .gen_range(1..10);
         tokio::time::sleep(Duration::from_millis(timeout)).await;
 
         let mut rng = self.rng.lock().expect("failed to acquire mock can lock");

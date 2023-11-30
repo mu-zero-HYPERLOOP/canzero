@@ -1,31 +1,29 @@
 use std::{
-    collections::HashMap,
+    collections::{HashMap, HashSet},
+    sync::{atomic::AtomicUsize, Arc},
     time::{Duration, Instant},
 };
 
 use serde::{ser::SerializeMap, Serialize};
-
-use crate::observers::observable_data::ObservableData;
+use tauri::Manager;
+use tokio::sync::{mpsc, Mutex};
 
 use super::frame::{Frame, UniqueFrameKey};
 
+type TraceStore = Arc<tokio::sync::Mutex<HashMap<UniqueFrameKey, TraceObjectEvent>>>;
+
 pub struct TraceObject {
-    observable: ObservableData<TraceObjectEvent>,
+    observable: TraceObjectObservable,
     // saves last frame of each kind
-    trace: tokio::sync::Mutex<HashMap<UniqueFrameKey, TraceObjectEvent>>,
+    trace: TraceStore,
     start_time: Instant,
 }
 
 impl TraceObject {
     pub fn create(app_handle: &tauri::AppHandle) -> Self {
         Self {
-            observable: ObservableData::create(
-                app_handle,
-                "trace",
-                tokio::time::Duration::from_millis(200),
-                2048,
-            ),
-            trace: tokio::sync::Mutex::new(HashMap::new()),
+            observable: TraceObjectObservable::new(app_handle, "trace", Duration::from_millis(500)),
+            trace: Arc::new(tokio::sync::Mutex::new(HashMap::new())),
             start_time: Instant::now(),
         }
     }
@@ -36,7 +34,7 @@ impl TraceObject {
         let mut unlocked_trace = self.trace.lock().await;
         let prev = unlocked_trace.get_mut(&key);
         let timestamp = arrive_instant.duration_since(self.start_time.clone());
-        let trace_object = match prev {
+        match prev {
             Some(prev) => {
                 let trace_object = TraceObjectEvent {
                     frame,
@@ -57,11 +55,14 @@ impl TraceObject {
             }
         };
         drop(unlocked_trace);
-        self.observable.notify(trace_object).await;
+
+        // instead of copying the trace_object we can store the key to update
+        // the view later!
+        self.observable.notify(key).await;
     }
 
     pub fn listen(&self) {
-        self.observable.listen();
+        self.observable.listen(&self.trace);
     }
 
     pub async fn get(&self) -> Vec<TraceObjectEvent> {
@@ -104,5 +105,144 @@ impl Serialize for TraceObjectEvent {
         )?;
 
         ser_map.end()
+    }
+}
+
+enum TraceObjectObservableMsg {
+    Poison,
+    Value(UniqueFrameKey),
+}
+
+struct TraceObjectObservable {
+    event_name: String,
+    listen_count: AtomicUsize,
+    tx: mpsc::Sender<TraceObjectObservableMsg>,
+    rx: Arc<Mutex<mpsc::Receiver<TraceObjectObservableMsg>>>,
+    min_interval: tokio::time::Duration,
+    app_handle: tauri::AppHandle,
+}
+
+impl TraceObjectObservable {
+    pub fn new(
+        app_handle: &tauri::AppHandle,
+        event_name: &str,
+        min_interval: tokio::time::Duration,
+    ) -> Self {
+        let (tx, rx) = mpsc::channel(10);
+        Self {
+            event_name: event_name.to_owned(),
+            tx,
+            rx: Arc::new(Mutex::new(rx)),
+            listen_count: AtomicUsize::new(0),
+            min_interval,
+            app_handle: app_handle.clone(),
+        }
+    }
+
+    pub async fn notify(&self, key: UniqueFrameKey) {
+        if self.listen_count.load(std::sync::atomic::Ordering::SeqCst) != 0 {
+            self.tx
+                .send(TraceObjectObservableMsg::Value(key))
+                .await
+                .unwrap();
+        }
+    }
+
+    pub fn listen(&self, store: &TraceStore) {
+        let prev_count = self
+            .listen_count
+            .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+        if prev_count == 0 {
+            // this indicates that the batching task should be started
+            self.start_batching_task(store);
+        }
+    }
+
+    pub async fn unlisten(&self) {
+        let prev_count = self
+            .listen_count
+            .fetch_sub(1, std::sync::atomic::Ordering::SeqCst);
+        if prev_count == 1 {
+            // this indicates that the batching task should be stoped
+            self.stop_batching_task().await;
+        }
+    }
+
+    fn start_batching_task(&self, store: &TraceStore) {
+        tokio::spawn(Self::notify_task(
+            self.event_name.clone(),
+            self.app_handle.clone(),
+            self.min_interval.clone(),
+            self.rx.clone(),
+            store.clone(),
+        ));
+    }
+
+    async fn stop_batching_task(&self) {
+        self.tx
+            .send(TraceObjectObservableMsg::Poison)
+            .await
+            .unwrap();
+    }
+
+    async fn notify_task(
+        event_name: String,
+        app_handle: tauri::AppHandle,
+        min_interval: tokio::time::Duration,
+        rx: Arc<tokio::sync::Mutex<mpsc::Receiver<TraceObjectObservableMsg>>>,
+        store: TraceStore,
+    ) {
+        println!("start notify task for {event_name}");
+        let mut rx = rx.lock().await;
+        let mut next_batch_time = tokio::time::Instant::now();
+        let mut timeout = tokio::time::Instant::now() + Duration::from_secs(0xFFFF);
+        let mut batch: HashSet<UniqueFrameKey> = HashSet::new();
+        loop {
+            match tokio::time::timeout_at(timeout, rx.recv()).await {
+                Ok(opt) => {
+                    match opt {
+                        Some(TraceObjectObservableMsg::Poison) => {
+                            if !batch.is_empty() {
+                                let store_lock = store.lock().await;
+                                let payload: Vec<TraceObjectEvent> =
+                                    batch.iter().map(|key| store_lock[key].clone()).collect();
+                                app_handle.emit_all(&event_name, payload).expect("failed to emit trace event");
+                            }
+                            break;
+                        }
+                        Some(TraceObjectObservableMsg::Value(key)) => {
+                            batch.insert(key);
+                            // only send batch if the last interval is min_interval in the past!
+
+                            if next_batch_time <= tokio::time::Instant::now() {
+                                // println!("emit {event_name} = {value:?}");
+                                let store_lock = store.lock().await;
+                                // FIXME consider using get instead of index [] for hashmaps to 
+                                // avoid task crashes!!
+                                let payload : Vec<TraceObjectEvent> = batch.iter().map(|key| store_lock[key].clone()).collect();                               
+                                app_handle.emit_all(&event_name, payload).expect("failed to emit trace event");
+                                batch.clear();
+                                next_batch_time = tokio::time::Instant::now() + min_interval;
+                                timeout = next_batch_time; //copy!
+                            }
+                        }
+                        None => {
+                            panic!("rx_receiver closed early");
+                        }
+                    };
+                }
+                Err(_elapsed) => {
+                    if !batch.is_empty() {
+                        let store_lock = store.lock().await;
+                        let payload : Vec<TraceObjectEvent> = batch.iter().map(|key| store_lock[key].clone()).collect();
+                        batch.clear();
+                        app_handle.emit_all(&event_name, payload).expect("failed to emit trace event");
+                        next_batch_time = tokio::time::Instant::now() + min_interval;
+                    }
+                    timeout += Duration::from_secs(0xFFFF); //wait for ever!
+                }
+            }
+        }
+        println!("stop notify task for {event_name}");
     }
 }
