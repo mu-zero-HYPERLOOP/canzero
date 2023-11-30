@@ -15,8 +15,9 @@ pub struct ObjectEntryObject {
     store: Arc<Mutex<ObjectEntryStore>>,
     start_time: std::time::Instant,
     latest_observable: ObjectEntryLatestObservable,
-    latest_event_name : String,
-    history_event_name : String,
+    latest_event_name: String,
+    history_observable: ObjectEntryHistroyObservable,
+    history_event_name: String,
 }
 
 impl ObjectEntryObject {
@@ -24,8 +25,16 @@ impl ObjectEntryObject {
         object_entry_config: &config::ObjectEntryRef,
         app_handle: &tauri::AppHandle,
     ) -> Self {
-        let latest_event_name = format!("{}_{}_latest", object_entry_config.node().name(), object_entry_config.name());
-        let history_event_name = format!("{}_{}_history", object_entry_config.node().name(), object_entry_config.name());
+        let latest_event_name = format!(
+            "{}_{}_latest",
+            object_entry_config.node().name(),
+            object_entry_config.name()
+        );
+        let history_event_name = format!(
+            "{}_{}_history",
+            object_entry_config.node().name(),
+            object_entry_config.name()
+        );
         Self {
             object_entry_ref: object_entry_config.clone(),
             store: Arc::new(Mutex::new(ObjectEntryStore::new())),
@@ -36,6 +45,11 @@ impl ObjectEntryObject {
                 &app_handle,
             ),
             latest_event_name,
+            history_observable: ObjectEntryHistroyObservable::new(
+                &history_event_name,
+                Duration::from_millis(500),
+                &app_handle,
+            ),
             history_event_name,
         }
     }
@@ -61,31 +75,32 @@ impl ObjectEntryObject {
 
     pub async fn push_value(&self, value: TypeValue) {
         let arrive_instance = std::time::Instant::now();
-        
+
         let mut store = self.store.lock().await;
         let timestamp = arrive_instance.duration_since(self.start_time);
         let delta_time = match store.latest_value() {
             Some(latest) => timestamp.saturating_sub(latest.timestamp), //Not sure if saturating
-                                                                        //sub is correct here
+            //sub is correct here
             None => timestamp,
         };
-        
+
         let event = ObjectEntryEvent {
             value,
             timestamp,
             delta_time,
         };
-        
-        
-        self.latest_observable.notify(&event).await;
+
+        // The value has to be stored before notify because the observables 
+        // use the values in the store directly to reduce clones
         store.push_event(event);
+        self.latest_observable.notify().await;
+        self.history_observable.notify().await;
     }
     pub fn ty(&self) -> &config::TypeRef {
         &self.object_entry_ref.ty()
     }
 
     // Latest Events Issue #12
-
 
     #[allow(unused)] //FIXME
     pub fn listen_to_latest(&self) {
@@ -102,11 +117,11 @@ impl ObjectEntryObject {
 
     #[allow(unused)] //FIXME
     pub fn listen_to_history(&self) {
-        //TODO register a listener to the history
+        self.history_observable.listen(&self.store);
     }
 
     pub async fn unlisten_from_history(&self) {
-        //TODO unregister a listener of the history
+        self.history_observable.unlisten().await;
     }
 
     pub async fn history(&self) -> Vec<ObjectEntryEvent> {
@@ -150,7 +165,6 @@ impl ObjectEntryStore {
         Self { history: vec![] }
     }
 
-
     #[allow(unused)] //FIXME
     pub fn complete_history(&self) -> &Vec<ObjectEntryEvent> {
         &self.history
@@ -166,7 +180,7 @@ impl ObjectEntryStore {
 
 enum ObjectEntryEventMsg {
     Poison,
-    Value(ObjectEntryEvent),
+    Value,
 }
 
 struct ObjectEntryLatestObservable {
@@ -192,9 +206,9 @@ impl ObjectEntryLatestObservable {
         }
     }
 
-    pub async fn notify(&self, value : &ObjectEntryEvent) {
+    pub async fn notify(&self) {
         if self.listen_count.load(std::sync::atomic::Ordering::SeqCst) != 0 {
-            self.tx.send(ObjectEntryEventMsg::Value(value.clone())).await.unwrap();
+            self.tx.send(ObjectEntryEventMsg::Value).await.unwrap();
         }
     }
 
@@ -207,7 +221,6 @@ impl ObjectEntryLatestObservable {
             self.start_notify_task(store);
         }
     }
-
 
     #[allow(unused)] //FIXME
     pub async fn unlisten(&self) {
@@ -262,11 +275,13 @@ impl ObjectEntryLatestObservable {
                             };
                             break;
                         }
-                        Some(ObjectEntryEventMsg::Value(value)) => {
+                        Some(ObjectEntryEventMsg::Value) => {
                             // only send batch if the last interval is min_interval in the past!
                             if next_batch_time <= tokio::time::Instant::now() {
                                 // println!("emit {event_name} = {value:?}");
-                                app_handle.emit_all(&event_name, value).unwrap();
+                                app_handle
+                                    .emit_all(&event_name, store.lock().await.latest_value())
+                                    .unwrap();
                                 next_batch_time = tokio::time::Instant::now() + min_interval;
                                 timeout = next_batch_time;
                             }
@@ -285,6 +300,138 @@ impl ObjectEntryLatestObservable {
                         }
                         None => (),
                     };
+                    timeout += Duration::from_secs(0xFFFF); //wait for ever!
+                }
+            }
+        }
+        println!("stop notify task for {event_name}");
+    }
+}
+
+struct ObjectEntryHistroyObservable {
+    min_interval: Duration,
+    event_name: String,
+    listen_count: AtomicUsize,
+    app_handle: tauri::AppHandle,
+
+    tx: mpsc::Sender<ObjectEntryEventMsg>,
+    rx: Arc<Mutex<mpsc::Receiver<ObjectEntryEventMsg>>>,
+}
+
+impl ObjectEntryHistroyObservable {
+    pub fn new(event_name: &str, min_interval: Duration, app_handle: &tauri::AppHandle) -> Self {
+        let (tx, rx) = mpsc::channel(10);
+        Self {
+            event_name: event_name.to_owned(),
+            min_interval,
+            app_handle: app_handle.clone(),
+            listen_count: AtomicUsize::new(0),
+            tx,
+            rx: Arc::new(Mutex::new(rx)),
+        }
+    }
+
+    pub async fn notify(&self) {
+        if self.listen_count.load(std::sync::atomic::Ordering::SeqCst) != 0 {
+            self.tx.send(ObjectEntryEventMsg::Value).await.unwrap();
+        }
+    }
+
+    pub async fn listen(&self, store: &Arc<Mutex<ObjectEntryStore>>) {
+        let prev_count = self
+            .listen_count
+            .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+        if prev_count == 0 {
+            // this indicates that the batching task should be started
+            self.start_notify_task(store).await;
+        }
+    }
+    pub async fn unlisten(&self) {
+        let prev_count = self
+            .listen_count
+            .fetch_sub(1, std::sync::atomic::Ordering::SeqCst);
+        if prev_count == 1 {
+            // this indicates that the batching task should be stoped
+            self.stop_notify_task().await;
+        }
+    }
+
+    pub async fn start_notify_task(&self, store: &Arc<Mutex<ObjectEntryStore>>) {
+        tokio::spawn(Self::notify_task(
+            self.event_name.clone(),
+            self.min_interval,
+            self.app_handle.clone(),
+            self.rx.clone(),
+            store.clone(),
+            store.lock().await.history.len(),
+        ));
+    }
+
+    pub async fn stop_notify_task(&self) {
+        self.tx
+            .send(ObjectEntryEventMsg::Poison)
+            .await
+            .expect("failed to send poison to object entry history notify task");
+    }
+
+    async fn notify_task(
+        event_name: String,
+        min_interval: Duration,
+        app_handle: tauri::AppHandle,
+        rx: Arc<Mutex<mpsc::Receiver<ObjectEntryEventMsg>>>,
+        store: Arc<Mutex<ObjectEntryStore>>,
+        latest_index: usize, // index into the store.history, everything after the
+                             // index (inclusive) the observers have not been notified
+    ) {
+        let mut latest_index = latest_index;
+        println!("start notify task for {event_name}");
+        let mut rx = rx.lock().await;
+        let mut next_batch_time = tokio::time::Instant::now();
+        let mut timeout = tokio::time::Instant::now() + Duration::from_secs(0xFFFF);
+        loop {
+            match tokio::time::timeout_at(timeout, rx.recv()).await {
+                Ok(opt) => {
+                    match opt {
+                        Some(ObjectEntryEventMsg::Poison) => {
+                            let store_lock = store.lock().await;
+                            if store_lock.history.len() < latest_index {
+                                let payload = store_lock.history[latest_index..].to_vec();
+                                app_handle.emit_all(&event_name, payload).unwrap();
+                            }
+                            break;
+                        }
+                        Some(ObjectEntryEventMsg::Value) => {
+                            // only send batch if the last interval is min_interval in the past!
+
+                            if next_batch_time <= tokio::time::Instant::now() {
+                                // println!("emit {event_name} = {value:?}");
+                                let store_lock = store.lock().await;
+                                // should never be false because the store should be updated before
+                                // the notify (otherwise notify should not be called)
+                                if store_lock.history.len() < latest_index { 
+                                    let payload = store_lock.history[latest_index..].to_vec();
+                                    latest_index = store_lock.history.len(); 
+                                    app_handle.emit_all(&event_name, payload).unwrap();
+                                    next_batch_time = tokio::time::Instant::now() + min_interval;
+                                    timeout = next_batch_time;
+                                }else {
+                                    panic!("I assumed this should not be called, just checking here!");
+                                }
+                            }
+                        }
+                        None => {
+                            panic!("rx_receiver closed early");
+                        }
+                    };
+                }
+                Err(_elapsed) => {
+                    let store_lock = store.lock().await;
+                    if store_lock.history.len() < latest_index {
+                        let payload = store_lock.history[latest_index..].to_vec();
+                        latest_index = store_lock.history.len();
+                        app_handle.emit_all(&event_name, payload).unwrap();
+                        next_batch_time = tokio::time::Instant::now() + min_interval;
+                    }
                     timeout += Duration::from_secs(0xFFFF); //wait for ever!
                 }
             }
