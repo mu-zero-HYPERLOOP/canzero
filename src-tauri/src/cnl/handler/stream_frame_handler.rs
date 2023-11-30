@@ -1,20 +1,52 @@
-use crate::cnl::{can_frame::CanFrame, frame::Frame, parser::type_frame_parser::TypeFrameParser};
+use std::sync::Arc;
+
+use can_config_rs::config;
+
+use crate::cnl::{
+    can_frame::CanFrame, frame::Frame, network::object_entry_object::ObjectEntryObject,
+    parser::type_frame_parser::TypeFrameParser,
+};
 
 pub struct StreamFrameHandler {
     parser: TypeFrameParser,
+    object_entries: Vec<Arc<ObjectEntryObject>>,
 }
 
 impl StreamFrameHandler {
-
     #[allow(unused)]
-    pub fn create(parser: TypeFrameParser) -> Self {
-        Self { parser }
+    pub fn create(
+        stream: &config::stream::StreamRef,
+        node_object_entries: &Vec<Arc<ObjectEntryObject>>,
+    ) -> Self {
+        let mapped_object_entries = stream
+            .mapping()
+            .into_iter()
+            .map(|oe_opt| {
+                let oe = oe_opt.to_owned().expect("expected a tx stream got rx stream");
+                node_object_entries
+                    .into_iter()
+                    .find(|oeo| oe.name() == oeo.name())
+                    .expect("the object entries provided don't contain the oe the stream mapps")
+                    .clone()
+            })
+            .collect();
+        Self {
+            parser: TypeFrameParser::new(stream.message()),
+            object_entries: mapped_object_entries,
+        }
     }
     pub async fn handle(&self, frame: &CanFrame) -> Frame {
         let frame = self.parser.parse(frame);
-        let Frame::TypeFrame(_type_frame) = &frame else {
+        let Frame::TypeFrame(type_frame) = &frame else {
             panic!();
         };
+        for (attrib, oeo) in type_frame.value().iter().zip(&self.object_entries) {
+            // notify the oeo one after another 
+            // Interesstingly not possible in rusts async model to await all 
+            // at once at least not useful if you think about it !
+            oeo.push_value(attrib.value().clone()).await;
+        }
+
         frame
     }
 }

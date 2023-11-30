@@ -84,6 +84,9 @@ impl TypeFrame {
     pub fn value(&self) -> &Vec<FrameType> {
         &self.value
     }
+    pub fn into_value(self) -> Vec<FrameType> {
+        self.value
+    }
     pub fn name(&self) -> &str {
         self.message_ref.name()
     }
@@ -107,6 +110,9 @@ impl FrameType {
     }
     pub fn value(&self) -> &TypeValue {
         &self.value
+    }
+    pub fn into_value(self) -> TypeValue {
+        self.value
     }
     pub fn name(&self) -> &str {
         &self.name

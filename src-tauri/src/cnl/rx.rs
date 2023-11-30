@@ -10,6 +10,7 @@ use super::frame::Frame;
 use super::handler::empty_frame_handler::EmptyFrameHandler;
 use super::handler::get_resp_frame_handler::GetRespFrameHandler;
 use super::handler::set_resp_frame_handler::SetRespFrameHandler;
+use super::handler::stream_frame_handler::StreamFrameHandler;
 use super::handler::MessageHandler;
 use super::network::NetworkObject;
 use super::parser::type_frame_parser::TypeFrameParser;
@@ -36,13 +37,33 @@ impl RxCom {
                 config::MessageId::StandardId(id) => (*id, false),
                 config::MessageId::ExtendedId(id) => (*id, true),
             };
+            for node in network_config.nodes() {
+                for tx_stream in node.tx_streams() {
+                    if tx_stream.message().id() == message_config.id() {
+                        lookup.insert(
+                            key,
+                            MessageHandler::StreamFrameHandler(StreamFrameHandler::create(
+                                tx_stream,
+                                network
+                                    .nodes()
+                                    .iter()
+                                    .find(|n| n.id() == node.id())
+                                    .expect("invalid network")
+                                    .object_entries(),
+                            )),
+                        );
+                        continue;
+                    }
+                }
+            }
+
             if network_config.get_resp_message().id() == message_config.id() {
                 lookup.insert(
                     key,
                     MessageHandler::GetRespFrameHandler(GetRespFrameHandler::create(
                         TypeFrameParser::new(message_config),
                         network,
-                        network_config.get_resp_message()
+                        network_config.get_resp_message(),
                     )),
                 );
             } else if (network_config as &Network).set_resp_message().id() == message_config.id() {
