@@ -3,6 +3,7 @@ import Stack from '@mui/material/Stack';
 import {invoke} from '@tauri-apps/api';
 import ControlTable from '../components/ControlTable';
 import {Container} from '@mui/material';
+import {useEffect} from "react";
 
 function ControllButtons() {
     return (
@@ -33,16 +34,32 @@ function ControllButtons() {
 }
 
 function ControlPanel() {
+
+    useEffect(() => {
+        const keyDownHandler = (event: { key: string; preventDefault: () => void; }) => {
+            if (event.key === ' ') {
+                event.preventDefault();
+                invoke('emergency');
+            }
+        };
+
+        document.addEventListener('keydown', keyDownHandler);
+
+        return () => {
+            document.removeEventListener('keydown', keyDownHandler);
+        };
+    }, []);
+
     return (
         <>
             <Container maxWidth="lg" sx={{mt: 1, mb: 1}}>
-            <ControllButtons/>
-        </Container>
+                <ControllButtons/>
+            </Container>
             <Container maxWidth="lg" sx={{mt: 1, mb: 1}}>
                 <ControlTable/>
             </Container>
         </>
     );
-};
+}
 
 export default ControlPanel;
