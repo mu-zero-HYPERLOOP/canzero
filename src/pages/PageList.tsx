@@ -124,34 +124,18 @@ interface NodeEntriesProps {
   nodeInfo: NodeInformation,
 }
 
-// this is now a stateless component, because the nodeInformation is fetched easier to reduce lag when 
-// initaly rendering the component
 function NodeEntries({ nodeInfo }: NodeEntriesProps) {
-  // invoke<NodeInformation>("node_information", { nodeName: name }).then((nodeInformation) => {
-  //   console.log(nodeInformation)
-  //   setEntries(nodeInformation.object_entries.concat(nodeInformation.commands))
-  // });
 
-  // useEffect(() => {
-  //   invoke<NodeInformation>("node_information", { nodeName: name }).then((nodeInformation) => {
-  //     console.log(nodeInformation)
-  //     setEntries(nodeInformation.object_entries.concat(nodeInformation.commands))
-  //   });
-  // }, []);
-
+  /*Page name has to equal the nodeId!*/
   return (<>
     {nodeInfo.object_entries.map((entry) => 
       <CustomTreeItem nodeId={nodeInfo.name + "/" + entry} label={entry}/>
     )}
   </>);
 
-  /*Page name has to equal the nodeId!*/
-  //return (entries.map((entry) => <CustomTreeItem nodeId={name + "/" + entry} label={entry}></CustomTreeItem>));
 }
 
 export function NodeList() {
-  // I changed this to a NodeInformation because, if we only fetch the names here we get a 
-  // short lag when expanding the sidebar, which i really disliked!
   const [nodes, setNodes] = useState<NodeInformation[]>([]);
   
   async function asyncFetchNetworkInfo() {
@@ -187,15 +171,10 @@ export function NodeList() {
   );
 }
 
-// It's a lot better to define a props interface for all components,
-// this is especially important for typescript.
 interface ListEntriesProps {
   open: boolean,
 }
 
-// React components always only have one attributes 
-// they are rarely invoked as functions, instead as JSX literals
-// so to invoke this component include <ListEntries open={true}/> in JSX code!.
 export function ListEntries({ open }: ListEntriesProps) {
   if (open) {
     return <>

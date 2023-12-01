@@ -13,9 +13,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ShowPages from './ShowPages';
 import {ListEntries} from './PageList';
-import {Button} from '@mui/material';
 import logo from '../assets/mu-zero-hyperloop-logo.png'
-import {invoke} from '@tauri-apps/api';
 
 
 const drawerWidth: number = 220;
@@ -115,9 +113,6 @@ export default function Dashboard() {
                             src={logo}
                         />
                     </Typography>
-                    <Button variant="contained" size="large" color="secondary" style={{maxWidth: '150px', maxHeight: '45px', minWidth: '150px', minHeight: '45px'}} onClick={() => {
-                        invoke('connect_pod');
-                    }}>Connect</Button>
                 </Toolbar>
             </AppBar>
             <Drawer variant="permanent" open={open}>

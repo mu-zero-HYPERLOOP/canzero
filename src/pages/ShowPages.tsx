@@ -22,30 +22,6 @@ function Content() {
 function ShowPages() {
   const [nodes, setNodes] = useState<NodeInformation[]>([]);
 
-  // NEVER TO THIS!
-  // What this means is that the function is rerendered every frame because
-  // first render:
-  //  -> invoke call
-  //    -> then 
-  //      -> mark component as dirty 
-  // rerender immediatly! <- BAD BAD BAD
-  // invoke<NetworkInformation>("network_information").then((networkInformation) => {
-  //     setNodes(networkInformation.node_names)
-  // });
-
-  // Instead use useEffect, it runs everytime the state variables in the second argument change
-  // for this case only once when the component is first rendered!
-  // thereby:
-  // first render:
-  //  -> useEffect
-  //    -> invoke call
-  //      -> then 
-  //        -> mark as dirty
-  // second render
-  //  -> dont invoke useEffect -> doesn't mark dirty GOOD!!
-
-
-  // Here is another cool trick, async works really well is we wan't to request data based on another request 
   async function asyncFetchNodeData() {
     let nodes = [];
     let networkInformation = await invoke<NetworkInformation>("network_information");
