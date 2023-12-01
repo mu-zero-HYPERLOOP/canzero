@@ -66,7 +66,7 @@ fn random_get_resp(rng: &mut ThreadRng, network_config: &config::NetworkRef) -> 
         << (64 - value_signal.size()))
         >> value_signal.byte_offset();
 
-    CanFrame::new(id, ide, false, 8, value)
+    CanFrame::new(id, ide, false, msg.dlc(), value)
 }
 
 fn random_stream_frame(rng: &mut ThreadRng, network_config: &config::NetworkRef) -> CanFrame {
@@ -83,7 +83,7 @@ fn random_stream_frame(rng: &mut ThreadRng, network_config: &config::NetworkRef)
         config::MessageId::StandardId(id) => (*id, false),
         config::MessageId::ExtendedId(id) => (*id, true),
     };
-    let dlc = 8; //TODO based on msg, but currently not supported by can-config-rs
+    let dlc = msg.dlc();
 
     let data = rng.gen();
 
