@@ -228,7 +228,7 @@ dependencies = [
 [[package]]
 name = "can-config-rs"
 version = "0.1.0"
-source = "git+https://github.com/mu-zero-HYPERLOOP/can-config-rs.git#68b37d23c44339d27f6b4b8785963db3e197a7b4"
+source = "git+https://github.com/mu-zero-HYPERLOOP/can-config-rs.git#df098ebf12104165fcfe7001550359c5dd6b4319"
 dependencies = [
  "chrono",
  "regex",
