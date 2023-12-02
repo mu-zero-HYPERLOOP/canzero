@@ -18,7 +18,7 @@ import { SignalFrame } from "../types/SignalFrame";
 import SignalFrameDetail from "./SignalFrameDetail";
 import { UndefinedFrame } from "../types/UndefinedFrame";
 import { ErrorFrame } from "../types/ErrorFrame";
-import { Virtuoso, TableVirtuoso, TableComponents } from 'react-virtuoso';
+// import { Virtuoso, TableVirtuoso, TableComponents } from 'react-virtuoso';
 
 import TraceSearchBar from "./TraceSearchBar";
 
