@@ -4,7 +4,7 @@ use can_config_rs::config;
 
 use crate::cnl::{
     can_frame::CanFrame, frame::Frame, network::object_entry_object::ObjectEntryObject,
-    parser::type_frame_parser::TypeFrameParser,
+    parser::type_frame_parser::TypeFrameParser, timestamped::Timestamped,
 };
 
 pub struct StreamFrameHandler {
@@ -22,7 +22,9 @@ impl StreamFrameHandler {
             .mapping()
             .into_iter()
             .map(|oe_opt| {
-                let oe = oe_opt.to_owned().expect("expected a tx stream got rx stream");
+                let oe = oe_opt
+                    .to_owned()
+                    .expect("expected a tx stream got rx stream");
                 node_object_entries
                     .into_iter()
                     .find(|oeo| oe.name() == oeo.name())
@@ -35,18 +37,19 @@ impl StreamFrameHandler {
             object_entries: mapped_object_entries,
         }
     }
-    pub async fn handle(&self, frame: &CanFrame) -> Frame {
-        let frame = self.parser.parse(frame);
+    pub async fn handle(&self, can_frame: &Timestamped<CanFrame>) -> Timestamped<Frame> {
+        let frame = self.parser.parse(can_frame);
         let Frame::TypeFrame(type_frame) = &frame else {
             panic!();
         };
         for (attrib, oeo) in type_frame.value().iter().zip(&self.object_entries) {
-            // notify the oeo one after another 
-            // Interesstingly not possible in rusts async model to await all 
+            // notify the oeo one after another
+            // Interesstingly not possible in rusts async model to await all
             // at once at least not useful if you think about it !
-            oeo.push_value(attrib.value().clone()).await;
+            oeo.push_value(attrib.value().clone(), can_frame.timestamp())
+                .await;
         }
 
-        frame
+        Timestamped::new(can_frame.timestamp().clone(), frame)
     }
 }

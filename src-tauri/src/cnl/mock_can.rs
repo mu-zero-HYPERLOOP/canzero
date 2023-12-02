@@ -6,7 +6,7 @@ use std::{
 use can_config_rs::config;
 use rand::{rngs::ThreadRng, Rng};
 
-use super::can_frame::{CanError, CanFrame};
+use super::{can_frame::{CanError, CanFrame}, timestamped::Timestamped};
 
 fn random_get_resp(rng: &mut ThreadRng, network_config: &config::NetworkRef) -> CanFrame {
     let object_entries: Vec<&Arc<config::ObjectEntry>> = network_config
@@ -108,7 +108,7 @@ impl MockCan {
         println!("mock-can : sending {frame:?}");
     }
 
-    pub async fn receive(&self) -> Result<CanFrame, CanError> {
+    pub async fn receive(&self) -> Result<Timestamped<CanFrame>, Timestamped<CanError>> {
         // await for random amount of time.
         let timeout: u64 = self
             .rng
@@ -117,11 +117,12 @@ impl MockCan {
             .gen_range(1..10);
         tokio::time::sleep(Duration::from_millis(timeout)).await;
 
+
         let mut rng = self.rng.lock().expect("failed to acquire mock can lock");
         let t: u32 = rng.gen_range(0..=1);
         match t {
-            0 => Ok(random_get_resp(&mut rng, &self.network_ref)),
-            1 => Ok(random_stream_frame(&mut rng, &self.network_ref)),
+            0 => Ok(Timestamped::now(random_get_resp(&mut rng, &self.network_ref))),
+            1 => Ok(Timestamped::now(random_stream_frame(&mut rng, &self.network_ref))),
             _ => panic!(),
         }
 
@@ -147,7 +148,7 @@ impl MockCan {
         //     data,
         // ))
     }
-    pub async fn receive_err(&mut self) -> CanError {
+    pub async fn receive_err(&mut self) -> Timestamped<CanError> {
         // await for random amount of time.
         let timeout: u64 = self
             .rng
@@ -156,7 +157,9 @@ impl MockCan {
             .gen_range(2..10);
         tokio::time::sleep(Duration::from_secs(timeout)).await;
 
-        return CanError::Can(42);
+        let error = Timestamped::now(CanError::Can(42));
+
+        error
     }
 }
 

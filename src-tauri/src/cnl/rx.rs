@@ -3,6 +3,7 @@ use std::sync::Arc;
 
 use crate::cnl::frame::error_frame::ErrorFrame;
 use crate::cnl::frame::undefined_frame::UndefinedFrame;
+use crate::cnl::timestamped::Timestamped;
 
 use super::can_frame::CanError;
 use super::can_frame::CanFrame;
@@ -102,7 +103,7 @@ type LookupRef = Arc<Lookup>;
 
 async fn can_receiver(can: Arc<super::CAN>, lookup: LookupRef, trace: Arc<TraceObject>) {
     async fn receive_msg(
-        frame: Result<CanFrame, CanError>,
+        frame: Result<Timestamped<CanFrame>, Timestamped<CanError>>,
         lookup: LookupRef,
         trace: Arc<TraceObject>,
     ) {
@@ -111,16 +112,19 @@ async fn can_receiver(can: Arc<super::CAN>, lookup: LookupRef, trace: Arc<TraceO
                 let key = (frame.get_id(), frame.get_ide_flag());
                 match lookup.get(&key) {
                     Some(handler) => handler.handle(&frame).await,
-                    None => Frame::UndefinedFrame(UndefinedFrame::new(
-                        frame.get_id(),
-                        frame.get_ide_flag(),
-                        frame.get_rtr_flag(),
-                        frame.get_dlc(),
-                        frame.get_data_u64(),
-                    )),
+                    None => Timestamped::new(
+                        frame.timestamp().clone(),
+                        Frame::UndefinedFrame(UndefinedFrame::new(
+                            frame.get_id(),
+                            frame.get_ide_flag(),
+                            frame.get_rtr_flag(),
+                            frame.get_dlc(),
+                            frame.get_data_u64(),
+                        )),
+                    ),
                 }
             }
-            Err(error) => Frame::ErrorFrame(ErrorFrame::new(&error)),
+            Err(error) => Timestamped::new(error.timestamp().clone(), Frame::ErrorFrame(ErrorFrame::new(&error))),
         };
         trace.push_frame(frame).await;
     }

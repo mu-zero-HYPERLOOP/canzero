@@ -73,8 +73,7 @@ impl ObjectEntryObject {
         &self.history_event_name
     }
 
-    pub async fn push_value(&self, value: TypeValue) {
-        let arrive_instance = std::time::Instant::now();
+    pub async fn push_value(&self, value: TypeValue, arrive_instance : &std::time::Instant) {
 
         let mut store = self.store.lock().await;
         let timestamp = arrive_instance.duration_since(self.start_time);

@@ -11,6 +11,7 @@ pub mod network;
 pub mod parser;
 mod rx;
 pub mod trace;
+pub mod timestamped;
 
 use std::sync::Arc;
 
@@ -73,6 +74,7 @@ impl CNL {
     }
     pub fn start(&mut self) {
         self.rx.start(&self.can0);
+        #[cfg(feature = "socket-can")]
         self.rx.start(&self.can1);
     }
 

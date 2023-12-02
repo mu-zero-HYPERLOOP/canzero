@@ -9,7 +9,7 @@ use crate::cnl::{
         Frame,
     },
     network::NetworkObject,
-    parser::type_frame_parser::TypeFrameParser,
+    parser::type_frame_parser::TypeFrameParser, timestamped::Timestamped,
 };
 
 pub struct GetRespFrameHandler {
@@ -112,9 +112,9 @@ impl GetRespFrameHandler {
     // for each frame a lookup is done to get the correct handler afterwards.
     // This handler is only invoked for the get resp message of the config therefor the
     // format can be assumed to be the same for every frame!
-    pub async fn handle(&self, frame: &CanFrame) -> Frame {
+    pub async fn handle(&self, can_frame: &Timestamped<CanFrame>) -> Timestamped<Frame> {
         // a small example of how to parse the type frame!
-        let frame = self.parser.parse(frame);
+        let frame = self.parser.parse(can_frame);
         let Frame::TypeFrame(type_frame) = &frame else {
             panic!("GetRespFrameHandler invoked with the wrong message, can only be invoked for get respond messages");
         };
@@ -150,11 +150,11 @@ impl GetRespFrameHandler {
         // this just selects a random one!
         let Some(server_node) = self.network.nodes().get(*server_id as usize) else {
             // TODO implement error handling
-            return frame;
+            return Timestamped::new(can_frame.timestamp().clone(), frame);
         };
         let Some(object_entry) = server_node.object_entries().get(*object_entry_id as usize) else {
             // TODO implement error handling
-            return frame;
+            return Timestamped::new(can_frame.timestamp().clone(), frame);
         };
 
         let mut bitstring = Bitstring::new(); //TODO probably good to implement fragmentation here!
@@ -171,10 +171,10 @@ impl GetRespFrameHandler {
         .1;
 
         // notify the object entry (object) about the new value
-        object_entry.push_value(value).await;
+        object_entry.push_value(value, can_frame.timestamp()).await;
 
         // has to return the parsed frame, because the frame is needed for the trace page!
-        frame
+        Timestamped::new(can_frame.timestamp().clone(), frame)
     }
 }
 

@@ -17,9 +17,9 @@ pub enum CanModule {
 
 pub struct CAN {
     socket: OwnedCanSocket,
-    rx: Mutex<Receiver<CanFrame>>,
-    err_rx: Mutex<Receiver<CanError>>,
-    tx: Sender<CanFrame>,
+    rx: Mutex<Receiver<Timestamped<CanFrame>>>,
+    err_rx: Mutex<Receiver<Timestamped<CanError>>>,
+    tx: Sender<Timestamped<CanFrame>>,
 }
 
 impl CAN {
@@ -41,13 +41,13 @@ impl CAN {
             Handle::current().block_on(async {
                 match frame {
                     Ok(frame) => {
-                        tx.send(frame)
+                        tx.send(Timestamped::now(frame))
                             .await
                             .expect("failed to forward canframe receiver closed early");
                     }
                     Err(err) => {
                         err_tx
-                            .send(err)
+                            .send(Timestamped::now(err))
                             .await
                             .expect("failed to forward canerror receiver closed early");
                     }
@@ -82,13 +82,13 @@ impl CAN {
             .expect("failed to forward canframe to can module for transmission");
     }
 
-    pub async fn receive(&self) -> Result<CanFrame, CanError> {
+    pub async fn receive(&self) -> Result<Timestamped<CanFrame>, Timestamped<CanError>> {
         let frame = self.rx.lock().await.recv().await;
         match frame {
             Some(frame) => Ok(frame),
-            None => Err(CanError::Disconnect(format!(
+            None => Err(Timestamped::now(CanError::Disconnect(format!(
                 "can receive thread closed rx channel"
-            ))),
+            )))),
         }
     }
 

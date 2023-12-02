@@ -4,7 +4,7 @@ use self::{
     stream_frame_handler::StreamFrameHandler,
 };
 
-use super::{can_frame::CanFrame, frame::Frame};
+use super::{can_frame::CanFrame, frame::Frame, timestamped::Timestamped};
 
 pub mod command_resp_frame_handler;
 pub mod empty_frame_handler;
@@ -24,7 +24,7 @@ pub enum MessageHandler {
 }
 
 impl MessageHandler {
-    pub async fn handle(&self, frame: &CanFrame) -> Frame {
+    pub async fn handle(&self, frame: &Timestamped<CanFrame>) -> Timestamped<Frame> {
         match &self {
             MessageHandler::EmptyFrameHandler(handler) => handler.handle(frame).await,
             MessageHandler::GetRespFrameHandler(handler) => handler.handle(frame).await,
