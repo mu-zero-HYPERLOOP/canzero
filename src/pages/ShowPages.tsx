@@ -1,6 +1,6 @@
 import { Route, Routes, useLocation } from "react-router-dom";
-import ControlPanel from "./ControlPanel";
-import DebugPanel from "./DebugPanel";
+import OverviewPanel from "./OverviewPanel.tsx";
+import TracePanel from "./TracePanel.tsx";
 import { Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api";
@@ -40,8 +40,8 @@ function ShowPages() {
 
   return (
     <Routes>
-      <Route index element={<ControlPanel />} />
-      <Route path="DebugPanel" element={<DebugPanel />} />
+      <Route index element={<OverviewPanel />} />
+      <Route path="TracePanel" element={<TracePanel />} />
       {nodes.map((node) => {
 
         let routes = [<Route path={node.name} element={<NodePanel node={node} />} />];

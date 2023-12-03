@@ -33,7 +33,7 @@ function ControllButtons() {
     );
 }
 
-function ControlPanel() {
+function OverviewPanel() {
 
     useEffect(() => {
         const keyDownHandler = (event: { key: string; preventDefault: () => void; }) => {
@@ -62,4 +62,4 @@ function ControlPanel() {
     );
 }
 
-export default ControlPanel;
+export default OverviewPanel;

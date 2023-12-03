@@ -1,10 +1,10 @@
 import TraceGrid from "../components/TraceGrid";
 
-function DebugPanel() {
+function TracePanel() {
     return (
         <>
             <TraceGrid />
         </>
     );
 };
-export default DebugPanel;
+export default TracePanel;

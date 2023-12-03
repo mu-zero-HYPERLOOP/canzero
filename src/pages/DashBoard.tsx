@@ -16,7 +16,7 @@ import {ListEntries} from './PageList';
 import logo from '../assets/mu-zero-hyperloop-logo.png'
 
 
-const drawerWidth: number = 220;
+const drawerWidth: number = 200;
 
 interface AppBarProps extends MuiAppBarProps {
     open?: boolean;
@@ -59,7 +59,7 @@ const Drawer = styled(MuiDrawer, {shouldForwardProp: (prop) => prop !== 'open'})
                 }),
                 width: theme.spacing(7),
                 [theme.breakpoints.up('sm')]: {
-                    width: theme.spacing(8),
+                    width: theme.spacing(7.5),
                 },
             }),
         },

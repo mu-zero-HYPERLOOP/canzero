@@ -115,8 +115,8 @@ function ListItemButtonLink(props: ListItemLinkProps) {
 
 export const RouterList = (
   <React.Fragment>
-    <ListItemButtonLink to="/" primary="Control Panel" icon={<GamesIcon />} />
-    <ListItemButtonLink to="/DebugPanel" primary="Debug Panel" icon={<TerminalIcon />} />
+    <ListItemButtonLink to="/" primary="Overview" icon={<GamesIcon />} />
+    <ListItemButtonLink to="/TracePanel" primary="Trace Panel" icon={<TerminalIcon />} />
   </React.Fragment>
 );
 
