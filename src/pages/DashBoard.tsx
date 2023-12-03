@@ -99,9 +99,7 @@ export default function Dashboard() {
                         variant="h6"
                         color="inherit"
                         noWrap
-                        sx={{flexGrow: 1,
-                            left: -100
-                        }}
+                        sx={{flexGrow: 1}}
                     >
                         <Box
                             component="img"
