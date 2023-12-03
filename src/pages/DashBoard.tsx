@@ -16,7 +16,7 @@ import {ListEntries} from './PageList';
 import logo from '../assets/mu-zero-hyperloop-logo.png'
 import {EstablishConnection} from "../components/EstablishConnection.tsx";
 
-const drawerWidth: number = 180;
+const drawerWidth: number = 200;
 
 interface AppBarProps extends MuiAppBarProps {
     open?: boolean;
@@ -99,7 +99,9 @@ export default function Dashboard() {
                         variant="h6"
                         color="inherit"
                         noWrap
-                        sx={{flexGrow: 1}}
+                        sx={{flexGrow: 1,
+                            left: -100
+                        }}
                     >
                         <Box
                             component="img"
