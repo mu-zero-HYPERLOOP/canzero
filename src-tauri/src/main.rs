@@ -37,7 +37,8 @@ fn land_pod() {
 }
 
 #[tauri::command]
-fn connect_pod() {
+async fn connect_pod() {
+    tokio::time::sleep(Duration::from_millis(10000)).await;
     println!("Connect")
 }
 
