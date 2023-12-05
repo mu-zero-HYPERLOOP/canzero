@@ -1,5 +1,5 @@
-import ControlTable from '../components/PodTemperatures';
-import { Grid, Paper, Box, Skeleton, styled } from '@mui/material';
+import PodTemperatures from './PodTemperatures';
+import { Grid, Paper, Skeleton, styled } from '@mui/material';
 
 const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -9,8 +9,12 @@ const Item = styled(Paper)(({ theme }) => ({
     color: theme.palette.text.secondary,
   }));
 
+interface ControlGridProps {
+    isConnecting: boolean;
+}
 
-function ControlGrid({ isConnecting=true }) {
+
+function ControlGrid({ isConnecting }: ControlGridProps) {
     return (
         <Grid container rowSpacing={1} columnSpacing={{ xs: 1, md: 2 }} sx={{ margin: "1%" }}>
             {isConnecting ? (
@@ -25,32 +29,27 @@ function ControlGrid({ isConnecting=true }) {
                 <>
                     <Grid item xs={6} md={8}>
                         <Item sx={{ width: "100%", height: "300px" }}>
-                            xs=6 md=8
+                            3D Pod Model
                         </Item>
                     </Grid>
                     <Grid item xs={6} md={4}>
                         <Item sx={{ width: "100%", height: "300px" }}>
-                            xs=6 md=8
+                            Table 01
                         </Item>
                     </Grid>
                     <Grid item xs={6} md={4}>
                         <Item sx={{ width: "100%", height: "300px" }}>
-                            xs=6 md=8
+                            Table 02
                         </Item>
                     </Grid>
                     <Grid item xs={6} md={8}>
                         <Item sx={{ width: "100%", height: "300px" }}>
-                            xs=6 md=8
-                        </Item>
-                    </Grid>
-                    <Grid item xs={6} md={4}>
-                        <Item sx={{ width: "100%", height: "300px" }}>
-                            xs=6 md=8
+                            Table 03
                         </Item>
                     </Grid>
                     <Grid item xs={12} md={12}>
-                        <Item sx={{ width: "100%", height: "300px" }}>
-                            xs=6 md=8
+                        <Item sx={{ width: "100%" }}>
+                            <PodTemperatures />
                         </Item>
                     </Grid>
                 </>

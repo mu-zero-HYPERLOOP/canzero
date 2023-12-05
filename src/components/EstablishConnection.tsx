@@ -7,19 +7,22 @@ import {green, red, yellow} from "@mui/material/colors";
 import SyncIcon from '@mui/icons-material/Sync';
 import ErrorIcon from '@mui/icons-material/ErrorOutline';
 
+interface EstablishConnectionProps {
+    isConnecting: boolean;
+    setIsConnecting: (isConnecting: boolean) => void;
+}
 
-export function EstablishConnection() {
-    const [connecting, setConnecting] = useState<boolean>(true);
-    const [sucess, setSucess] = useState<boolean>(false)
+function EstablishConnection({ isConnecting, setIsConnecting }: EstablishConnectionProps) {
+    const [success, setSuccess] = useState<boolean>(false)
 
     async function asyncConnect() {
         try {
             await invoke("connect_pod");
-            setSucess(true)
+            setSuccess(true)
         } catch(error) {
             // TODO: handle error
         } finally {
-            setConnecting(false)
+            setIsConnecting(false)
         }
     }
 
@@ -28,12 +31,12 @@ export function EstablishConnection() {
     }, []);
 
     const sx = {
-        ...((!connecting && sucess && {
+        ...((success && {
             bgcolor: '#2E9B33',
             '&:hover': {
                 bgcolor: green[800],
             },
-        }) || (!connecting && !sucess && {
+        }) || (!success && {
             bgcolor: '#E32E13',
             '&:hover': {
                 bgcolor: red[800],
@@ -44,7 +47,7 @@ export function EstablishConnection() {
     return (
         <Box sx={{display: 'flex', alignItems: 'center', width: 180}}>
             <Box sx={{m: 1, position: 'relative'}}>
-                {(connecting && <>Connecting...</>) || (!connecting && sucess && <>Connected</>) || (!connecting && !sucess && <>Failed!</>)}
+            {(isConnecting && <>Connecting...</>) || (!isConnecting && success && <>Connected</>) || (!isConnecting && !success && <>Failed!</>)}
             </Box>
             <Box sx={{m: 1, position: 'relative'}}>
                 <Fab
@@ -52,9 +55,9 @@ export function EstablishConnection() {
                     color="secondary"
                     sx={sx}
                     size="medium" >
-                    {(connecting && <SyncIcon/>) || (!connecting && sucess && <CheckIcon/>) || (!connecting && !sucess && <ErrorIcon/>)}
+                    {(isConnecting && <SyncIcon/>) || (!isConnecting && success && <CheckIcon/>) || (!isConnecting && !success && <ErrorIcon/>)}
                 </Fab>
-                {connecting && (
+                {isConnecting && (
                     <CircularProgress
                         size={57}
                         sx={{
@@ -68,5 +71,6 @@ export function EstablishConnection() {
                 )}
             </Box>
         </Box>
-    )
+    );
 }
+export default EstablishConnection;

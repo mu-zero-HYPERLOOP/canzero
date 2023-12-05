@@ -36,7 +36,8 @@ function getColor(value:number) {
     let percent = (value - 20) / (47 - 20)
     return colormap(percent)
 }
-export default function ControlTable() {
+
+export default function PodTemperatures() {
     return (
         <div className="ControlTable">
         <TableContainer component={Paper}>
