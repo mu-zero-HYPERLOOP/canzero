@@ -4,6 +4,15 @@ import {invoke} from '@tauri-apps/api';
 import ControlTable from '../components/ControlTable';
 import {Container} from '@mui/material';
 import {useEffect} from "react";
+import { Grid, Paper, Box, styled } from '@mui/material';
+
+const Item = styled(Paper)(({ theme }) => ({
+    backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
+    ...theme.typography.body2,
+    padding: theme.spacing(1),
+    textAlign: 'center',
+    color: theme.palette.text.secondary,
+  }));
 
 function ControllButtons() {
     return (
@@ -51,15 +60,42 @@ function OverviewPanel() {
     }, []);
 
     return (
-        <>
-            <Container maxWidth="lg" sx={{mt: 1, mb: 1}}>
-                <ControllButtons/>
-            </Container>
-            <Container maxWidth="lg" sx={{mt: 1, mb: 1}}>
-                <ControlTable/>
-            </Container>
-        </>
+        <div>
+            <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+                <Grid item xs={12} md={12}>
+                    <Item>xs=12 md=12</Item>
+                </Grid>
+                <Grid item xs={6} md={8}>
+                    <Item>xs=6 md=8</Item>
+                </Grid>
+                <Grid item xs={6} md={4}>
+                    <Item>xs=6 md=4</Item>
+                </Grid>
+                <Grid item xs={6} md={4}>
+                    <Item>xs=6 md=8</Item>
+                </Grid>
+                <Grid item xs={6} md={8}>
+                    <Item>xs=6 md=4</Item>
+                </Grid>
+                <Grid item xs={6} md={4}>
+                    <Item>xs=6 md=4</Item>
+                </Grid>
+                <Grid item xs={12} md={12}>
+                    <Item>xs=6 md=4</Item>
+                </Grid>
+            </Grid>
+        </div>
+
     );
 }
 
 export default OverviewPanel;
+
+{/*<>
+<Container maxWidth="lg" sx={{mt: 1, mb: 1}}>
+    <ControllButtons/>
+</Container>
+<Container maxWidth="lg" sx={{mt: 1, mb: 1}}>
+    <ControlTable/>
+</Container>
+</>*/}
