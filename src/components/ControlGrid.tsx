@@ -10,46 +10,52 @@ const Item = styled(Paper)(({ theme }) => ({
   }));
 
 
-function ControlGrid() {
-
-
+function ControlGrid({ isConnecting=true }) {
     return (
-        <div>
-            <Grid container rowSpacing={1} columnSpacing={{ xs: 1, md: 2 }} sx={{ margin: "1%"}}>
-                <Grid item xs={12} md={12}>
-                </Grid>
-                <Grid item xs={6} md={8}>
-                    <Item sx={{ width: "100%", height: "300px"}}>
-                        xs=6 md=8
-                    </Item>
-                </Grid>
-                <Grid item xs={6} md={4}>
-                    <Item sx={{ width: "100%", height: "300px"}}>
-                        xs=6 md=8
-                    </Item>
-                </Grid>
-                <Grid item xs={6} md={4}>
-                <Item sx={{ width: "100%", height: "300px"}}>
-                        xs=6 md=8
-                    </Item>
-                </Grid>
-                <Grid item xs={6} md={8}>
-                <Item sx={{ width: "100%", height: "300px"}}>
-                        xs=6 md=8
-                    </Item>
-                </Grid>
-                <Grid item xs={6} md={4}>
-                <Item sx={{ width: "100%", height: "300px"}}>
-                        xs=6 md=8
-                    </Item>
-                </Grid>
-                <Grid item xs={12} md={12}>
-                <Item sx={{ width: "100%", height: "300px"}}>
-                        xs=6 md=8
-                    </Item>
-                </Grid>
-            </Grid>
-        </div>
+        <Grid container rowSpacing={1} columnSpacing={{ xs: 1, md: 2 }} sx={{ margin: "1%" }}>
+            {isConnecting ? (
+                <>
+                    {Array.from({ length: 4 }, (_, index) => (
+                        <Grid item xs={6} md={(index % 4 === 0 || index % 4 === 3) ? 8 : 4} key={index}>
+                            <Skeleton variant="rounded" width="100%" height="300px" />
+                        </Grid>
+                    ))}
+                </>
+            ) : (
+                <>
+                    <Grid item xs={6} md={8}>
+                        <Item sx={{ width: "100%", height: "300px" }}>
+                            xs=6 md=8
+                        </Item>
+                    </Grid>
+                    <Grid item xs={6} md={4}>
+                        <Item sx={{ width: "100%", height: "300px" }}>
+                            xs=6 md=8
+                        </Item>
+                    </Grid>
+                    <Grid item xs={6} md={4}>
+                        <Item sx={{ width: "100%", height: "300px" }}>
+                            xs=6 md=8
+                        </Item>
+                    </Grid>
+                    <Grid item xs={6} md={8}>
+                        <Item sx={{ width: "100%", height: "300px" }}>
+                            xs=6 md=8
+                        </Item>
+                    </Grid>
+                    <Grid item xs={6} md={4}>
+                        <Item sx={{ width: "100%", height: "300px" }}>
+                            xs=6 md=8
+                        </Item>
+                    </Grid>
+                    <Grid item xs={12} md={12}>
+                        <Item sx={{ width: "100%", height: "300px" }}>
+                            xs=6 md=8
+                        </Item>
+                    </Grid>
+                </>
+            )}
+        </Grid>
     );
 }
 
