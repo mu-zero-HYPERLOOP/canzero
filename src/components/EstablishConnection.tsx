@@ -1,5 +1,5 @@
 import Box from "@mui/material/Box";
-import {CircularProgress, Fab} from "@mui/material";
+import {CircularProgress, Fab } from "@mui/material";
 import {useEffect, useState} from "react";
 import {invoke} from "@tauri-apps/api";
 import CheckIcon from '@mui/icons-material/Check';
@@ -13,15 +13,18 @@ export function EstablishConnection() {
     const [sucess, setSucess] = useState<boolean>(false)
 
     async function asyncConnect() {
-        await invoke("connect_pod");
-        setSucess(true)
-        setConnecting(false)
+        try {
+            await invoke("connect_pod");
+            setSucess(true)
+        } catch(error) {
+            // TODO: handle error
+        } finally {
+            setConnecting(false)
+        }
     }
 
     useEffect(() => {
-        asyncConnect().catch(() => {
-            setConnecting(false)
-        })
+        asyncConnect();
     }, []);
 
     const sx = {
@@ -38,31 +41,32 @@ export function EstablishConnection() {
         })),
     };
 
-    return (<Box sx={{display: 'flex', alignItems: 'center', width: 180}}>
-        <Box sx={{m: 1, position: 'relative'}}>
-            {(connecting && <>Connecting...</>) || (!connecting && sucess && <>Connected</>) || (!connecting && !sucess && <>Failed!</>)}
+    return (
+        <Box sx={{display: 'flex', alignItems: 'center', width: 180}}>
+            <Box sx={{m: 1, position: 'relative'}}>
+                {(connecting && <>Connecting...</>) || (!connecting && sucess && <>Connected</>) || (!connecting && !sucess && <>Failed!</>)}
+            </Box>
+            <Box sx={{m: 1, position: 'relative'}}>
+                <Fab
+                    aria-label="save"
+                    color="secondary"
+                    sx={sx}
+                    size="medium" >
+                    {(connecting && <SyncIcon/>) || (!connecting && sucess && <CheckIcon/>) || (!connecting && !sucess && <ErrorIcon/>)}
+                </Fab>
+                {connecting && (
+                    <CircularProgress
+                        size={57}
+                        sx={{
+                            color: yellow[500],
+                            position: 'absolute',
+                            top: -4.5,
+                            left: -4.5,
+                            zIndex: 1,
+                        }}
+                    />
+                )}
+            </Box>
         </Box>
-        <Box sx={{m: 1, position: 'relative'}}>
-            <Fab
-                aria-label="save"
-                color="secondary"
-                sx={sx}
-                size="medium"
-            >
-                {(connecting && <SyncIcon/>) || (!connecting && sucess && <CheckIcon/>) || (!connecting && !sucess && <ErrorIcon/>)}
-            </Fab>
-            {connecting && (
-                <CircularProgress
-                    size={57}
-                    sx={{
-                        color: yellow[500],
-                        position: 'absolute',
-                        top: -4.5,
-                        left: -4.5,
-                        zIndex: 1,
-                    }}
-                />
-            )}
-        </Box>
-    </Box>)
+    )
 }

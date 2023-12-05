@@ -1,18 +1,7 @@
-import Button from '@mui/material/Button';
-import Stack from '@mui/material/Stack';
 import {invoke} from '@tauri-apps/api';
-import ControlTable from '../components/ControlTable';
-import {Container} from '@mui/material';
+import {Container, Button, Stack} from '@mui/material';
 import {useEffect} from "react";
-import { Grid, Paper, Box, styled } from '@mui/material';
-
-const Item = styled(Paper)(({ theme }) => ({
-    backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-    ...theme.typography.body2,
-    padding: theme.spacing(1),
-    textAlign: 'center',
-    color: theme.palette.text.secondary,
-  }));
+import ControlGrid from '../components/ControlGrid';
 
 function ControllButtons() {
     return (
@@ -64,52 +53,12 @@ function OverviewPanel() {
             <Container maxWidth="lg" sx={{mt: 1, mb: 1}}>
                 <ControllButtons/>
             </Container>
-            <Grid container rowSpacing={1} columnSpacing={{ xs: 1, md: 2 }} sx={{ margin: "1%"}}>
-                <Grid item xs={12} md={12}>
-                </Grid>
-                <Grid item xs={6} md={8}>
-                    <Item sx={{ width: "100%", height: "300px"}}>
-                        xs=6 md=8
-                    </Item>
-                </Grid>
-                <Grid item xs={6} md={4}>
-                    <Item sx={{ width: "100%", height: "300px"}}>
-                        xs=6 md=8
-                    </Item>
-                </Grid>
-                <Grid item xs={6} md={4}>
-                <Item sx={{ width: "100%", height: "300px"}}>
-                        xs=6 md=8
-                    </Item>
-                </Grid>
-                <Grid item xs={6} md={8}>
-                <Item sx={{ width: "100%", height: "300px"}}>
-                        xs=6 md=8
-                    </Item>
-                </Grid>
-                <Grid item xs={6} md={4}>
-                <Item sx={{ width: "100%", height: "300px"}}>
-                        xs=6 md=8
-                    </Item>
-                </Grid>
-                <Grid item xs={12} md={12}>
-                <Item sx={{ width: "100%", height: "300px"}}>
-                        xs=6 md=8
-                    </Item>
-                </Grid>
-            </Grid>
+            <Container maxWidth="lg" sx={{mt: 1, mb: 1}}>
+                <ControlGrid />
+            </Container>
         </div>
 
     );
 }
 
 export default OverviewPanel;
-
-{/*<>
-<Container maxWidth="lg" sx={{mt: 1, mb: 1}}>
-    <ControllButtons/>
-</Container>
-<Container maxWidth="lg" sx={{mt: 1, mb: 1}}>
-    <ControlTable/>
-</Container>
-</>*/}
