@@ -14,7 +14,6 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ShowPages from './ShowPages';
 import {ListEntries} from './PageList';
 import logo from '../assets/mu-zero-hyperloop-logo.png'
-import {EstablishConnection} from "../components/EstablishConnection.tsx";
 
 const drawerWidth: number = 200;
 
@@ -113,7 +112,6 @@ export default function Dashboard() {
                             src={logo}
                         />
                     </Typography>
-                    <EstablishConnection/>
                 </Toolbar>
             </AppBar>
             <Drawer variant="permanent" open={open}>

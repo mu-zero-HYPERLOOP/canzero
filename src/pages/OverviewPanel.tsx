@@ -2,32 +2,36 @@ import {invoke} from '@tauri-apps/api';
 import {Container, Button, Stack} from '@mui/material';
 import {useEffect} from "react";
 import ControlGrid from '../components/ControlGrid';
+import { EstablishConnection } from '../components/EstablishConnection';
 
 function ControllButtons() {
     return (
-        <Stack
-            direction="row"
-            justifyContent="space-around"
-            alignItems="center"
-            spacing={2}
-        >
-            {/*Add icons*/}
-            <Button variant="contained" size="large"
-                    style={{maxWidth: '150px', maxHeight: '45px', minWidth: '150px', minHeight: '45px'}} color="error"
-                    onClick={() => {
-                        invoke('emergency');
-                    }}>Emergency</Button>
-            <Button variant="contained" size="large"
-                    style={{maxWidth: '150px', maxHeight: '45px', minWidth: '150px', minHeight: '45px'}} color="success"
-                    onClick={() => {
-                        invoke('launch_pod');
-                    }}>Launch</Button>
-            <Button variant="contained" size="large"
-                    style={{maxWidth: '150px', maxHeight: '45px', minWidth: '150px', minHeight: '45px'}}
-                    onClick={() => {
-                        invoke('land_pod');
-                    }}>Land</Button>
-        </Stack>
+        <>        
+            <Stack
+                direction="row"
+                justifyContent="start"
+                alignItems="center"
+                spacing={5} >
+                {/*Add icons*/}
+                <Button variant="contained" size="large"
+                        style={{maxWidth: '150px', maxHeight: '45px', minWidth: '150px', minHeight: '45px'}} color="error"
+                        onClick={() => {
+                            invoke('emergency');
+                        }}>Emergency</Button>
+                <Button variant="contained" size="large"
+                        style={{maxWidth: '150px', maxHeight: '45px', minWidth: '150px', minHeight: '45px'}} color="success"
+                        onClick={() => {
+                            invoke('launch_pod');
+                        }}>Launch</Button>
+                <Button variant="contained" size="large"
+                        style={{maxWidth: '150px', maxHeight: '45px', minWidth: '150px', minHeight: '45px', marginRight: "20%"}}
+                        onClick={() => {
+                            invoke('land_pod');
+                        }}>Land</Button>
+                
+                <EstablishConnection />
+            </Stack>
+        </>
     );
 }
 
