@@ -313,7 +313,7 @@ function TraceGrid() {
   // maxHeight : 800 sucks asss
   return (
     <StyledPaper sx={{ width: '100%' }}>
-      <Box sx={{ padding: "10px", textAlign: "center" }}>
+      <Box sx={{ margin: "2%", textAlign: "center" }}>
         <TraceSearchBar onSearch={filterRows} />
       </Box>
       <TableContainer sx={{ maxHeight: 800 }}>

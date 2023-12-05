@@ -61,27 +61,41 @@ function OverviewPanel() {
 
     return (
         <div>
-            <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+            <Container maxWidth="lg" sx={{mt: 1, mb: 1}}>
+                <ControllButtons/>
+            </Container>
+            <Grid container rowSpacing={1} columnSpacing={{ xs: 1, md: 2 }} sx={{ margin: "1%"}}>
                 <Grid item xs={12} md={12}>
-                    <Item>xs=12 md=12</Item>
                 </Grid>
                 <Grid item xs={6} md={8}>
-                    <Item>xs=6 md=8</Item>
+                    <Item sx={{ width: "100%", height: "300px"}}>
+                        xs=6 md=8
+                    </Item>
                 </Grid>
                 <Grid item xs={6} md={4}>
-                    <Item>xs=6 md=4</Item>
+                    <Item sx={{ width: "100%", height: "300px"}}>
+                        xs=6 md=8
+                    </Item>
                 </Grid>
                 <Grid item xs={6} md={4}>
-                    <Item>xs=6 md=8</Item>
+                <Item sx={{ width: "100%", height: "300px"}}>
+                        xs=6 md=8
+                    </Item>
                 </Grid>
                 <Grid item xs={6} md={8}>
-                    <Item>xs=6 md=4</Item>
+                <Item sx={{ width: "100%", height: "300px"}}>
+                        xs=6 md=8
+                    </Item>
                 </Grid>
                 <Grid item xs={6} md={4}>
-                    <Item>xs=6 md=4</Item>
+                <Item sx={{ width: "100%", height: "300px"}}>
+                        xs=6 md=8
+                    </Item>
                 </Grid>
                 <Grid item xs={12} md={12}>
-                    <Item>xs=6 md=4</Item>
+                <Item sx={{ width: "100%", height: "300px"}}>
+                        xs=6 md=8
+                    </Item>
                 </Grid>
             </Grid>
         </div>
