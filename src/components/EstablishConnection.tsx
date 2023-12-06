@@ -31,12 +31,12 @@ function EstablishConnection({ isConnecting, setIsConnecting }: EstablishConnect
     }, []);
 
     const sx = {
-        ...((success && {
+        ...((!isConnecting && success && {
             bgcolor: '#2E9B33',
             '&:hover': {
                 bgcolor: green[800],
             },
-        }) || (!success && {
+        }) || (!isConnecting && !success && {
             bgcolor: '#E32E13',
             '&:hover': {
                 bgcolor: red[800],
