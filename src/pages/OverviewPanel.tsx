@@ -51,7 +51,7 @@ function OverviewPanel() {
     
                     <Box sx={{ flexGrow: 1 }}></Box>
     
-                    <EstablishConnection setIsConnecting={isConnecting, setIsConnecting} />
+                    <EstablishConnection isConnecting={isConnecting} setIsConnecting={setIsConnecting} />
                 </Stack>
             </>
         );
