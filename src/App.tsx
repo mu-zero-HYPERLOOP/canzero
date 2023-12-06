@@ -2,9 +2,12 @@ import { StaticRouter } from "react-router-dom/server";
 import "./App.css";
 import DashBoard from "./pages/DashBoard";
 import { MemoryRouter } from "react-router-dom";
-import {ThemeProvider, createTheme } from "@mui/material";
+import {ThemeProvider, createTheme} from "@mui/material";
+import {SnackbarProvider} from "notistack";
+import NotificationSystem from "./components/NotificationSystem.tsx";
+import React from "react";
 
-function Router(props: { children?: React.ReactNode }) {
+function Router(props: Readonly<{ children?: React.ReactNode }>) {
   const { children } = props;
   if (typeof window === 'undefined') {
     return <StaticRouter location="/">{children}</StaticRouter>;
@@ -31,9 +34,12 @@ function App() {
 
   return (
       <ThemeProvider theme={theme}>
-          <Router>
-              <DashBoard/>
-          </Router>
+          <SnackbarProvider>
+              <Router>
+                  <DashBoard/>
+                  <NotificationSystem/>
+              </Router>
+          </SnackbarProvider>
       </ThemeProvider>
   );
 }
