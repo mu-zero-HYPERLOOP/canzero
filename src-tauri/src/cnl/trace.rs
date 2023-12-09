@@ -109,19 +109,17 @@ impl Serialize for TraceTimestamp {
         let secs = self.timestamp.as_secs();
         if secs > 0 {
             time_string.push_str(&secs.to_string());
-            time_string.push_str("s ");
-        }
-        let millis = self.timestamp.subsec_millis();
-        if millis > 0 {
+            time_string.push_str(".");
+            let millis = self.timestamp.subsec_millis();
             time_string.push_str(&millis.to_string());
-            time_string.push_str("ms ");
+            time_string.push_str("s");
+            time_string.serialize(serializer)
+        } else {
+            let millis = self.timestamp.subsec_millis();
+            time_string.push_str(&millis.to_string());
+            time_string.push_str("ms");
+            time_string.serialize(serializer)
         }
-        let nanos = self.timestamp.subsec_micros() % 1000;
-        if nanos > 0 {
-            time_string.push_str(&nanos.to_string());
-            time_string.push_str("\u{03bc}s");
-        }
-        time_string.serialize(serializer)
     }
 }
 
@@ -134,19 +132,20 @@ impl Serialize for TraceDeltaTime {
         let secs = self.delta_time.as_secs();
         if secs > 0 {
             time_string.push_str(&secs.to_string());
-            time_string.push_str("s ");
-        }
-        let millis = self.delta_time.subsec_millis();
-        if millis > 0 {
+            time_string.push_str(".");
+            let millis = self.delta_time.subsec_millis();
             time_string.push_str(&millis.to_string());
-            time_string.push_str("ms ");
-        }
-        let nanos = self.delta_time.subsec_micros() % 1000;
-        if nanos > 0 {
+            time_string.push_str("s");
+            time_string.serialize(serializer)
+        } else {
+            let millis = self.delta_time.subsec_millis();
+            time_string.push_str(&millis.to_string());
+            time_string.push_str(".");
+            let nanos = (self.delta_time.subsec_micros() % 1000) / 100;
             time_string.push_str(&nanos.to_string());
-            time_string.push_str("\u{03bc}s");
+            time_string.push_str("ms");
+            time_string.serialize(serializer)
         }
-        time_string.serialize(serializer)
     }
 }
 

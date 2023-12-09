@@ -1,5 +1,5 @@
-import { Box, Collapse, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, styled, Stack } from "@mui/material";
-import { AccessAlarm, AddAlarm } from "@mui/icons-material";
+import { Box, Collapse, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, styled, Stack, Button } from "@mui/material";
+import { AccessAlarm, ChangeHistory } from "@mui/icons-material";
 import { invoke } from "@tauri-apps/api";
 import { listen } from "@tauri-apps/api/event";
 import React, { useEffect, useState, useRef } from "react";
@@ -336,19 +336,17 @@ function TraceGrid() {
                 {sortField === 'Dlc' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
               </TableHeaderCell>
               <TableHeaderCell align="left" onClick={() => toggleSortDirection('Time')}>
-                {timeAbsolute ? "Absolute Time" : "Relative Time"}
                 <Stack direction="row" spacing={1} alignItems="center">
-                  <IconButton onClick={(evt) => {
-                    setTimeAbsolute((t) => !t);
-                    evt.stopPropagation();
-                  }}>
-                    {timeAbsolute ? (
-                      <AccessAlarm />
-                    ) : (
-                      <AddAlarm />
-                    )}
-                  </IconButton>
-
+                  <Button startIcon={timeAbsolute ? (
+                    <AccessAlarm fontSize="small"/>
+                    ):(
+                    <ChangeHistory fontSize="small"/>)} 
+                      onClick={(evt) => {
+                        setTimeAbsolute((t) => !t);
+                        evt.stopPropagation();
+                      }} sx={{color:"white"}}>
+                        Time
+                      </Button>
                   {sortField === 'Time' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
                 </Stack>
               </TableHeaderCell>
