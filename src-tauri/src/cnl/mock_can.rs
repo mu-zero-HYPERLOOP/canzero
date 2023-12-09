@@ -37,7 +37,7 @@ fn random_get_resp(rng: &mut ThreadRng, network_config: &config::NetworkRef) -> 
     let sof = 1;
     let eof = 1;
     let toggle = 1;
-    let object_entry_id = object_entry.id();
+    let object_entry_id = 0;
     let server_id = 0;
     let client_id = network_config.nodes().len();
 
@@ -115,6 +115,7 @@ impl MockCan {
             .lock()
             .expect("failed to acquire mock can lock")
             .gen_range(1..10);
+        let timeout = 1;
         tokio::time::sleep(Duration::from_millis(timeout)).await;
 
 
