@@ -12,7 +12,7 @@ interface ObjectEntryPanelProps {
 }
 
 function ObjectEntryPanel({node, name}: ObjectEntryPanelProps) {
-    const [objectEntryInfo, setObjectEntryInfo] = useState<ObjectEntryInformation>({name: name, id: -1});
+    const [objectEntryInfo, setObjectEntryInfo] = useState<ObjectEntryInformation>({name: "name", id: -1, ty: "int"});
     const [objectEntryEvent, setObjectEntryEvent] = useState<ObjectEntryEvent>({value: 0, timestamp: 0, delta_time: 0})
 
     async function asyncFetchNetworkInfo() {
