@@ -146,16 +146,21 @@ impl GetRespFrameHandler {
         assert_eq!(*eof, 1, "No Fragmentation supported yet");
         assert_eq!(*toggle, 1, "No Fragmentation supported yet");
 
+        // println!("object_entry_id = {object_entry_id}");
+
         // TODO lookup correct object entry!
         // this just selects a random one!
         let Some(server_node) = self.network.nodes().get(*server_id as usize) else {
             // TODO implement error handling
+            panic!();
             return Timestamped::new(can_frame.timestamp().clone(), frame);
         };
         let Some(object_entry) = server_node.object_entries().get(*object_entry_id as usize) else {
             // TODO implement error handling
+            panic!();
             return Timestamped::new(can_frame.timestamp().clone(), frame);
         };
+        // println!("object_entry_name = {}", object_entry.name());
 
         let mut bitstring = Bitstring::new(); //TODO probably good to implement fragmentation here!
         bitstring.append(unsafe { std::mem::transmute::<u32, [u8; 4]>(*value as u32) }.as_slice());
@@ -169,6 +174,7 @@ impl GetRespFrameHandler {
         )
         .expect("failed to parse get resp value")
         .1;
+        // println!("object_entry value = {value:?}");
 
         // notify the object entry (object) about the new value
         object_entry.push_value(value, can_frame.timestamp()).await;

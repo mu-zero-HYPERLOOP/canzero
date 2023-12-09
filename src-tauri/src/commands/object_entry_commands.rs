@@ -3,7 +3,7 @@ use serde::Serialize;
 use crate::{state::cnl_state::CNLState, cnl::network::object_entry_object::ObjectEntryEvent};
 
 
-#[derive(Clone, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct ObjectEntryListenLatestResponse {
     event_name : String,
     latest : Option<ObjectEntryEvent>,
@@ -16,6 +16,7 @@ pub async fn listen_to_latest_object_entry_value(
     node_name : String,
     object_entry_name : String,
 ) -> Result<ObjectEntryListenLatestResponse, ()> {
+    println!("view invoked listen_to_latest_object_entry_value({node_name}, {object_entry_name})");
     let cnl = state.lock().await;
 
     let Some(node) = cnl.nodes().iter().find(|no| no.name() == &node_name) else {
@@ -26,10 +27,13 @@ pub async fn listen_to_latest_object_entry_value(
     };
     object_entry_object.listen_to_latest();
 
-    Ok(ObjectEntryListenLatestResponse{
+    let x = ObjectEntryListenLatestResponse{
         event_name : object_entry_object.latest_event_name().to_owned(),
         latest : object_entry_object.latest().await
-    })
+    };
+    println!("return {x:?}");
+
+    Ok(x)
 }
 
 #[allow(unused)]
@@ -39,6 +43,7 @@ pub async fn unlisten_from_latest_object_entry_value(
     node_name : String,
     object_entry_name : String,
 ) -> Result<(), ()> {
+    println!("view invoked unlisten_from_latest_object_entry_value({node_name}, {object_entry_name})");
     let cnl = state.lock().await;
 
     let Some(node) = cnl.nodes().iter().find(|no| no.name() == &node_name) else {
@@ -52,7 +57,7 @@ pub async fn unlisten_from_latest_object_entry_value(
 }
 
 
-#[derive(Clone, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct ObjectEntryListenHistoryResponse {
     event_name : String,
     history : Vec<ObjectEntryEvent>,
@@ -65,6 +70,7 @@ pub async fn listen_to_history_of_object_entry(
     node_name : String,
     object_entry_name : String,
 ) -> Result<ObjectEntryListenHistoryResponse, ()> {
+    println!("view invoked listen_to_history_of_object_entry({node_name}, {object_entry_name})");
     let cnl = state.lock().await;
 
     let Some(node) = cnl.nodes().iter().find(|no| no.name() == &node_name) else {
@@ -75,10 +81,13 @@ pub async fn listen_to_history_of_object_entry(
     };
     object_entry_object.listen_to_history();
 
-    Ok(ObjectEntryListenHistoryResponse {
+    let x = ObjectEntryListenHistoryResponse {
         event_name : object_entry_object.history_event_name().to_owned(),
         history : object_entry_object.history().await,
-    })
+    };
+    println!("return -> {x:?}");
+
+    Ok(x)
 }
 
 #[allow(unused)]
@@ -88,6 +97,7 @@ pub async fn unlisten_from_history_of_object_entry(
     node_name : String,
     object_entry_name : String,
 ) -> Result<(), ()> {
+    println!("view invoked unlisten_from_history_object_entry({node_name}, {object_entry_name})");
     let cnl = state.lock().await;
 
     let Some(node) = cnl.nodes().iter().find(|no| no.name() == &node_name) else {

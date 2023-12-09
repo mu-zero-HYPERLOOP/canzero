@@ -38,7 +38,7 @@ fn random_get_resp(rng: &mut ThreadRng, network_config: &config::NetworkRef) -> 
     let eof = 1;
     let toggle = 1;
     let object_entry_id = object_entry.id();
-    let server_id = object_entry.id();
+    let server_id = 0;
     let client_id = network_config.nodes().len();
 
     let mut value = 0;

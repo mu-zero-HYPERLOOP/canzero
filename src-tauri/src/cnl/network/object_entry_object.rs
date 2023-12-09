@@ -35,6 +35,7 @@ impl ObjectEntryObject {
             object_entry_config.node().name(),
             object_entry_config.name()
         );
+        println!("latest_name = {latest_event_name}");
         Self {
             object_entry_ref: object_entry_config.clone(),
             store: Arc::new(Mutex::new(ObjectEntryStore::new())),
@@ -267,7 +268,7 @@ impl ObjectEntryLatestObservable {
                         Some(ObjectEntryEventMsg::Poison) => {
                             match store.lock().await.latest_value() {
                                 Some(latest) => {
-                                    // println!("emit {event_name} = {latest:?}");
+                                    println!("emit {event_name} = {latest:?}");
                                     app_handle.emit_all(&event_name, latest).unwrap();
                                 }
                                 None => (),
@@ -277,7 +278,7 @@ impl ObjectEntryLatestObservable {
                         Some(ObjectEntryEventMsg::Value) => {
                             // only send batch if the last interval is min_interval in the past!
                             if next_batch_time <= tokio::time::Instant::now() {
-                                // println!("emit {event_name} = {value:?}");
+                                println!("emit {event_name} = {:?}", store.lock().await.latest_value());
                                 app_handle
                                     .emit_all(&event_name, store.lock().await.latest_value())
                                     .unwrap();
@@ -293,7 +294,7 @@ impl ObjectEntryLatestObservable {
                 Err(_elapsed) => {
                     match store.lock().await.latest_value() {
                         Some(latest) => {
-                            // println!("emit {event_name} = {latest:?}");
+                            println!("emit {event_name} = {latest:?}");
                             app_handle.emit_all(&event_name, latest).unwrap();
                             next_batch_time = tokio::time::Instant::now() + min_interval;
                         }
