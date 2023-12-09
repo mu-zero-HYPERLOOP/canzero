@@ -8,7 +8,6 @@ import { NetworkInformation } from "../types/NetworkInformation";
 import NodePanel from "./NodePanel";
 import { NodeInformation } from "../types/NodeInformation";
 import ObjectEntryPanel from "./ObjectEntryPanel";
-import CommandPanel from "./CommandPanel";
 
 function Content() {
   const location = useLocation();
@@ -50,13 +49,6 @@ function ShowPages() {
             <Route 
               path={`${node.name}/${objectEntryName}`} 
               element={<ObjectEntryPanel node={node} name={objectEntryName} />} 
-            />);
-        }
-        for (let commandName of node.commands) {
-          routes.push(
-            <Route 
-              path={`${node.name}/${commandName}`} 
-              element={<CommandPanel node={node} name={commandName} />} 
             />);
         }
 

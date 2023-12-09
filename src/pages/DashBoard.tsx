@@ -6,14 +6,12 @@ import Box from '@mui/material/Box';
 import MuiAppBar, {AppBarProps as MuiAppBarProps} from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import List from '@mui/material/List';
-import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ShowPages from './ShowPages';
 import {ListEntries} from './PageList';
-import logo from '../assets/mu-zero-hyperloop-logo.png'
 
 const drawerWidth: number = 200;
 
@@ -93,25 +91,6 @@ export default function Dashboard() {
                     >
                         <MenuIcon/>
                     </IconButton>
-                    <Typography
-                        component="h1"
-                        variant="h6"
-                        color="inherit"
-                        noWrap
-                        sx={{flexGrow: 1}}
-                    >
-                        <Box
-                            component="img"
-                            sx={{
-                                height: 50,
-                                width: 114,
-                                maxHeight: { xs: 233, md: 167 },
-                                maxWidth: { xs: 350, md: 250 },
-                            }}
-                            alt="The house from the offer."
-                            src={logo}
-                        />
-                    </Typography>
                 </Toolbar>
             </AppBar>
             <Drawer variant="permanent" open={open}>
