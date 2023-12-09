@@ -13,7 +13,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ShowPages from './ShowPages';
 import {ListEntries} from './PageList';
 
-const drawerWidth: number = 200;
+const drawerWidth: number = 220;
 
 interface AppBarProps extends MuiAppBarProps {
     open?: boolean;

@@ -34,7 +34,7 @@ function App() {
 
   return (
       <ThemeProvider theme={theme}>
-          <SnackbarProvider>
+          <SnackbarProvider preventDuplicate maxSnack={5}>
               <Router>
                   <DashBoard/>
                   <NotificationSystem/>
