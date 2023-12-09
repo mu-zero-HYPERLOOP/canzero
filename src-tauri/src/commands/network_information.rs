@@ -1,4 +1,8 @@
-use serde::Serialize;
+use can_config_rs::config;
+use serde::{
+    ser::{SerializeMap, SerializeSeq},
+    Serialize,
+};
 
 use crate::state::cnl_state::CNLState;
 
@@ -63,17 +67,106 @@ pub struct ObjectEntryInformation {
     description: Option<String>,
     id: u16,
     unit: Option<String>,
+    ty : ObjectEntryType,
 }
 
+#[derive(Clone)]
 pub enum ObjectEntryType {
     Int,
     Uint,
     Real,
-    Enum { entries : Vec<String>},
-    Composite { 
-        name : String, 
-        attributes : Vec<(String, Box<ObjectEntryType>)>
+    Enum {
+        entries: Vec<String>,
     },
+    Composite {
+        name: String,
+        attributes: Vec<(String, Box<ObjectEntryType>)>,
+    },
+}
+
+impl ObjectEntryType {
+    pub fn new(ty: &config::Type) -> ObjectEntryType {
+        match ty {
+            config::Type::Primitive(signal_type) => match signal_type {
+                config::SignalType::UnsignedInt { size : _ } => ObjectEntryType::Uint,
+                config::SignalType::SignedInt { size : _ } => ObjectEntryType::Int,
+                config::SignalType::Decimal {
+                    size : _,
+                    offset : _,
+                    scale : _,
+                } => ObjectEntryType::Real,
+            },
+            config::Type::Struct {
+                name,
+                description : _,
+                attribs,
+                visibility : _ ,
+            } => ObjectEntryType::Composite {
+                name: name.clone(),
+                attributes: attribs
+                    .iter()
+                    .map(|(attrib_name, attrib_ty)| {
+                        (
+                            attrib_name.clone(),
+                            Box::new(ObjectEntryType::new(attrib_ty)),
+                        )
+                    })
+                    .collect(),
+            },
+            config::Type::Enum {
+                name : _,
+                description : _,
+                size : _,
+                entries,
+                visibility : _,
+            } => ObjectEntryType::Enum {
+                entries: entries
+                    .iter()
+                    .map(|(value_name, _)| value_name.clone())
+                    .collect(),
+            },
+            config::Type::Array { len : _, ty : _ } => todo!(),
+        }
+    }
+}
+
+impl Serialize for ObjectEntryType {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        match &self {
+            ObjectEntryType::Int => serializer.serialize_str("int"),
+            ObjectEntryType::Uint => serializer.serialize_str("uint"),
+            ObjectEntryType::Real => serializer.serialize_str("real"),
+            ObjectEntryType::Enum { entries } => {
+                let mut seq = serializer.serialize_seq(Some(entries.len()))?;
+                for entry in entries {
+                    seq.serialize_element(entry)?;
+                }
+                seq.end()
+            }
+            ObjectEntryType::Composite { name, attributes } => {
+                let mut map = serializer.serialize_map(Some(2))?;
+                map.serialize_entry("name", name)?;
+                struct Attribs<'a>(&'a Vec<(String, Box<ObjectEntryType>)>);
+                impl<'a> Serialize for Attribs<'a> {
+                    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+                    where
+                        S: serde::Serializer,
+                    {
+                        let mut attrib_map = serializer.serialize_map(Some(self.0.len()))?;
+                        for (attrib_name, attrib_type) in self.0 {
+                            attrib_map.serialize_entry(attrib_name, attrib_type)?;
+                        }
+                        attrib_map.end()
+                    }
+                }
+                map.serialize_entry("attributes", &Attribs(attributes))?;
+                map.end()
+            }
+        }
+    }
 }
 
 #[tauri::command]
@@ -105,6 +198,7 @@ pub async fn object_entry_information(
                 Some(desc) => Some(desc.to_owned()),
                 None => None,
             },
+            ty : ObjectEntryType::new(object_entry.ty()),
         }),
         None => Err(format!(
             "node '{node_name}' doesn't have a object entry with name '{object_entry_name}'"
