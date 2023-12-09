@@ -1,17 +1,21 @@
 import {useSnackbar} from "notistack";
-import {Button} from "@mui/material";
+import {useEffect} from "react";
+import {listen} from "@tauri-apps/api/event";
 
 function NotificationSystem() {
-    return <MyButton/>
+    const { enqueueSnackbar } = useSnackbar()
+
+    useEffect(() => {
+        let unsubscribe =  listen<Notification>("notification", (event) => {
+            enqueueSnackbar(event.payload)
+        });
+
+        return () => {
+            unsubscribe.then(f => f());
+        };
+    }, []);
+
 }
 
-const MyButton = () => {
-    const { enqueueSnackbar } = useSnackbar()
-    return (
-        <Button onClick={() => enqueueSnackbar('Test')}>
-            Show snackbar
-        </Button>
-    )
-}
 
 export default NotificationSystem
