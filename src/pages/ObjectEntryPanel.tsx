@@ -1,14 +1,15 @@
-import { NodeInformation } from "../types/NodeInformation";
-import { useEffect, useState } from "react";
-import { ObjectEntryInformation } from "../types/ObjectEntryInformation.ts";
-import { invoke } from "@tauri-apps/api";
-import ObjectEntryEvent from "../types/ObjectEntryEvent.ts";
+import {NodeInformation} from "../types/NodeInformation";
+import {useEffect, useState} from "react";
+import {ObjectEntryInformation} from "../types/ObjectEntryInformation.ts";
+import {invoke} from "@tauri-apps/api";
+import Graph from "../components/Graph.tsx";
 import ObjectEntryListenLatestResponse from "../types/ObjectEntryListenLatestResponse.ts";
-import { listen } from "@tauri-apps/api/event";
+import ObjectEntryEvent from "../types/ObjectEntryEvent.ts";
+import { Event, listen } from "@tauri-apps/api/event";
 
 interface ObjectEntryPanelProps {
-  node: NodeInformation,
-  name: string,
+    node: NodeInformation,
+    name: string,   // name of obejct entry
 }
 
 function ObjectEntryPanel({ node, name }: ObjectEntryPanelProps) {
@@ -34,7 +35,7 @@ function ObjectEntryPanel({ node, name }: ObjectEntryPanelProps) {
       setObjectEntryEvent(objectEntryListenLatestResponse.latest)
     }
 
-    return await listen<ObjectEntryEvent>(objectEntryListenLatestResponse.event_name, (event) => {
+    return await listen<ObjectEntryEvent>(objectEntryListenLatestResponse.event_name, (event : Event<ObjectEntryEvent>) => {
       setObjectEntryEvent(event.payload)
     })
   }
@@ -54,6 +55,7 @@ function ObjectEntryPanel({ node, name }: ObjectEntryPanelProps) {
 
   return <>
     <h1> Hello {objectEntryInfo.name} of {node.name} </h1>
+    <Graph nodeName={node.name} oeName={name} />
     <label>
       Value: <input name="SetObjectDictionaryValue" value={objectEntryEvent.value.toString()} />
     </label>
