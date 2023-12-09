@@ -16,6 +16,7 @@ mod cnl;
 mod commands;
 mod observers;
 mod state;
+mod notification;
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
