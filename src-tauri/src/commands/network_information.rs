@@ -65,6 +65,17 @@ pub struct ObjectEntryInformation {
     unit: Option<String>,
 }
 
+pub enum ObjectEntryType {
+    Int,
+    Uint,
+    Real,
+    Enum { entries : Vec<String>},
+    Composite { 
+        name : String, 
+        attributes : Vec<(String, Box<ObjectEntryType>)>
+    },
+}
+
 #[tauri::command]
 pub async fn object_entry_information(
     state: tauri::State<'_, CNLState>,
@@ -80,6 +91,8 @@ pub async fn object_entry_information(
         .object_entries()
         .iter()
         .find(|oe| oe.name() == &object_entry_name);
+    // determine ObjectEntryFormat
+
     match object_entry {
         Some(object_entry) => Ok(ObjectEntryInformation {
             name: object_entry_name,
