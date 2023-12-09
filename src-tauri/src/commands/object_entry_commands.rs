@@ -79,13 +79,13 @@ pub async fn listen_to_history_of_object_entry(
     let Some(object_entry_object) = node.object_entries().iter().find(|oe| oe.name() == &object_entry_name) else {
         return Err(());
     };
-    object_entry_object.listen_to_history();
+    object_entry_object.listen_to_history().await;
 
     let x = ObjectEntryListenHistoryResponse {
         event_name : object_entry_object.history_event_name().to_owned(),
         history : object_entry_object.history().await,
     };
-    println!("return -> {x:?}");
+    println!("return [{:?}]", x.history.len());
 
     Ok(x)
 }

@@ -100,9 +100,6 @@ impl ObjectEntryObject {
         &self.object_entry_ref.ty()
     }
 
-    // Latest Events Issue #12
-
-    #[allow(unused)] //FIXME
     pub fn listen_to_latest(&self) {
         self.latest_observable.listen(&self.store);
     }
@@ -113,11 +110,8 @@ impl ObjectEntryObject {
         self.store.lock().await.latest_value().cloned()
     }
 
-    // History Events Issue #13
-
-    #[allow(unused)] //FIXME
-    pub fn listen_to_history(&self) {
-        self.history_observable.listen(&self.store);
+    pub async fn listen_to_history(&self) {
+        self.history_observable.listen(&self.store).await;
     }
 
     pub async fn unlisten_from_history(&self) {
@@ -268,7 +262,7 @@ impl ObjectEntryLatestObservable {
                         Some(ObjectEntryEventMsg::Poison) => {
                             match store.lock().await.latest_value() {
                                 Some(latest) => {
-                                    println!("emit {event_name} = {latest:?}");
+                                    // println!("emit {event_name} = {latest:?}");
                                     app_handle.emit_all(&event_name, latest).unwrap();
                                 }
                                 None => (),
@@ -278,7 +272,7 @@ impl ObjectEntryLatestObservable {
                         Some(ObjectEntryEventMsg::Value) => {
                             // only send batch if the last interval is min_interval in the past!
                             if next_batch_time <= tokio::time::Instant::now() {
-                                println!("emit {event_name} = {:?}", store.lock().await.latest_value());
+                                // println!("emit {event_name} = {:?}", store.lock().await.latest_value());
                                 app_handle
                                     .emit_all(&event_name, store.lock().await.latest_value())
                                     .unwrap();
@@ -294,7 +288,7 @@ impl ObjectEntryLatestObservable {
                 Err(_elapsed) => {
                     match store.lock().await.latest_value() {
                         Some(latest) => {
-                            println!("emit {event_name} = {latest:?}");
+                            // println!("emit {event_name} = {latest:?}");
                             app_handle.emit_all(&event_name, latest).unwrap();
                             next_batch_time = tokio::time::Instant::now() + min_interval;
                         }
@@ -396,6 +390,7 @@ impl ObjectEntryHistroyObservable {
                             let store_lock = store.lock().await;
                             if store_lock.history.len() < latest_index {
                                 let payload = store_lock.history[latest_index..].to_vec();
+                                println!("emit {event_name} = [{:?}]", payload.len());
                                 app_handle.emit_all(&event_name, payload).unwrap();
                             }
                             break;
@@ -404,18 +399,19 @@ impl ObjectEntryHistroyObservable {
                             // only send batch if the last interval is min_interval in the past!
 
                             if next_batch_time <= tokio::time::Instant::now() {
-                                // println!("emit {event_name} = {value:?}");
                                 let store_lock = store.lock().await;
                                 // should never be false because the store should be updated before
                                 // the notify (otherwise notify should not be called)
-                                if store_lock.history.len() < latest_index { 
+                                println!("trying to emit event {event_name}, latest = {latest_index}, history_len = {}", store_lock.history.len());
+                                if store_lock.history.len() > latest_index { 
                                     let payload = store_lock.history[latest_index..].to_vec();
                                     latest_index = store_lock.history.len(); 
+                                    println!("emit {event_name} = [{:?}]", payload.len());
                                     app_handle.emit_all(&event_name, payload).unwrap();
                                     next_batch_time = tokio::time::Instant::now() + min_interval;
                                     timeout = next_batch_time;
                                 }else {
-                                    panic!("I assumed this should not be called, just checking here!");
+                                    //panic!("I assumed this should not be called, just checking here!");
                                 }
                             }
                         }
@@ -428,6 +424,7 @@ impl ObjectEntryHistroyObservable {
                     let store_lock = store.lock().await;
                     if store_lock.history.len() < latest_index {
                         let payload = store_lock.history[latest_index..].to_vec();
+                        println!("emit {event_name} = [{:?}]", payload.len());
                         latest_index = store_lock.history.len();
                         app_handle.emit_all(&event_name, payload).unwrap();
                         next_batch_time = tokio::time::Instant::now() + min_interval;
