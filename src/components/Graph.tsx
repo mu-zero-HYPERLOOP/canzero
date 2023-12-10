@@ -15,7 +15,7 @@ interface GraphProps {
 function Graph({ nodeName, oeName }: GraphProps) {
   const [history, setHistory] = useState<ObjectEntryEvent[]>([]);
 
-  const frameSize: number = 10000; // in milliseconds
+  const frameSize: number = 1000; // in milliseconds
   const minInterval: number = 10; // in milliseconds
 
 
