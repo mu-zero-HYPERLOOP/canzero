@@ -5,17 +5,22 @@ mod can;
 mod mock_can;
 
 mod can_frame;
+pub mod command;
+pub mod errors;
 pub mod frame;
 mod handler;
 pub mod network;
 pub mod parser;
 mod rx;
-pub mod trace;
 pub mod timestamped;
+pub mod trace;
 
 use std::sync::Arc;
 
+use crate::notification::NotificationStream;
+
 use self::{
+    command::Command,
     network::{node_object::NodeObject, NetworkObject},
     rx::RxCom,
     trace::TraceObject,
@@ -37,6 +42,7 @@ pub struct CNL {
     rx: RxCom,
     network: Arc<NetworkObject>,
     baudrate: u32,
+    notification_stream: NotificationStream,
 }
 
 impl CNL {
@@ -55,14 +61,14 @@ impl CNL {
         let trace = Arc::new(TraceObject::create(app_handle));
 
         let network = Arc::new(NetworkObject::create(network_config, app_handle));
-        
+
         // for node in network.nodes() {
         //     for oe in node.object_entries() {
         //         oe.listen_to_latest();
         //     }
         // }
 
-        let rx = RxCom::create(network_config, &trace, &network);
+        let rx = RxCom::create(network_config, &trace, &network, app_handle);
         Self {
             can0,
             can1,
@@ -70,6 +76,7 @@ impl CNL {
             trace,
             network,
             baudrate: network_config.baudrate(),
+            notification_stream: NotificationStream::new(&app_handle),
         }
     }
     pub fn start(&mut self) {
@@ -87,5 +94,20 @@ impl CNL {
     }
     pub fn baudrate(&self) -> u32 {
         self.baudrate
+    }
+
+    pub fn command(&self, command: Command) {
+        match &command {
+            Command::Emergency => self.notification_stream.notify_error(
+                "Unimplemented",
+                "The command emergency is not yet implemented",
+            ),
+            Command::Launch => self
+                .notification_stream
+                .notify_error("Unimplemented", "The command launch is not yet implemented"),
+            Command::Abort => self
+                .notification_stream
+                .notify_error("Unimplemented", "The command abort is not yet implemented"),
+        }
     }
 }

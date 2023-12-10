@@ -3,6 +3,8 @@ use std::cmp::Ordering;
 use can_config_rs::config::{self, Type};
 
 use crate::cnl::{
+    errors::Result,
+    errors::Error,
     can_frame::CanFrame,
     frame::{
         type_frame::{CompositeTypeValue, FrameType, TypeFrame, TypeValue},
@@ -269,7 +271,7 @@ impl TypeParser {
 }
 
 impl TypeParser {
-    pub fn parse(&self, data: u64) -> TypeValue {
+    pub fn parse(&self, data: u64) -> Result<TypeValue> {
         match &self {
             TypeParser::UnsignedParser {
                 name: _,
@@ -279,7 +281,7 @@ impl TypeParser {
                 let value = data.overflowing_shr(64 - bit_offset - bit_size).0
                     & (0xFFFFFFFFFFFFFFFF as u64).overflowing_shr(64 - bit_size).0;
 
-                TypeValue::Unsigned(value)
+                Ok(TypeValue::Unsigned(value))
             }
             TypeParser::SignedParser {
                 name: _,
@@ -290,7 +292,7 @@ impl TypeParser {
                     & (0xFFFFFFFFFFFFFFFF as u64).overflowing_shr(64 - bit_size).0;
 
                 let ivalue = unsafe { std::mem::transmute::<u64, i64>(value) };
-                TypeValue::Signed(ivalue)
+                Ok(TypeValue::Signed(ivalue))
             }
 
             TypeParser::DecimalParser {
@@ -304,25 +306,25 @@ impl TypeParser {
                     & (0xFFFFFFFFFFFFFFFF as u64).overflowing_shr(64 - bit_size).0;
 
                 let dvalue = value as f64 * scale - offset;
-                TypeValue::Real(dvalue)
+                Ok(TypeValue::Real(dvalue))
             }
             TypeParser::CompositeParser {
                 name: _,
                 ty,
                 attrib_parsers,
             } => {
-                let attribs = attrib_parsers
-                    .iter()
-                    .map(|parser| FrameType::new(parser.name().to_owned(), parser.parse(data)))
-                    .collect();
-                TypeValue::Composite(CompositeTypeValue::new(attribs, ty))
+                let mut attribs = Vec::with_capacity(attrib_parsers.len());
+                for parser in attrib_parsers {
+                    attribs.push(FrameType::new(parser.name().to_owned(), parser.parse(data)?));
+                }
+                Ok(TypeValue::Composite(CompositeTypeValue::new(attribs, ty)))
             }
             TypeParser::RootParser { attrib_parsers } => {
-                let attribs = attrib_parsers
-                    .iter()
-                    .map(|parser| FrameType::new(parser.name().to_owned(), parser.parse(data)))
-                    .collect();
-                TypeValue::Root(attribs)
+                let mut attribs = Vec::with_capacity(attrib_parsers.len());
+                for parser in attrib_parsers {
+                    attribs.push(FrameType::new(parser.name().to_owned(), parser.parse(data)?));
+                }
+                Ok(TypeValue::Root(attribs))
             }
             TypeParser::EnumParser {
                 name: _,
@@ -335,8 +337,8 @@ impl TypeParser {
                     & (0xFFFFFFFFFFFFFFFF as u64).overflowing_shr(64 - bit_size).0;
                 let opt = entries.iter().find(|e| e.1 == value);
                 match opt {
-                    Some((name, _)) => TypeValue::Enum(ty.clone(), name.clone()),
-                    None => TypeValue::Enum(ty.clone(), "?".to_owned()),
+                    Some((name, _)) => Ok(TypeValue::Enum(ty.clone(), name.clone())),
+                    None => Ok(TypeValue::Enum(ty.clone(), "?".to_owned())),
                 }
             }
             TypeParser::ArrayParser {} => todo!(),
@@ -357,12 +359,12 @@ impl TypeFrameParser {
         }
     }
 
-    pub fn parse(&self, frame: &CanFrame) -> Frame {
-        let TypeValue::Root(composite_type_value) = self.root_parser.parse(frame.get_data_u64())
+    pub fn parse(&self, frame: &CanFrame) -> Result<Frame> {
+        let TypeValue::Root(composite_type_value) = self.root_parser.parse(frame.get_data_u64())?
         else {
             panic!("root parser is not a CompositeParser");
         };
-        Frame::TypeFrame(TypeFrame::new(
+        Ok(Frame::TypeFrame(TypeFrame::new(
             frame.get_id(),
             frame.get_ide_flag(),
             frame.get_rtr_flag(),
@@ -370,6 +372,6 @@ impl TypeFrameParser {
             composite_type_value,
             self.message_ref.clone(),
             frame.get_data_u64(),
-        ))
+        )))
     }
 }

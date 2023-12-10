@@ -3,6 +3,8 @@ use std::sync::Arc;
 use can_config_rs::config;
 
 use crate::cnl::{
+    errors::Result,
+    errors::Error,
     can_frame::CanFrame, frame::Frame, network::object_entry_object::ObjectEntryObject,
     parser::type_frame_parser::TypeFrameParser, timestamped::Timestamped,
 };
@@ -37,10 +39,10 @@ impl StreamFrameHandler {
             object_entries: mapped_object_entries,
         }
     }
-    pub async fn handle(&self, can_frame: &Timestamped<CanFrame>) -> Timestamped<Frame> {
-        let frame = self.parser.parse(can_frame);
+    pub async fn handle(&self, can_frame: &Timestamped<CanFrame>) -> Result<Timestamped<Frame>> {
+        let frame = self.parser.parse(can_frame)?;
         let Frame::TypeFrame(type_frame) = &frame else {
-            panic!();
+            return Err(Error::InvalidStreamMessageFormat);
         };
         for (attrib, oeo) in type_frame.value().iter().zip(&self.object_entries) {
             // notify the oeo one after another
@@ -50,6 +52,6 @@ impl StreamFrameHandler {
                 .await;
         }
 
-        Timestamped::new(can_frame.timestamp().clone(), frame)
+        Ok(Timestamped::new(can_frame.timestamp().clone(), frame))
     }
 }

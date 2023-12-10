@@ -1,4 +1,4 @@
-use crate::cnl::{can_frame::CanFrame, frame::Frame, parser::type_frame_parser::TypeFrameParser, timestamped::Timestamped};
+use crate::cnl::{errors::{Result, Error}, can_frame::CanFrame, frame::Frame, parser::type_frame_parser::TypeFrameParser, timestamped::Timestamped};
 
 pub struct SetRespFrameHandler {
     parser: TypeFrameParser,
@@ -8,11 +8,11 @@ impl SetRespFrameHandler {
     pub fn create(parser: TypeFrameParser) -> Self {
         Self { parser }
     }
-    pub async fn handle(&self, can_frame: &Timestamped<CanFrame>) -> Timestamped<Frame> {
-        let frame = self.parser.parse(can_frame);
+    pub async fn handle(&self, can_frame: &Timestamped<CanFrame>) -> Result<Timestamped<Frame>> {
+        let frame = self.parser.parse(can_frame)?;
         let Frame::TypeFrame(_type_frame) = &frame else {
-            panic!();
+            return Err(Error::InvalidSetResponseFormat);
         };
-        Timestamped::new(can_frame.timestamp().clone(),frame)
+        Ok(Timestamped::new(can_frame.timestamp().clone(),frame))
     }
 }

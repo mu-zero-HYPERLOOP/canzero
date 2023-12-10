@@ -2,6 +2,7 @@ use can_config_rs::config;
 
 use crate::cnl::{
     can_frame::CanFrame,
+    errors::Result,
     frame::{
         signal_frame::{Signal, SignalFrame, SignalValue},
         Frame,
@@ -29,7 +30,7 @@ enum SignalParser {
 }
 
 impl SignalParser {
-    pub fn parse(&self, data: u64) -> Signal {
+    pub fn parse(&self, data: u64) -> Result<Signal> {
         match &self {
             SignalParser::UnsignedSignalParser {
                 signal_ref,
@@ -41,7 +42,7 @@ impl SignalParser {
                         .overflowing_shr(64 - byte_size)
                         .0;
 
-                Signal::new(signal_ref.clone(), SignalValue::Unsigned(value))
+                Ok(Signal::new(signal_ref.clone(), SignalValue::Unsigned(value)))
             }
             SignalParser::SignedSignalParser {
                 signal_ref,
@@ -55,7 +56,7 @@ impl SignalParser {
 
                 let ivalue = unsafe { std::mem::transmute::<u64, i64>(value) };
 
-                Signal::new(signal_ref.clone(), SignalValue::Signed(ivalue))
+                Ok(Signal::new(signal_ref.clone(), SignalValue::Signed(ivalue)))
             }
             SignalParser::DecimalSignalParser {
                 signal_ref,
@@ -70,7 +71,7 @@ impl SignalParser {
                         .0;
                 let dvalue = value as f64 * scale - offset;
 
-                Signal::new(signal_ref.clone(), SignalValue::Real(dvalue))
+                Ok(Signal::new(signal_ref.clone(), SignalValue::Real(dvalue)))
             }
         }
     }
@@ -116,19 +117,20 @@ impl SignalFrameParser {
                 .collect(),
         }
     }
-    pub fn parse(&self, frame: &CanFrame) -> Frame {
+    pub fn parse(&self, frame: &CanFrame) -> Result<Frame> {
         let data = frame.get_data_u64();
-        Frame::SignalFrame(SignalFrame::new(
+        let mut signals = Vec::with_capacity(self.signal_parsers.len());
+        for parser in &self.signal_parsers {
+            signals.push(parser.parse(data)?);
+        }
+        Ok(Frame::SignalFrame(SignalFrame::new(
             frame.get_id(),
             frame.get_ide_flag(),
             frame.get_rtr_flag(),
             frame.get_dlc(),
-            self.signal_parsers
-                .iter()
-                .map(|parser| parser.parse(data))
-                .collect(),
+            signals,
             self.message_ref.clone(),
             frame.get_data_u64(),
-        ))
+        )))
     }
 }

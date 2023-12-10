@@ -18,24 +18,6 @@ mod observers;
 mod state;
 mod notification;
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-#[tauri::command]
-fn emergency() {
-    println!("Emergency")
-    //TODO: Emergency behaviour
-}
-
-#[tauri::command]
-fn launch_pod() {
-    println!("Launch")
-    //TODO: launch_pod behaviour
-}
-
-#[tauri::command]
-fn land_pod() {
-    println!("Land")
-    //TODO: stop_pod behaviourany
-}
 
 #[tauri::command]
 async fn connect_pod() {
@@ -82,9 +64,9 @@ fn main() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            emergency,
-            launch_pod,
-            land_pod,
+            commands::commands::emergency,
+            commands::commands::launch_pod,
+            commands::commands::land_pod,
             connect_pod,
             listen_to_trace,
             unlisten_to_trace,

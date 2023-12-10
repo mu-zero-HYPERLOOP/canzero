@@ -4,6 +4,8 @@ use std::sync::Arc;
 use crate::cnl::frame::error_frame::ErrorFrame;
 use crate::cnl::frame::undefined_frame::UndefinedFrame;
 use crate::cnl::timestamped::Timestamped;
+use crate::notification::NotificationStream;
+use super::errors::Result;
 
 use super::can_frame::CanError;
 use super::can_frame::CanFrame;
@@ -24,6 +26,7 @@ use can_config_rs::config;
 pub struct RxCom {
     parser_lookup: Arc<HashMap<(u32, bool), MessageHandler>>,
     trace: Arc<TraceObject>,
+    app_handle: tauri::AppHandle,
 }
 
 impl RxCom {
@@ -31,6 +34,7 @@ impl RxCom {
         network_config: &config::NetworkRef,
         trace: &Arc<TraceObject>,
         network: &Arc<NetworkObject>,
+        app_handle: &tauri::AppHandle,
     ) -> Self {
         let mut lookup = HashMap::new();
         for message_config in network_config.messages() {
@@ -87,6 +91,7 @@ impl RxCom {
         Self {
             parser_lookup: Arc::new(lookup),
             trace: trace.clone(),
+            app_handle: app_handle.clone(),
         }
     }
     pub fn start(&mut self, can: &Arc<super::CAN>) {
@@ -94,6 +99,7 @@ impl RxCom {
             can.clone(),
             self.parser_lookup.clone(),
             self.trace.clone(),
+            self.app_handle.clone(),
         ));
     }
 }
@@ -101,17 +107,22 @@ impl RxCom {
 type Lookup = HashMap<(u32, bool), MessageHandler>;
 type LookupRef = Arc<Lookup>;
 
-async fn can_receiver(can: Arc<super::CAN>, lookup: LookupRef, trace: Arc<TraceObject>) {
+async fn can_receiver(
+    can: Arc<super::CAN>,
+    lookup: LookupRef,
+    trace: Arc<TraceObject>,
+    app_handle: tauri::AppHandle,
+) {
     async fn receive_msg(
-        frame: Result<Timestamped<CanFrame>, Timestamped<CanError>>,
+        frame: std::result::Result<Timestamped<CanFrame>, Timestamped<CanError>>,
         lookup: LookupRef,
         trace: Arc<TraceObject>,
-    ) {
+    ) -> Result<()> {
         let frame = match frame {
             Ok(frame) => {
                 let key = (frame.get_id(), frame.get_ide_flag());
                 match lookup.get(&key) {
-                    Some(handler) => handler.handle(&frame).await,
+                    Some(handler) => handler.handle(&frame).await?,
                     None => Timestamped::new(
                         frame.timestamp().clone(),
                         Frame::UndefinedFrame(UndefinedFrame::new(
@@ -124,13 +135,28 @@ async fn can_receiver(can: Arc<super::CAN>, lookup: LookupRef, trace: Arc<TraceO
                     ),
                 }
             }
-            Err(error) => Timestamped::new(error.timestamp().clone(), Frame::ErrorFrame(ErrorFrame::new(&error))),
+            Err(error) => Timestamped::new(
+                error.timestamp().clone(),
+                Frame::ErrorFrame(ErrorFrame::new(&error)),
+            ),
         };
         trace.push_frame(frame).await;
+        Ok(())
     }
 
+    let notification_stream = NotificationStream::new(&app_handle);
     loop {
         let frame = can.receive().await;
-        tokio::spawn(receive_msg(frame, lookup.clone(), trace.clone()));
+        let lookup = lookup.clone();
+        let trace = trace.clone();
+        let notification_stream = notification_stream.clone();
+        tokio::spawn(async move { 
+            match receive_msg(frame, lookup, trace).await {
+                Ok(_) => (),
+                Err(err) => {
+                    notification_stream.notify_error(err.reason(), err.description());
+                }
+            }
+        });
     }
 }

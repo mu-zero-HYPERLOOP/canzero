@@ -4,6 +4,7 @@ use can_config_rs::config;
 
 use crate::cnl::{
     can_frame::CanFrame,
+    errors::{Result, Error},
     frame::{
         type_frame::{CompositeTypeValue, TypeValue, FrameType},
         Frame,
@@ -45,8 +46,7 @@ impl GetRespFrameHandler {
         get_resp_msg: &config::MessageRef,
         start_bit: usize,
         end_bit: usize, //exclusive!!
-    ) -> Result<(usize, TypeValue), String> {
-        // TODO implement parsing of object entry data into a TypeValue!
+    ) -> Result<(usize, TypeValue)> {
 
         match ty as &config::Type {
             config::Type::Primitive(signal_type) => match signal_type {
@@ -112,35 +112,35 @@ impl GetRespFrameHandler {
     // for each frame a lookup is done to get the correct handler afterwards.
     // This handler is only invoked for the get resp message of the config therefor the
     // format can be assumed to be the same for every frame!
-    pub async fn handle(&self, can_frame: &Timestamped<CanFrame>) -> Timestamped<Frame> {
+    pub async fn handle(&self, can_frame: &Timestamped<CanFrame>) -> Result<Timestamped<Frame>> {
         // a small example of how to parse the type frame!
-        let frame = self.parser.parse(can_frame);
+        let frame = self.parser.parse(can_frame)?;
         let Frame::TypeFrame(type_frame) = &frame else {
-            panic!("GetRespFrameHandler invoked with the wrong message, can only be invoked for get respond messages");
+            return Err(Error::InvalidGetResponseFormat);
         };
         let TypeValue::Composite(composite) = type_frame.value()[0].value() else {
-            panic!("invalid get resp message format");
+            return Err(Error::InvalidGetResponseFieldFormat{field : "header"});
         };
         let TypeValue::Unsigned(sof) = composite.attributes()[0].value() else {
-            panic!("invalid get resp message format");
+            return Err(Error::InvalidGetResponseFieldFormat{field : "header.sof"});
         };
         let TypeValue::Unsigned(eof) = composite.attributes()[1].value() else {
-            panic!("invalid get resp message format");
+            return Err(Error::InvalidGetResponseFieldFormat{field : "header.eof"});
         };
         let TypeValue::Unsigned(toggle) = composite.attributes()[2].value() else {
-            panic!("invalid get resp message format");
+            return Err(Error::InvalidGetResponseFieldFormat{field : "header.toggle"});
         };
         let TypeValue::Unsigned(object_entry_id) = composite.attributes()[3].value() else {
-            panic!("invalid get resp message format");
+            return Err(Error::InvalidGetResponseFieldFormat{field : "header.object_entry_id"});
         };
         let TypeValue::Unsigned(_client_id) = composite.attributes()[4].value() else {
-            panic!("invalid get resp message format");
+            return Err(Error::InvalidGetResponseFieldFormat{field : "header.client_id"});
         };
         let TypeValue::Unsigned(server_id) = composite.attributes()[5].value() else {
-            panic!("invalid get resp message format");
+            return Err(Error::InvalidGetResponseFieldFormat{field : "header.server_id"});
         };
         let TypeValue::Unsigned(value) = type_frame.value()[1].value() else {
-            panic!("invalid get resp message format");
+            return Err(Error::InvalidGetResponseFieldFormat{field : "header.value"});
         };
         assert_eq!(*sof, 1, "No Fragmentation supported yet");
         assert_eq!(*eof, 1, "No Fragmentation supported yet");
@@ -151,16 +151,11 @@ impl GetRespFrameHandler {
         // TODO lookup correct object entry!
         // this just selects a random one!
         let Some(server_node) = self.network.nodes().get(*server_id as usize) else {
-            // TODO implement error handling
-            panic!();
-            return Timestamped::new(can_frame.timestamp().clone(), frame);
+            return Err(Error::InvalidGetResponseServerNotFound);
         };
         let Some(object_entry) = server_node.object_entries().get(*object_entry_id as usize) else {
-            // TODO implement error handling
-            panic!();
-            return Timestamped::new(can_frame.timestamp().clone(), frame);
+            return Err(Error::InvalidGetResponseObjectEntryNotFound);
         };
-        // println!("object_entry_name = {}", object_entry.name());
 
         let mut bitstring = Bitstring::new(); //TODO probably good to implement fragmentation here!
         bitstring.append(unsafe { std::mem::transmute::<u32, [u8; 4]>(*value as u32) }.as_slice());
@@ -171,16 +166,14 @@ impl GetRespFrameHandler {
             &self.get_resp_msg,
             0,
             bitstring.byte_len() * 8,
-        )
-        .expect("failed to parse get resp value")
-        .1;
+        )?;
         // println!("object_entry value = {value:?}");
 
         // notify the object entry (object) about the new value
-        object_entry.push_value(value, can_frame.timestamp()).await;
+        object_entry.push_value(value.1, can_frame.timestamp()).await;
 
         // has to return the parsed frame, because the frame is needed for the trace page!
-        Timestamped::new(can_frame.timestamp().clone(), frame)
+        Ok(Timestamped::new(can_frame.timestamp().clone(), frame))
     }
 }
 
@@ -201,15 +194,14 @@ impl Bitstring {
         self.bitstring.len()
     }
 
-    pub fn read_at(&self, bit_offset: usize, bit_size: usize) -> Result<u64, String> {
+    pub fn read_at(&self, bit_offset: usize, bit_size: usize) -> Result<u64> {
         let byte_offset = bit_offset / 8;
         let top_byte = (bit_offset + bit_size - 1) / 8;
         let bit_mod = bit_offset % 8;
         let size_mod = (bit_size + bit_offset) % 8;
         if self.bitstring.len() < (top_byte as usize) {
-            return Err(format!(
-                "faild to read from bitstring at offset {bit_offset} and size {bit_size}"
-            ));
+            return Err(Error::FragmentationError);
+            //faild to read from bitstring at offset {bit_offset} and size {bit_size}
         }
         let mut bitslice = self.bitstring[byte_offset..=top_byte].to_vec();
 
