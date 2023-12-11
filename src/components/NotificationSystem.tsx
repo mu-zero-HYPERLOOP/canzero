@@ -1,14 +1,13 @@
 import {closeSnackbar, useSnackbar} from "notistack";
 import {useEffect} from "react";
 import {listen} from "@tauri-apps/api/event";
-import {Button} from "@mui/material";
 
 const action = (snackbarId: any) => (
-    <Button onClick={() => {
+    <button onClick={() => {
         closeSnackbar(snackbarId)
     }}>
         Dismiss
-    </Button>
+    </button>
 );
 
 function NotificationSystem() {
@@ -20,19 +19,36 @@ function NotificationSystem() {
 
             switch (notification.level) {
                 case "info" : {
-                    enqueueSnackbar(notification.message, {autoHideDuration: 2000, preventDuplicate: true, variant: "info"})
+                    enqueueSnackbar(notification.message, {
+                        autoHideDuration: 2000,
+                        preventDuplicate: true,
+                        variant: "info"
+                    })
                     break
                 }
                 case "debug": {
-                    enqueueSnackbar(notification.message, {autoHideDuration: 3000, preventDuplicate: true, variant: "default"})
+                    enqueueSnackbar(notification.message, {
+                        autoHideDuration: 3000,
+                        preventDuplicate: true,
+                        variant: "default"
+                    })
                     break
                 }
                 case "warning": {
-                    enqueueSnackbar(notification.message, {autoHideDuration: 5000, preventDuplicate: true, variant: "warning"})
+                    enqueueSnackbar(notification.message, {
+                        autoHideDuration: 5000,
+                        preventDuplicate: true,
+                        variant: "warning"
+                    })
                     break
                 }
                 case "error": {
-                    enqueueSnackbar(notification.message, {action, preventDuplicate: true, variant: "error"})
+                    enqueueSnackbar(notification.message, {
+                        action,
+                        persist: true,
+                        preventDuplicate: true,
+                        variant: "error"
+                    })
                     break
                 }
             }
