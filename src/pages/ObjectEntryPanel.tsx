@@ -51,7 +51,7 @@ function ObjectEntryValue({currentValue, node, objectEntry}: Readonly<DisplayObj
             onKeyDown={(event) => {
                 if (event.key == "Enter") {
                     event.preventDefault();
-                    invoke("new_object_entry_value", {value: newValue})
+                    invoke("new_object_entry_value", {nodeName: node, objectEntryName: objectEntry, value: newValue})
                 }
             }}
         />
