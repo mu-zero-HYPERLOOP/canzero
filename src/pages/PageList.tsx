@@ -129,7 +129,7 @@ function NodeEntries({ nodeInfo }: NodeEntriesProps) {
   /*Page name has to equal the nodeId!*/
   return (<>
     {nodeInfo.object_entries.map((entry) => 
-      <CustomTreeItem nodeId={nodeInfo.name + "/" + entry} label={entry}/>
+      <CustomTreeItem key={nodeInfo.name + "/" + entry} nodeId={nodeInfo.name + "/" + entry} label={entry}/>
     )}
   </>);
 
@@ -153,21 +153,19 @@ export function NodeList() {
   });
 
   return (
-    <React.Fragment>
-      <Box sx={{ minHeight: 180, flexGrow: 1, maxWidth: 300 }}>
+      <Box sx={{minHeight: 180, flexGrow: 1, maxWidth: 300}}>
         <TreeView
-          aria-label="icon expansion"
-          defaultCollapseIcon={<ExpandMoreIcon />}
-          defaultExpandIcon={<ChevronRightIcon />}
+            aria-label="icon expansion"
+            defaultCollapseIcon={<ExpandMoreIcon/>}
+            defaultExpandIcon={<ChevronRightIcon/>}
         >
           {nodes.map((node) =>
-            <CustomTreeItem nodeId={node.name} label={node.name} >
-              <NodeEntries nodeInfo={node} />
-            </CustomTreeItem>)}
+              <CustomTreeItem key={node.name} nodeId={node.name} label={node.name}>
+                <NodeEntries nodeInfo={node}/>
+              </CustomTreeItem>)}
 
         </TreeView>
       </Box>
-    </React.Fragment>
   );
 }
 

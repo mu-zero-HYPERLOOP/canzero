@@ -51,7 +51,7 @@ export default function PodTemperatures() {
                 </TableHead>
                 <TableBody>
                     {rows.map((row) => (
-                        <TableRow>
+                        <TableRow key={rows.indexOf(row) }>
                             <TableCell align="center" style={{backgroundColor:getColor(row.sensor1)}}>{row.sensor1} </TableCell>
                             <TableCell align="center" style={{backgroundColor:getColor(row.sensor2)}}>{row.sensor2}</TableCell>
                             <TableCell align="center" style={{backgroundColor:getColor(row.sensor3)}}>{row.sensor3}</TableCell>
