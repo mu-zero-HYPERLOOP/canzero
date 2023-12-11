@@ -12,6 +12,8 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ShowPages from './ShowPages';
 import {ListEntries} from './PageList';
+import {useEffect} from "react";
+import {invoke} from "@tauri-apps/api";
 
 const drawerWidth: number = 220;
 
@@ -69,6 +71,21 @@ export default function Dashboard() {
     const toggleDrawer = () => {
         setOpen(!open);
     };
+
+    useEffect(() => {
+        const keyDownHandler = (event: { key: string; preventDefault: () => void; }) => {
+            if (event.key === ' ') {
+                event.preventDefault();
+                invoke('emergency');
+            }
+        };
+
+        document.addEventListener('keydown', keyDownHandler);
+
+        return () => {
+            document.removeEventListener('keydown', keyDownHandler);
+        };
+    }, []);
 
     return (
         <Box sx={{display: 'flex'}}>
