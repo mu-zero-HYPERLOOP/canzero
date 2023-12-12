@@ -12,8 +12,10 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ShowPages from './ShowPages';
 import {ListEntries} from './PageList';
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import {invoke} from "@tauri-apps/api";
+import ControlButtons from "../components/ControlButtons.tsx";
+import {yellow} from "@mui/material/colors";
 
 const drawerWidth: number = 220;
 
@@ -68,9 +70,33 @@ const Drawer = styled(MuiDrawer, {shouldForwardProp: (prop) => prop !== 'open'})
 
 export default function Dashboard() {
     const [open, setOpen] = React.useState(true);
+    const [isConnecting, setIsConnecting] = useState(true);
+    const [success, setSuccess] = useState<boolean>(false)
+
     const toggleDrawer = () => {
         setOpen(!open);
     };
+
+    function getColor() {
+        if (isConnecting) return yellow[500];
+        else if (success) return '#2E9B33';
+        else return '#E32E13';
+    }
+
+    async function asyncConnect() {
+        try {
+            await invoke("connect_pod");
+            setSuccess(true)
+        } catch(error) {
+            // TODO: handle error
+        } finally {
+            setIsConnecting(false)
+        }
+    }
+
+    useEffect(() => {
+        asyncConnect();
+    }, []);
 
     useEffect(() => {
         const keyDownHandler = (event: { key: string; preventDefault: () => void; }) => {
@@ -90,7 +116,7 @@ export default function Dashboard() {
     return (
         <Box sx={{display: 'flex'}}>
             <CssBaseline/>
-            <AppBar position="absolute" open={open}>
+            <AppBar position="absolute" open={open} sx={{backgroundColor: getColor()}}>
                 <Toolbar
                     sx={{
                         pr: '24px', // keep right padding when drawer closed
@@ -108,6 +134,7 @@ export default function Dashboard() {
                     >
                         <MenuIcon/>
                     </IconButton>
+                    <ControlButtons/>
                 </Toolbar>
             </AppBar>
             <Drawer variant="permanent" open={open}>

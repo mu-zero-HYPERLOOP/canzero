@@ -1,6 +1,6 @@
 import {NodeInformation} from "../types/NodeInformation";
 import {useEffect, useState} from "react";
-import {ObjectEntryInformation} from "../types/ObjectEntryInformation.ts";
+import {ObjectEntryInformation, ObjectEntryType} from "../types/ObjectEntryInformation.ts";
 import {invoke} from "@tauri-apps/api";
 import Graph from "../components/Graph.tsx";
 import ObjectEntryListenLatestResponse from "../types/ObjectEntryListenLatestResponse.ts";
@@ -16,6 +16,7 @@ interface ObjectEntryPanelProps {
 
 interface DisplayObjectEntryEvent {
     currentValue: number | string | ObjectEntryComposite
+    type: ObjectEntryType
     node: string
     objectEntry: string
 }
@@ -101,7 +102,7 @@ function ObjectEntryPanel({node, name}: Readonly<ObjectEntryPanelProps>) {
 
     return <>
         <h1> Hello {objectEntryInfo.name} of {node.name} </h1>
-        <ObjectEntryValue currentValue={objectEntryEvent.value} node={node.name} objectEntry={name}/>
+        <ObjectEntryValue currentValue={objectEntryEvent.value} type={objectEntryInfo.ty} node={node.name} objectEntry={name}/>
         <Graph nodeName={node.name} oeName={name}/>
     </>
 }
