@@ -1,9 +1,14 @@
 import {NodeInformation} from "../types/NodeInformation";
 import {useEffect, useState} from "react";
-import {ObjectEntryInformation, ObjectEntryType} from "../types/ObjectEntryInformation.ts";
+import {
+    isInt, isObjectEntryCompositeType, isReal, isStringArray, isUint,
+    ObjectEntryCompositeType,
+    ObjectEntryInformation,
+    ObjectEntryType
+} from "../types/ObjectEntryInformation.ts";
 import {invoke} from "@tauri-apps/api";
 import ObjectEntryListenLatestResponse from "../types/ObjectEntryListenLatestResponse.ts";
-import ObjectEntryEvent, {ObjectEntryComposite} from "../types/ObjectEntryEvent.ts";
+import ObjectEntryEvent, { ObjectEntryComposite} from "../types/ObjectEntryEvent.ts";
 import {Event, listen} from "@tauri-apps/api/event";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
@@ -21,42 +26,60 @@ interface DisplayObjectEntryEvent {
     objectEntry: string
 }
 
-function ObjectEntryValue({currentValue, node, objectEntry}: Readonly<DisplayObjectEntryEvent>) {
+function showValueTextField(currentValue: number | string | ObjectEntryComposite, type: ObjectEntryType) {
+
+    if (isStringArray(type)) {
+        return currentValue;
+    } else {
+        return currentValue.toString();
+    }
+}
+
+function ObjectEntryValue({currentValue, type, node, objectEntry}: Readonly<DisplayObjectEntryEvent>) {
     const [newValue, setNewValue] = useState<string>("");
 
-
-    return <Box
-        component="form"
-        sx={{
-            '& > :not(style)': {m: 1, width: '25ch'},
-        }}
-        noValidate
-        autoComplete="off"
-    >
-        <TextField
-            key={"currentValue" + node + "/" + objectEntry}
-            id={"currentValue"}
-            label="Current value"
-            variant="outlined"
-            value={currentValue.toString()}
-            InputProps={{
-                readOnly: true,
-            }}/>
-        <TextField
-            key={"setValue" + node + "/" + objectEntry}
-            id={"setValue"}
-            label="Set value"
-            variant="outlined"
-            error={false} //TODO type check and others
-            onChange={(event) => {setNewValue(event.target.value)}}
-            onKeyDown={(event) => {
-                if (event.key == "Enter") {
-                    event.preventDefault();
-                    invoke("new_object_entry_value", {nodeName: node, objectEntryName: objectEntry, value: newValue})
-                }
+    if (isObjectEntryCompositeType(type)) {
+        return <></>
+    } else {
+        return <Box
+            component="form"
+            sx={{
+                '& > :not(style)': {m: 1, width: '25ch'},
             }}
-        />
-    </Box>
+            noValidate
+            autoComplete="off"
+        >
+            <TextField
+                key={"currentValue" + node + "/" + objectEntry}
+                id={"currentValue"}
+                label="Current value"
+                variant="outlined"
+                value={showValueTextField(currentValue, type)}
+                InputProps={{
+                    readOnly: true,
+                }}/>
+            <TextField
+                key={"setValue" + node + "/" + objectEntry}
+                id={"setValue"}
+                label="Set value"
+                variant="outlined"
+                error={false} //TODO type check and others
+                onChange={(event) => {
+                    setNewValue(event.target.value)
+                }}
+                onKeyDown={(event) => {
+                    if (event.key == "Enter") {
+                        event.preventDefault();
+                        invoke("new_object_entry_value", {
+                            nodeName: node,
+                            objectEntryName: objectEntry,
+                            value: newValue
+                        })
+                    }
+                }}
+            />
+        </Box>
+    }
 }
 
 function ObjectEntryPanel({node, name}: Readonly<ObjectEntryPanelProps>) {
@@ -90,7 +113,7 @@ function ObjectEntryPanel({node, name}: Readonly<ObjectEntryPanelProps>) {
     useEffect(() => {
         asyncFetchNetworkInfo().catch(console.error);
         let unlisten = asyncListenToEvents();
-        
+
         return () => {
             invoke("unlisten_from_latest_object_entry_value", {
                 nodeName: node.name,
