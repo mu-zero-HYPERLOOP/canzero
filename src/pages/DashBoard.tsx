@@ -16,6 +16,7 @@ import {useEffect, useState} from "react";
 import {invoke} from "@tauri-apps/api";
 import ControlButtons from "../components/ControlButtons.tsx";
 import {yellow} from "@mui/material/colors";
+import EstablishConnection from "../components/EstablishConnection.tsx";
 
 const drawerWidth: number = 220;
 
@@ -71,7 +72,8 @@ const Drawer = styled(MuiDrawer, {shouldForwardProp: (prop) => prop !== 'open'})
 export default function Dashboard() {
     const [open, setOpen] = React.useState(true);
     const [isConnecting, setIsConnecting] = useState(true);
-    const [success, setSuccess] = useState<boolean>(false)
+    const [connectionSuccess, setConnectionSuccess] = useState<boolean>(false)
+
 
     const toggleDrawer = () => {
         setOpen(!open);
@@ -79,24 +81,9 @@ export default function Dashboard() {
 
     function getColor() {
         if (isConnecting) return yellow[500];
-        else if (success) return '#2E9B33';
+        else if (connectionSuccess) return '#2E9B33';
         else return '#E32E13';
     }
-
-    async function asyncConnect() {
-        try {
-            await invoke("connect_pod");
-            setSuccess(true)
-        } catch(error) {
-            // TODO: handle error
-        } finally {
-            setIsConnecting(false)
-        }
-    }
-
-    useEffect(() => {
-        asyncConnect();
-    }, []);
 
     useEffect(() => {
         const keyDownHandler = (event: { key: string; preventDefault: () => void; }) => {
@@ -135,6 +122,7 @@ export default function Dashboard() {
                         <MenuIcon/>
                     </IconButton>
                     <ControlButtons/>
+                    <EstablishConnection setIsConnecting={setIsConnecting} setConnectionSuccess={setConnectionSuccess}/>
                 </Toolbar>
             </AppBar>
             <Drawer variant="permanent" open={open}>
