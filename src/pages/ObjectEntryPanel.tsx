@@ -1,14 +1,17 @@
 import {NodeInformation} from "../types/NodeInformation";
-import {useEffect, useState} from "react";
+import {SetStateAction, useEffect, useRef, useState} from "react";
 import {
-    isInt, isObjectEntryCompositeType, isReal, isStringArray, isUint,
-    ObjectEntryCompositeType,
+    isInt,
+    isObjectEntryCompositeType,
+    isReal,
+    isStringArray,
+    isUint,
     ObjectEntryInformation,
     ObjectEntryType
 } from "../types/ObjectEntryInformation.ts";
 import {invoke} from "@tauri-apps/api";
 import ObjectEntryListenLatestResponse from "../types/ObjectEntryListenLatestResponse.ts";
-import ObjectEntryEvent, { ObjectEntryComposite} from "../types/ObjectEntryEvent.ts";
+import ObjectEntryEvent, {ObjectEntryComposite} from "../types/ObjectEntryEvent.ts";
 import {Event, listen} from "@tauri-apps/api/event";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
@@ -26,8 +29,70 @@ interface DisplayObjectEntryEvent {
     objectEntry: string
 }
 
-function showValueTextField(currentValue: number | string | ObjectEntryComposite, type: ObjectEntryType) {
+function checkInput(node: string, objectEntry: string, val: string, type: ObjectEntryType, setError: {
+    (value: SetStateAction<boolean>): void;
+    (arg0: boolean): void;
+}) {
+    setError(false)
 
+    if (isInt(type)) {
+        if (!val.includes(".")) {
+            let num = parseInt(val)
+            if (!isNaN(num)) {
+                invoke("new_object_entry_value", {
+                    nodeName: node,
+                    objectEntryName: objectEntry,
+                    value: num
+                })
+                return;
+            }
+        }
+    } else if (isUint(type)) {
+        if (!val.includes(".")) {
+            let num = parseInt(val)
+            if (!isNaN(num) && num >= 0) {
+                invoke("new_object_entry_value", {
+                    nodeName: node,
+                    objectEntryName: objectEntry,
+                    value: num
+                })
+                return;
+            }
+        }
+    } else if (isReal(type)) {
+        let num = parseFloat(val)
+        if (!isNaN(num)) {
+            invoke("new_object_entry_value", {
+                nodeName: node,
+                objectEntryName: objectEntry,
+                value: num
+            })
+            return;
+        }
+    } else if (isStringArray(type)) {
+        if (type.includes(val)) {
+            invoke("new_object_entry_value", {
+                nodeName: node,
+                objectEntryName: objectEntry,
+                value: val
+            })
+            return;
+        }
+    }
+    setError(true)
+}
+
+function returnDefaultValue(type: ObjectEntryType) {
+    if (isStringArray(type)) {
+        return {value: "", timestamp: 0, delta_time: 0}
+    } else if (isObjectEntryCompositeType(type)) {
+        return {value: 1, timestamp: 0, delta_time: 0} //TODO default value
+    } else {
+        return {value: 0, timestamp: 0, delta_time: 0}
+    }
+}
+
+function showValueTextField(currentValue: number | string | ObjectEntryComposite, type: ObjectEntryType) {
     if (isStringArray(type)) {
         return currentValue;
     } else {
@@ -36,7 +101,8 @@ function showValueTextField(currentValue: number | string | ObjectEntryComposite
 }
 
 function ObjectEntryValue({currentValue, type, node, objectEntry}: Readonly<DisplayObjectEntryEvent>) {
-    const [newValue, setNewValue] = useState<string>("");
+    const newValue = useRef<string>("");
+    const [error, setError] = useState<boolean>(false)
 
     if (isObjectEntryCompositeType(type)) {
         return <></>
@@ -63,18 +129,15 @@ function ObjectEntryValue({currentValue, type, node, objectEntry}: Readonly<Disp
                 id={"setValue"}
                 label="Set value"
                 variant="outlined"
-                error={false} //TODO type check and others
+                error={error}
+                onAnimationStart={() => setError(false)}
                 onChange={(event) => {
-                    setNewValue(event.target.value)
+                    newValue.current = event.target.value
                 }}
                 onKeyDown={(event) => {
                     if (event.key == "Enter") {
                         event.preventDefault();
-                        invoke("new_object_entry_value", {
-                            nodeName: node,
-                            objectEntryName: objectEntry,
-                            value: newValue
-                        })
+                        checkInput(node, objectEntry, newValue.current, type, setError)
                     }
                 }}
             />
@@ -95,22 +158,23 @@ function ObjectEntryPanel({node, name}: Readonly<ObjectEntryPanelProps>) {
         setObjectEntryInfo(objectEntryInformation);
     }
 
-    async function asyncListenToEvents() {
-        let objectEntryListenLatestResponse = await invoke<ObjectEntryListenLatestResponse>("listen_to_latest_object_entry_value", {
-            nodeName: node.name,
-            objectEntryName: name
-        });
+    useEffect(() => {
+        async function asyncListenToEvents() {
+            let objectEntryListenLatestResponse = await invoke<ObjectEntryListenLatestResponse>("listen_to_latest_object_entry_value", {
+                nodeName: node.name,
+                objectEntryName: name
+            });
+            if (objectEntryListenLatestResponse.latest != null) {
+                setObjectEntryEvent(objectEntryListenLatestResponse.latest)
+            } else {
+                setObjectEntryEvent(returnDefaultValue(objectEntryInfo.ty))
+            }
 
-        if (objectEntryListenLatestResponse.latest != null) {
-            setObjectEntryEvent(objectEntryListenLatestResponse.latest)
+            return await listen<ObjectEntryEvent>(objectEntryListenLatestResponse.event_name, (event: Event<ObjectEntryEvent>) => {
+                setObjectEntryEvent(event.payload)
+            })
         }
 
-        return await listen<ObjectEntryEvent>(objectEntryListenLatestResponse.event_name, (event: Event<ObjectEntryEvent>) => {
-            setObjectEntryEvent(event.payload)
-        })
-    }
-
-    useEffect(() => {
         asyncFetchNetworkInfo().catch(console.error);
         let unlisten = asyncListenToEvents();
 
