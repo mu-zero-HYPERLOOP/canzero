@@ -1,25 +1,23 @@
 import {useEffect} from "react";
-import {invoke} from "@tauri-apps/api";
+import {listen} from "@tauri-apps/api/event";
 
 interface EstablishConnectionProps {
-    setIsConnecting: (isConnecting: boolean) => void;
-    setConnectionSuccess: (isConnecting: boolean) => void;
+    setConnectingPossible: (isConnecting: boolean) => void;
 }
 
-function EstablishConnection({ setIsConnecting, setConnectionSuccess }: Readonly<EstablishConnectionProps>) {
+function EstablishConnection({ setConnectingPossible }: Readonly<EstablishConnectionProps>) {
     async function asyncConnect() {
-        try {
-            await invoke("connect_pod");
-            setConnectionSuccess(true)
-        } catch(error) {
-            // Success in false on default. Nothing to do.
-        } finally {
-            setIsConnecting(false)
-        }
+        return await listen("connecting_to_pod_possible", () => {
+            setConnectingPossible(true)
+        })
     }
 
     useEffect(() => {
-        asyncConnect();
+        let unlisten = asyncConnect();
+
+        return () => {
+            unlisten.then(f => f()).catch(console.error);
+        }
     }, []);
 
     return <></>

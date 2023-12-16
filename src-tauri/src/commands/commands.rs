@@ -1,3 +1,4 @@
+use std::time::Duration;
 use crate::{state::cnl_state::CNLState, cnl::command::Command};
 
 
@@ -18,4 +19,10 @@ pub async fn launch_pod(state: tauri::State<'_, CNLState>) -> Result<(), ()>{
 pub async fn land_pod(state: tauri::State<'_, CNLState>) -> Result<(),()>{
     state.lock().await.command(Command::Abort);
     Ok(())
+}
+
+#[tauri::command]
+pub async fn connect_pod() {
+    tokio::time::sleep(Duration::from_millis(5000)).await;
+    println!("Connect")
 }

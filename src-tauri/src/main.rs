@@ -18,13 +18,6 @@ mod observers;
 mod state;
 mod notification;
 
-
-#[tauri::command]
-async fn connect_pod() {
-    tokio::time::sleep(Duration::from_millis(5000)).await;
-    println!("Connect")
-}
-
 #[derive(Serialize)]
 struct InitialGraphData {
     values: Vec<Graphable>,
@@ -67,7 +60,7 @@ fn main() {
             commands::commands::emergency,
             commands::commands::launch_pod,
             commands::commands::land_pod,
-            connect_pod,
+            commands::commands::connect_pod,
             listen_to_trace,
             unlisten_to_trace,
             network_information::network_information,

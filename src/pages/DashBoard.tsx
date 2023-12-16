@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {useEffect, useState} from 'react';
 import {styled,} from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import MuiDrawer from '@mui/material/Drawer';
@@ -12,16 +13,21 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ShowPages from './ShowPages';
 import {ListEntries} from './PageList';
-import {useEffect, useState} from "react";
-import {invoke} from "@tauri-apps/api";
-import ControlButtons from "../components/ControlButtons.tsx";
+import ControlBar, {abort, connect, emergency, launch, levitate, prepare, States} from "../components/ControlBar.tsx";
 import {yellow} from "@mui/material/colors";
 import EstablishConnection from "../components/EstablishConnection.tsx";
+import interpolate from "color-interpolate";
 
 const drawerWidth: number = 220;
 
 interface AppBarProps extends MuiAppBarProps {
     open?: boolean;
+}
+
+function getColor(value: number, color1: string, color2: string) {
+    let colormap = interpolate([color1, color2]);
+    let percent = (value) / (2000)
+    return colormap(percent)
 }
 
 const AppBar = styled(MuiAppBar, {
@@ -71,25 +77,67 @@ const Drawer = styled(MuiDrawer, {shouldForwardProp: (prop) => prop !== 'open'})
 
 export default function Dashboard() {
     const [open, setOpen] = React.useState(true);
-    const [isConnecting, setIsConnecting] = useState(true);
+    const [connectingPossible, setConnectingPossible] = useState(false);
     const [connectionSuccess, setConnectionSuccess] = useState<boolean>(false)
-
+    const [color, setColor] = useState<string>('#D11F04')
+    const [state, setState] = useState<States>(States.Startup)
 
     const toggleDrawer = () => {
         setOpen(!open);
     };
 
-    function getColor() {
-        if (isConnecting) return yellow[500];
-        else if (connectionSuccess) return '#2E9B33';
-        else return '#E32E13';
-    }
+    useEffect(() => {
+        if (connectingPossible) {
+            let count = 0
+            const intervalId = setInterval(() => {
+                count += 20
+                setColor(getColor(count, color, yellow[500]))
+                if (count === 2000) {
+                    clearInterval(intervalId);
+                }
+            }, 20);
+        } else if (connectionSuccess) {
+            let count = 0
+            const intervalId = setInterval(() => {
+                count += 20
+                setColor(getColor(count, color, '#2E9B33'))
+                if (count === 2000) {
+                    clearInterval(intervalId);
+                }
+            }, 20);
+        } else {
+            let count = 0
+            const intervalId = setInterval(() => {
+                count += 20
+                setColor(getColor(count, color, '#D11F04'))
+                if (count === 2000) {
+                    clearInterval(intervalId);
+                }
+            }, 20);
+        }
+
+    }, [connectingPossible, connectionSuccess]);
 
     useEffect(() => {
         const keyDownHandler = (event: { key: string; preventDefault: () => void; }) => {
             if (event.key === ' ') {
-                event.preventDefault();
-                invoke('emergency');
+                event.preventDefault()
+                emergency(setConnectingPossible)
+            } else if (event.key === "F1") { //TODO Somebody test please, mac does not like overwriting this
+                event.preventDefault()
+                connect(setConnectingPossible, setConnectionSuccess)
+            } else if (event.key === "F2") {
+                event.preventDefault()
+                prepare(state, setState)
+            } else if (event.key === "F3") {
+                event.preventDefault()
+                levitate(setState)
+            } else if (event.key === "F4") {
+                event.preventDefault()
+                launch(setState)
+            } else if (event.key === "F5") {
+                event.preventDefault()
+                abort(state, setState)
             }
         };
 
@@ -103,7 +151,7 @@ export default function Dashboard() {
     return (
         <Box sx={{display: 'flex'}}>
             <CssBaseline/>
-            <AppBar position="absolute" open={open} sx={{backgroundColor: getColor()}}>
+            <AppBar position="absolute" open={open} sx={{backgroundColor: color}}>
                 <Toolbar
                     sx={{
                         pr: '24px', // keep right padding when drawer closed
@@ -121,8 +169,9 @@ export default function Dashboard() {
                     >
                         <MenuIcon/>
                     </IconButton>
-                    <ControlButtons/>
-                    <EstablishConnection setIsConnecting={setIsConnecting} setConnectionSuccess={setConnectionSuccess}/>
+                    <ControlBar connectingPossible={connectingPossible} setConnectingPossible={setConnectingPossible}
+                                setConnectionSuccess={setConnectionSuccess} state={state} setState={setState}/>
+                    <EstablishConnection setConnectingPossible={setConnectingPossible}/>
                 </Toolbar>
             </AppBar>
             <Drawer variant="permanent" open={open}>
@@ -131,7 +180,8 @@ export default function Dashboard() {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'flex-start',
-                        px: [2],
+                        px: [1],
+                        m: 0.4
                     }}
                 >
                     <IconButton onClick={toggleDrawer}>
