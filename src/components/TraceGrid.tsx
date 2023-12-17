@@ -19,8 +19,8 @@ import { SignalFrame } from "../types/SignalFrame";
 import SignalFrameDetail from "./SignalFrameDetail";
 import { UndefinedFrame } from "../types/UndefinedFrame";
 import { ErrorFrame } from "../types/ErrorFrame";
-
 import TraceSearchBar from "./TraceSearchBar";
+import Fuse, { IFuseOptions } from 'fuse.js';
 
 // Main Paper component with gradient background
 const StyledPaper = styled(Paper)({
@@ -296,15 +296,14 @@ function TraceGrid() {
     if (searchText === "") {
       setFilteredRows(rowsRef.current.slice());
     } else {
-      const filtered = rowsRef.current.filter((o) => {
-        const frameName =
-          (o.frame.TypeFrame?.name ||
-            o.frame.SignalFrame?.name ||
-            o.frame.ErrorFrame?.name ||
-            "") as string; // Handle all possible frame types and cast to string
-        return frameName.includes(searchText);
-      });
-      setFilteredRows(filtered);
+      const fuseOptions: IFuseOptions<TraceObjectEvent> = {
+        keys: ['frame.TypeFrame.name', 'frame.SignalFrame.name', 'frame.ErrorFrame.name', 'frame.TypeFrame.id', 'frame.SignalFrame.id'],
+        includeScore: true,
+        includeMatches: true
+      };
+      const fuse = new Fuse(rowsRef.current, fuseOptions);
+      const result = fuse.search(searchText).map(({ item }) => item);
+      setFilteredRows(result);
     }
   };
 
