@@ -5,7 +5,9 @@ import ObjectEntryListenHistoryResponse from "../types/ObjectEntryListenHistoryR
 import { listen, Event } from "@tauri-apps/api/event";
 import { ObjectEntryHistoryEvent } from "../types/ObjectEntryHistoryEvent";
 import ObjectEntryEvent from "../types/ObjectEntryEvent";
-import { FormControl, InputLabel, MenuItem, Paper, Select, SelectChangeEvent, Stack, Typography } from "@mui/material";
+import { Button, FormControl, InputLabel, MenuItem, Paper, Select, SelectChangeEvent, Stack, Typography } from "@mui/material";
+import { ObjectEntryInformation } from "../types/ObjectEntryInformation";
+import DownloadIcon from '@mui/icons-material/Download';
 
 
 enum D3InterpolationMode {
@@ -34,7 +36,8 @@ interface D3ObjectEntryGraph {
   margin: { top: number, bottom: number, left: number, right: number },
   interpolation: D3InterpolationMode
   performanceMode: D3PerformanceMode,
-  height: number
+  height: number | number[],
+  unit?: string,
 }
 
 function D3ObjectEntryGraph({
@@ -47,13 +50,32 @@ function D3ObjectEntryGraph({
   eventRate,
   margin,
   interpolation,
-  performanceMode
+  performanceMode,
+  unit
 }: D3ObjectEntryGraph) {
 
   // use ref so that react can fill the reference before useEffect is called!
   // <svg ref={svgRef}></svg> makes this work!
   const svgRef = useRef() as any;
   const [width, setWidth] = useState(100);
+
+  let maxHeight: number;
+  let minHeight: number;
+  if (Array.isArray(height)) {
+    if (height.length >= 2) {
+      minHeight = height[0];
+      maxHeight = height[1];
+    } else if (height.length == 1) {
+      minHeight = maxHeight = height[0];
+    } else {
+      minHeight = 400;
+      maxHeight = 250;
+    }
+  } else {
+    minHeight = maxHeight = height;
+  }
+
+  let [responsiveHeight, setResponsiveHeight] = useState(minHeight);
 
   useEffect(function() {
     // used to scale the xScale so that the right most values are not included
@@ -71,7 +93,7 @@ function D3ObjectEntryGraph({
     }
 
     const innerWidth = width - margin.left - margin.right;
-    const innerHeight = height - margin.top - margin.bottom;
+    const innerHeight = responsiveHeight - margin.top - margin.bottom;
 
     let resizeObserver = new ResizeObserver(
       entries => {
@@ -80,6 +102,7 @@ function D3ObjectEntryGraph({
         const entry = entries[0];
         if (width != entry.contentRect.width) {
           setWidth(entry.contentRect.width);
+          setResponsiveHeight(Math.max(Math.min(entry.contentRect.width / 3, maxHeight), minHeight));
         }
       }
     );
@@ -124,18 +147,18 @@ function D3ObjectEntryGraph({
       .tickFormat(x => `${x as number / 1000.0}s`)
       .ticks(5);
 
-    let yAxis = d3.axisLeft(y).ticks(5);
+    let yAxis = d3.axisLeft(y).tickFormat(x => `${x}${unit ?? ""}`).ticks(5);
     const yAxisGrid = d3.axisLeft(y).tickSize(-innerWidth).tickFormat("" as any).ticks(5);
 
     let history: ObjectEntryEvent[] = [];
-    let latestValue : ObjectEntryEvent;
+    let latestValue: ObjectEntryEvent;
     let maxY = Number.NEGATIVE_INFINITY;
     let minY = Number.POSITIVE_INFINITY;
 
 
     const svg = d3.select(svgRef.current)
       .attr("width", "100%")
-      .attr("height", height)
+      .attr("height", responsiveHeight)
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -143,7 +166,7 @@ function D3ObjectEntryGraph({
       .attr("id", "clip")
       .append("rect")
       .attr("width", innerWidth)
-      .attr("height", height);
+      .attr("height", responsiveHeight);
     let graph = svg.append("g");
     graph.attr("clip-path", "url(#clip)")
 
@@ -162,12 +185,12 @@ function D3ObjectEntryGraph({
 
 
     let value = svg.append("text")
-      .attr("x", 20)
-      .attr("y", 30)
-      .attr("text-anchor", "start")
+      .attr("x", innerWidth - 20)
+      .attr("y", 25)
+      .attr("text-anchor", "end")
 
     function updateValue() {
-      value.text(`${Math.round(property(latestValue)*100.0)/100.0}`);
+      value.text(`${Math.round(property(latestValue) * 100.0) / 100.0}${unit ?? ""}`);
     }
 
     const group = graph.append("g");
@@ -221,7 +244,7 @@ function D3ObjectEntryGraph({
           minY = value;
         }
       }
-      
+
       if (event.payload.new_values.length != 0) {
         latestValue = event.payload.new_values[event.payload.new_values.length - 1];
         updateValue();
@@ -332,7 +355,9 @@ function D3ObjectEntryGraph({
 
 interface ObjectEntryGraph {
   nodeName: string,
-  oeName: string,
+  objectEntryInformation: ObjectEntryInformation,
+  property: (event: ObjectEntryEvent) => number,
+  propertyName?: string,
 }
 
 // horrible solution to perserve the state, but it works pretty well =^)
@@ -341,7 +366,9 @@ let defaultMode = D3PerformanceMode.Info;
 
 function ObjectEntryGraph({
   nodeName,
-  oeName,
+  objectEntryInformation,
+  property,
+  propertyName,
 }: ObjectEntryGraph) {
 
   const [interpolation, setInterpolation] = useState(defaultInterpolation);
@@ -404,42 +431,57 @@ function ObjectEntryGraph({
     });
   };
 
-  return <Paper sx={{ 
-      marginTop : "24px",
-      marginLeft: "8px", 
-      marginRight: "10px", 
-      paddingLeft: "12px", 
-      paddingRight: "12px", 
-      paddingTop : "20px",
-      paddingBottom : "20px",
-      width: "calc(100% - 16px)" ,
-      position :"relative"
-    }} >
-    <Typography sx={{
-        position: "absolute",
-        top : "-15px",
-        left : "12px",
-        padding : "1px",
+  function onExportPressed() {
+    // we should pass the node name and object entry name to the tauri command!
+    console.log("TODO invoke rust backend to open a native file dialog, should be more performant!");
+  }
 
-    }} variant="h5">{nodeName}::{oeName}</Typography>
+  return <Paper sx={{
+    marginTop: "px",
+    marginLeft: "8px",
+    marginRight: "10px",
+    paddingLeft: "12px",
+    paddingRight: "12px",
+    paddingTop: propertyName ? "30px" : "10px",
+    paddingBottom: "20px",
+    width: "calc(100% - 16px)",
+    position: "relative",
+  }} elevation={8}>
+    {propertyName ? <Typography sx={{
+      position: "absolute",
+      top: "-2px",
+      width: "100%",
+      textAlign: "center",
+      padding: "1px",
+
+    }} variant="h6">{propertyName}</Typography> :
+      <></>}
     <Stack direction="row">
       <Paper sx={{ width: "100%", backgroundColor: "#f2f2f2" }}>
         <div onWheel={handleScrollWheel}>
           <D3ObjectEntryGraph
             nodeName={nodeName}
-            oeName={oeName}
+            oeName={objectEntryInformation.name}
             refreshRate={refreshRate}
             eventRate={eventRate}
-            height={300}
+            height={[200, 400]}
             timeDomainSize={timeDomain}
-            property={event => event.value as number}
+            property={property}
             margin={{ top: 20, bottom: 20, left: 50, right: 0 }}
             interpolation={interpolation}
             performanceMode={performanceMode}
+            unit={objectEntryInformation?.unit}
           />
         </div>
       </Paper>
-      <Stack sx={{ marginLeft: 1, marginRight: 1, padding: 0, width: 200 }} >
+      <Stack sx={{ paddingLeft: "8px", width: 200 }} spacing={"10px"} >
+        <Button
+          disableElevation={true}
+          variant="outlined"
+          startIcon={<DownloadIcon />}
+          onClick={onExportPressed}>
+          Export
+        </Button>
         <FormControl sx={{ m: 0, minWidth: 150 }} size="small">
           <InputLabel id="interpolation-select">Interpolation</InputLabel>
           <Select
@@ -459,7 +501,7 @@ function ObjectEntryGraph({
             <MenuItem value={D3InterpolationMode.NaturalSpline}>Natural Spline</MenuItem>
           </Select>
         </FormControl>
-        <FormControl sx={{ marginTop: 2, minWidth: 150 }} size="small">
+        <FormControl sx={{ minWidth: 150 }} size="small">
           <InputLabel id="mode-select">Mode</InputLabel>
           <Select
             labelId="mode-select-label"

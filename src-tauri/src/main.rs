@@ -71,6 +71,7 @@ fn main() {
             object_entry_commands::unlisten_from_latest_object_entry_value,
             object_entry_commands::listen_to_history_of_object_entry,
             object_entry_commands::unlisten_from_history_of_object_entry,
+            object_entry_commands::request_object_entry_value,
             initialize_graph,
         ])
         .run(tauri::generate_context!())

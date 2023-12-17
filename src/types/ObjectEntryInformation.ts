@@ -4,7 +4,7 @@ export interface ObjectEntryCompositeType {
   // name of the composite type (name of the struct)
   name: string,
   // map of name -> type
-  attributes: { [key: string]: ObjectEntryType },
+  attributes: { name : string, type : ObjectEntryType}[],
 }
 
 // string[] for enums
