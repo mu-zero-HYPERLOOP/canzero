@@ -24,10 +24,15 @@ interface AppBarProps extends MuiAppBarProps {
     open?: boolean;
 }
 
-function getColor(value: number, color1: string, color2: string) {
-    let colormap = interpolate([color1, color2]);
-    let percent = (value) / (2000)
-    return colormap(percent)
+interface CustomAppBarProps {
+    connectingPossible: boolean;
+    connectionSuccess: boolean;
+    setConnectingPossible: (isConnecting: boolean) => void;
+    setConnectionSuccess: (isConnecting: boolean) => void;
+    state: States;
+    setState: (state: States) => void;
+    open: boolean;
+    toggleDrawer: () => void;
 }
 
 const AppBar = styled(MuiAppBar, {
@@ -74,17 +79,23 @@ const Drawer = styled(MuiDrawer, {shouldForwardProp: (prop) => prop !== 'open'})
     }),
 );
 
-
-export default function Dashboard() {
-    const [open, setOpen] = React.useState(true);
-    const [connectingPossible, setConnectingPossible] = useState(false);
-    const [connectionSuccess, setConnectionSuccess] = useState<boolean>(false)
+function CustomAppBar({
+                          connectingPossible,
+                          connectionSuccess,
+                          setConnectingPossible,
+                          setConnectionSuccess,
+                          state,
+                          setState,
+                          open,
+                          toggleDrawer
+                      }: Readonly<CustomAppBarProps>) {
     const [color, setColor] = useState<string>('#D11F04')
-    const [state, setState] = useState<States>(States.Startup)
 
-    const toggleDrawer = () => {
-        setOpen(!open);
-    };
+    function getColor(value: number, color1: string, color2: string) {
+        let colormap = interpolate([color1, color2]);
+        let percent = (value) / (2000)
+        return colormap(percent)
+    }
 
     useEffect(() => {
         if (connectingPossible) {
@@ -117,6 +128,42 @@ export default function Dashboard() {
         }
 
     }, [connectingPossible, connectionSuccess]);
+
+    return (<AppBar position="absolute" open={open} sx={{backgroundColor: color}}>
+        <Toolbar
+            sx={{
+                pr: '24px', // keep right padding when drawer closed
+            }}
+        >
+            <IconButton
+                edge="start"
+                color="inherit"
+                aria-label="open drawer"
+                onClick={toggleDrawer}
+                sx={{
+                    marginRight: '36px',
+                    ...(open && {display: 'none'}),
+                }}
+            >
+                <MenuIcon/>
+            </IconButton>
+            <ControlBar connectingPossible={connectingPossible} setConnectingPossible={setConnectingPossible}
+                        setConnectionSuccess={setConnectionSuccess} state={state} setState={setState}/>
+            <EstablishConnection setConnectingPossible={setConnectingPossible}/>
+        </Toolbar>
+    </AppBar>)
+}
+
+
+export default function Dashboard() {
+    const [open, setOpen] = React.useState(true);
+    const [connectingPossible, setConnectingPossible] = useState(false);
+    const [connectionSuccess, setConnectionSuccess] = useState<boolean>(false)
+    const [state, setState] = useState<States>(States.Startup)
+
+    const toggleDrawer = () => {
+        setOpen(!open);
+    };
 
     useEffect(() => {
         const keyDownHandler = (event: { key: string; preventDefault: () => void; }) => {
@@ -151,29 +198,9 @@ export default function Dashboard() {
     return (
         <Box sx={{display: 'flex'}}>
             <CssBaseline/>
-            <AppBar position="absolute" open={open} sx={{backgroundColor: color}}>
-                <Toolbar
-                    sx={{
-                        pr: '24px', // keep right padding when drawer closed
-                    }}
-                >
-                    <IconButton
-                        edge="start"
-                        color="inherit"
-                        aria-label="open drawer"
-                        onClick={toggleDrawer}
-                        sx={{
-                            marginRight: '36px',
-                            ...(open && {display: 'none'}),
-                        }}
-                    >
-                        <MenuIcon/>
-                    </IconButton>
-                    <ControlBar connectingPossible={connectingPossible} setConnectingPossible={setConnectingPossible}
-                                setConnectionSuccess={setConnectionSuccess} state={state} setState={setState}/>
-                    <EstablishConnection setConnectingPossible={setConnectingPossible}/>
-                </Toolbar>
-            </AppBar>
+            <CustomAppBar connectingPossible={connectingPossible} connectionSuccess={connectionSuccess}
+                          setConnectingPossible={setConnectingPossible} setConnectionSuccess={setConnectionSuccess}
+                          state={state} setState={setState} open={open} toggleDrawer={toggleDrawer}/>
             <Drawer variant="permanent" open={open}>
                 <Toolbar
                     sx={{
