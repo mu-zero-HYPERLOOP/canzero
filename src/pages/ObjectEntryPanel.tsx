@@ -23,10 +23,9 @@ interface ObjectEntryPanelProps {
 }
 
 interface DisplayObjectEntryEvent {
-    currentValue: number | string | ObjectEntryComposite
-    type: ObjectEntryType
-    node: string
-    objectEntry: string
+    objectEntryInfo: ObjectEntryInformation
+    objectEntryEvent: ObjectEntryEvent
+    nodeName: string
 }
 
 function checkInput(node: string, objectEntry: string, val: string, type: ObjectEntryType, setError: {
@@ -92,19 +91,19 @@ function returnDefaultValue(type: ObjectEntryType) {
     }
 }
 
-function showValueTextField(currentValue: number | string | ObjectEntryComposite, type: ObjectEntryType) {
+function showValueTextField(currentValue: number | string | ObjectEntryComposite, type: ObjectEntryType): string {
     if (isStringArray(type)) {
-        return currentValue;
+        return currentValue as string;
     } else {
         return currentValue.toString();
     }
 }
 
-function ObjectEntryValue({currentValue, type, node, objectEntry}: Readonly<DisplayObjectEntryEvent>) {
+function ObjectEntryValue({objectEntryInfo, objectEntryEvent, nodeName}: Readonly<DisplayObjectEntryEvent>) {
     const newValue = useRef<string>("");
     const [error, setError] = useState<boolean>(false)
 
-    if (isObjectEntryCompositeType(type)) {
+    if (isObjectEntryCompositeType(objectEntryInfo.ty)) {
         return <></>
     } else {
         return <Box
@@ -116,16 +115,16 @@ function ObjectEntryValue({currentValue, type, node, objectEntry}: Readonly<Disp
             autoComplete="off"
         >
             <TextField
-                key={"currentValue" + node + "/" + objectEntry}
+                key={"currentValue" + nodeName + "/" + objectEntryInfo.name}
                 id={"currentValue"}
                 label="Current value"
                 variant="outlined"
-                value={showValueTextField(currentValue, type)}
+                value={showValueTextField(objectEntryEvent.value, objectEntryInfo.ty) + " " + (typeof objectEntryInfo.unit === "string"? objectEntryInfo.unit : null )}
                 InputProps={{
                     readOnly: true,
                 }}/>
             <TextField
-                key={"setValue" + node + "/" + objectEntry}
+                key={"setValue" + nodeName + "/" + objectEntryInfo.name}
                 id={"setValue"}
                 label="Set value"
                 variant="outlined"
@@ -137,7 +136,7 @@ function ObjectEntryValue({currentValue, type, node, objectEntry}: Readonly<Disp
                 onKeyDown={(event) => {
                     if (event.key == "Enter") {
                         event.preventDefault();
-                        checkInput(node, objectEntry, newValue.current, type, setError)
+                        checkInput(nodeName, objectEntryInfo.name, newValue.current, objectEntryInfo.ty, setError)
                     }
                 }}
             />
@@ -187,7 +186,9 @@ function ObjectEntryPanel({node, name}: Readonly<ObjectEntryPanelProps>) {
         }
     }, [node, name]);
 
-    return <ObjectEntryGraph nodeName={node.name} oeName={name}/>
+    return <> <h2>{node.name}: {name}</h2> <h3>{objectEntryInfo.description}</h3>
+        <ObjectEntryValue objectEntryInfo={objectEntryInfo} objectEntryEvent={objectEntryEvent} nodeName={node.name}/>
+        <ObjectEntryGraph nodeName={node.name} oeName={name}/></>
 }
 
 export default ObjectEntryPanel;
