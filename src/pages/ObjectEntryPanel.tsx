@@ -1,6 +1,23 @@
 import { useEffect, useMemo, useState } from "react";
 import { ObjectEntryInformation, ObjectEntryCompositeType, ObjectEntryType } from "../types/ObjectEntryInformation.ts";
 import { invoke } from "@tauri-apps/api";
+import {NodeInformation} from "../types/NodeInformation";
+import {SetStateAction, useEffect, useRef, useState} from "react";
+import {
+    isInt,
+    isObjectEntryCompositeType,
+    isReal,
+    isStringArray,
+    isUint,
+    ObjectEntryInformation,
+    ObjectEntryType
+} from "../types/ObjectEntryInformation.ts";
+import {invoke} from "@tauri-apps/api";
+import ObjectEntryListenLatestResponse from "../types/ObjectEntryListenLatestResponse.ts";
+import ObjectEntryEvent, {ObjectEntryComposite} from "../types/ObjectEntryEvent.ts";
+import {Event, listen} from "@tauri-apps/api/event";
+import Box from "@mui/material/Box";
+import TextField from "@mui/material/TextField";
 import ObjectEntryGraph from "../components/Graph.tsx";
 import { Box, Button, CircularProgress, Container, FormControl, FormHelperText, IconButton, Input, InputAdornment, Modal, OutlinedInput, Paper, Skeleton, Stack, TextField, Typography } from "@mui/material";
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -10,55 +27,114 @@ import ObjectEntryListenLatestResponse from "../types/ObjectEntryListenLatestRes
 import { listen } from "@tauri-apps/api/event";
 import ObjectEntryEvent, { ObjectEntryComposite, ObjectEntryValue } from "../types/ObjectEntryEvent.ts";
 
-// interface ObjectEntryPanelProps {
-//   node: NodeInformation,
-//   name: string,   // name of obejct entry
-// }
-//
-// interface DisplayObjectEntryEvent {
-//   currentValue: number | string | ObjectEntryComposite
-//   type: ObjectEntryType
-//   node: string
-//   objectEntry: string
-// }
+interface ObjectEntryPanelProps {
+    node: NodeInformation,
+    name: string,   // name of obejct entry
+}
 
-// function ObjectEntryValue({ currentValue, node, objectEntry }: Readonly<DisplayObjectEntryEvent>) {
-//   const [newValue, setNewValue] = useState<string>("");
-//
-//
-//   return <Box
-//     component="form"
-//     sx={{
-//       '& > :not(style)': { m: 1, width: '25ch' },
-//     }}
-//     noValidate
-//     autoComplete="off"
-//   >
-//     <TextField
-//       key={"currentValue" + node + "/" + objectEntry}
-//       id={"currentValue"}
-//       label="Current value"
-//       variant="outlined"
-//       value={currentValue.toString()}
-//       InputProps={{
-//         readOnly: true,
-//       }} />
-//     <TextField
-//       key={"setValue" + node + "/" + objectEntry}
-//       id={"setValue"}
-//       label="Set value"
-//       variant="outlined"
-//       error={false} //TODO type check and others
-//       onChange={(event) => { setNewValue(event.target.value) }}
-//       onKeyDown={(event) => {
-//         if (event.key == "Enter") {
-//           event.preventDefault();
-//           invoke("new_object_entry_value", { nodeName: node, objectEntryName: objectEntry, value: newValue })
-//         }
-//       }}
-//     />
-//   </Box>
-// }
+interface DisplayObjectEntryEvent {
+    objectEntryInfo: ObjectEntryInformation
+    objectEntryEvent: ObjectEntryEvent
+    nodeName: string
+}
+
+function checkInput(node: string, objectEntry: string, val: string, type: ObjectEntryType, setError: {
+    (value: SetStateAction<boolean>): void;
+    (arg0: boolean): void;
+}) {
+    setError(false)
+
+    if (isInt(type)) {
+        if (!val.includes(".")) {
+            let num = parseInt(val)
+            if (!isNaN(num)) {
+                invoke("new_object_entry_value", {
+                    nodeName: node,
+                    objectEntryName: objectEntry,
+                    value: num
+                })
+                return;
+            }
+        }
+    } else if (isUint(type)) {
+        if (!val.includes(".")) {
+            let num = parseInt(val)
+            if (!isNaN(num) && num >= 0) {
+                invoke("new_object_entry_value", {
+                    nodeName: node,
+                    objectEntryName: objectEntry,
+                    value: num
+                })
+                return;
+            }
+        }
+    } else if (isReal(type)) {
+        let num = parseFloat(val)
+        if (!isNaN(num)) {
+            invoke("new_object_entry_value", {
+                nodeName: node,
+                objectEntryName: objectEntry,
+                value: num
+            })
+            return;
+        }
+    } else if (isStringArray(type)) {
+        if (type.includes(val)) {
+            invoke("new_object_entry_value", {
+                nodeName: node,
+                objectEntryName: objectEntry,
+                value: val
+            })
+            return;
+        }
+    }
+    setError(true)
+}
+
+function ObjectEntryValue({objectEntryInfo, objectEntryEvent, nodeName}: Readonly<DisplayObjectEntryEvent>) {
+    const newValue = useRef<string>("");
+    const [error, setError] = useState<boolean>(false)
+
+    if (isObjectEntryCompositeType(objectEntryInfo.ty)) {
+        return <></>
+    } else {
+        return <Box
+            component="form"
+            sx={{
+                '& > :not(style)': {m: 1, width: '25ch'},
+            }}
+            noValidate
+            autoComplete="off"
+        >
+            <TextField
+                key={"currentValue" + nodeName + "/" + objectEntryInfo.name}
+                id={"currentValue"}
+                label="Current value"
+                variant="outlined"
+                value={showValueTextField(objectEntryEvent.value, objectEntryInfo.ty) + " " + (typeof objectEntryInfo.unit === "string"? objectEntryInfo.unit : null )}
+                InputProps={{
+                    readOnly: true,
+                }}/>
+            <TextField
+                key={"setValue" + nodeName + "/" + objectEntryInfo.name}
+                id={"setValue"}
+                label="Set value"
+                variant="outlined"
+                error={error}
+                onAnimationStart={() => setError(false)}
+                onChange={(event) => {
+                    newValue.current = event.target.value
+                }}
+                onKeyDown={(event) => {
+                    if (event.key == "Enter") {
+                        event.preventDefault();
+                        checkInput(nodeName, objectEntryInfo.name, newValue.current, objectEntryInfo.ty, setError)
+                    }
+                }}
+            />
+        </Box>
+    }
+}
 
 interface RefreshButtonProps {
   nodeName: string,
@@ -257,7 +333,7 @@ interface GraphListProps {
   nodeName: string,
 }
 
-// This function is not tested property because the backend currently doesn't any 
+// This function is not tested property because the backend currently doesn't any
 // structures messages!
 function GraphList({ information, nodeName }: GraphListProps) {
   function computeRenderFunc(
