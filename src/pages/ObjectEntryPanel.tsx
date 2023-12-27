@@ -1,7 +1,6 @@
-import {SetStateAction, useEffect, useMemo, useRef, useState} from "react";
+import {SetStateAction, useEffect, useMemo, useState} from "react";
 import {
     isInt,
-    isObjectEntryCompositeType,
     isReal,
     isStringArray,
     isUint,
@@ -28,75 +27,69 @@ import {
     Paper,
     Skeleton,
     Stack,
-    TextField,
     Typography
 } from "@mui/material";
 import RefreshIcon from '@mui/icons-material/Refresh';
 import CreateIcon from '@mui/icons-material/Create';
 
-// interface ObjectEntryPanelProps {
-//     node: NodeInformation,
-//     name: string,   // name of obejct entry
-// }
-//
 // interface DisplayObjectEntryEvent {
 //     objectEntryInfo: ObjectEntryInformation
 //     objectEntryEvent: ObjectEntryEvent
 //     nodeName: string
 // }
-//
-// function checkInput(node: string, objectEntry: string, val: string, type: ObjectEntryType, setError: {
-//     (value: SetStateAction<boolean>): void;
-//     (arg0: boolean): void;
-// }) {
-//     setError(false)
-//
-//     if (isInt(type)) {
-//         if (!val.includes(".")) {
-//             let num = parseInt(val)
-//             if (!isNaN(num)) {
-//                 invoke("new_object_entry_value", {
-//                     nodeName: node,
-//                     objectEntryName: objectEntry,
-//                     value: num
-//                 })
-//                 return;
-//             }
-//         }
-//     } else if (isUint(type)) {
-//         if (!val.includes(".")) {
-//             let num = parseInt(val)
-//             if (!isNaN(num) && num >= 0) {
-//                 invoke("new_object_entry_value", {
-//                     nodeName: node,
-//                     objectEntryName: objectEntry,
-//                     value: num
-//                 })
-//                 return;
-//             }
-//         }
-//     } else if (isReal(type)) {
-//         let num = parseFloat(val)
-//         if (!isNaN(num)) {
-//             invoke("new_object_entry_value", {
-//                 nodeName: node,
-//                 objectEntryName: objectEntry,
-//                 value: num
-//             })
-//             return;
-//         }
-//     } else if (isStringArray(type)) {
-//         if (type.includes(val)) {
-//             invoke("new_object_entry_value", {
-//                 nodeName: node,
-//                 objectEntryName: objectEntry,
-//                 value: val
-//             })
-//             return;
-//         }
-//     }
-//     setError(true)
-// }
+
+function checkInput(node: string, objectEntry: string, val: string, type: ObjectEntryType, setError: {
+    (value: SetStateAction<boolean>): void;
+    (arg0: boolean): void;
+}) {
+    setError(false)
+
+    if (isInt(type)) {
+        if (!val.includes(".")) {
+            let num = parseInt(val)
+            if (!isNaN(num)) {
+                invoke("new_object_entry_value", {
+                    nodeName: node,
+                    objectEntryName: objectEntry,
+                    value: num
+                })
+                return;
+            }
+        }
+    } else if (isUint(type)) {
+        if (!val.includes(".")) {
+            let num = parseInt(val)
+            if (!isNaN(num) && num >= 0) {
+                invoke("new_object_entry_value", {
+                    nodeName: node,
+                    objectEntryName: objectEntry,
+                    value: num
+                })
+                return;
+            }
+        }
+    } else if (isReal(type)) {
+        let num = parseFloat(val)
+        if (!isNaN(num)) {
+            invoke("new_object_entry_value", {
+                nodeName: node,
+                objectEntryName: objectEntry,
+                value: num
+            })
+            return;
+        }
+    } else if (isStringArray(type)) {
+        if (type.includes(val)) {
+            invoke("new_object_entry_value", {
+                nodeName: node,
+                objectEntryName: objectEntry,
+                value: val
+            })
+            return;
+        }
+    }
+    setError(true)
+}
 //
 // function ObjectEntryValue({objectEntryInfo, objectEntryEvent, nodeName}: Readonly<DisplayObjectEntryEvent>) {
 //     const newValue = useRef<string>("");
@@ -199,6 +192,7 @@ function EditDialog({onClose, open, nodeName, objectEntryName}: EditDialogProps)
 
     let [information, setInformation] = useState<ObjectEntryInformation | null>(null);
     let [value, setValue] = useState<ObjectEntryEvent | null>(null);
+    let [error, setError] = useState<boolean>(false);
 
     function updateValue(event: ObjectEntryEvent, information: ObjectEntryInformation) {
         console.log("update value!");
@@ -234,9 +228,7 @@ function EditDialog({onClose, open, nodeName, objectEntryName}: EditDialogProps)
         console.log("fetched information", information);
         // wait for fetch Information to be complete before listeningS
         // allows using the information in updateValue!
-        let unlisten = await registerListener(information);
-
-        return unlisten;
+        return await registerListener(information);
     }
 
     useEffect(() => {
@@ -281,6 +273,7 @@ function EditDialog({onClose, open, nodeName, objectEntryName}: EditDialogProps)
                         inputProps={{
                             'aria-label': 'weight',
                         }}
+                        error={error}
                     />
                 </FormControl>
                 <Box
@@ -295,6 +288,7 @@ function EditDialog({onClose, open, nodeName, objectEntryName}: EditDialogProps)
                         sx={{
                             marginLeft: "auto"
                         }}
+                        disabled={error}
                     >
                         Upload
                     </Button>
