@@ -169,7 +169,7 @@ export default function Dashboard() {
         const keyDownHandler = (event: { key: string; preventDefault: () => void; }) => {
             if (event.key === ' ') {
                 event.preventDefault()
-                emergency(setConnectingPossible)
+                emergency(setConnectingPossible, setState)
             } else if (event.key === "F1") { //TODO Somebody test please, mac does not like overwriting this
                 event.preventDefault()
                 connect(setConnectingPossible, setConnectionSuccess)

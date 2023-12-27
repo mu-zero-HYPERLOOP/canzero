@@ -16,7 +16,8 @@ export enum States {
     Brake = 'Brake',
     StopLevitation = 'Stop Levitation',
     Rolling = 'Rolling',
-    EndOfRun = 'End of Run'
+    EndOfRun = 'End of Run',
+    Off = 'Off'
 }
 
 interface EstablishConnectionProps {
@@ -27,7 +28,8 @@ interface EstablishConnectionProps {
     setState: (state: States) => void
 }
 
-export function emergency(setConnectingPossible: (isConnecting: boolean) => void) {
+export function emergency(setConnectingPossible: (isConnecting: boolean) => void, setState: (state: States) => void) {
+    setState(States.Off)
     invoke('emergency');
     setConnectingPossible(true) //TODO Remove when unnecessary
 }
@@ -110,7 +112,7 @@ function ControlBar({
                     sx={{backgroundColor: '#E32B10'}}
                     color="error"
                     onClick={() => {
-                        emergency(setConnectingPossible)
+                        emergency(setConnectingPossible, setState)
                     }}
             >Emergency [Space bar]</Button>
             <Button variant="contained" size="large"
