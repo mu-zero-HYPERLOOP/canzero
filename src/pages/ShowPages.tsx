@@ -8,6 +8,9 @@ import {NetworkInformation} from "../types/NetworkInformation";
 import NodePanel from "./NodePanel";
 import {NodeInformation} from "../types/NodeInformation";
 import ObjectEntryPanel from "./ObjectEntryPanel";
+import LevitationControl from "./LevitationControl.tsx";
+import GuidanceControl from "./GuidanceControl.tsx";
+import MotorControl from "./MotorControl.tsx";
 
 function Content() {
     const location = useLocation();
@@ -45,6 +48,9 @@ function ShowPages({connectionSuccess}: ConnectionProps) {
         <Routes>
             <Route index element={<OverviewPanel connectionSuccess={connectionSuccess}/>}/>
             <Route path="TracePanel" element={<TracePanel/>}/>
+            <Route path="LevitationControl" element={<LevitationControl/>}/>
+            <Route path="GuidanceControl" element={<GuidanceControl/>}/>
+            <Route path="MotorControl" element={<MotorControl/>}/>
             {nodes.map((node) => {
 
                 let routes = [<Route key={node.name} path={node.name} element={<NodePanel node={node}/>}/>];

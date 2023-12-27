@@ -4,6 +4,9 @@ import TerminalIcon from '@mui/icons-material/Terminal';
 import GamesIcon from '@mui/icons-material/Games';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import FlightTakeoff from '@mui/icons-material/FlightTakeoff';
+import Speed from '@mui/icons-material/Speed';
+import EditRoad from '@mui/icons-material/EditRoad';
 import clsx from 'clsx';
 import { Link as RouterLink, LinkProps as RouterLinkProps, useNavigate, } from 'react-router-dom';
 import { Box, Divider, ListItemButton, Typography } from '@mui/material';
@@ -117,6 +120,9 @@ export const RouterList = (
   <React.Fragment>
     <ListItemButtonLink to="/" primary="Overview" icon={<GamesIcon />} />
     <ListItemButtonLink to="/TracePanel" primary="Trace" icon={<TerminalIcon />} />
+    <ListItemButtonLink to="/LevitationControl" primary="Levitation Control" icon={<FlightTakeoff />} />
+    <ListItemButtonLink to="/GuidanceControl" primary="Guidance Control" icon={<EditRoad />} />
+    <ListItemButtonLink to="/MotorControl" primary="Motor Control" icon={<Speed />} />
   </React.Fragment>
 );
 
