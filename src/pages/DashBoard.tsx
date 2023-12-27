@@ -234,7 +234,7 @@ export default function Dashboard() {
             >
                 <Toolbar/>
                 <Box sx={{width: '100%'}}>
-                    <ShowPages/>
+                    <ShowPages connectionSuccess={connectionSuccess}/>
                 </Box>
             </Box>
         </Box>

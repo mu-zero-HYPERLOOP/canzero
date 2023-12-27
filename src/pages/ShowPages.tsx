@@ -18,7 +18,11 @@ function Content() {
     );
 }
 
-function ShowPages() {
+interface ConnectionProps {
+    connectionSuccess: boolean
+}
+
+function ShowPages({connectionSuccess}: ConnectionProps) {
     const [nodes, setNodes] = useState<NodeInformation[]>([]);
 
     async function asyncFetchNodeData() {
@@ -39,7 +43,7 @@ function ShowPages() {
 
     return (
         <Routes>
-            <Route index element={<OverviewPanel/>}/>
+            <Route index element={<OverviewPanel connectionSuccess={connectionSuccess}/>}/>
             <Route path="TracePanel" element={<TracePanel/>}/>
             {nodes.map((node) => {
 

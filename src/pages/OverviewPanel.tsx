@@ -1,12 +1,15 @@
 import {Container} from '@mui/material';
 import ControlGrid from '../components/ControlGrid';
 
-function OverviewPanel() {
+interface ConnectionProps {
+    connectionSuccess: boolean
+}
+function OverviewPanel({connectionSuccess}: ConnectionProps) {
 
     return (
         <div>
             <Container maxWidth="lg" sx={{mt: 1, mb: 1}}>
-                <ControlGrid isConnecting={false}/>
+                <ControlGrid connectionSuccess={connectionSuccess}/>
             </Container>
         </div>
 

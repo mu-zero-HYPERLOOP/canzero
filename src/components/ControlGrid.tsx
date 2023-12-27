@@ -10,14 +10,14 @@ const Item = styled(Paper)(({ theme }) => ({
   }));
 
 interface ControlGridProps {
-    isConnecting: boolean;
+    connectionSuccess: boolean;
 }
 
 
-function ControlGrid({ isConnecting }: ControlGridProps) {
+function ControlGrid({ connectionSuccess }: ControlGridProps) {
     return (
         <Grid container rowSpacing={1} columnSpacing={{ xs: 1, md: 2 }} sx={{ margin: "1%" }}>
-            {isConnecting ? (
+            {!connectionSuccess ? (
                 <>
                     {Array.from({ length: 4 }, (_, index) => (
                         <Grid item xs={6} md={(index % 4 === 0 || index % 4 === 3) ? 8 : 4} key={index}>
