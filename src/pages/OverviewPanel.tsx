@@ -8,7 +8,7 @@ function OverviewPanel({connectionSuccess}: ConnectionProps) {
 
     return (
         <div>
-            <Container maxWidth="lg" sx={{mt: 1, mb: 1}}>
+            <Container maxWidth="xl" sx={{mt: 0, mb: 0}}>
                 <ControlGrid connectionSuccess={connectionSuccess}/>
             </Container>
         </div>

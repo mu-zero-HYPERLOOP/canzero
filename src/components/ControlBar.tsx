@@ -148,7 +148,6 @@ function ControlBar({
                         abort(state, setState)
                     }}
             >Abort [F5]</Button>
-            <Box sx={{flexGrow: 1}}></Box>
         </Stack>
     );
 }

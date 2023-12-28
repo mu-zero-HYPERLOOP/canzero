@@ -9,7 +9,7 @@ import Speed from '@mui/icons-material/Speed';
 import EditRoad from '@mui/icons-material/EditRoad';
 import clsx from 'clsx';
 import { Link as RouterLink, LinkProps as RouterLinkProps, useNavigate, } from 'react-router-dom';
-import { Box, Divider, ListItemButton, Typography } from '@mui/material';
+import {  Divider, ListItemButton, Typography } from '@mui/material';
 import { TreeItem, TreeItemContentProps, TreeItemProps, TreeView, useTreeItem } from '@mui/x-tree-view';
 import { NetworkInformation } from '../types/NetworkInformation';
 import { NodeInformation } from '../types/NodeInformation';
@@ -159,7 +159,6 @@ export function NodeList() {
   });
 
   return (
-      <Box sx={{minHeight: 180, flexGrow: 1, maxWidth: 300}}>
         <TreeView
             aria-label="icon expansion"
             defaultCollapseIcon={<ExpandMoreIcon/>}
@@ -171,7 +170,6 @@ export function NodeList() {
               </CustomTreeItem>)}
 
         </TreeView>
-      </Box>
   );
 }
 
