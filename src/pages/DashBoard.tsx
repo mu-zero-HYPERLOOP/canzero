@@ -137,12 +137,16 @@ function CustomAppBar({
         >
             <IconButton
                 edge="start"
-                color="inherit"
                 aria-label="open drawer"
                 onClick={toggleDrawer}
                 sx={{
                     marginRight: '36px',
                     ...(open && {display: 'none'}),
+                    backgroundColor: "black",
+                    color: "#00d6ba",
+                    '&:hover': {
+                        backgroundColor: "#232323"
+                    }
                 }}
             >
                 <MenuIcon/>
