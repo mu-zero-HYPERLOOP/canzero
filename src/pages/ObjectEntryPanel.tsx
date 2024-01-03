@@ -1,4 +1,4 @@
-import {SetStateAction, useEffect, useMemo, useState} from "react";
+import {SetStateAction, useEffect, useMemo, useRef, useState} from "react";
 import {
     isInt,
     isReal,
@@ -32,13 +32,7 @@ import {
 import RefreshIcon from '@mui/icons-material/Refresh';
 import CreateIcon from '@mui/icons-material/Create';
 
-// interface DisplayObjectEntryEvent {
-//     objectEntryInfo: ObjectEntryInformation
-//     objectEntryEvent: ObjectEntryEvent
-//     nodeName: string
-// }
-
-function checkInput(node: string, objectEntry: string, val: string, type: ObjectEntryType, setError: {
+function checkAndSendInput(node: string, objectEntry: string, val: string, type: ObjectEntryType, setError: {
     (value: SetStateAction<boolean>): void;
     (arg0: boolean): void;
 }) {
@@ -90,51 +84,6 @@ function checkInput(node: string, objectEntry: string, val: string, type: Object
     }
     setError(true)
 }
-//
-// function ObjectEntryValue({objectEntryInfo, objectEntryEvent, nodeName}: Readonly<DisplayObjectEntryEvent>) {
-//     const newValue = useRef<string>("");
-//     const [error, setError] = useState<boolean>(false)
-//
-//     if (isObjectEntryCompositeType(objectEntryInfo.ty)) {
-//         return <></>
-//     } else {
-//         return <Box
-//             component="form"
-//             sx={{
-//                 '& > :not(style)': {m: 1, width: '25ch'},
-//             }}
-//             noValidate
-//             autoComplete="off"
-//         >
-//             <TextField
-//                 key={"currentValue" + nodeName + "/" + objectEntryInfo.name}
-//                 id={"currentValue"}
-//                 label="Current value"
-//                 variant="outlined"
-//                 value={showValueTextField(objectEntryEvent.value, objectEntryInfo.ty) + " " + (typeof objectEntryInfo.unit === "string" ? objectEntryInfo.unit : null)}
-//                 InputProps={{
-//                     readOnly: true,
-//                 }}/>
-//             <TextField
-//                 key={"setValue" + nodeName + "/" + objectEntryInfo.name}
-//                 id={"setValue"}
-//                 label="Set value"
-//                 variant="outlined"
-//                 error={error}
-//                 onAnimationStart={() => setError(false)}
-//                 onChange={(event) => {
-//                     newValue.current = event.target.value
-//                 }}
-//                 onKeyDown={(event) => {
-//                     if (event.key == "Enter") {
-//                         event.preventDefault();
-//                         checkInput(nodeName, objectEntryInfo.name, newValue.current, objectEntryInfo.ty, setError)
-//                     }
-//                 }}
-//             />
-//         </Box>
-//     }
-// }
 
 interface RefreshButtonProps {
     nodeName: string,
@@ -193,9 +142,10 @@ function EditDialog({onClose, open, nodeName, objectEntryName}: EditDialogProps)
     let [information, setInformation] = useState<ObjectEntryInformation | null>(null);
     let [value, setValue] = useState<ObjectEntryEvent | null>(null);
     let [error, setError] = useState<boolean>(false);
+    const newValue = useRef<string>("");
 
     function updateValue(event: ObjectEntryEvent, information: ObjectEntryInformation) {
-        console.log("update value!");
+        console.log("update value: " + event.value);
         setValue(event);
     }
 
@@ -273,6 +223,10 @@ function EditDialog({onClose, open, nodeName, objectEntryName}: EditDialogProps)
                         inputProps={{
                             'aria-label': 'weight',
                         }}
+                        onAnimationStart={() => setError(false)}
+                        onChange={(event) => {
+                            newValue.current = event.target.value
+                        }}
                         error={error}
                     />
                 </FormControl>
@@ -288,7 +242,9 @@ function EditDialog({onClose, open, nodeName, objectEntryName}: EditDialogProps)
                         sx={{
                             marginLeft: "auto"
                         }}
-                        disabled={error}
+                        onClick={() => {
+                            if (information) checkAndSendInput(nodeName, information.name, newValue.current, information.ty, setError)
+                        }}
                     >
                         Upload
                     </Button>
@@ -360,7 +316,6 @@ function GraphList({information, nodeName}: GraphListProps) {
             return () => <> {renderFuncs.map(f => f())}</>;
         } else if (Array.isArray(ty)) {
             // Enum Type
-            let entries = ty as string[];
             return () => {
                 return <ObjectEntryGraph
                     nodeName={nodeName}
@@ -422,8 +377,8 @@ function ObjectEntryPanel({node, name}: ObjectEntryPanelProps) {
 
                     }} variant="subtitle2">{information.description}</Typography>
                     : <></>}
-                <RefreshButton nodeName={node.name} objectEntryName={information?.name}/>
-                <SetValueButton nodeName={node.name} objectEntryName={information?.name}/>
+                <RefreshButton nodeName={node.name} objectEntryName={information.name}/>
+                <SetValueButton nodeName={node.name} objectEntryName={information.name}/>
                 <GraphList information={information} nodeName={node.name}/>
             </>
         } else {
