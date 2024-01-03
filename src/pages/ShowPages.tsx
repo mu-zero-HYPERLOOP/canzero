@@ -48,9 +48,9 @@ function ShowPages({connectionSuccess}: ConnectionProps) {
         <Routes>
             <Route index element={<OverviewPanel connectionSuccess={connectionSuccess}/>}/>
             <Route path="TracePanel" element={<TracePanel/>}/>
-            <Route path="LevitationControl" element={<LevitationControl/>}/>
-            <Route path="GuidanceControl" element={<GuidanceControl/>}/>
-            <Route path="MotorControl" element={<MotorControl/>}/>
+            <Route path="LevitationControl" element={<LevitationControl nodes={nodes}/>}/>
+            <Route path="GuidanceControl" element={<GuidanceControl nodes={nodes}/>}/>
+            <Route path="MotorControl" element={<MotorControl nodes={nodes}/>}/>
             {nodes.map((node) => {
 
                 let routes = [<Route key={node.name} path={node.name} element={<NodePanel node={node}/>}/>];
