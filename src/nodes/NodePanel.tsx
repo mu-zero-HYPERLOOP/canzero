@@ -1,4 +1,4 @@
-import { NodeInformation } from "../types/NodeInformation";
+import { NodeInformation } from "./types/NodeInformation.ts";
 
 interface NodePanelProps {
   node : NodeInformation

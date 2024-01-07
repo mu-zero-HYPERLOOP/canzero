@@ -1,4 +1,4 @@
-import { Frame } from "./Frame";
+import { Frame } from "./Frame.ts";
 
 export interface TraceObjectEvent {
   frame: Frame,

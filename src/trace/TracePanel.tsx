@@ -1,4 +1,4 @@
-import TraceGrid from "../components/TraceGrid";
+import TraceGrid from "./TraceGrid.tsx";
 
 function TracePanel() {
     return (

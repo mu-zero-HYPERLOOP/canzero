@@ -11,8 +11,8 @@ import clsx from 'clsx';
 import { Link as RouterLink, LinkProps as RouterLinkProps, useNavigate, } from 'react-router-dom';
 import {  Divider, ListItemButton, Typography } from '@mui/material';
 import { TreeItem, TreeItemContentProps, TreeItemProps, TreeView, useTreeItem } from '@mui/x-tree-view';
-import { NetworkInformation } from '../types/NetworkInformation';
-import { NodeInformation } from '../types/NodeInformation';
+import { NetworkInformation } from '../nodes/types/NetworkInformation.ts';
+import { NodeInformation } from '../nodes/types/NodeInformation.ts';
 import React, { useEffect, useState } from "react";
 import { invoke } from '@tauri-apps/api';
 

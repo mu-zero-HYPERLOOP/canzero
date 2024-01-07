@@ -1,12 +1,12 @@
 import { Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
-import { TypeFrame } from "../types/TypeFrame";
+import { SignalFrame } from "./types/SignalFrame.ts";
 
 
-interface TypeFrameDetailProps {
-  frame : TypeFrame,
+interface SignalFrameDetailProps {
+  frame : SignalFrame,
 }
 
-function TypeFrameDetail({frame} : TypeFrameDetailProps) {
+function SignalFrameDetail({frame} : SignalFrameDetailProps) {
     return (
       <Table size="small" aria-label="purchases">
         <TableHead>
@@ -16,12 +16,12 @@ function TypeFrameDetail({frame} : TypeFrameDetailProps) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {frame.attributes.map((attribute) => {
+          {frame.signals.map((signal) => {
             return (
-              <TableRow key={attribute.name}>
-                <TableCell>{attribute.name}</TableCell>
+              <TableRow key={signal.name}>
+                <TableCell>{signal.name}</TableCell>
                 <TableCell component="th" scope="row">
-                  {attribute.value as (number | string)}
+                  {signal.value as (number | string)}
                 </TableCell>
               </TableRow>
             );
@@ -31,4 +31,4 @@ function TypeFrameDetail({frame} : TypeFrameDetailProps) {
     );
 }
 
-export default TypeFrameDetail;
+export default SignalFrameDetail;

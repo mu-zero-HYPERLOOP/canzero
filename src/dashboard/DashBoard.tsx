@@ -11,11 +11,11 @@ import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ShowPages from './ShowPages';
-import {ListEntries} from './PageList';
-import ControlBar, {abort, connect, emergency, launch, levitate, prepare, States} from "../components/ControlBar.tsx";
+import ShowPages from './ShowPages.tsx';
+import {ListEntries} from './PageList.tsx';
+import ControlBar, {abort, connect, emergency, launch, levitate, prepare, States} from "../overview/ControlBar.tsx";
 import {yellow} from "@mui/material/colors";
-import EstablishConnection from "../components/EstablishConnection.tsx";
+import EstablishConnection from "./EstablishConnection.tsx";
 import interpolate from "color-interpolate";
 
 const drawerWidth: number = 220;

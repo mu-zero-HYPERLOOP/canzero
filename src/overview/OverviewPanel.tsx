@@ -1,5 +1,5 @@
 import {Container} from '@mui/material';
-import ControlGrid from '../components/ControlGrid';
+import ControlGrid from './ControlGrid.tsx';
 
 interface ConnectionProps {
     connectionSuccess: boolean

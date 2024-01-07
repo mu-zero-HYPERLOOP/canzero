@@ -1,16 +1,16 @@
 import {Route, Routes, useLocation} from "react-router-dom";
-import OverviewPanel from "./OverviewPanel.tsx";
-import TracePanel from "./TracePanel.tsx";
+import OverviewPanel from "../overview/OverviewPanel.tsx";
+import TracePanel from "../trace/TracePanel.tsx";
 import {Typography} from "@mui/material";
 import {useEffect, useState} from "react";
 import {invoke} from "@tauri-apps/api";
-import {NetworkInformation} from "../types/NetworkInformation";
-import NodePanel from "./NodePanel";
-import {NodeInformation} from "../types/NodeInformation";
-import ObjectEntryPanel from "./ObjectEntryPanel";
-import LevitationControl from "./LevitationControl.tsx";
-import GuidanceControl from "./GuidanceControl.tsx";
-import MotorControl from "./MotorControl.tsx";
+import {NetworkInformation} from "../nodes/types/NetworkInformation.ts";
+import NodePanel from "../nodes/NodePanel.tsx";
+import {NodeInformation} from "../nodes/types/NodeInformation.ts";
+import ObjectEntryPanel from "../nodes/ObjectEntryPanel.tsx";
+import LevitationControl from "../nodes/LevitationControl.tsx";
+import GuidanceControl from "../nodes/GuidanceControl.tsx";
+import MotorControl from "../nodes/MotorControl.tsx";
 
 function Content() {
     const location = useLocation();

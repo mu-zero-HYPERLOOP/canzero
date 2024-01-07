@@ -1,7 +1,7 @@
-import { ErrorFrame } from "../types/ErrorFrame";
-import { SignalFrame } from "../types/SignalFrame";
-import { TypeFrame } from "../types/TypeFrame";
-import { UndefinedFrame } from "../types/UndefinedFrame";
+import { ErrorFrame } from "./types/ErrorFrame.ts";
+import { SignalFrame } from "./types/SignalFrame.ts";
+import { TypeFrame } from "./types/TypeFrame.ts";
+import { UndefinedFrame } from "./types/UndefinedFrame.ts";
 
 
 

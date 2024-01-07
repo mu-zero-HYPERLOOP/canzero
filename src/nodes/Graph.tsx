@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import { invoke } from "@tauri-apps/api";
-import ObjectEntryListenHistoryResponse from "../types/ObjectEntryListenHistoryResponse";
+import ObjectEntryListenHistoryResponse from "./types/ObjectEntryListenHistoryResponse.ts";
 import { listen, Event } from "@tauri-apps/api/event";
-import { ObjectEntryHistoryEvent } from "../types/ObjectEntryHistoryEvent";
-import ObjectEntryEvent from "../types/ObjectEntryEvent";
+import { ObjectEntryHistoryEvent } from "./types/ObjectEntryHistoryEvent.ts";
+import ObjectEntryEvent from "./types/ObjectEntryEvent.ts";
 import { Button, FormControl, InputLabel, MenuItem, Paper, Select, SelectChangeEvent, Stack, Typography } from "@mui/material";
-import { ObjectEntryInformation } from "../types/ObjectEntryInformation";
+import { ObjectEntryInformation } from "./types/ObjectEntryInformation.ts";
 import DownloadIcon from '@mui/icons-material/Download';
 
 

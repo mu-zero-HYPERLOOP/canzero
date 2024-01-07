@@ -1,6 +1,6 @@
-import { ErrorFrame } from "../types/ErrorFrame";
-import { SignalFrame } from "../types/SignalFrame";
-import { TypeFrame } from "../types/TypeFrame";
+import { ErrorFrame } from "./types/ErrorFrame.ts";
+import { SignalFrame } from "./types/SignalFrame.ts";
+import { TypeFrame } from "./types/TypeFrame.ts";
 
 
 interface FrameDescriptionProps {

@@ -1,4 +1,4 @@
-import ObjectEntryEvent from "./ObjectEntryEvent";
+import ObjectEntryEvent from "./ObjectEntryEvent.ts";
 
 
 interface ObjectEntryListenLatestResponse {

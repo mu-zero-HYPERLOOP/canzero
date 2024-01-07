@@ -1,4 +1,4 @@
-import PodTemperatures from './PodTemperatures';
+import PodTemperatures from './PodTemperatures.tsx';
 import {Grid, Paper, Skeleton, Stack, styled} from '@mui/material';
 import BMW from '../assets/bmw_m4.glb?url';
 import {PresentationControls, Stage, useGLTF} from '@react-three/drei';

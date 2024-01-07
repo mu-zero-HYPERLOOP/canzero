@@ -1,6 +1,6 @@
-import { SignalFrame } from "../types/SignalFrame";
-import { TypeFrame } from "../types/TypeFrame";
-import { UndefinedFrame } from "../types/UndefinedFrame";
+import { SignalFrame } from "./types/SignalFrame.ts";
+import { TypeFrame } from "./types/TypeFrame.ts";
+import { UndefinedFrame } from "./types/UndefinedFrame.ts";
 
 
 interface FrameDlcProp {

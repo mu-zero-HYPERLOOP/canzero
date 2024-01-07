@@ -7,13 +7,13 @@ import {
     ObjectEntryCompositeType,
     ObjectEntryInformation,
     ObjectEntryType
-} from "../types/ObjectEntryInformation.ts";
+} from "./types/ObjectEntryInformation.ts";
 import {invoke} from "@tauri-apps/api";
-import {NodeInformation} from "../types/NodeInformation";
-import ObjectEntryListenLatestResponse from "../types/ObjectEntryListenLatestResponse.ts";
-import ObjectEntryEvent, {ObjectEntryComposite, ObjectEntryValue} from "../types/ObjectEntryEvent.ts";
+import {NodeInformation} from "./types/NodeInformation.ts";
+import ObjectEntryListenLatestResponse from "./types/ObjectEntryListenLatestResponse.ts";
+import ObjectEntryEvent, {ObjectEntryComposite, ObjectEntryValue} from "./types/ObjectEntryEvent.ts";
 import {listen} from "@tauri-apps/api/event";
-import ObjectEntryGraph from "../components/Graph.tsx";
+import ObjectEntryGraph from "./Graph.tsx";
 import {
     Box,
     Button,

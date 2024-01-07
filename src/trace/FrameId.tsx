@@ -1,6 +1,6 @@
-import { SignalFrame } from "../types/SignalFrame";
-import { UndefinedFrame } from "../types/UndefinedFrame";
-import { TypeFrame } from "../types/TypeFrame";
+import { SignalFrame } from "./types/SignalFrame.ts";
+import { UndefinedFrame } from "./types/UndefinedFrame.ts";
+import { TypeFrame } from "./types/TypeFrame.ts";
 
 
 

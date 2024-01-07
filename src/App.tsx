@@ -1,10 +1,10 @@
 import { StaticRouter } from "react-router-dom/server";
 import "./App.css";
-import DashBoard from "./pages/DashBoard";
+import DashBoard from "./dashboard/DashBoard.tsx";
 import { MemoryRouter } from "react-router-dom";
 import {ThemeProvider, createTheme} from "@mui/material";
 import {SnackbarProvider} from "notistack";
-import NotificationSystem from "./components/NotificationSystem.tsx";
+import NotificationSystem from "./dashboard/NotificationSystem.tsx";
 import React from "react";
 
 function Router(props: Readonly<{ children?: React.ReactNode }>) {
