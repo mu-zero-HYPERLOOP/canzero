@@ -3,7 +3,7 @@ use std::ops::Index;
 use can_config_rs::config;
 use serde::{
     ser::{SerializeMap, SerializeSeq},
-    Serialize, Serializer,
+    Serialize, Serializer, Deserialize,
 };
 
 /**
@@ -286,3 +286,4 @@ impl Serialize for TypeValue {
         }
     }
 }
+

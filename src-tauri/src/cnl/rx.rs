@@ -146,10 +146,10 @@ async fn can_receiver(
 
     let notification_stream = NotificationStream::new(&app_handle);
     loop {
-        let frame = can.receive().await;
         let lookup = lookup.clone();
         let trace = trace.clone();
         let notification_stream = notification_stream.clone();
+        let frame = can.receive().await;
         tokio::spawn(async move { 
             match receive_msg(frame, lookup, trace).await {
                 Ok(_) => (),

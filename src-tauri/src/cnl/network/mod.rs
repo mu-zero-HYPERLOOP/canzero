@@ -7,6 +7,7 @@ use self::node_object::NodeObject;
 pub mod command_object;
 pub mod node_object;
 pub mod object_entry_object;
+pub mod set_request;
 
 pub struct NetworkObject {
     nodes: Vec<Arc<NodeObject>>,
