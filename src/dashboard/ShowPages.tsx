@@ -8,9 +8,9 @@ import {NetworkInformation} from "../nodes/types/NetworkInformation.ts";
 import NodePanel from "../nodes/NodePanel.tsx";
 import {NodeInformation} from "../nodes/types/NodeInformation.ts";
 import ObjectEntryPanel from "../nodes/ObjectEntryPanel.tsx";
-import LevitationControl from "../nodes/LevitationControl.tsx";
-import GuidanceControl from "../nodes/GuidanceControl.tsx";
-import MotorControl from "../nodes/MotorControl.tsx";
+import LevitationControl from "../divisions/LevitationControl.tsx";
+import GuidanceControl from "../divisions/GuidanceControl.tsx";
+import MotorControl from "../divisions/MotorControl.tsx";
 
 function Content() {
     const location = useLocation();

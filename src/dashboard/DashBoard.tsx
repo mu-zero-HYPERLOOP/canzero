@@ -174,7 +174,7 @@ export default function Dashboard() {
             if (event.key === ' ') {
                 event.preventDefault()
                 emergency(setConnectingPossible, setState)
-            } else if (event.key === "F1") { //TODO Somebody test please, mac does not like overwriting this
+            } else if (event.key === "F1") {
                 event.preventDefault()
                 connect(setConnectingPossible, setConnectionSuccess)
             } else if (event.key === "F2") {
@@ -200,7 +200,7 @@ export default function Dashboard() {
     }, []);
 
     return (
-        <Box sx={{display: 'flex'}}>
+        <Box component="form" sx={{display: 'flex'}}>
             <CssBaseline/>
             <CustomAppBar connectingPossible={connectingPossible} connectionSuccess={connectionSuccess}
                           setConnectingPossible={setConnectingPossible} setConnectionSuccess={setConnectionSuccess}
@@ -237,7 +237,7 @@ export default function Dashboard() {
                 }}
             >
                 <Toolbar/>
-                <Box sx={{width: '100%'}}>
+                <Box component="form" sx={{width: '100%'}}>
                     <ShowPages connectionSuccess={connectionSuccess}/>
                 </Box>
             </Box>
