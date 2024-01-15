@@ -99,7 +99,7 @@ function SignalFrameRow({ frame, timestamp }: SignalFrameRowProps) {
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0, background: 'white' }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 1 }}>
+            <Box component="form" sx={{ margin: 1 }}>
               <SignalFrameDetail frame={frame} />
             </Box>
           </Collapse>
@@ -138,7 +138,7 @@ function TypeFrameRow({ frame, timestamp }: TypeFrameRowProps) {
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0,  background: 'white' }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 1 }}>
+            <Box component="form" sx={{ margin: 1 }}>
               <TypeFrameDetail frame={frame} />
             </Box>
           </Collapse>
@@ -310,7 +310,7 @@ function TraceGrid() {
   // maxHeight : 800 sucks asss
   return (
     <StyledPaper sx={{ width: '100%' }}>
-      <Box sx={{ margin: "2%", textAlign: "center" }}>
+      <Box component="form" sx={{ margin: "2%", textAlign: "center" }}>
         <TraceSearchBar onSearch={filterRows} />
       </Box>
       <TableContainer sx={{ maxHeight: 800 }}>
