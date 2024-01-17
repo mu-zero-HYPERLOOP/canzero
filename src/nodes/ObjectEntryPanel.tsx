@@ -1,6 +1,7 @@
 import {SetStateAction, useEffect, useMemo, useRef, useState} from "react";
 import {
     isInt,
+    isObjectEntryCompositeType,
     isReal,
     isStringArray,
     isUint,
@@ -42,10 +43,10 @@ function checkAndSendInput(node: string, objectEntry: string, val: string, type:
         if (!val.includes(".")) {
             let num = parseInt(val)
             if (!isNaN(num)) {
-                invoke("new_object_entry_value", {
+                invoke("set_object_entry_value", {
                     nodeName: node,
                     objectEntryName: objectEntry,
-                    value: num
+                    newValueJson: num.toString()
                 })
                 return;
             }
@@ -54,10 +55,10 @@ function checkAndSendInput(node: string, objectEntry: string, val: string, type:
         if (!val.includes(".")) {
             let num = parseInt(val)
             if (!isNaN(num) && num >= 0) {
-                invoke("new_object_entry_value", {
+                invoke("set_object_entry_value", {
                     nodeName: node,
                     objectEntryName: objectEntry,
-                    value: num
+                    newValueJson: num.toString()
                 })
                 return;
             }
@@ -65,22 +66,29 @@ function checkAndSendInput(node: string, objectEntry: string, val: string, type:
     } else if (isReal(type)) {
         let num = parseFloat(val)
         if (!isNaN(num)) {
-            invoke("new_object_entry_value", {
+            invoke("set_object_entry_value", {
                 nodeName: node,
                 objectEntryName: objectEntry,
-                value: num
+                newValueJson: num.toString()
             })
             return;
         }
     } else if (isStringArray(type)) {
         if (type.includes(val)) {
-            invoke("new_object_entry_value", {
+            invoke("set_object_entry_value", {
                 nodeName: node,
                 objectEntryName: objectEntry,
-                value: val
+                newValueJson: val
             })
             return;
         }
+    } else if (isObjectEntryCompositeType(type)) {
+        invoke("set_object_entry_value", {
+            nodeName: node,
+            objectEntryName: objectEntry,
+            newValueJson: val
+        })
+        return;
     }
     setError(true)
 }
