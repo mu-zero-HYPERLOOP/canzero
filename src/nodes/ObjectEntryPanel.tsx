@@ -47,7 +47,7 @@ function checkAndSendInput(node: string, objectEntry: string, val: string, type:
                     nodeName: node,
                     objectEntryName: objectEntry,
                     newValueJson: num.toString()
-                })
+                }).catch((_) => setError(true));
                 return;
             }
         }
@@ -59,7 +59,7 @@ function checkAndSendInput(node: string, objectEntry: string, val: string, type:
                     nodeName: node,
                     objectEntryName: objectEntry,
                     newValueJson: num.toString()
-                })
+                }).catch((_) => setError(true));
                 return;
             }
         }
@@ -70,7 +70,7 @@ function checkAndSendInput(node: string, objectEntry: string, val: string, type:
                 nodeName: node,
                 objectEntryName: objectEntry,
                 newValueJson: num.toString()
-            })
+            }).catch((_) => setError(true));
             return;
         }
     } else if (isStringArray(type)) {
@@ -79,7 +79,7 @@ function checkAndSendInput(node: string, objectEntry: string, val: string, type:
                 nodeName: node,
                 objectEntryName: objectEntry,
                 newValueJson: val
-            })
+            }).catch((_) => setError(true));
             return;
         }
     } else if (isObjectEntryCompositeType(type)) {
@@ -87,7 +87,7 @@ function checkAndSendInput(node: string, objectEntry: string, val: string, type:
             nodeName: node,
             objectEntryName: objectEntry,
             newValueJson: val
-        })
+        }).catch((_) => setError(true));
         return;
     }
     setError(true)

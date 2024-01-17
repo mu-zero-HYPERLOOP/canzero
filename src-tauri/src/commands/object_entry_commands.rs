@@ -148,7 +148,7 @@ pub async fn set_object_entry_value(
     };
     println!("parsed value: {type_value:?}");
 
-    Err(())
+    Ok(())
 }
 
 #[derive(Debug, Clone, Serialize)]
