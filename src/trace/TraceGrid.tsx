@@ -381,7 +381,7 @@ function TraceGrid() {
             <TraceSearchBar onSearch={filterRows} />
           </Box>
           <Tooltip title="Toggle Density">
-              <Button onClick={toggleRowDensity}>
+            <Button onClick={toggleRowDensity}>
               {rowDensity === 'compact' && <DensitySmallIcon style={{ color: 'white' }} />}
               {rowDensity === 'standard' && <DensityMediumIcon style={{ color: 'white' }} />}
               {rowDensity === 'comfortable' && <DensityLargeIcon style={{ color: 'white' }} />}
