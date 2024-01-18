@@ -69,18 +69,25 @@ const IconButtonStyled = styled(IconButton)({
   color: '#00d6ba', // Color for icons
 });
 
+type RowDensity = 'compact' | 'standard' | 'comfortable';
+const rowDensities = {
+  compact: { padding: '4px 10px' },
+  standard: { padding: '10px 15px' },
+  comfortable: { padding: '15px 20px' },
+};
 
 
 interface SignalFrameRowProps {
   frame: SignalFrame,
   timestamp: string,
+  rowDensity: RowDensity,
 }
 
-function SignalFrameRow({ frame, timestamp }: SignalFrameRowProps) {
+function SignalFrameRow({ frame, timestamp, rowDensity }: SignalFrameRowProps) {
   const [open, setOpen] = React.useState(false);
   return (
     <React.Fragment>
-      <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+      <TableRow sx={{ '& > *': { borderBottom: 'unset', ...rowDensities[rowDensity] } }}>
         <TableCell>
           <IconButtonStyled
             aria-label="expand row"
@@ -112,14 +119,15 @@ function SignalFrameRow({ frame, timestamp }: SignalFrameRowProps) {
 interface TypeFrameRowProps {
   frame: TypeFrame,
   timestamp: string,
+  rowDensity: RowDensity,
 }
 
 
-function TypeFrameRow({ frame, timestamp }: TypeFrameRowProps) {
+function TypeFrameRow({ frame, timestamp, rowDensity }: TypeFrameRowProps) {
   const [open, setOpen] = React.useState(false);
   return (
     <React.Fragment>
-      <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+      <TableRow sx={{ '& > *': { borderBottom: 'unset', ...rowDensities[rowDensity] } }}>
         <TypeFrameCell>
           <IconButtonStyled
             aria-label="expand row"
@@ -151,13 +159,14 @@ function TypeFrameRow({ frame, timestamp }: TypeFrameRowProps) {
 interface UndefinedFrameRowProps {
   frame: UndefinedFrame
   timestamp: string,
+  rowDensity: RowDensity,
 }
 
 
 
-function UndefinedFrameRow({ frame, timestamp }: UndefinedFrameRowProps) {
+function UndefinedFrameRow({ frame, timestamp, rowDensity }: UndefinedFrameRowProps) {
   return (
-    <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+    <TableRow sx={{ '& > *': { borderBottom: 'unset', ...rowDensities[rowDensity] } }}>
       <UndefinedFrameCell>
         <IconButtonStyled
           aria-label="expand row"
@@ -176,12 +185,13 @@ function UndefinedFrameRow({ frame, timestamp }: UndefinedFrameRowProps) {
 interface ErrorFrameRowProps {
   frame: ErrorFrame,
   timestamp: string,
+  rowDensity: RowDensity,
 }
 
 
-function ErrorFrameRow({ frame, timestamp }: ErrorFrameRowProps) {
+function ErrorFrameRow({ frame, timestamp, rowDensity }: ErrorFrameRowProps) {
   return (
-    <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+    <TableRow sx={{ '& > *': { borderBottom: 'unset', ...rowDensities[rowDensity] } }}>
       <ErrorFrameCell>
         <IconButtonStyled
           aria-label="expand row"
@@ -199,22 +209,19 @@ function ErrorFrameRow({ frame, timestamp }: ErrorFrameRowProps) {
 
 interface RowProps {
   evt: TraceObjectEvent,
-  timeAbsolute: boolean,
+  timeAbsolute: string,
+  rowDensity: RowDensity,
 }
 
-function Row({ evt, timeAbsolute }: RowProps) {
+function Row({ evt, timeAbsolute, rowDensity }: RowProps) {
   if (evt.frame.TypeFrame != undefined) {
-    return <TypeFrameRow frame={evt.frame.TypeFrame}
-      timestamp={timeAbsolute ? evt.timestamp : evt.delta_time} />
+    return <TypeFrameRow frame={evt.frame.TypeFrame} timestamp={timeAbsolute} rowDensity={rowDensity} />
   } else if (evt.frame.SignalFrame != undefined) {
-    return <SignalFrameRow frame={evt.frame.SignalFrame}
-      timestamp={timeAbsolute ? evt.timestamp : evt.delta_time} />
+    return <SignalFrameRow frame={evt.frame.SignalFrame} timestamp={timeAbsolute} rowDensity={rowDensity} />
   } else if (evt.frame.UndefinedFrame != undefined) {
-    return <UndefinedFrameRow frame={evt.frame.UndefinedFrame}
-      timestamp={timeAbsolute ? evt.timestamp : evt.delta_time} />
+    return <UndefinedFrameRow frame={evt.frame.UndefinedFrame} timestamp={timeAbsolute} rowDensity={rowDensity} />
   } else if (evt.frame.ErrorFrame != undefined) {
-    return <ErrorFrameRow frame={evt.frame.ErrorFrame}
-      timestamp={timeAbsolute ? evt.timestamp : evt.delta_time} />
+    return <ErrorFrameRow frame={evt.frame.ErrorFrame} timestamp={timeAbsolute} rowDensity={rowDensity} />
   }
 }
 
@@ -243,6 +250,7 @@ function TraceGrid() {
   const { sortField, sortDirection, toggleSortDirection } = useSortState();
   const searchStringRef = useRef("");
   const [timeAbsolute, setTimeAbsolute] = useState(false);
+  const [rowDensity, setRowDensity] = useState<RowDensity>('standard');
 
   function handle_event(event: TraceObjectEvent) {
     let index = rowsRef.current.findIndex((f) => {
@@ -303,6 +311,20 @@ function TraceGrid() {
     };
   }, [sortField, sortDirection]);
   
+  const toggleRowDensity = () => {
+    setRowDensity(prevDensity => {
+      switch (prevDensity) {
+        case 'compact':
+          return 'standard';
+        case 'standard':
+          return 'comfortable';
+        case 'comfortable':
+          return 'compact';
+        default:
+          return 'standard';
+      }
+    });
+  };
 
   const filterRows = (searchText: string) => {
     searchStringRef.current = searchText;
@@ -353,35 +375,32 @@ function TraceGrid() {
         <TraceSearchBar onSearch={filterRows} />
       </Box>
       <TableContainer sx={{ maxHeight: 800 }}>
+        <Button onClick={toggleRowDensity}>
+          Toggle Density
+        </Button>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow >
               <TableHeaderCell />
               <TableHeaderCell align="left" onClick={() => toggleSortDirection('Name')}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', columnGap: '5px', minWidth: '50px' }}>
                   Name 
-                  {sortField === 'Name' ? 
-                    (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />) :
-                    <ArrowUpwardIcon style={{ visibility: 'hidden' }} />}
+                  {sortField === 'Name' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
                 </div>
               </TableHeaderCell>
               <TableHeaderCell align="left" onClick={() => toggleSortDirection('Id')}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', columnGap: '5px', minWidth: '50px' }}>
                   Id 
-                  {sortField === 'Id' ? 
-                    (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />) :
-                    <ArrowUpwardIcon style={{ visibility: 'hidden' }} />}
+                  {sortField === 'Id' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
                 </div>
               </TableHeaderCell>
               <TableHeaderCell align="left">
                 Data
               </TableHeaderCell>
               <TableHeaderCell align="left" onClick={() => toggleSortDirection('Dlc')}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', columnGap: '5px', minWidth: '50px' }}>
                   Dlc 
-                  {sortField === 'Dlc' ? 
-                    (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />) :
-                    <ArrowUpwardIcon style={{ visibility: 'hidden' }} />}
+                  {sortField === 'Dlc' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
                 </div>
               </TableHeaderCell>
               <TableHeaderCell align="left">
@@ -402,7 +421,7 @@ function TraceGrid() {
           </TableHead>
           <TableBody>
             {filteredRows.map((evt, index) => {
-              return <Row evt={evt} key={index} timeAbsolute={timeAbsolute} /> 
+              return <Row evt={evt} timeAbsolute={timeAbsolute ? evt.timestamp : evt.delta_time} rowDensity={rowDensity} key={index}/> 
             })}
           </TableBody>
         </Table>
