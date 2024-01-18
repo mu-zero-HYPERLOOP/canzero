@@ -361,6 +361,10 @@ function TraceGrid() {
           fieldA = a.frame.TypeFrame?.dlc || a.frame.SignalFrame?.dlc || '';
           fieldB = b.frame.TypeFrame?.dlc || b.frame.SignalFrame?.dlc || '';
           break;
+        case 'Time':
+          fieldA = a.frame.TypeFrame?.dlc || a.frame.SignalFrame?.dlc || '';
+          fieldB = b.frame.TypeFrame?.dlc || b.frame.SignalFrame?.dlc || '';
+          break;
         default:
           return 0;
       }
@@ -408,23 +412,26 @@ function TraceGrid() {
                 Data
               </TableHeaderCell>
               <TableHeaderCell align="left" onClick={() => toggleSortDirection('Dlc')}>
-                <div style={{ display: 'flex', alignItems: 'center', columnGap: '5px', minWidth: '50px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', columnGap: '5px', minWidth: '60px' }}>
                   Dlc 
                   {sortField === 'Dlc' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
                 </div>
               </TableHeaderCell>
-              <TableHeaderCell align="left">
+              <TableHeaderCell align="left" onClick={() => toggleSortDirection('Time')}>
                 <Stack direction="row" spacing={1} alignItems="center">
-                  <Button startIcon={timeAbsolute ? (
-                    <AccessAlarm fontSize="small"/>
-                    ):(
-                    <ChangeHistory fontSize="small"/>)} 
-                      onClick={(evt) => {
-                        setTimeAbsolute((t) => !t);
-                        evt.stopPropagation();
-                      }} sx={{color:"white"}}>
-                        Time
-                      </Button>
+                  <div style={{ display: 'flex', alignItems: 'center', columnGap: '5px', minWidth: '120px' }}>
+                    <Button startIcon={timeAbsolute ? (
+                      <AccessAlarm fontSize="small"/>
+                      ):(
+                      <ChangeHistory fontSize="small"/>)} 
+                        onClick={(evt) => {
+                          setTimeAbsolute((t) => !t);
+                          evt.stopPropagation();
+                        }} sx={{color:"white"}}>
+                      Time
+                    </Button>
+                    {sortField === 'Time' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
+                  </div>
                 </Stack>
               </TableHeaderCell>
             </TableRow>
