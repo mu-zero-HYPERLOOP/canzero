@@ -69,7 +69,7 @@ const ErrorFrameCell = styled(TableCell)(({ theme }) =>
 
 const IconButtonStyled = styled(IconButton)({
   background: 'white',
-  color: '#00d6ba', // Color for icons
+  color: '#00d6ba',
 });
 
 type RowDensity = 'compact' | 'standard' | 'comfortable';
@@ -164,7 +164,6 @@ interface UndefinedFrameRowProps {
   timestamp: string,
   rowDensity: RowDensity,
 }
-
 
 
 function UndefinedFrameRow({ frame, timestamp, rowDensity }: UndefinedFrameRowProps) {
@@ -334,13 +333,25 @@ function TraceGrid() {
     if (searchStringRef.current === "") {
       return rowsRef.current.slice();
     } else {
-      const fuseOptions = {
-        keys: ['frame.TypeFrame.name', 'frame.SignalFrame.name', 'frame.ErrorFrame.name', 'frame.TypeFrame.id', 'frame.SignalFrame.id', 'frame.UndefinedFrame.id'],
-        includeScore: true,
-        includeMatches: true,
-      };
-      const fuse = new Fuse(rowsRef.current, fuseOptions);
-      return fuse.search(searchText).map(({ item }) => item);
+      // Check if the search is for a hexadecimal ID
+      if (searchText.toLowerCase().startsWith('0x')) {
+        const hexSearch = searchText.toLowerCase().substring(2);
+        return rowsRef.current.filter((event) => {
+          const frameIdHex = event.frame.TypeFrame?.id.toString(16) || 
+                             event.frame.SignalFrame?.id.toString(16) ||
+                             event.frame.UndefinedFrame?.id.toString(16);
+          return frameIdHex?.toLowerCase().startsWith(hexSearch);
+        });
+      } else {
+        // Regular search using Fuse.js
+        const fuseOptions = {
+          keys: ['frame.TypeFrame.name', 'frame.SignalFrame.name', 'frame.ErrorFrame.name', 'frame.TypeFrame.id', 'frame.SignalFrame.id', 'frame.UndefinedFrame.id'],
+          includeScore: true,
+          includeMatches: true,
+        };
+        const fuse = new Fuse(rowsRef.current, fuseOptions);
+        return fuse.search(searchText).map(({ item }) => item);
+      }
     }
   };
   
@@ -374,11 +385,9 @@ function TraceGrid() {
       return 0;
     });
   };
-  
 
   return (
     <StyledPaper sx={{ width: '100%' }}>
-     
       <TableContainer sx={{ maxHeight: 800 }}>
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
           <Box component="form" sx={{ margin: "2%", textAlign: "center", width: '50%' }}>
