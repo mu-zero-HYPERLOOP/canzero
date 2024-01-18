@@ -362,8 +362,8 @@ function TraceGrid() {
           fieldB = b.frame.TypeFrame?.dlc || b.frame.SignalFrame?.dlc || '';
           break;
         case 'Time':
-          fieldA = a.frame.TypeFrame?.dlc || a.frame.SignalFrame?.dlc || '';
-          fieldB = b.frame.TypeFrame?.dlc || b.frame.SignalFrame?.dlc || '';
+          fieldA = a.timestamp || a.delta_time || '';
+          fieldB = b.timestamp || b.delta_time || '';
           break;
         default:
           return 0;
@@ -418,8 +418,8 @@ function TraceGrid() {
                 </div>
               </TableHeaderCell>
               <TableHeaderCell align="left" onClick={() => toggleSortDirection('Time')}>
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <div style={{ display: 'flex', alignItems: 'center', columnGap: '5px', minWidth: '120px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', columnGap: '5px', minWidth: '120px' }}>
+                  <Stack direction="row" spacing={1} alignItems="center"> 
                     <Button startIcon={timeAbsolute ? (
                       <AccessAlarm fontSize="small"/>
                       ):(
@@ -430,9 +430,9 @@ function TraceGrid() {
                         }} sx={{color:"white"}}>
                       Time
                     </Button>
-                    {sortField === 'Time' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
-                  </div>
-                </Stack>
+                  </Stack>               
+                  {sortField === 'Time' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
+                </div>
               </TableHeaderCell>
             </TableRow>
           </TableHead>
