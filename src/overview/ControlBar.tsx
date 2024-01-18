@@ -1,6 +1,8 @@
 import {Box, Button, Stack} from "@mui/material";
 import {invoke} from "@tauri-apps/api";
 import TextField from "@mui/material/TextField";
+import {useEffect} from "react";
+import {listen} from "@tauri-apps/api/event";
 
 export enum States {
     Startup = 'Startup',
@@ -83,6 +85,22 @@ function ControlBar({
                         state,
                         setState
                     }: Readonly<EstablishConnectionProps>) {
+
+    async function fetchConnectingPossible() {
+        return await listen("connecting_possible", () => {
+            setConnectingPossible(true)
+            console.log("pos")
+        })
+    }
+
+    useEffect(() => {
+        let unlisten = fetchConnectingPossible()
+        return () => {
+            unlisten.then(f => f()).catch(console.error);
+        }
+    }, []);
+
+
     return (
         <Stack
             direction="row"

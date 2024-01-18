@@ -54,6 +54,8 @@ fn main() {
             tauri::async_runtime::spawn(async move {
                 app_handle.manage(CNLState::create("./test.yaml", &app_handle));
             });
+            app.handle().emit_all("connecting_possible", ()).unwrap();
+            println!("connect");
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
