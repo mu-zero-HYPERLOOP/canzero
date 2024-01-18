@@ -1,4 +1,4 @@
-import { Box, Collapse, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, styled, Stack, Button } from "@mui/material";
+import { Box, Collapse, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, styled, Stack, Button, Tooltip } from "@mui/material";
 import { AccessAlarm, ChangeHistory } from "@mui/icons-material";
 import { invoke } from "@tauri-apps/api";
 import { listen } from "@tauri-apps/api/event";
@@ -13,6 +13,9 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import DensityLargeIcon from '@mui/icons-material/DensityLarge';
+import DensityMediumIcon from '@mui/icons-material/DensityMedium';
+import DensitySmallIcon from '@mui/icons-material/DensitySmall';
 import { TypeFrame } from "./types/TypeFrame.ts";
 import TypeFrameDetail from "./TypeFrameDetail.tsx";
 import { SignalFrame } from "./types/SignalFrame.ts";
@@ -20,7 +23,7 @@ import SignalFrameDetail from "./SignalFrameDetail.tsx";
 import { UndefinedFrame } from "./types/UndefinedFrame.ts";
 import { ErrorFrame } from "./types/ErrorFrame.ts";
 import TraceSearchBar from "./TraceSearchBar.tsx";
-import Fuse, { IFuseOptions } from 'fuse.js';
+import Fuse from 'fuse.js';
 
 // Main Paper component with gradient background
 const StyledPaper = styled(Paper)({
@@ -69,18 +72,25 @@ const IconButtonStyled = styled(IconButton)({
   color: '#00d6ba', // Color for icons
 });
 
+type RowDensity = 'compact' | 'standard' | 'comfortable';
+const rowDensities = {
+  compact: { padding: '4px 10px' },
+  standard: { padding: '10px 15px' },
+  comfortable: { padding: '15px 20px' },
+};
 
 
 interface SignalFrameRowProps {
   frame: SignalFrame,
   timestamp: string,
+  rowDensity: RowDensity,
 }
 
-function SignalFrameRow({ frame, timestamp }: SignalFrameRowProps) {
+function SignalFrameRow({ frame, timestamp, rowDensity }: SignalFrameRowProps) {
   const [open, setOpen] = React.useState(false);
   return (
     <React.Fragment>
-      <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+      <TableRow sx={{ '& > *': { borderBottom: 'unset', ...rowDensities[rowDensity] } }}>
         <TableCell>
           <IconButtonStyled
             aria-label="expand row"
@@ -112,14 +122,15 @@ function SignalFrameRow({ frame, timestamp }: SignalFrameRowProps) {
 interface TypeFrameRowProps {
   frame: TypeFrame,
   timestamp: string,
+  rowDensity: RowDensity,
 }
 
 
-function TypeFrameRow({ frame, timestamp }: TypeFrameRowProps) {
+function TypeFrameRow({ frame, timestamp, rowDensity }: TypeFrameRowProps) {
   const [open, setOpen] = React.useState(false);
   return (
     <React.Fragment>
-      <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+      <TableRow sx={{ '& > *': { borderBottom: 'unset', ...rowDensities[rowDensity] } }}>
         <TypeFrameCell>
           <IconButtonStyled
             aria-label="expand row"
@@ -151,13 +162,14 @@ function TypeFrameRow({ frame, timestamp }: TypeFrameRowProps) {
 interface UndefinedFrameRowProps {
   frame: UndefinedFrame
   timestamp: string,
+  rowDensity: RowDensity,
 }
 
 
 
-function UndefinedFrameRow({ frame, timestamp }: UndefinedFrameRowProps) {
+function UndefinedFrameRow({ frame, timestamp, rowDensity }: UndefinedFrameRowProps) {
   return (
-    <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+    <TableRow sx={{ '& > *': { borderBottom: 'unset', ...rowDensities[rowDensity] } }}>
       <UndefinedFrameCell>
         <IconButtonStyled
           aria-label="expand row"
@@ -176,12 +188,13 @@ function UndefinedFrameRow({ frame, timestamp }: UndefinedFrameRowProps) {
 interface ErrorFrameRowProps {
   frame: ErrorFrame,
   timestamp: string,
+  rowDensity: RowDensity,
 }
 
 
-function ErrorFrameRow({ frame, timestamp }: ErrorFrameRowProps) {
+function ErrorFrameRow({ frame, timestamp, rowDensity }: ErrorFrameRowProps) {
   return (
-    <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+    <TableRow sx={{ '& > *': { borderBottom: 'unset', ...rowDensities[rowDensity] } }}>
       <ErrorFrameCell>
         <IconButtonStyled
           aria-label="expand row"
@@ -199,22 +212,19 @@ function ErrorFrameRow({ frame, timestamp }: ErrorFrameRowProps) {
 
 interface RowProps {
   evt: TraceObjectEvent,
-  timeAbsolute: boolean,
+  timeAbsolute: string,
+  rowDensity: RowDensity,
 }
 
-function Row({ evt, timeAbsolute }: RowProps) {
+function Row({ evt, timeAbsolute, rowDensity }: RowProps) {
   if (evt.frame.TypeFrame != undefined) {
-    return <TypeFrameRow frame={evt.frame.TypeFrame}
-      timestamp={timeAbsolute ? evt.timestamp : evt.delta_time} />
+    return <TypeFrameRow frame={evt.frame.TypeFrame} timestamp={timeAbsolute} rowDensity={rowDensity} />
   } else if (evt.frame.SignalFrame != undefined) {
-    return <SignalFrameRow frame={evt.frame.SignalFrame}
-      timestamp={timeAbsolute ? evt.timestamp : evt.delta_time} />
+    return <SignalFrameRow frame={evt.frame.SignalFrame} timestamp={timeAbsolute} rowDensity={rowDensity} />
   } else if (evt.frame.UndefinedFrame != undefined) {
-    return <UndefinedFrameRow frame={evt.frame.UndefinedFrame}
-      timestamp={timeAbsolute ? evt.timestamp : evt.delta_time} />
+    return <UndefinedFrameRow frame={evt.frame.UndefinedFrame} timestamp={timeAbsolute} rowDensity={rowDensity} />
   } else if (evt.frame.ErrorFrame != undefined) {
-    return <ErrorFrameRow frame={evt.frame.ErrorFrame}
-      timestamp={timeAbsolute ? evt.timestamp : evt.delta_time} />
+    return <ErrorFrameRow frame={evt.frame.ErrorFrame} timestamp={timeAbsolute} rowDensity={rowDensity} />
   }
 }
 
@@ -235,6 +245,7 @@ const useSortState = () => {
   return { sortField, sortDirection, toggleSortDirection };
 };
 
+
 function TraceGrid() {
 
   const rowsRef = useRef<TraceObjectEvent[]>([]);
@@ -242,6 +253,7 @@ function TraceGrid() {
   const { sortField, sortDirection, toggleSortDirection } = useSortState();
   const searchStringRef = useRef("");
   const [timeAbsolute, setTimeAbsolute] = useState(false);
+  const [rowDensity, setRowDensity] = useState<RowDensity>('standard');
 
   function handle_event(event: TraceObjectEvent) {
     let index = rowsRef.current.findIndex((f) => {
@@ -273,9 +285,14 @@ function TraceGrid() {
         console.log("initial frame: " + traceObjectEvent.frame);
         handle_event(traceObjectEvent);
       }
-      filterRows(searchStringRef.current);
+      // Apply the filter first
+      const updatedRows = filterRows(searchStringRef.current);
+      // Then sort the data
+      const sortedRows = sortData(updatedRows, sortField, sortDirection);
+      // Update state with sorted data
+      setFilteredRows(sortedRows);
     });
-
+  
     let trace_event_listener = listen<TraceObjectEvent[]>("trace", (event) => {
       console.log("trace listener triggered with:");
       console.log(event.payload);
@@ -283,58 +300,120 @@ function TraceGrid() {
         console.log(traceObjectEvent);
         handle_event(traceObjectEvent);
       }
-      filterRows(searchStringRef.current);
+      // Apply the filter first
+      const updatedRows = filterRows(searchStringRef.current);
+      // Then sort the data
+      const sortedRows = sortData(updatedRows, sortField, sortDirection);
+      // Update state with sorted data
+      setFilteredRows(sortedRows);
     });
+  
     return () => {
-      invoke("unlisten_to_trace")
+      invoke("unlisten_to_trace");
       trace_event_listener.then((f) => f());
-    }
-  }, []);
+    };
+  }, [sortField, sortDirection]);
+  
+  const toggleRowDensity = () => {
+    setRowDensity(prevDensity => {
+      switch (prevDensity) {
+        case 'compact':
+          return 'standard';
+        case 'standard':
+          return 'comfortable';
+        case 'comfortable':
+          return 'compact';
+        default:
+          return 'standard';
+      }
+    });
+  };
 
   const filterRows = (searchText: string) => {
     searchStringRef.current = searchText;
-    if (searchText === "") {
-      setFilteredRows(rowsRef.current.slice());
+    if (searchStringRef.current === "") {
+      return rowsRef.current.slice();
     } else {
-      const fuseOptions: IFuseOptions<TraceObjectEvent> = {
-        keys: ['frame.TypeFrame.name', 'frame.SignalFrame.name', 'frame.ErrorFrame.name', 'frame.TypeFrame.id', 'frame.SignalFrame.id'],
+      const fuseOptions = {
+        keys: ['frame.TypeFrame.name', 'frame.SignalFrame.name', 'frame.ErrorFrame.name', 'frame.TypeFrame.id', 'frame.SignalFrame.id', 'frame.UndefinedFrame.id'],
         includeScore: true,
-        includeMatches: true
+        includeMatches: true,
       };
       const fuse = new Fuse(rowsRef.current, fuseOptions);
-      const result = fuse.search(searchText).map(({ item }) => item);
-      setFilteredRows(result);
+      return fuse.search(searchText).map(({ item }) => item);
     }
   };
+  
 
-  // maxHeight : 800 sucks asss
+  const sortData = (data: TraceObjectEvent[], sortField: string, sortDirection: string) => {
+    return data.sort((a, b) => {
+      let fieldA, fieldB;
+      switch (sortField) {
+        case 'Name':
+          fieldA = a.frame.TypeFrame?.name || a.frame.SignalFrame?.name || '';
+          fieldB = b.frame.TypeFrame?.name || b.frame.SignalFrame?.name || '';
+          break;
+        case 'Id':
+          fieldA = a.frame.TypeFrame?.id || a.frame.SignalFrame?.id || '';
+          fieldB = b.frame.TypeFrame?.id || b.frame.SignalFrame?.id || '';
+          break;
+        case 'Dlc':
+          fieldA = a.frame.TypeFrame?.dlc || a.frame.SignalFrame?.dlc || '';
+          fieldB = b.frame.TypeFrame?.dlc || b.frame.SignalFrame?.dlc || '';
+          break;
+        default:
+          return 0;
+      }
+  
+      if (fieldA < fieldB) return sortDirection === 'asc' ? -1 : 1;
+      if (fieldA > fieldB) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  };
+  
+
   return (
     <StyledPaper sx={{ width: '100%' }}>
-      <Box component="form" sx={{ margin: "2%", textAlign: "center" }}>
-        <TraceSearchBar onSearch={filterRows} />
-      </Box>
+     
       <TableContainer sx={{ maxHeight: 800 }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Box component="form" sx={{ margin: "2%", textAlign: "center", width: '50%' }}>
+            <TraceSearchBar onSearch={filterRows} />
+          </Box>
+          <Tooltip title="Toggle Density">
+              <Button onClick={toggleRowDensity}>
+              {rowDensity === 'compact' && <DensitySmallIcon style={{ color: 'white' }} />}
+              {rowDensity === 'standard' && <DensityMediumIcon style={{ color: 'white' }} />}
+              {rowDensity === 'comfortable' && <DensityLargeIcon style={{ color: 'white' }} />}
+            </Button>
+          </Tooltip>
+        </div>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow >
               <TableHeaderCell />
               <TableHeaderCell align="left" onClick={() => toggleSortDirection('Name')}>
-                Name
-                {sortField === 'Name' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
+                <div style={{ display: 'flex', alignItems: 'center', columnGap: '5px', minWidth: '50px' }}>
+                  Name 
+                  {sortField === 'Name' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
+                </div>
               </TableHeaderCell>
               <TableHeaderCell align="left" onClick={() => toggleSortDirection('Id')}>
-                Id
-                {sortField === 'Id' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
+                <div style={{ display: 'flex', alignItems: 'center', columnGap: '5px', minWidth: '50px' }}>
+                  Id 
+                  {sortField === 'Id' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
+                </div>
               </TableHeaderCell>
-              <TableHeaderCell align="left" onClick={() => toggleSortDirection('Data')}>
+              <TableHeaderCell align="left">
                 Data
-                {sortField === 'Data' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
               </TableHeaderCell>
               <TableHeaderCell align="left" onClick={() => toggleSortDirection('Dlc')}>
-                Dlc
-                {sortField === 'Dlc' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
+                <div style={{ display: 'flex', alignItems: 'center', columnGap: '5px', minWidth: '50px' }}>
+                  Dlc 
+                  {sortField === 'Dlc' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
+                </div>
               </TableHeaderCell>
-              <TableHeaderCell align="left" onClick={() => toggleSortDirection('Time')}>
+              <TableHeaderCell align="left">
                 <Stack direction="row" spacing={1} alignItems="center">
                   <Button startIcon={timeAbsolute ? (
                     <AccessAlarm fontSize="small"/>
@@ -346,14 +425,13 @@ function TraceGrid() {
                       }} sx={{color:"white"}}>
                         Time
                       </Button>
-                  {sortField === 'Time' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
                 </Stack>
               </TableHeaderCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {filteredRows.map((evt, index) => {
-              return <Row evt={evt} key={index} timeAbsolute={timeAbsolute} /> 
+              return <Row evt={evt} timeAbsolute={timeAbsolute ? evt.timestamp : evt.delta_time} rowDensity={rowDensity} key={index}/> 
             })}
           </TableBody>
         </Table>
