@@ -1,4 +1,4 @@
-import { Box, Collapse, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, styled, Stack, Button } from "@mui/material";
+import { Box, Collapse, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, styled, Stack, Button, Tooltip } from "@mui/material";
 import { AccessAlarm, ChangeHistory } from "@mui/icons-material";
 import { invoke } from "@tauri-apps/api";
 import { listen } from "@tauri-apps/api/event";
@@ -13,6 +13,9 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import DensityLargeIcon from '@mui/icons-material/DensityLarge';
+import DensityMediumIcon from '@mui/icons-material/DensityMedium';
+import DensitySmallIcon from '@mui/icons-material/DensitySmall';
 import { TypeFrame } from "./types/TypeFrame.ts";
 import TypeFrameDetail from "./TypeFrameDetail.tsx";
 import { SignalFrame } from "./types/SignalFrame.ts";
@@ -20,7 +23,7 @@ import SignalFrameDetail from "./SignalFrameDetail.tsx";
 import { UndefinedFrame } from "./types/UndefinedFrame.ts";
 import { ErrorFrame } from "./types/ErrorFrame.ts";
 import TraceSearchBar from "./TraceSearchBar.tsx";
-import Fuse, { IFuseOptions } from 'fuse.js';
+import Fuse from 'fuse.js';
 
 // Main Paper component with gradient background
 const StyledPaper = styled(Paper)({
@@ -371,13 +374,20 @@ function TraceGrid() {
 
   return (
     <StyledPaper sx={{ width: '100%' }}>
-      <Box component="form" sx={{ margin: "2%", textAlign: "center" }}>
-        <TraceSearchBar onSearch={filterRows} />
-      </Box>
+     
       <TableContainer sx={{ maxHeight: 800 }}>
-        <Button onClick={toggleRowDensity}>
-          Toggle Density
-        </Button>
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Box component="form" sx={{ margin: "2%", textAlign: "center", width: '50%' }}>
+            <TraceSearchBar onSearch={filterRows} />
+          </Box>
+          <Tooltip title="Toggle Density">
+              <Button onClick={toggleRowDensity}>
+              {rowDensity === 'compact' && <DensitySmallIcon style={{ color: 'white' }} />}
+              {rowDensity === 'standard' && <DensityMediumIcon style={{ color: 'white' }} />}
+              {rowDensity === 'comfortable' && <DensityLargeIcon style={{ color: 'white' }} />}
+            </Button>
+          </Tooltip>
+        </div>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow >
