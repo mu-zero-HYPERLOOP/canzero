@@ -235,6 +235,7 @@ const useSortState = () => {
   return { sortField, sortDirection, toggleSortDirection };
 };
 
+
 function TraceGrid() {
 
   const rowsRef = useRef<TraceObjectEvent[]>([]);
@@ -273,9 +274,14 @@ function TraceGrid() {
         console.log("initial frame: " + traceObjectEvent.frame);
         handle_event(traceObjectEvent);
       }
-      filterRows(searchStringRef.current);
+      // Apply the filter first
+      const updatedRows = filterRows(searchStringRef.current);
+      // Then sort the data
+      const sortedRows = sortData(updatedRows, sortField, sortDirection);
+      // Update state with sorted data
+      setFilteredRows(sortedRows);
     });
-
+  
     let trace_event_listener = listen<TraceObjectEvent[]>("trace", (event) => {
       console.log("trace listener triggered with:");
       console.log(event.payload);
@@ -283,31 +289,64 @@ function TraceGrid() {
         console.log(traceObjectEvent);
         handle_event(traceObjectEvent);
       }
-      filterRows(searchStringRef.current);
+      // Apply the filter first
+      const updatedRows = filterRows(searchStringRef.current);
+      // Then sort the data
+      const sortedRows = sortData(updatedRows, sortField, sortDirection);
+      // Update state with sorted data
+      setFilteredRows(sortedRows);
     });
+  
     return () => {
-      invoke("unlisten_to_trace")
+      invoke("unlisten_to_trace");
       trace_event_listener.then((f) => f());
-    }
-  }, []);
+    };
+  }, [sortField, sortDirection]);
+  
 
   const filterRows = (searchText: string) => {
     searchStringRef.current = searchText;
-    if (searchText === "") {
-      setFilteredRows(rowsRef.current.slice());
+    if (searchStringRef.current === "") {
+      return rowsRef.current.slice();
     } else {
-      const fuseOptions: IFuseOptions<TraceObjectEvent> = {
-        keys: ['frame.TypeFrame.name', 'frame.SignalFrame.name', 'frame.ErrorFrame.name', 'frame.TypeFrame.id', 'frame.SignalFrame.id'],
+      const fuseOptions = {
+        keys: ['frame.TypeFrame.name', 'frame.SignalFrame.name', 'frame.ErrorFrame.name', 'frame.TypeFrame.id', 'frame.SignalFrame.id', 'frame.UndefinedFrame.id'],
         includeScore: true,
-        includeMatches: true
+        includeMatches: true,
       };
       const fuse = new Fuse(rowsRef.current, fuseOptions);
-      const result = fuse.search(searchText).map(({ item }) => item);
-      setFilteredRows(result);
+      return fuse.search(searchText).map(({ item }) => item);
     }
   };
+  
 
-  // maxHeight : 800 sucks asss
+  const sortData = (data: TraceObjectEvent[], sortField: string, sortDirection: string) => {
+    return data.sort((a, b) => {
+      let fieldA, fieldB;
+      switch (sortField) {
+        case 'Name':
+          fieldA = a.frame.TypeFrame?.name || a.frame.SignalFrame?.name || '';
+          fieldB = b.frame.TypeFrame?.name || b.frame.SignalFrame?.name || '';
+          break;
+        case 'Id':
+          fieldA = a.frame.TypeFrame?.id || a.frame.SignalFrame?.id || '';
+          fieldB = b.frame.TypeFrame?.id || b.frame.SignalFrame?.id || '';
+          break;
+        case 'Dlc':
+          fieldA = a.frame.TypeFrame?.dlc || a.frame.SignalFrame?.dlc || '';
+          fieldB = b.frame.TypeFrame?.dlc || b.frame.SignalFrame?.dlc || '';
+          break;
+        default:
+          return 0;
+      }
+  
+      if (fieldA < fieldB) return sortDirection === 'asc' ? -1 : 1;
+      if (fieldA > fieldB) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  };
+  
+
   return (
     <StyledPaper sx={{ width: '100%' }}>
       <Box component="form" sx={{ margin: "2%", textAlign: "center" }}>
@@ -319,22 +358,24 @@ function TraceGrid() {
             <TableRow >
               <TableHeaderCell />
               <TableHeaderCell align="left" onClick={() => toggleSortDirection('Name')}>
-                Name
-                {sortField === 'Name' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  Name {sortField === 'Name' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
+                </div>
               </TableHeaderCell>
               <TableHeaderCell align="left" onClick={() => toggleSortDirection('Id')}>
-                Id
-                {sortField === 'Id' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  Id {sortField === 'Id' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
+                </div>
               </TableHeaderCell>
-              <TableHeaderCell align="left" onClick={() => toggleSortDirection('Data')}>
+              <TableHeaderCell align="left">
                 Data
-                {sortField === 'Data' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
               </TableHeaderCell>
               <TableHeaderCell align="left" onClick={() => toggleSortDirection('Dlc')}>
-                Dlc
-                {sortField === 'Dlc' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  Dlc {sortField === 'Dlc' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
+                </div>
               </TableHeaderCell>
-              <TableHeaderCell align="left" onClick={() => toggleSortDirection('Time')}>
+              <TableHeaderCell align="left">
                 <Stack direction="row" spacing={1} alignItems="center">
                   <Button startIcon={timeAbsolute ? (
                     <AccessAlarm fontSize="small"/>
@@ -346,7 +387,6 @@ function TraceGrid() {
                       }} sx={{color:"white"}}>
                         Time
                       </Button>
-                  {sortField === 'Time' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
                 </Stack>
               </TableHeaderCell>
             </TableRow>
