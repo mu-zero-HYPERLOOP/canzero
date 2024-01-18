@@ -359,12 +359,18 @@ function TraceGrid() {
               <TableHeaderCell />
               <TableHeaderCell align="left" onClick={() => toggleSortDirection('Name')}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                  Name {sortField === 'Name' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
+                  Name 
+                  {sortField === 'Name' ? 
+                    (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />) :
+                    <ArrowUpwardIcon style={{ visibility: 'hidden' }} />}
                 </div>
               </TableHeaderCell>
               <TableHeaderCell align="left" onClick={() => toggleSortDirection('Id')}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                  Id {sortField === 'Id' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
+                  Id 
+                  {sortField === 'Id' ? 
+                    (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />) :
+                    <ArrowUpwardIcon style={{ visibility: 'hidden' }} />}
                 </div>
               </TableHeaderCell>
               <TableHeaderCell align="left">
@@ -372,7 +378,10 @@ function TraceGrid() {
               </TableHeaderCell>
               <TableHeaderCell align="left" onClick={() => toggleSortDirection('Dlc')}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                  Dlc {sortField === 'Dlc' && (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />)}
+                  Dlc 
+                  {sortField === 'Dlc' ? 
+                    (sortDirection === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />) :
+                    <ArrowUpwardIcon style={{ visibility: 'hidden' }} />}
                 </div>
               </TableHeaderCell>
               <TableHeaderCell align="left">
