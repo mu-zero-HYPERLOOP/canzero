@@ -72,6 +72,8 @@ const IconButtonStyled = styled(IconButton)({
   color: '#00d6ba',
 });
 
+
+// Define row densities for different table row styles
 type RowDensity = 'compact' | 'standard' | 'comfortable';
 const rowDensities = {
   compact: { padding: '4px 10px' },
@@ -79,19 +81,24 @@ const rowDensities = {
   comfortable: { padding: '15px 20px' },
 };
 
-
+// Define props for a row displaying SignalFrame
 interface SignalFrameRowProps {
   frame: SignalFrame,
   timestamp: string,
   rowDensity: RowDensity,
 }
 
+// Define a functional component to render a row with SignalFrame data
 function SignalFrameRow({ frame, timestamp, rowDensity }: SignalFrameRowProps) {
+  // Use state to control row expansion
   const [open, setOpen] = React.useState(false);
+  
   return (
     <React.Fragment>
+      {/* Table row for SignalFrame data */}
       <TableRow sx={{ '& > *': { borderBottom: 'unset', ...rowDensities[rowDensity] } }}>
         <TableCell>
+          {/* IconButton for expanding/collapsing the row */}
           <IconButtonStyled
             aria-label="expand row"
             size="small"
@@ -100,6 +107,7 @@ function SignalFrameRow({ frame, timestamp, rowDensity }: SignalFrameRowProps) {
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButtonStyled>
         </TableCell>
+        {/* Render SignalFrame data */}
         <SignalFrameCell align="left"><FrameName frame={frame} /></SignalFrameCell>
         <SignalFrameCell align="left"><FrameId frame={frame} /></SignalFrameCell>
         <SignalFrameCell align="left"><FrameData frame={frame} /></SignalFrameCell>
@@ -107,8 +115,10 @@ function SignalFrameRow({ frame, timestamp, rowDensity }: SignalFrameRowProps) {
         <SignalFrameCell align="left"><FrameTime timestamp={timestamp} /></SignalFrameCell>
       </TableRow>
       <TableRow>
+        {/* Row for expanding/collapsing details */}
         <TableCell style={{ paddingBottom: 0, paddingTop: 0, background: 'white' }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
+            {/* Container for displaying SignalFrame details */}
             <Box component="form" sx={{ margin: 1 }}>
               <SignalFrameDetail frame={frame} />
             </Box>
@@ -119,19 +129,24 @@ function SignalFrameRow({ frame, timestamp, rowDensity }: SignalFrameRowProps) {
   );
 }
 
+// Define props for a row displaying TypeFrame
 interface TypeFrameRowProps {
   frame: TypeFrame,
   timestamp: string,
   rowDensity: RowDensity,
 }
 
-
+// Define a functional component to render a row with TypeFrame data
 function TypeFrameRow({ frame, timestamp, rowDensity }: TypeFrameRowProps) {
+  // Use state to control row expansion
   const [open, setOpen] = React.useState(false);
+  
   return (
     <React.Fragment>
+      {/* Table row for TypeFrame data */}
       <TableRow sx={{ '& > *': { borderBottom: 'unset', ...rowDensities[rowDensity] } }}>
         <TypeFrameCell>
+          {/* IconButton for expanding/collapsing the row */}
           <IconButtonStyled
             aria-label="expand row"
             size="small"
@@ -140,6 +155,7 @@ function TypeFrameRow({ frame, timestamp, rowDensity }: TypeFrameRowProps) {
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButtonStyled>
         </TypeFrameCell>
+        {/* Render TypeFrame data */}
         <TypeFrameCell align="left"><FrameName frame={frame} /></TypeFrameCell>
         <TypeFrameCell align="left"><FrameId frame={frame} /></TypeFrameCell>
         <TypeFrameCell align="left"><FrameData frame={frame} /></TypeFrameCell>
@@ -147,8 +163,10 @@ function TypeFrameRow({ frame, timestamp, rowDensity }: TypeFrameRowProps) {
         <TypeFrameCell align="left"><FrameTime timestamp={timestamp} /></TypeFrameCell>
       </TableRow>
       <TableRow>
+        {/* Row for expanding/collapsing details */}
         <TableCell style={{ paddingBottom: 0, paddingTop: 0,  background: 'white' }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
+            {/* Container for displaying TypeFrame details */}
             <Box component="form" sx={{ margin: 1 }}>
               <TypeFrameDetail frame={frame} />
             </Box>
@@ -159,13 +177,14 @@ function TypeFrameRow({ frame, timestamp, rowDensity }: TypeFrameRowProps) {
   );
 }
 
+// Define props for a row displaying UndefinedFrame
 interface UndefinedFrameRowProps {
-  frame: UndefinedFrame
+  frame: UndefinedFrame,
   timestamp: string,
   rowDensity: RowDensity,
 }
 
-
+// Define a functional component to render a row with UndefinedFrame data
 function UndefinedFrameRow({ frame, timestamp, rowDensity }: UndefinedFrameRowProps) {
   return (
     <TableRow sx={{ '& > *': { borderBottom: 'unset', ...rowDensities[rowDensity] } }}>
@@ -184,13 +203,14 @@ function UndefinedFrameRow({ frame, timestamp, rowDensity }: UndefinedFrameRowPr
   );
 }
 
+// Define props for a row displaying ErrorFrame
 interface ErrorFrameRowProps {
   frame: ErrorFrame,
   timestamp: string,
   rowDensity: RowDensity,
 }
 
-
+// Define a functional component to render a row with ErrorFrame data
 function ErrorFrameRow({ frame, timestamp, rowDensity }: ErrorFrameRowProps) {
   return (
     <TableRow sx={{ '& > *': { borderBottom: 'unset', ...rowDensities[rowDensity] } }}>
@@ -209,12 +229,14 @@ function ErrorFrameRow({ frame, timestamp, rowDensity }: ErrorFrameRowProps) {
   );
 }
 
+// Define props for a generic row that can display different frame types
 interface RowProps {
   evt: TraceObjectEvent,
   timeAbsolute: string,
   rowDensity: RowDensity,
 }
 
+// Define a functional component to render a row based on the frame type
 function Row({ evt, timeAbsolute, rowDensity }: RowProps) {
   if (evt.frame.TypeFrame != undefined) {
     return <TypeFrameRow frame={evt.frame.TypeFrame} timestamp={timeAbsolute} rowDensity={rowDensity} />
@@ -227,11 +249,12 @@ function Row({ evt, timeAbsolute, rowDensity }: RowProps) {
   }
 }
 
-// Define a state to manage the sorting direction
+// Define a custom hook for managing sorting state
 const useSortState = () => {
   const [sortField, setSortField] = useState('Name');
   const [sortDirection, setSortDirection] = useState('asc');
 
+  // Function to toggle sorting direction
   const toggleSortDirection = (field: React.SetStateAction<string>) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -247,14 +270,27 @@ const useSortState = () => {
 
 function TraceGrid() {
 
+  // useRef to maintain a mutable object that persists for the lifetime of the component without causing re-renders
   const rowsRef = useRef<TraceObjectEvent[]>([]);
+
+  // State for managing filtered rows shown in the UI
   const [filteredRows, setFilteredRows] = useState<TraceObjectEvent[]>([]);
+
+  // Custom hook for managing sorting state
   const { sortField, sortDirection, toggleSortDirection } = useSortState();
+
+  // useRef for tracking the current search string
   const searchStringRef = useRef("");
+
+  // State for toggling between absolute and relative time display
   const [timeAbsolute, setTimeAbsolute] = useState(false);
+
+  // State for setting row density in the table
   const [rowDensity, setRowDensity] = useState<RowDensity>('standard');
 
+  // Function to handle new trace events and update the rows
   function handle_event(event: TraceObjectEvent) {
+    // Find the index of the event in the current array
     let index = rowsRef.current.findIndex((f) => {
       if (f.frame.TypeFrame != undefined && event.frame.TypeFrame != undefined) {
         return f.frame.TypeFrame.id === event.frame.TypeFrame.id &&
@@ -271,6 +307,7 @@ function TraceGrid() {
         return false;
       }
     });
+    // If event is new, add it to the array, else update the existing event
     if (index == -1) {
       rowsRef.current.push(event);
     } else {
@@ -278,7 +315,9 @@ function TraceGrid() {
     }
   }
 
+  // Effect hook to set up event listeners and apply initial sorting and filtering
   useEffect(() => {
+    // Initial setup to listen to trace events
     invoke<TraceObjectEvent[]>("listen_to_trace").then((traceObjectEvents) => {
       for (let traceObjectEvent of traceObjectEvents) {
         console.log("initial frame: " + traceObjectEvent.frame);
@@ -313,6 +352,7 @@ function TraceGrid() {
     };
   }, [sortField, sortDirection]);
   
+  // Function to toggle the row density state
   const toggleRowDensity = () => {
     setRowDensity(prevDensity => {
       switch (prevDensity) {
@@ -328,6 +368,7 @@ function TraceGrid() {
     });
   };
 
+  // Function to filter rows based on the search text
   const filterRows = (searchText: string) => {
     searchStringRef.current = searchText;
     if (searchStringRef.current === "") {
@@ -355,7 +396,7 @@ function TraceGrid() {
     }
   };
   
-
+  // Function to sort data based on the current sort field and direction
   const sortData = (data: TraceObjectEvent[], sortField: string, sortDirection: string) => {
     return data.sort((a, b) => {
       let fieldA, fieldB;
