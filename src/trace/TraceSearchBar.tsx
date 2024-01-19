@@ -6,7 +6,6 @@ import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material/styles";
 import { Button, Tooltip } from "@mui/material";
-import { color } from "d3";
 
 interface TraceSearchBarProps {
   onSearch: (value: string) => void;
