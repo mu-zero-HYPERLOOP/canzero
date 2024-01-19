@@ -1,9 +1,9 @@
 
-export type ObjectEntryType = number | string | ObjectEntryComposite;
+export type ObjectEntryValue = number | string | ObjectEntryComposite;
 
 export interface ObjectEntryComposite {
   name: string; // redundant!
-  value: {name : string, value : ObjectEntryType}[],
+  value: {name : string, value : ObjectEntryValue}[],
 }
 
 interface ObjectEntryEvent {

@@ -34,7 +34,7 @@ function GraphList({information, nodeName}: GraphListProps) {
 
             let renderFuncs = compositeType.attributes.map((attrib, index) => {
                 return computeRenderFunc(
-                    (event) => (property(event) as ObjectEntryComposite).value[index],
+                    (event) => (property(event) as ObjectEntryComposite).value[index].value,
                     attrib.type,
                     propertyName ? `${propertyName}.${attrib.name}` : attrib.name
                 );
