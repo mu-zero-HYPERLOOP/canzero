@@ -1,11 +1,11 @@
 import {useEffect} from "react";
 import {listen} from "@tauri-apps/api/event";
 
-interface EstablishConnectionProps {
+interface EstablishConnectionPossibleProps {
     setConnectingPossible: (isConnecting: boolean) => void;
 }
 
-function EstablishConnection({ setConnectingPossible }: Readonly<EstablishConnectionProps>) {
+function EstablishConnectionPossible({ setConnectingPossible }: Readonly<EstablishConnectionPossibleProps>) {
     async function asyncConnect() {
         return await listen("connecting_to_pod_possible", () => {
             setConnectingPossible(true)
@@ -23,4 +23,4 @@ function EstablishConnection({ setConnectingPossible }: Readonly<EstablishConnec
     return <></>
 }
 
-export default EstablishConnection
+export default EstablishConnectionPossible

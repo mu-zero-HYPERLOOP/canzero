@@ -130,7 +130,7 @@ interface NodeEntriesProps {
   nodeInfo: NodeInformation,
 }
 
-function NodeEntries({ nodeInfo }: NodeEntriesProps) {
+function NodeEntries({ nodeInfo }: Readonly<NodeEntriesProps>) {
 
   /*Page name has to equal the nodeId!*/
   return (<>
@@ -177,7 +177,7 @@ interface ListEntriesProps {
   open: boolean,
 }
 
-export function ListEntries({ open }: ListEntriesProps) {
+export function ListEntries({ open }: Readonly<ListEntriesProps>) {
   if (open) {
     return <>
       {RouterList}

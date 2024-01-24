@@ -1,15 +1,17 @@
 import {Container} from '@mui/material';
 import ControlGrid from './ControlGrid.tsx';
+import {NodeInformation} from "../nodes/types/NodeInformation.ts";
 
-interface ConnectionProps {
+interface OverviewProps {
     connectionSuccess: boolean
+    nodes: NodeInformation[];
 }
-function OverviewPanel({connectionSuccess}: ConnectionProps) {
+function OverviewPanel({connectionSuccess, nodes}: Readonly<OverviewProps>) {
 
     return (
         <div>
             <Container maxWidth="xl" sx={{mt: 0, mb: 0}}>
-                <ControlGrid connectionSuccess={connectionSuccess}/>
+                <ControlGrid connectionSuccess={connectionSuccess} nodes={nodes}/>
             </Container>
         </div>
 

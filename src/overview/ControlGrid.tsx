@@ -1,4 +1,4 @@
-import PodTemperatures from './PodTemperatures.tsx';
+import PodTemperatures from './ValueTable.tsx';
 import {Grid, Paper, Skeleton, Stack, styled} from '@mui/material';
 import BMW from '../assets/bmw_m4.glb?url';
 import {PresentationControls, Stage, useGLTF} from '@react-three/drei';
@@ -9,6 +9,7 @@ import {faCarBattery, faTriangleExclamation} from '@fortawesome/free-solid-svg-i
 import Thermostat from '@mui/icons-material/Thermostat';
 import Bolt from '@mui/icons-material/Bolt';
 import Box from "@mui/material/Box";
+import {NodeInformation} from "../nodes/types/NodeInformation.ts";
 
 const Item = styled(Paper)(({theme}) => ({
     backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -20,7 +21,9 @@ const Item = styled(Paper)(({theme}) => ({
 
 interface ControlGridProps {
     connectionSuccess: boolean;
+    nodes: NodeInformation[];
 }
+
 
 function ControlLights() {
     return (
@@ -71,7 +74,7 @@ function Pod3DModel() {
     );
 }
 
-function ControlGrid({connectionSuccess}: ControlGridProps) {
+function ControlGrid({connectionSuccess, nodes}: Readonly<ControlGridProps>) {
     return (
         <Grid container rowSpacing={2} columnSpacing={{xs: 1, md: 2}} sx={{margin: "1%"}}>
             {!connectionSuccess ? (
@@ -122,7 +125,7 @@ function ControlGrid({connectionSuccess}: ControlGridProps) {
                     </Grid>
                     <Grid item xs={12} md={12}>
                         <Item sx={{width: "100%"}}>
-                            <PodTemperatures/>
+                            <PodTemperatures nodes={nodes} width={700} height={100}/>
                         </Item>
                     </Grid>
                 </>

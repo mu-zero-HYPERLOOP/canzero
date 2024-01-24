@@ -25,7 +25,7 @@ interface ConnectionProps {
     connectionSuccess: boolean
 }
 
-function ShowPages({connectionSuccess}: ConnectionProps) {
+function ShowPages({connectionSuccess}: Readonly<ConnectionProps>) {
     const [nodes, setNodes] = useState<NodeInformation[]>([]);
 
     async function asyncFetchNodeData() {
@@ -46,7 +46,7 @@ function ShowPages({connectionSuccess}: ConnectionProps) {
 
     return (
         <Routes>
-            <Route index element={<OverviewPanel connectionSuccess={connectionSuccess}/>}/>
+            <Route index element={<OverviewPanel connectionSuccess={connectionSuccess} nodes={nodes}/>}/>
             <Route path="TracePanel" element={<TracePanel/>}/>
             <Route path="LevitationControl" element={<LevitationControl nodes={nodes}/>}/>
             <Route path="GuidanceControl" element={<GuidanceControl nodes={nodes}/>}/>

@@ -1,7 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-use rand::{rngs::StdRng, Rng, SeedableRng};
+use rand::{Rng, SeedableRng};
 use serde::Serialize;
-use std::time::Duration;
 use tauri::Manager;
 
 use crate::{
@@ -49,13 +48,10 @@ fn main() {
     tauri::Builder::default()
         .setup(|app| {
             println!("Hello, Tauri!");
-            random_integer(app.handle());
             let app_handle = app.handle();
             tauri::async_runtime::spawn(async move {
                 app_handle.manage(CNLState::create("./test.yaml", &app_handle));
             });
-            app.handle().emit_all("connecting_possible", ()).unwrap();
-            println!("connect");
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -79,18 +75,4 @@ fn main() {
         ])
         .run(tauri::generate_context!())
         .expect("Error while running tauri application");
-}
-
-fn random_integer(app_handle: tauri::AppHandle) {
-    tauri::async_runtime::spawn(async move {
-        let mut rng = {
-            let rng = rand::thread_rng();
-            StdRng::from_rng(rng).unwrap()
-        };
-        loop {
-            tokio::time::sleep(Duration::from_millis(1000)).await;
-            let x = rng.gen::<u32>();
-            app_handle.emit_all("random-integer", x).unwrap();
-        }
-    });
 }
