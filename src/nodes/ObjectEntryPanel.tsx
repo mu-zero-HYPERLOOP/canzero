@@ -19,11 +19,12 @@ import RefreshButton from "./RefreshButton.tsx";
 interface GraphListProps {
     information: ObjectEntryInformation,
     nodeName: string,
+    useScrolling?: boolean,
 }
 
 // This function is not tested property because the backend currently doesn't any
 // structures messages!
-function GraphList({information, nodeName}: GraphListProps) {
+function GraphList({information, nodeName, useScrolling = true}: GraphListProps) {
     function computeRenderFunc(
         property: (event: ObjectEntryEvent) => ObjectEntryValue,
         ty: ObjectEntryType,
@@ -49,6 +50,7 @@ function GraphList({information, nodeName}: GraphListProps) {
                     objectEntryInformation={information}
                     property={(event) => event.value as number}
                     propertyName={propertyName}
+                    useScrolling={useScrolling}
                 />
             };
         } else {
@@ -59,6 +61,7 @@ function GraphList({information, nodeName}: GraphListProps) {
                     objectEntryInformation={information}
                     property={(event) => event.value as number}
                     propertyName={propertyName}
+                    useScrolling={useScrolling}
                 />
             };
         }
@@ -72,9 +75,10 @@ function GraphList({information, nodeName}: GraphListProps) {
 interface ObjectEntryPanelProps {
     node: NodeInformation,
     name: string,
+    useGraphScrolling?: boolean,
 }
 
-function ObjectEntryPanel({node, name}: Readonly<ObjectEntryPanelProps>) {
+function ObjectEntryPanel({node, name, useGraphScrolling = true}: Readonly<ObjectEntryPanelProps>) {
 
 
     const [information, setInformation] = useState<ObjectEntryInformation | null>(null);
@@ -106,7 +110,11 @@ function ObjectEntryPanel({node, name}: Readonly<ObjectEntryPanelProps>) {
                     : <></>}
                 <RefreshButton nodeName={node.name} objectEntryName={information.name}/>
                 <SetValueButton nodeName={node.name} objectEntryName={information.name}/>
-                <GraphList information={information} nodeName={node.name}/>
+                <GraphList 
+                  information={information} 
+                  nodeName={node.name} 
+                  useScrolling={useGraphScrolling}
+                />
             </>
         } else {
             return <Skeleton variant="rounded" height={"300px"}/>

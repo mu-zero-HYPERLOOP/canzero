@@ -51,7 +51,7 @@ function D3ObjectEntryGraph({
   margin,
   interpolation,
   performanceMode,
-  unit
+  unit,
 }: D3ObjectEntryGraph) {
 
   // use ref so that react can fill the reference before useEffect is called!
@@ -202,7 +202,6 @@ function D3ObjectEntryGraph({
       .style("stroke", "#ff1e00")
       .style("stroke-width", 1.5)
       .style("fill", "none");
-
 
 
     let running = true;
@@ -358,6 +357,7 @@ interface ObjectEntryGraph {
   objectEntryInformation: ObjectEntryInformation,
   property: (event: ObjectEntryEvent) => number,
   propertyName?: string,
+  useScrolling?: boolean,
 }
 
 // horrible solution to perserve the state, but it works pretty well =^)
@@ -369,6 +369,7 @@ function ObjectEntryGraph({
   objectEntryInformation,
   property,
   propertyName,
+  useScrolling = true,
 }: ObjectEntryGraph) {
 
   const [interpolation, setInterpolation] = useState(defaultInterpolation);
@@ -458,7 +459,7 @@ function ObjectEntryGraph({
       <></>}
     <Stack direction="row">
       <Paper sx={{ width: "100%", backgroundColor: "#f2f2f2" }}>
-        <div onWheel={handleScrollWheel}>
+        <div onWheel={useScrolling ? handleScrollWheel : undefined}>
           <D3ObjectEntryGraph
             nodeName={nodeName}
             oeName={objectEntryInformation.name}

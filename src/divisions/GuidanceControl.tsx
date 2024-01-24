@@ -2,10 +2,11 @@ import {NodeInformation} from "../nodes/types/NodeInformation.ts";
 import ObjectEntryPanel from "../nodes/ObjectEntryPanel.tsx";
 
 interface NodesProps {
-    nodes: NodeInformation[];
+    nodes: NodeInformation[],
+    useGraphScrolling?: boolean,
 }
 
-function GuidanceControl({nodes}: NodesProps) {
+function GuidanceControl({nodes, useGraphScrolling = false}: NodesProps) {
 
     return (
         <>
@@ -13,12 +14,18 @@ function GuidanceControl({nodes}: NodesProps) {
             {nodes.map((entry: NodeInformation) => {
                 if (entry.name === "secu")
                     return (<>
-                            <ObjectEntryPanel node={entry} name={"guidance_state"}/>
-                            <ObjectEntryPanel node={entry} name={"position"}/>
-                            <ObjectEntryPanel node={entry} name={"velocity"}/>
-                            <ObjectEntryPanel node={entry} name={"acceleration_x"}/>
-                            <ObjectEntryPanel node={entry} name={"acceleration_y"}/>
-                            <ObjectEntryPanel node={entry} name={"acceleration_z"}/>
+                            <ObjectEntryPanel node={entry} name={"guidance_state"} 
+                              useGraphScrolling={useGraphScrolling}/>
+                            <ObjectEntryPanel node={entry} name={"position"} 
+                              useGraphScrolling={useGraphScrolling}/>
+                            <ObjectEntryPanel node={entry} name={"velocity"} 
+                              useGraphScrolling={useGraphScrolling}/>
+                            <ObjectEntryPanel node={entry} name={"acceleration_x"} 
+                              useGraphScrolling={useGraphScrolling}/>
+                            <ObjectEntryPanel node={entry} name={"acceleration_y"} 
+                              useGraphScrolling={useGraphScrolling}/>
+                            <ObjectEntryPanel node={entry} name={"acceleration_z"} 
+                              useGraphScrolling={useGraphScrolling}/>
                         </>
                     )
             })}
