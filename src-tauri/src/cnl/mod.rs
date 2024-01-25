@@ -4,6 +4,8 @@ mod can;
 #[cfg(feature = "mock-can")]
 mod mock_can;
 
+pub mod connection;
+
 mod can_frame;
 pub mod command;
 pub mod errors;
@@ -23,7 +25,7 @@ use self::{
     command::Command,
     network::{node_object::NodeObject, NetworkObject},
     rx::RxCom,
-    trace::TraceObject,
+    trace::TraceObject, connection::{ConnectionObject, ConnectionStatus},
 };
 
 use can_config_rs::config;
@@ -43,10 +45,14 @@ pub struct CNL {
     network: Arc<NetworkObject>,
     baudrate: u32,
     notification_stream: NotificationStream,
+    connection_object : ConnectionObject,
 }
 
 impl CNL {
     pub fn create(network_config: &config::NetworkRef, app_handle: &tauri::AppHandle) -> Self {
+    
+        let connection_object = ConnectionObject::new(ConnectionStatus::CanDisconnected, app_handle);
+
         #[cfg(feature = "socket-can")]
         let can0 =
             Arc::new(can::CAN::create(can::CanModule::CAN0, true).expect("failed to setup can0"));
@@ -58,15 +64,11 @@ impl CNL {
         #[cfg(feature = "mock-can")]
         let can1 = Arc::new(mock_can::MockCan::create(network_config));
 
+        connection_object.set_status(ConnectionStatus::CanConnected);
+
         let trace = Arc::new(TraceObject::create(app_handle));
 
         let network = Arc::new(NetworkObject::create(network_config, app_handle));
-
-        // for node in network.nodes() {
-        //     for oe in node.object_entries() {
-        //         oe.listen_to_latest();
-        //     }
-        // }
 
         let rx = RxCom::create(network_config, &trace, &network, app_handle);
         Self {
@@ -77,6 +79,7 @@ impl CNL {
             network,
             baudrate: network_config.baudrate(),
             notification_stream: NotificationStream::new(&app_handle),
+            connection_object,
         }
     }
     pub fn start(&mut self) {
