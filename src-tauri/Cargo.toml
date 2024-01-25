@@ -29,6 +29,7 @@ can-config-rs = { git = "https://github.com/mu-zero-HYPERLOOP/can-config-rs.git"
 can-yaml-config-rs = { git = "https://github.com/mu-zero-HYPERLOOP/can-yaml-config-rs.git" }
 sorted-vec = "0.8.3"
 fix-path-env = { git = "https://github.com/tauri-apps/fix-path-env-rs.git"}
+bitvec = "1.0.1"
 
 [features]
 default = ["mock-can"]

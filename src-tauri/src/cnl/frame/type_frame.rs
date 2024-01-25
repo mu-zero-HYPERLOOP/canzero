@@ -1,10 +1,12 @@
 use std::ops::Index;
 
+use bitvec::vec::BitVec;
 use can_config_rs::config;
 use serde::{
     ser::{SerializeMap, SerializeSeq},
     Serialize, Serializer, Deserialize,
 };
+use config::{Type, SignalType};
 
 /**
  *
@@ -284,6 +286,27 @@ impl Serialize for TypeValue {
             TypeValue::Enum(_, v) => serializer.serialize_str(v),
             TypeValue::Array(_) => todo!(),
         }
+    }
+}
+
+impl TypeValue {
+    pub fn get_as_bin(&self, ty: &config::Type) -> Vec<u64> {
+        let mut bit_vec: BitVec = BitVec::new();
+        let mut next_idx: usize = 0;
+        match (&self, ty) {
+            (TypeValue::Unsigned(_), Type::Primitive(SignalType::UnsignedInt{ size })) => {
+                todo!()
+            },
+            (TypeValue::Signed(_), config::Type::Primitive(SignalType::SignedInt{ size })) => todo!(),
+            (TypeValue::Real(_), config::Type::Primitive(SignalType::Decimal { size, offset, scale })) => todo!(),
+            (TypeValue::Composite(_), config::Type::Struct { name, description, attribs, visibility }) => todo!(),
+            (TypeValue::Enum(_, _), config::Type::Enum { name, description, size, entries, visibility }) => todo!(),
+            (TypeValue::Array(_), config::Type::Array { len, ty }) => todo!(),
+            _ => panic!()
+        };
+
+
+        vec![0]
     }
 }
 
