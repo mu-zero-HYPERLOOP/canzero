@@ -9,7 +9,6 @@ use crate::state::cnl_state::CNLState;
 // In typescript represented as types/NetworkInformation
 #[derive(Serialize, Clone)]
 pub struct NetworkInformation {
-    baudrate: u32,
     node_names: Vec<String>,
 }
 #[tauri::command]
@@ -18,7 +17,6 @@ pub async fn network_information(
 ) -> Result<NetworkInformation, ()> {
     let cnl = state.lock().await;
     Ok(NetworkInformation {
-        baudrate: cnl.baudrate(),
         node_names: cnl.nodes().iter().map(|n| n.name().to_owned()).collect(),
     })
 }

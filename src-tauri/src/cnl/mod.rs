@@ -38,14 +38,12 @@ pub type CAN = mock_can::MockCan;
 
 // CaNetwork Layer
 pub struct CNL {
-    can0: Arc<CAN>,
-    can1: Arc<CAN>,
+    can_buses : Vec<Arc<CAN>>,
     trace: Arc<TraceObject>,
     rx: RxCom,
     network: Arc<NetworkObject>,
-    baudrate: u32,
     notification_stream: NotificationStream,
-    connection_object : ConnectionObject,
+    connection_object : Arc<ConnectionObject>,
 }
 
 impl CNL {
@@ -53,16 +51,11 @@ impl CNL {
     
         let connection_object = ConnectionObject::new(ConnectionStatus::CanDisconnected, app_handle);
 
-        #[cfg(feature = "socket-can")]
-        let can0 =
-            Arc::new(can::CAN::create(can::CanModule::CAN0, true).expect("failed to setup can0"));
-        #[cfg(feature = "socket-can")]
-        let can1 =
-            Arc::new(can::CAN::create(can::CanModule::CAN1, true).expect("failed to setup can1"));
-        #[cfg(feature = "mock-can")]
-        let can0 = Arc::new(mock_can::MockCan::create(network_config));
-        #[cfg(feature = "mock-can")]
-        let can1 = Arc::new(mock_can::MockCan::create(network_config));
+        
+        let can_buses = network_config.buses().iter().map(|bus_config| {
+            #[cfg(feature = "mock-can")]
+            Arc::new(mock_can::MockCan::create(bus_config, network_config))
+        }).collect();
 
         connection_object.set_status(ConnectionStatus::CanConnected);
 
@@ -72,20 +65,18 @@ impl CNL {
 
         let rx = RxCom::create(network_config, &trace, &network, app_handle);
         Self {
-            can0,
-            can1,
+            can_buses,
             rx,
             trace,
             network,
-            baudrate: network_config.baudrate(),
             notification_stream: NotificationStream::new(&app_handle),
-            connection_object,
+            connection_object : Arc::new(connection_object),
         }
     }
     pub fn start(&mut self) {
-        self.rx.start(&self.can0);
-        #[cfg(feature = "socket-can")]
-        self.rx.start(&self.can1);
+        for can_bus in &self.can_buses {
+            self.rx.start(can_bus);
+        }
     }
 
     pub fn trace(&self) -> &Arc<TraceObject> {
@@ -94,9 +85,6 @@ impl CNL {
 
     pub fn nodes(&self) -> &Vec<Arc<NodeObject>> {
         self.network.nodes()
-    }
-    pub fn baudrate(&self) -> u32 {
-        self.baudrate
     }
 
     pub fn command(&self, command: Command) {

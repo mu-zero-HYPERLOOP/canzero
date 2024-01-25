@@ -3,7 +3,7 @@ use std::{
     time::Duration,
 };
 
-use can_config_rs::config;
+use can_config_rs::config::{self};
 use rand::{rngs::ThreadRng, Rng};
 
 use super::{can_frame::{CanError, CanFrame}, timestamped::Timestamped};
@@ -96,7 +96,7 @@ pub struct MockCan {
 }
 
 impl MockCan {
-    pub fn create(network_ref: &config::NetworkRef) -> Self {
+    pub fn create(bus_config : &config::bus::BusRef, network_ref: &config::NetworkRef) -> Self {
         Self {
             network_ref: network_ref.clone(),
             rng: Mutex::new(rand::thread_rng()),

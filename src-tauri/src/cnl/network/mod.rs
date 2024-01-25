@@ -25,11 +25,6 @@ impl NetworkObject {
             network_ref: network_config.clone(),
         }
     }
-
-    #[allow(unused)] //FIXME
-    pub fn baudrate(&self) -> u32 {
-        self.network_ref.baudrate()
-    }
     pub fn nodes(&self) -> &Vec<Arc<NodeObject>> {
         &self.nodes
     }

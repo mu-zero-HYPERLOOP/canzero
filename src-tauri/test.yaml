@@ -1,6 +1,12 @@
 
 baudrate : 10
 
+buses:
+  can0:
+    baudrate: 1000000
+  can1:
+    baudrate: 1000000
+
 nodes: 
   secu: 
     description: Sensor Electronics Control Unit
