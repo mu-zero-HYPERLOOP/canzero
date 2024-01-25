@@ -1,13 +1,15 @@
 use std::sync::Arc;
 
 use can_config_rs::config;
+use tokio::sync::Mutex;
 
 use self::node_object::NodeObject;
+
+use super::tx::TxCom;
 
 pub mod command_object;
 pub mod node_object;
 pub mod object_entry_object;
-pub mod set_request;
 
 pub struct NetworkObject {
     nodes: Vec<Arc<NodeObject>>,
@@ -15,12 +17,12 @@ pub struct NetworkObject {
 }
 
 impl NetworkObject {
-    pub fn create(network_config: &config::NetworkRef, app_handle: &tauri::AppHandle) -> Self {
+    pub fn create(network_config: &config::NetworkRef, app_handle: &tauri::AppHandle, tx_com: Arc<TxCom>) -> Self {
         Self {
             nodes: network_config
                 .nodes()
                 .iter()
-                .map(|node_config| Arc::new(NodeObject::create(node_config, app_handle)))
+                .map(|node_config| Arc::new(NodeObject::create(node_config, app_handle, tx_com.clone())))
                 .collect(),
             network_ref: network_config.clone(),
         }

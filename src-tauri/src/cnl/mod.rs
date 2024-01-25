@@ -14,6 +14,7 @@ mod handler;
 pub mod network;
 pub mod parser;
 mod rx;
+mod tx;
 pub mod timestamped;
 pub mod trace;
 
@@ -26,6 +27,7 @@ use self::{
     network::{node_object::NodeObject, NetworkObject},
     rx::RxCom,
     trace::TraceObject, connection::{ConnectionObject, ConnectionStatus},
+    tx::TxCom,
 };
 
 use can_config_rs::config;
@@ -41,6 +43,7 @@ pub struct CNL {
     can_buses : Vec<Arc<CAN>>,
     trace: Arc<TraceObject>,
     rx: RxCom,
+    tx: Arc<TxCom>,
     network: Arc<NetworkObject>,
     notification_stream: NotificationStream,
     connection_object : Arc<ConnectionObject>,
@@ -61,12 +64,15 @@ impl CNL {
 
         let trace = Arc::new(TraceObject::create(app_handle));
 
-        let network = Arc::new(NetworkObject::create(network_config, app_handle));
+        let tx = Arc::new(TxCom::create(network_config.clone()));
+
+        let network = Arc::new(NetworkObject::create(network_config, app_handle, tx.clone()));
 
         let rx = RxCom::create(network_config, &trace, &network, app_handle);
         Self {
             can_buses,
             rx,
+            tx,
             trace,
             network,
             notification_stream: NotificationStream::new(&app_handle),

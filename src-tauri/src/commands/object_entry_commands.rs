@@ -5,7 +5,7 @@ use serde::Serialize;
 use crate::{
     cnl::{
         frame::type_frame::{CompositeTypeValue, FrameType, TypeValue},
-        network::object_entry_object::{self, ObjectEntryEvent},
+        network::object_entry_object::{ObjectEntryEvent},
     },
     notification::NotificationStream,
     state::cnl_state::CNLState,
@@ -93,10 +93,10 @@ pub async fn set_object_entry_value(
             }
 
             Type::Struct {
-                name,
-                description,
+                name: _,
+                description: _,
                 attribs,
-                visibility,
+                visibility: _,
             } => {
                 if let Some(map) = json_value.as_object() {
                     let mut frame_types = vec![];
@@ -138,7 +138,7 @@ pub async fn set_object_entry_value(
                     return Err(());
                 }
             },
-            Type::Array { len, ty } => todo!(),
+            Type::Array { len: _, ty: _ } => todo!(),
         }
     }
 
@@ -146,7 +146,9 @@ pub async fn set_object_entry_value(
         Ok(x) => x,
         Err(_) => return Err(()),
     };
+
     println!("parsed value: {type_value:?}");
+    object_entry_object.set_request(type_value);
 
     Ok(())
 }
