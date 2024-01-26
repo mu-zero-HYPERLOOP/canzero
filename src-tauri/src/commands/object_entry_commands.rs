@@ -52,8 +52,8 @@ pub async fn set_object_entry_value(
         match oe_type.as_ref() {
             Type::Primitive(SignalType::SignedInt { size }) => {
                 if let Some(val) = json_value.as_i64() {
-                    if (2 as i64).pow((*size - 1) as u32) > val
-                        && (2 as i64).pow((*size - 1) as u32) >= -val
+                    if 2i64.pow((*size - 1) as u32) > val
+                        && 2i64.pow((*size - 1) as u32) >= -val
                     {
                         Ok(TypeValue::Signed(val))
                     } else {
@@ -65,7 +65,7 @@ pub async fn set_object_entry_value(
             }
             Type::Primitive(SignalType::UnsignedInt { size }) => {
                 if let Some(val) = json_value.as_u64() {
-                    if (2 as u64).pow(*size as u32) < val {
+                    if 2u64.pow(*size as u32) > val {
                         Ok(TypeValue::Unsigned(val))
                     } else {
                         return Err(());

@@ -292,13 +292,12 @@ impl Serialize for TypeValue {
 impl TypeValue {
     pub fn get_as_bin(&self, ty: &config::Type) -> Vec<u64> {
         let mut bit_vec: BitVec<u64, Msb0> = BitVec::new();
-        let mut next_idx: usize = 0;
 
         fn continue_get_as_bin(
                 type_value: &TypeValue, 
                 ty: &config::Type, 
                 bit_vec: &mut BitVec<u64, Msb0>, 
-                next_idx: usize) {
+            ) {
             match (type_value, ty) {
                 (TypeValue::Unsigned(val), Type::Primitive(SignalType::UnsignedInt{ size })) => {
                     for i in (0..*size).rev() {
@@ -315,20 +314,54 @@ impl TypeValue {
                 (TypeValue::Real(val), config::Type::Primitive(SignalType::Decimal { size, offset, scale })) => {
                     let base_float = (val - offset) / scale;
                     let base_bits = base_float.round() as i64;
+                    // just in case floating point errors fuck us. 
+                    // not sure if actually needed.
+                    let base_bits: u64 = if base_bits < 0 { 
+                        0 
+                    } else if (base_bits >> size) > 0 { 
+                        0xffff_ffff_ffff_ffff 
+                    } else {
+                        base_bits as u64
+                    };
                     for i in (0..*size).rev() {
                         let bit_int = (base_bits >> i) & 0x1;
                         bit_vec.push(if bit_int == 0 { false } else { true });
                     }
                 },
-                (TypeValue::Composite(val), config::Type::Struct { name, description, attribs, visibility }) => todo!(),
-                (TypeValue::Enum(_, _), config::Type::Enum { name, description, size, entries, visibility }) => todo!(),
-                (TypeValue::Array(val), config::Type::Array { len, ty }) => todo!(),
-                _ => panic!()
+                (TypeValue::Composite(val), config::Type::Struct { 
+                    name: _, 
+                    description: _, 
+                    attribs, 
+                    visibility: _ 
+                }) => {
+                    for (nested_val, nested_type) in val.attributes().iter().zip(
+                        attribs.iter().map(|attr| attr.1.clone())) {
+                        continue_get_as_bin(nested_val.value(), nested_type.as_ref(), bit_vec)
+                    }
+                },
+                (TypeValue::Enum(_, variant_name), config::Type::Enum { 
+                    name: _, 
+                    description: _, 
+                    size, 
+                    entries, 
+                    visibility: _
+                }) => {
+                    if let Some(enum_val) = entries.iter().find(|(name, _)| name == variant_name) {
+                        let bit_val = enum_val.1;
+                        for i in (0..*size).rev() {
+                            let bit_int = (bit_val >> i) & 0x1;
+                            bit_vec.push(if bit_int == 0 { false } else { true });
+                        }
+                    } else {
+                        panic!("variant name not known!");
+                    };
+                },
+                (TypeValue::Array(_), config::Type::Array { len: _, ty: _ }) => todo!(),
+                _ => panic!("TypeValue and config::Type did not match!")
             };
         }
 
-        continue_get_as_bin(self, ty, &mut bit_vec, next_idx);
-
+        continue_get_as_bin(self, ty, &mut bit_vec);
 
         bit_vec.set_uninitialized(false);
         let vec_u64 = bit_vec.into_vec();

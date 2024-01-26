@@ -14,7 +14,8 @@ impl TxCom {
         TxCom { network_ref }
     }
 
-    pub fn send_set_request(&self, server_id: u16, oe_id: u32, type_value: TypeValue) {
+    pub fn send_set_request(&self, server_id: u16, oe_id: u32, val: &Vec<u64>) {
+        println!("attempted send of {val:?}");
 
     }
 

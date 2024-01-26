@@ -103,6 +103,10 @@ impl ObjectEntryObject {
         &self.object_entry_ref.ty()
     }
 
+    fn tx(&self) -> Arc<TxCom> {
+        self.tx_com.clone()
+    }
+
     pub fn listen_to_latest(&self) {
         self.latest_observable.listen(&self.store);
     }
@@ -193,9 +197,10 @@ impl ObjectEntryObject {
     // }
 
     pub fn set_request(&self, type_value: TypeValue) {
-
-
-
+        let bit_value = type_value.get_as_bin(self.ty());
+        let config_type = self.ty();
+        println!("{config_type:?}");
+        self.tx().send_set_request(5, 2, &bit_value);
     }
 }
 
