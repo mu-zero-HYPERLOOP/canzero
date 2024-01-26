@@ -7,40 +7,41 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import '../styles.css'
 import CustomTableCell from "./CustomTableCell.tsx";
-import {NodeInformation} from "../nodes/types/NodeInformation.ts";
+import {TableCellInformation} from "./types/TableCellInformation.tsx";
 
 interface ValueTableprops {
-    nodes: NodeInformation[];
+    entries: TableCellInformation[];
+    title: string;
     width: number;
-    height: number
+    height: number;
+    rows: number;
+    columns: number
 }
 
-export default function ValueTable({nodes, width, height}: Readonly<ValueTableprops>) {
+// number of entries must equal rows * columns
+export default function ValueTable({entries, title, width, height, rows, columns}: Readonly<ValueTableprops>) {
     return (
         <div className="ControlTable">
             <TableContainer component={Paper}>
                 <Table sx={{width: {width}, height: height}} aria-label="simple table">
                     <TableHead>
                         <TableRow>
-                            <TableCell align="center" colSpan={5}>
-                                Current Pod Temperatures
+                            <TableCell align="center" colSpan={columns}>
+                                {title}
                             </TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        <TableRow>
-                            {nodes.map((entry: NodeInformation) => {
-                                if (entry.name === "secu")
-                                    return (<>
-                                            <CustomTableCell node={entry} name={"position"} min={20} max={47}/>
-                                            <CustomTableCell node={entry} name={"pressure_sensor_0"} min={20} max={47}/>
-                                            <CustomTableCell node={entry} name={"pressure_sensor_1"} min={20} max={47}/>
-                                            <CustomTableCell node={entry} name={"pressure_sensor_2"} min={20} max={47}/>
-                                            <CustomTableCell node={entry} name={"pressure_sensor_3"} min={20} max={47}/>
-                                        </>
-                                    )
-                            })}
-                        </TableRow>
+                        {Array.from(Array(rows).keys()).map((row, index) => (
+                            <TableRow key={index}>
+                                {Array.from(Array(columns).keys()).map((col, index) => (
+                                    <CustomTableCell key={index} node={entries[columns * row + col].node}
+                                                     name={entries[columns * row + col].entry}
+                                                     min={entries[columns * row + col].min}
+                                                     max={entries[columns * row + col].max}/>
+                                ))}
+                            </TableRow>
+                        ))}
                     </TableBody>
                 </Table>
             </TableContainer>

@@ -1,4 +1,4 @@
-import PodTemperatures from './ValueTable.tsx';
+import ValueTable from './ValueTable.tsx';
 import {Grid, Paper, Skeleton, Stack, styled} from '@mui/material';
 import BMW from '../assets/bmw_m4.glb?url';
 import {PresentationControls, Stage, useGLTF} from '@react-three/drei';
@@ -10,6 +10,7 @@ import Thermostat from '@mui/icons-material/Thermostat';
 import Bolt from '@mui/icons-material/Bolt';
 import Box from "@mui/material/Box";
 import {NodeInformation} from "../nodes/types/NodeInformation.ts";
+import {TableCellInformation} from "./types/TableCellInformation.tsx";
 
 const Item = styled(Paper)(({theme}) => ({
     backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -74,6 +75,23 @@ function Pod3DModel() {
     );
 }
 
+function createEntries(nodes: NodeInformation[]) {
+    let entries: TableCellInformation[] = [];
+    nodes.map((node: NodeInformation) => {
+            if (node.name === "secu") {
+                entries.push({node:node, entry:"position", min:20, max:47})
+                entries.push({node:node, entry:"cpu_temperature", min:20, max:47})
+                entries.push({node:node, entry:"bcu_temperature", min:20, max:47})
+                entries.push({node:node, entry:"global_state", min:20, max:47})
+                entries.push({node:node, entry:"pressure_sensor_0", min:20, max:47})
+                entries.push({node:node, entry:"pressure_sensor_1", min:20, max:47})
+                entries.push({node:node, entry:"pressure_sensor_2", min:20, max:47})
+                entries.push({node:node, entry:"pressure_sensor_3", min:20, max:47})
+            }
+        });
+    return entries;
+}
+
 function ControlGrid({connectionSuccess, nodes}: Readonly<ControlGridProps>) {
     return (
         <Grid container rowSpacing={2} columnSpacing={{xs: 1, md: 2}} sx={{margin: "1%"}}>
@@ -125,7 +143,7 @@ function ControlGrid({connectionSuccess, nodes}: Readonly<ControlGridProps>) {
                     </Grid>
                     <Grid item xs={12} md={12}>
                         <Item sx={{width: "100%"}}>
-                            <PodTemperatures nodes={nodes} width={700} height={100}/>
+                            <ValueTable entries={createEntries(nodes)} title={"Current Pod Temperatures in °C"} width={700} height={200} rows={2} columns={4}/>
                         </Item>
                     </Grid>
                 </>
