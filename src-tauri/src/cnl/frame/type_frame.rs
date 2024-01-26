@@ -1,6 +1,6 @@
 use std::ops::Index;
 
-use bitvec::vec::BitVec;
+use bitvec::{vec::BitVec, prelude::Msb0};
 use can_config_rs::config;
 use serde::{
     ser::{SerializeMap, SerializeSeq},
@@ -291,22 +291,49 @@ impl Serialize for TypeValue {
 
 impl TypeValue {
     pub fn get_as_bin(&self, ty: &config::Type) -> Vec<u64> {
-        let mut bit_vec: BitVec = BitVec::new();
+        let mut bit_vec: BitVec<u64, Msb0> = BitVec::new();
         let mut next_idx: usize = 0;
-        match (&self, ty) {
-            (TypeValue::Unsigned(_), Type::Primitive(SignalType::UnsignedInt{ size })) => {
-                todo!()
-            },
-            (TypeValue::Signed(_), config::Type::Primitive(SignalType::SignedInt{ size })) => todo!(),
-            (TypeValue::Real(_), config::Type::Primitive(SignalType::Decimal { size, offset, scale })) => todo!(),
-            (TypeValue::Composite(_), config::Type::Struct { name, description, attribs, visibility }) => todo!(),
-            (TypeValue::Enum(_, _), config::Type::Enum { name, description, size, entries, visibility }) => todo!(),
-            (TypeValue::Array(_), config::Type::Array { len, ty }) => todo!(),
-            _ => panic!()
-        };
+
+        fn continue_get_as_bin(
+                type_value: &TypeValue, 
+                ty: &config::Type, 
+                bit_vec: &mut BitVec<u64, Msb0>, 
+                next_idx: usize) {
+            match (type_value, ty) {
+                (TypeValue::Unsigned(val), Type::Primitive(SignalType::UnsignedInt{ size })) => {
+                    for i in (0..*size).rev() {
+                        let bit_int = (*val >> i) & 0x1;
+                        bit_vec.push(if bit_int == 0 { false } else { true });
+                    }
+                },
+                (TypeValue::Signed(val), config::Type::Primitive(SignalType::SignedInt{ size })) => {
+                    for i in (0..*size).rev() {
+                        let bit_int = (*val >> i) & 0x1;
+                        bit_vec.push(if bit_int == 0 { false } else { true });
+                    }
+                },
+                (TypeValue::Real(val), config::Type::Primitive(SignalType::Decimal { size, offset, scale })) => {
+                    let base_float = (val - offset) / scale;
+                    let base_bits = base_float.round() as i64;
+                    for i in (0..*size).rev() {
+                        let bit_int = (base_bits >> i) & 0x1;
+                        bit_vec.push(if bit_int == 0 { false } else { true });
+                    }
+                },
+                (TypeValue::Composite(val), config::Type::Struct { name, description, attribs, visibility }) => todo!(),
+                (TypeValue::Enum(_, _), config::Type::Enum { name, description, size, entries, visibility }) => todo!(),
+                (TypeValue::Array(val), config::Type::Array { len, ty }) => todo!(),
+                _ => panic!()
+            };
+        }
+
+        continue_get_as_bin(self, ty, &mut bit_vec, next_idx);
 
 
-        vec![0]
+        bit_vec.set_uninitialized(false);
+        let vec_u64 = bit_vec.into_vec();
+        println!("TypeValue as vec<u64>: {vec_u64:?}");
+        return vec_u64;
     }
 }
 
