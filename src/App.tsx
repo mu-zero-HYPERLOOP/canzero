@@ -20,6 +20,17 @@ function Router(props: Readonly<{ children?: React.ReactNode }>) {
   );
 }
 
+// Augment the palette to include an ochre color
+declare module '@mui/material/styles' {
+    interface Palette {
+        ochre: Palette['primary'];
+    }
+
+    interface PaletteOptions {
+        backgroundAndIcons?: PaletteOptions['primary'];
+    }
+}
+
 const theme = createTheme({
     palette: {
         secondary: {
@@ -28,6 +39,13 @@ const theme = createTheme({
             dark: '#A29415',
             contrastText: '#242105',
         },
+        backgroundAndIcons: {
+            main: '#B0B0B0',
+            light: '#D4D4D4',
+            dark: '#969696',
+            contrastText: '#595959',
+        },
+        // Primary for buttons and highlighting
     },
 });
 function App() {
