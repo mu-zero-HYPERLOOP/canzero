@@ -13,9 +13,9 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ShowPages from './ShowPages.tsx';
 import {ListEntries} from './PageList.tsx';
-import ControlBar, {abort, connect, emergency, launch, levitate, prepare, States} from "../overview/ControlBar.tsx";
+import ControlBar, {abort, connect, emergency, launch, levitate, prepare, States} from "./ControlBar.tsx";
 import {yellow} from "@mui/material/colors";
-import EstablishConnectionPossible from "./EstablishConnectionPossible.tsx";
+import EstablishConnection from "./EstablishConnection.tsx";
 import interpolate from "color-interpolate";
 
 const drawerWidth: number = 220;
@@ -153,7 +153,7 @@ function CustomAppBar({
             </IconButton>
             <ControlBar connectingPossible={connectingPossible} setConnectingPossible={setConnectingPossible}
                         setConnectionSuccess={setConnectionSuccess} state={state} setState={setState}/>
-            <EstablishConnectionPossible setConnectingPossible={setConnectingPossible}/>
+            <EstablishConnection setConnectingPossible={setConnectingPossible}/>
         </Toolbar>
     </AppBar>)
 }
