@@ -6,7 +6,7 @@ use tauri::Manager;
 use crate::{
     commands::{
         network_information,
-        trace::{listen_to_trace, unlisten_to_trace}, object_entry_commands,
+        trace::{listen_to_trace, unlisten_to_trace}, object_entry_commands, connection_status,
     },
     state::cnl_state::CNLState,
 };
@@ -71,6 +71,7 @@ fn main() {
             object_entry_commands::unlisten_from_history_of_object_entry,
             object_entry_commands::request_object_entry_value,
             object_entry_commands::set_object_entry_value,
+            connection_status::get_connection_status,
             initialize_graph,
         ])
         .run(tauri::generate_context!())

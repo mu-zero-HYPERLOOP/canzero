@@ -5,7 +5,6 @@ mod can;
 mod mock_can;
 
 pub mod connection;
-
 mod can_frame;
 pub mod command;
 pub mod errors;
@@ -100,5 +99,8 @@ impl CNL {
                 .notification_stream
                 .notify_error("Unimplemented", "The command abort is not yet implemented"),
         }
+    }
+    pub fn connection_object(&self) -> &Arc<ConnectionObject> {
+        &self.connection_object
     }
 }

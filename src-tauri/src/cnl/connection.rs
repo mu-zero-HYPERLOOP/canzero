@@ -1,21 +1,18 @@
-use std::sync::{
-    atomic::{AtomicUsize, Ordering},
-    Mutex,
-};
+use std::sync::Mutex;
 
 use serde::Serialize;
 use tauri::Manager;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum ConnectionStatus {
     // in this state the CNL is connected to a CAN bus, but no heartbeats are
     // received from the system.
-    CanConnected, 
+    CanConnected,
 
-    // Here it is connected to the CAN buses and heartbeats are received 
+    // Here it is connected to the CAN buses and heartbeats are received
     NetworkConnected,
 
-    // Here the CAN is disconnected this can basically only happen if 
+    // Here the CAN is disconnected this can basically only happen if
     // the program panics during initalization of the CAN modules
     CanDisconnected,
 }
@@ -33,21 +30,19 @@ impl Serialize for ConnectionStatus {
     }
 }
 
+const CONNECTION_STATUS_EVENT_NAME: &str = "connection-status";
+
 pub struct ConnectionObject {
     connection_status: Mutex<ConnectionStatus>,
-    listen_counter: AtomicUsize,
     app_handle: tauri::AppHandle,
 }
 
 impl ConnectionObject {
     pub fn new(connection_status: ConnectionStatus, app_handle: &tauri::AppHandle) -> Self {
         // broadcast inital state!
-        app_handle
-            .emit_all("connection-status", connection_status.clone())
-            .expect("failed to transmit connection status to frontend");
+        Self::emit_event(app_handle, &connection_status);
         Self {
             connection_status: Mutex::new(connection_status),
-            listen_counter: AtomicUsize::new(0),
             app_handle: app_handle.clone(),
         }
     }
@@ -56,11 +51,12 @@ impl ConnectionObject {
             .connection_status
             .lock()
             .expect("failed to acquire connection status lock") = connection_status;
-        if self.listen_counter.load(Ordering::SeqCst) > 0 {
-            self.app_handle
-                .emit_all("connection-status", self.get_status())
-                .expect("failed to transmit connection status to frontend");
-        }
+        Self::emit_event(
+            &self.app_handle,
+            &self.connection_status
+                .lock()
+                .expect("failed to acquire connection status lock"),
+        );
     }
     pub fn get_status(&self) -> ConnectionStatus {
         self.connection_status
@@ -68,13 +64,10 @@ impl ConnectionObject {
             .expect("failed to acquire connection status lock")
             .clone()
     }
-    pub fn listen(&self) {
-        self.listen_counter.fetch_add(1, Ordering::SeqCst);
-        self.app_handle
-            .emit_all("connection-status", self.get_status())
+    fn emit_event(app_handle: &tauri::AppHandle, status: &ConnectionStatus) {
+        println!("emit {CONNECTION_STATUS_EVENT_NAME} with payload {status:?}");
+        app_handle
+            .emit_all(CONNECTION_STATUS_EVENT_NAME, status)
             .expect("failed to transmit connection status to frontend");
-    }
-    pub fn unlisten(&self) {
-        self.listen_counter.fetch_sub(1, Ordering::SeqCst);
     }
 }
