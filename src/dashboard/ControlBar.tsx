@@ -1,43 +1,17 @@
 import {Box, Button, Stack} from "@mui/material";
 import {invoke} from "@tauri-apps/api";
 import TextField from "@mui/material/TextField";
+import {States} from "./Statemachine.tsx";
 
-export enum States {
-    Startup = 'Startup',
-    Idle = "Idle",
-    LevitationPreparation = 'Levitation Preparation',
-    ReadyToLevitate = 'Ready to Levitate',
-    StartLevitation = 'Start Levitation',
-    StableLevitation = 'Stable Levitation',
-    LaunchPreparation = 'Launch Preparation',
-    ReadyToLaunch = 'Ready to Launch',
-    Acceleration = 'Acceleration',
-    Cruising = 'Cruising',
-    Brake = 'Brake',
-    StopLevitation = 'Stop Levitation',
-    Rolling = 'Rolling',
-    EndOfRun = 'End of Run',
-    Off = 'Off'
-}
-
-interface EstablishConnectionProps {
-    connectingPossible: boolean;
-    setConnectingPossible: (isConnecting: boolean) => void;
-    setConnectionSuccess: (isConnecting: boolean) => void;
-    state: States,
-    setState: (state: States) => void
-}
-
-export function emergency(setConnectingPossible: (isConnecting: boolean) => void, setState: (state: States) => void) {
+export function emergency(setState: (state: States) => void) {
     setState(States.Off)
     invoke('emergency');
-    setConnectingPossible(true) //TODO Remove when unnecessary
 }
 
 export async function connect(setConnectingPossible: (isConnecting: boolean) => void, setConnectionSuccess: (connectionSuccess: boolean) => void) {
     try {
         await invoke("connect_pod");
-        setConnectionSuccess(true)
+        setConnectionSuccess(true) // TODO: Remove when success comes from backend
     } catch (error) {
         // Success is false on default. Nothing to do.
     } finally {
@@ -76,13 +50,23 @@ export function abort(state: States, setState: (state: States) => void) {
     } //TODO other possible aborts and disable
 }
 
+interface ControlBarProps {
+    connectingPossible: boolean;
+    setConnectingPossible: (isConnecting: boolean) => void;
+    setConnectionSuccess: (isConnecting: boolean) => void;
+    state: States,
+    setState: (state: States) => void
+}
+
+// TODO: Remove setStates when backend finished
 function ControlBar({
                         connectingPossible,
                         setConnectingPossible,
                         setConnectionSuccess,
                         state,
                         setState
-                    }: Readonly<EstablishConnectionProps>) {
+                    }: Readonly<ControlBarProps>) {
+
 
     return (
         <Stack
@@ -113,7 +97,7 @@ function ControlBar({
                     sx={{backgroundColor: '#E32B10'}}
                     color="error"
                     onClick={() => {
-                        emergency(setConnectingPossible, setState)
+                        emergency(setState)
                     }}
             >Emergency [Space bar]</Button>
             <Button variant="contained" size="large"

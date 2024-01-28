@@ -13,10 +13,11 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ShowPages from './ShowPages.tsx';
 import {ListEntries} from './PageList.tsx';
-import ControlBar, {abort, connect, emergency, launch, levitate, prepare, States} from "./ControlBar.tsx";
+import ControlBar, {abort, connect, emergency, launch, levitate, prepare} from "./ControlBar.tsx";
 import {yellow} from "@mui/material/colors";
 import EstablishConnection from "./EstablishConnection.tsx";
 import interpolate from "color-interpolate";
+import Statemachine, {States} from "./Statemachine.tsx";
 
 const drawerWidth: number = 220;
 
@@ -154,6 +155,7 @@ function CustomAppBar({
             <ControlBar connectingPossible={connectingPossible} setConnectingPossible={setConnectingPossible}
                         setConnectionSuccess={setConnectionSuccess} state={state} setState={setState}/>
             <EstablishConnection setConnectingPossible={setConnectingPossible} setConnectionSuccess={setConnectionSuccess}/>
+            <Statemachine setState={setState} />
         </Toolbar>
     </AppBar>)
 }
@@ -173,7 +175,7 @@ export default function Dashboard() {
         const keyDownHandler = (event: { key: string; preventDefault: () => void; }) => {
             if (event.key === ' ') {
                 event.preventDefault()
-                emergency(setConnectingPossible, setState)
+                emergency(setState)
             } else if (event.key === "F1") {
                 event.preventDefault()
                 connect(setConnectingPossible, setConnectionSuccess)
