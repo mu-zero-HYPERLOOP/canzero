@@ -153,7 +153,7 @@ function CustomAppBar({
             </IconButton>
             <ControlBar connectingPossible={connectingPossible} setConnectingPossible={setConnectingPossible}
                         setConnectionSuccess={setConnectionSuccess} state={state} setState={setState}/>
-            <EstablishConnection setConnectingPossible={setConnectingPossible}/>
+            <EstablishConnection setConnectingPossible={setConnectingPossible} setConnectionSuccess={setConnectionSuccess}/>
         </Toolbar>
     </AppBar>)
 }
