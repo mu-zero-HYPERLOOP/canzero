@@ -1,8 +1,8 @@
 import {NodeInformation} from "../../nodes/types/NodeInformation.ts";
 
-export interface TableCellInformation {
+export interface ObjectEntryGridInformation {
     node : NodeInformation,
     entry : string,
-    min : number,
-    max : number,
+    min? : number,
+    max? : number,
 }

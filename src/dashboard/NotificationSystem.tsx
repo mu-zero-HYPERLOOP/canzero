@@ -2,6 +2,11 @@ import {closeSnackbar, useSnackbar} from "notistack";
 import {useEffect} from "react";
 import {listen} from "@tauri-apps/api/event";
 
+interface Notification {
+    level : "info" | "debug" | "warning" | "error",
+    message : string,
+}
+
 const action = (snackbarId: any) => (
     <button onClick={() => {
         closeSnackbar(snackbarId)

@@ -7,10 +7,10 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import '../styles.css'
 import CustomTableCell from "./CustomTableCell.tsx";
-import {TableCellInformation} from "./types/TableCellInformation.tsx";
+import {ValueTableCellInformation} from "./types/ValueTableCellInformation.tsx";
 
 interface ValueTableprops {
-    entries: TableCellInformation[];
+    entries: ValueTableCellInformation[];
     title: string;
     width: number;
     height: number;
@@ -18,6 +18,7 @@ interface ValueTableprops {
     columns: number
 }
 
+// Only for numerical ObjectEntries
 // number of entries must equal rows * columns
 export default function ValueTable({entries, title, width, height, rows, columns}: Readonly<ValueTableprops>) {
     return (
