@@ -21,9 +21,14 @@ function ObjectEntryGrid({entries, width}: Readonly<ObjectEntryGridProps>) {
                 entries.map((entry, index) => <ObjectEntryField
                     key={index}
                     node={entry.node}
-                    name={entry.entry}
+                    entry={entry.entry}
+                    interpolate={entry.interpolate}
                     min={entry.min}
-                    max={entry.max}/>)
+                    max={entry.max}
+                    warning={entry.warning}
+                    ok={entry.ok}
+                    tooGood={entry.tooGood}
+                />)
             }
         </Box>
     );

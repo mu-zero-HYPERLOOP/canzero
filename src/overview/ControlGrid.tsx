@@ -12,6 +12,7 @@ import Box from "@mui/material/Box";
 import {NodeInformation} from "../nodes/types/NodeInformation.ts";
 import {ValueTableCellInformation} from "./types/ValueTableCellInformation.tsx";
 import ObjectEntryGrid from "./ObjectEntryGrid.tsx";
+import {ObjectEntryGridInformation} from "./types/ObjectEntryGridInformation.tsx";
 
 const Item = styled(Paper)(({theme}) => ({
     backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -76,7 +77,24 @@ function Pod3DModel() {
     );
 }
 
-function createEntries(nodes: NodeInformation[]) {
+function createGridEntries(nodes: NodeInformation[]) {
+    let entries: ObjectEntryGridInformation[] = [];
+    nodes.map((node: NodeInformation) => {
+        if (node.name === "secu") {
+            entries.push({node:node, entry:"position", interpolate:true, min:20, max:47})
+            entries.push({node:node, entry:"cpu_temperature", interpolate:true, min:20, max:47})
+            entries.push({node:node, entry:"bcu_temperature", interpolate:true, min:20, max:47})
+            entries.push({node:node, entry:"global_state", interpolate:true, min:20, max:47})
+            entries.push({node:node, entry:"pressure_sensor_0", interpolate:true, min:20, max:47})
+            entries.push({node:node, entry:"pressure_sensor_1", interpolate:true, min:20, max:47})
+            entries.push({node:node, entry:"pressure_sensor_2", interpolate:true, min:20, max:47})
+            entries.push({node:node, entry:"pressure_sensor_3", interpolate:true, min:20, max:47})
+        }
+    });
+    return entries;
+}
+
+function createValueTableEntries(nodes: NodeInformation[]) {
     let entries: ValueTableCellInformation[] = [];
     nodes.map((node: NodeInformation) => {
             if (node.name === "secu") {
@@ -139,12 +157,12 @@ function ControlGrid({connectionSuccess, nodes}: Readonly<ControlGridProps>) {
                     </Grid>
                     <Grid item xs={6} md={8}>
                         <Item sx={{width: "100%", height: "300px"}}>
-                            <ObjectEntryGrid entries={createEntries(nodes)} width={150}/>
+                            <ObjectEntryGrid entries={createGridEntries(nodes)} width={150}/>
                         </Item>
                     </Grid>
                     <Grid item xs={12} md={6}>
                         <Item sx={{width: "100%"}}>
-                            <ValueTable entries={createEntries(nodes)} title={"Current Pod Temperatures in °C"} width={700} height={200} rows={2} columns={4}/>
+                            <ValueTable entries={createValueTableEntries(nodes)} title={"Current Pod Temperatures in °C"} width={700} height={200} rows={2} columns={4}/>
                         </Item>
                     </Grid>
                 </>

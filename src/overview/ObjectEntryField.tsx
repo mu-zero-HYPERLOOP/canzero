@@ -1,4 +1,3 @@
-import {NodeInformation} from "../nodes/types/NodeInformation.ts";
 import {useEffect, useState} from "react";
 import {
     isInt,
@@ -16,14 +15,74 @@ import {listen} from "@tauri-apps/api/event";
 import {Skeleton} from "@mui/material";
 import TextField from "@mui/material/TextField";
 import interpolate from "color-interpolate";
+import {ObjectEntryGridInformation} from "./types/ObjectEntryGridInformation.tsx";
 
-function getColor(value: number, min: number, max: number) {
+function getColorDiscrete(value: number | string, warning: number[] | string[],
+                          ok: number[] | string[], tooGood: number[] | string[]) {
+    if (value in tooGood) {
+        return "#1976d2"
+    } else if (value in ok) {
+        return "#2E9B33"
+    } else if (value in warning)
+        return "#FFD500"
+    else {
+        return "#E32E13"
+    }
+}
+
+function getColorInterpolate(value: number, min: number, max: number) {
     let colormap = interpolate(['#2E9B33', '#FFD500', '#E32E13']);
     let percent = (value - min) / (max - min)
     return colormap(percent)
 }
 
-function displayEntry(ty: ObjectEntryType, value: ObjectEntryValue, name: string, min: number | undefined, max: number | undefined) {
+function displayEntryDiscrete(ty: ObjectEntryType, value: ObjectEntryValue, name: string,
+                              warning: number[] | string[], ok: number[] | string[], tooGood: number[] | string[]) {
+    if (isStringArray(ty)) {
+        return <TextField InputProps={{readOnly: true}} value={value} label={name} sx={{
+            '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                    borderWidth: "2px",
+                    borderColor: getColorDiscrete(String(value), warning, ok, tooGood),
+                },
+                '&:hover fieldset': {
+                    borderWidth: "2px",
+                    borderColor: getColorDiscrete(String(value), warning, ok, tooGood),
+                },
+                '&.Mui-focused fieldset': {
+                    borderWidth: "3px",
+                    borderColor: getColorDiscrete(String(value), warning, ok, tooGood),
+                },
+            },
+        }}/>
+    } else if (isInt(ty) || isUint(ty) || isReal(ty)) {
+        return <TextField InputProps={{readOnly: true}} value={Number(value).toFixed(1)} label={name} sx={{
+            '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                    borderWidth: "2px",
+                    borderColor: getColorDiscrete(Number(value), warning, ok, tooGood),
+                },
+                '&:hover fieldset': {
+                    borderWidth: "2px",
+                    borderColor: getColorDiscrete(Number(value), warning, ok, tooGood),
+                },
+                '&.Mui-focused fieldset': {
+                    borderWidth: "3px",
+                    borderColor: getColorDiscrete(Number(value), warning, ok, tooGood),
+                },
+            },
+        }}/>
+    } else if (isObjectEntryCompositeType(ty)) {
+        // TODO: Check if an and how this works
+        let oec: ObjectEntryComposite = value as ObjectEntryComposite
+        oec.value.forEach(function (value, index) {
+            displayEntryDiscrete(ty.attributes[index].type, value.value, value.name, warning, ok, tooGood)
+        })
+    }
+}
+
+
+function displayEntryInterpolate(ty: ObjectEntryType, value: ObjectEntryValue, name: string, min: number, max: number) {
     if (isStringArray(ty)) {
         return <TextField InputProps={{readOnly: true}} value={value} label={name} sx={{
             '& .MuiOutlinedInput-root': {
@@ -33,23 +92,41 @@ function displayEntry(ty: ObjectEntryType, value: ObjectEntryValue, name: string
             },
         }}/>
     } else if (isInt(ty) || isUint(ty) || isReal(ty)) {
-        if (min && max) return <TextField InputProps={{readOnly: true}} value={Number(value).toFixed(1)} label={name} sx={{
+        return <TextField InputProps={{readOnly: true}} value={Number(value).toFixed(1)} label={name} sx={{
             '& .MuiOutlinedInput-root': {
                 '& fieldset': {
                     borderWidth: "2px",
-                    borderColor: getColor(Number(value), min, max),
+                    borderColor: getColorInterpolate(Number(value), min, max),
                 },
                 '&:hover fieldset': {
                     borderWidth: "2px",
-                    borderColor: getColor(Number(value), min, max),
+                    borderColor: getColorInterpolate(Number(value), min, max),
                 },
                 '&.Mui-focused fieldset': {
                     borderWidth: "3px",
-                    borderColor: getColor(Number(value), min, max),
+                    borderColor: getColorInterpolate(Number(value), min, max),
                 },
             },
         }}/>
-        else return <TextField InputProps={{readOnly: true}} value={Number(value).toFixed(1)} label={name} sx={{
+    } else if (isObjectEntryCompositeType(ty)) {
+        let oec: ObjectEntryComposite = value as ObjectEntryComposite
+        oec.value.forEach(function (value, index) {
+            displayEntryInterpolate(ty.attributes[index].type, value.value, value.name, min, max)
+        })
+    }
+}
+
+function displayEntry(ty: ObjectEntryType, value: ObjectEntryValue, name: string) {
+    if (isStringArray(ty)) {
+        return <TextField InputProps={{readOnly: true}} value={value} label={name} sx={{
+            '& .MuiOutlinedInput-root': {
+                '&:hover fieldset': {
+                    borderColor: "#B7BFC7",
+                },
+            },
+        }}/>
+    } else if (isInt(ty) || isUint(ty) || isReal(ty)) {
+        return <TextField InputProps={{readOnly: true}} value={Number(value).toFixed(1)} label={name} sx={{
             '& .MuiOutlinedInput-root': {
                 '&:hover fieldset': {
                     borderColor: "#B7BFC7",
@@ -57,21 +134,15 @@ function displayEntry(ty: ObjectEntryType, value: ObjectEntryValue, name: string
             },
         }}/>
     } else if (isObjectEntryCompositeType(ty)) {
-        // TODO: Check if an and how this works
         let oec: ObjectEntryComposite = value as ObjectEntryComposite
         oec.value.forEach(function (value, index) {
-            displayEntry(ty.attributes[index].type, value.value, value.name, min, max)
+            displayEntry(ty.attributes[index].type, value.value, value.name)
         })
     }
 }
 
-interface ObjectEntryFieldProps {
-    node: NodeInformation,
-    name: string
-    min?: number
-    max?: number
-}
-function ObjectEntryField({node, name, min, max}: Readonly<ObjectEntryFieldProps>) {
+
+function ObjectEntryField({node, entry, interpolate, min, max, warning, ok, tooGood}: Readonly<ObjectEntryGridInformation>) {
     let [information, setInformation] = useState<ObjectEntryInformation | null>(null);
     let [value, setValue] = useState<ObjectEntryEvent | null>(null);
 
@@ -81,17 +152,17 @@ function ObjectEntryField({node, name, min, max}: Readonly<ObjectEntryFieldProps
 
     async function fetchInformation() {
         let information = await invoke<ObjectEntryInformation>("object_entry_information",
-            {nodeName: node.name, objectEntryName: name});
+            {nodeName: node.name, objectEntryName: entry});
         setInformation(information);
         return information;
     }
 
     async function registerListener() {
         let {event_name, latest} = await invoke<ObjectEntryListenLatestResponse>("listen_to_latest_object_entry_value",
-            {nodeName: node.name, objectEntryName: name});
+            {nodeName: node.name, objectEntryName: entry});
         updateValue(latest);
         let unlistenBackend = () => invoke("unlisten_from_latest_object_entry_value", {
-            nodeName: node.name, objectEntryName: name
+            nodeName: node.name, objectEntryName: entry
         }).catch(console.error);
 
         let unlistenReact = await listen<ObjectEntryEvent>(event_name, event => updateValue(event.payload));
@@ -117,11 +188,17 @@ function ObjectEntryField({node, name, min, max}: Readonly<ObjectEntryFieldProps
             setInformation(null);
             setValue(null);
         }
-    }, [node, name]);
+    }, [node, entry]);
 
 
     if (information && value) {
-        return displayEntry(information.ty, value.value, information.name, min, max)
+        if (interpolate && min && max && !isStringArray(information.ty)) {
+            return displayEntryInterpolate(information.ty, value.value, information.name, min, max)
+        } else if (!interpolate && warning && ok && tooGood) {
+            return displayEntryDiscrete(information.ty, value.value, information.name, warning, ok, tooGood)
+        } else {
+            return displayEntry(information.ty, value.value, information.name)
+        }
     } else {
         return <Skeleton variant="rounded" height={"100px"}/>
     }
