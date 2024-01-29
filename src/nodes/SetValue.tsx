@@ -34,6 +34,46 @@ function sendInput(node: string, objectEntry: string, val: string) {
   })
 }
 
+function checkInput(val: string, type: ObjectEntryType, setError: {
+  (value: SetStateAction<boolean>): void;
+  (arg0: boolean): void;
+}) {
+  if (val === "") {
+    setError(false)
+    return;
+  } else if (isInt(type)) {
+    let regExp = /[a-z]/i;
+    let num = parseInt(val)
+    if (!val.includes(".") && !regExp.test(val) && !isNaN(num)) {
+          setError(false)
+          return;
+    }
+  } else if (isUint(type)) {
+    let regExp = /[a-z]/i;
+    let num = parseInt(val)
+    if (!val.includes(".") && !regExp.test(val) && !isNaN(num) && num >= 0) {
+      setError(false)
+      return;
+    }
+  } else if (isReal(type)) {
+    let regExp = /[a-z]/i;
+    let num = parseFloat(val)
+    if (!regExp.test(val) && !isNaN(num)) {
+      setError(false)
+      return;
+    }
+  } else if (isStringArray(type)) {
+      if (type.includes(val)) {
+        setError(false)
+        return;
+      }
+  } else if (isObjectEntryCompositeType(type)) {
+      //TODO
+    return;
+  }
+  setError(true)
+}
+
 function checkAndSendInput(node: string, objectEntry: string, val: string, type: ObjectEntryType, setError: {
   (value: SetStateAction<boolean>): void;
   (arg0: boolean): void;
@@ -93,38 +133,27 @@ interface EditDialogProps {
   open: boolean,
   onClose: () => void,
   nodeName: string,
-  objectEntryName: string,
+  objectEntryName: string
+  objectEntryInfo: ObjectEntryInformation,
 }
 
-function EditDialog({ onClose, open, nodeName, objectEntryName }: Readonly<EditDialogProps>) {
-
-  let [information, setInformation] = useState<ObjectEntryInformation | null>(null);
+function EditDialog({ onClose, open, nodeName, objectEntryName, objectEntryInfo }: Readonly<EditDialogProps>) {
+  let [information, setInformation] = useState<ObjectEntryInformation | null>(objectEntryInfo);
   let [value, setValue] = useState<ObjectEntryEvent | null>(null);
   let [error, setError] = useState<boolean>(false);
   const newValue = useRef<string>("");
 
-  function updateValue(event: ObjectEntryEvent) {
-    console.log("update value!");
-    setValue(event);
-  }
-
-  async function fetchInformation() {
-    let information = await invoke<ObjectEntryInformation>("object_entry_information",
-      { nodeName, objectEntryName });
-    setInformation(information);
-    return information;
-  }
-
   async function registerListener() {
     let { event_name, latest } = await invoke<ObjectEntryListenLatestResponse>("listen_to_latest_object_entry_value",
       { nodeName, objectEntryName });
-    updateValue(latest);
+    setValue(latest);
+
     let unlistenBackend = () => invoke("unlisten_from_latest_object_entry_value", {
       nodeName,
       objectEntryName
     }).catch(console.error);
 
-    let unlistenReact = await listen<ObjectEntryEvent>(event_name, event => updateValue(event.payload));
+    let unlistenReact = await listen<ObjectEntryEvent>(event_name, event => setValue(event.payload));
 
     return () => {
       unlistenBackend();
@@ -132,18 +161,9 @@ function EditDialog({ onClose, open, nodeName, objectEntryName }: Readonly<EditD
     }
   }
 
-  async function asyncTask() {
-    let information = await fetchInformation();
-    console.log("fetched information", information);
-    // wait for fetch Information to be complete before listeningS
-    // allows using the information in updateValue!
-    return await registerListener();
-  }
-
   useEffect(() => {
     if (open) {
-      console.log("use effect");
-      let cleanup = asyncTask();
+      let cleanup = registerListener();
       return () => {
         cleanup.then(f => f()).catch(console.error);
         setInformation(null);
@@ -185,6 +205,7 @@ function EditDialog({ onClose, open, nodeName, objectEntryName }: Readonly<EditD
             onAnimationStart={() => setError(false)}
             onChange={(event) => {
               newValue.current = event.target.value
+              if (information) checkInput(newValue.current, information.ty, setError)
             }}
             error={error}
           />
@@ -215,9 +236,10 @@ function EditDialog({ onClose, open, nodeName, objectEntryName }: Readonly<EditD
 interface SetValueButtonProps {
   nodeName: string,
   objectEntryName: string,
+  objectEntryInfo: ObjectEntryInformation
 }
 
-function SetValueButton({ nodeName, objectEntryName }: Readonly<SetValueButtonProps>) {
+function SetValueButton({ nodeName, objectEntryName, objectEntryInfo }: Readonly<SetValueButtonProps>) {
   let [showDialog, setShowDialog] = useState(false);
 
   return <>
@@ -234,7 +256,10 @@ function SetValueButton({ nodeName, objectEntryName }: Readonly<SetValueButtonPr
         right: "60px",
         width: "100px",
       }}
-      onClick={() => setShowDialog(true)}
+      onClick={() => {
+        setShowDialog(true)
+        console.log(showDialog)
+      }}
     >
       Edit
     </Button>
@@ -243,6 +268,7 @@ function SetValueButton({ nodeName, objectEntryName }: Readonly<SetValueButtonPr
       onClose={() => setShowDialog(false)}
       nodeName={nodeName}
       objectEntryName={objectEntryName}
+      objectEntryInfo={objectEntryInfo}
     />
   </>
 }
