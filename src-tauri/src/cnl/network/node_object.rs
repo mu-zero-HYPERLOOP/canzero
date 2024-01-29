@@ -1,6 +1,9 @@
 use std::sync::Arc;
 
 use can_config_rs::config;
+use tokio::sync::Mutex;
+
+use crate::cnl::tx::TxCom;
 
 use super::{command_object::CommandObject, object_entry_object::ObjectEntryObject};
 
@@ -11,12 +14,12 @@ pub struct NodeObject {
 }
 
 impl NodeObject {
-    pub fn create(node_config: &config::NodeRef, app_handle: &tauri::AppHandle) -> Self {
+    pub fn create(node_config: &config::NodeRef, app_handle: &tauri::AppHandle, tx_com: Arc<TxCom>) -> Self {
         Self {
             object_entries: node_config
                 .object_entries()
                 .iter()
-                .map(|object_entry| Arc::new(ObjectEntryObject::create(object_entry, app_handle)))
+                .map(|object_entry| Arc::new(ObjectEntryObject::create(object_entry, app_handle, tx_com.clone())))
                 .collect(),
             commands: node_config
                 .commands()

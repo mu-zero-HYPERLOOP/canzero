@@ -11,7 +11,7 @@ use serde::{ser::SerializeMap, Serialize};
 use tauri::Manager;
 use tokio::sync::{mpsc, Mutex};
 
-use crate::cnl::frame::type_frame::TypeValue;
+use crate::cnl::{frame::type_frame::TypeValue, tx::TxCom};
 
 pub struct ObjectEntryObject {
     object_entry_ref: config::ObjectEntryRef,
@@ -23,12 +23,14 @@ pub struct ObjectEntryObject {
     history_observables_id_acc: AtomicU64,
     history_event_name_prefix: String,
     app_handle: tauri::AppHandle,
+    tx_com: Arc<TxCom>,
 }
 
 impl ObjectEntryObject {
     pub fn create(
         object_entry_config: &config::ObjectEntryRef,
         app_handle: &tauri::AppHandle,
+        tx_com: Arc<TxCom>,
     ) -> Self {
         let latest_event_name = format!(
             "{}_{}_latest",
@@ -55,6 +57,7 @@ impl ObjectEntryObject {
             history_observables_id_acc: AtomicU64::new(0),
             history_event_name_prefix: history_event_name,
             app_handle: app_handle.clone(),
+            tx_com
         }
     }
     pub fn name(&self) -> &str {
@@ -98,6 +101,10 @@ impl ObjectEntryObject {
     }
     pub fn ty(&self) -> &config::TypeRef {
         &self.object_entry_ref.ty()
+    }
+
+    fn tx(&self) -> Arc<TxCom> {
+        self.tx_com.clone()
     }
 
     pub fn listen_to_latest(&self) {
@@ -188,6 +195,13 @@ impl ObjectEntryObject {
     //     println!("sizeof history_of = {}", x.len());
     //     x
     // }
+
+    pub fn set_request(&self, type_value: TypeValue) {
+        let bit_value = type_value.get_as_bin(self.ty());
+        let config_type = self.ty();
+        println!("{config_type:?}");
+        self.tx().send_set_request(5, 2, &bit_value);
+    }
 }
 
 #[derive(Debug, Clone)]
