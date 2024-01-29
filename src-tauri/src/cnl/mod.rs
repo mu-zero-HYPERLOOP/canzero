@@ -39,7 +39,7 @@ pub type CAN = mock_can::MockCan;
 
 // CaNetwork Layer
 pub struct CNL {
-    can_buses : Vec<Arc<CAN>>,
+    can_adapters : Vec<Arc<CAN>>,
     trace: Arc<TraceObject>,
     rx: RxCom,
     tx: Arc<TxCom>,
@@ -54,7 +54,7 @@ impl CNL {
         let connection_object = ConnectionObject::new(ConnectionStatus::CanDisconnected, app_handle);
 
         
-        let can_buses = network_config.buses().iter().map(|bus_config| {
+        let can_adapters = network_config.buses().iter().map(|bus_config| {
             #[cfg(feature = "mock-can")]
             Arc::new(mock_can::MockCan::create(bus_config, network_config))
         }).collect();
@@ -69,7 +69,7 @@ impl CNL {
 
         let rx = RxCom::create(network_config, &trace, &network, app_handle);
         Self {
-            can_buses,
+            can_adapters,
             rx,
             tx,
             trace,
@@ -79,7 +79,7 @@ impl CNL {
         }
     }
     pub fn start(&mut self) {
-        for can_bus in &self.can_buses {
+        for can_bus in &self.can_adapters {
             self.rx.start(can_bus);
         }
     }
@@ -90,6 +90,10 @@ impl CNL {
 
     pub fn nodes(&self) -> &Vec<Arc<NodeObject>> {
         self.network.nodes()
+    }
+
+    pub fn can_adapters(&self) -> &Vec<Arc<CAN>> {
+        &self.can_adapters
     }
 
     pub fn command(&self, command: Command) {

@@ -1,6 +1,6 @@
-use std::ops::Index;
+use std::{ops::Index, mem::size_of};
 
-use bitvec::{vec::BitVec, prelude::Msb0};
+use bitvec::{vec::BitVec, prelude::Msb0, store::BitStore};
 use can_config_rs::config;
 use serde::{
     ser::{SerializeMap, SerializeSeq},
@@ -290,14 +290,14 @@ impl Serialize for TypeValue {
 }
 
 impl TypeValue {
-    pub fn get_as_bin(&self, ty: &config::Type) -> Vec<u64> {
-        let mut bit_vec: BitVec<u64, Msb0> = BitVec::new();
+    pub fn get_as_bin<T>(&self, ty: &config::Type) -> (Vec<T>, u8) where T: BitStore {
+        let mut bit_vec: BitVec<T, Msb0> = BitVec::new();
 
-        fn continue_get_as_bin(
+        fn continue_get_as_bin<T>(
                 type_value: &TypeValue, 
                 ty: &config::Type, 
-                bit_vec: &mut BitVec<u64, Msb0>, 
-            ) {
+                bit_vec: &mut BitVec<T, Msb0>, 
+            ) where T: BitStore {
             match (type_value, ty) {
                 (TypeValue::Unsigned(val), Type::Primitive(SignalType::UnsignedInt{ size })) => {
                     for i in (0..*size).rev() {
@@ -362,11 +362,13 @@ impl TypeValue {
         }
 
         continue_get_as_bin(self, ty, &mut bit_vec);
+        let num_bytes = (bit_vec.len() + 7) / 8;
+        let last_fill: u8 = (num_bytes % size_of::<T>()) as u8;
 
         bit_vec.set_uninitialized(false);
-        let vec_u64 = bit_vec.into_vec();
-        println!("TypeValue as vec<u64>: {vec_u64:?}");
-        return vec_u64;
+        let vec_t = bit_vec.into_vec();
+        println!("TypeValue as vec<T>: {vec_t:?} with {num_bytes} bytes set");
+        return (vec_t, last_fill);
     }
 }
 

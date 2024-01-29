@@ -93,6 +93,7 @@ fn random_stream_frame(rng: &mut ThreadRng, network_config: &config::NetworkRef)
 pub struct MockCan {
     network_ref: config::NetworkRef,
     rng: Mutex<ThreadRng>,
+    bus_config: config::bus::BusRef,
 }
 
 impl MockCan {
@@ -100,6 +101,7 @@ impl MockCan {
         Self {
             network_ref: network_ref.clone(),
             rng: Mutex::new(rand::thread_rng()),
+            bus_config: bus_config.clone(),
         }
     }
 

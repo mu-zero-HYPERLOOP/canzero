@@ -197,10 +197,10 @@ impl ObjectEntryObject {
     // }
 
     pub fn set_request(&self, type_value: TypeValue) {
-        let bit_value = type_value.get_as_bin(self.ty());
+        let (bit_value, last_fill) = type_value.get_as_bin(self.ty());
         let config_type = self.ty();
         println!("{config_type:?}");
-        self.tx().send_set_request(5, 2, &bit_value);
+        self.tx().send_set_request(5, 2, bit_value, last_fill);
     }
 }
 

@@ -20,10 +20,15 @@ pub struct CAN {
     rx: Mutex<Receiver<Timestamped<CanFrame>>>,
     err_rx: Mutex<Receiver<Timestamped<CanError>>>,
     tx: Sender<Timestamped<CanFrame>>,
+    bus_config: config::bus::BusRef,
 }
 
 impl CAN {
-    pub fn create(module: CanModule, recv_errors: bool) -> Result<CAN, std::io::Error> {
+    pub fn create(
+        module: CanModule,
+        recv_errors: bool,
+        bus_config: &config::bus::BusRef,
+    ) -> Result<CAN, std::io::Error> {
         let ifname = match module {
             CanModule::CAN0 => "can0",
             CanModule::CAN1 => "can1",
@@ -72,6 +77,7 @@ impl CAN {
             socket,
             rx: Mutex::new(rx),
             err_rx: Mutex::new(err_rx),
+            bus_config: bus_config.clone(),
         })
     }
 
