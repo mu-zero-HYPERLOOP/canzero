@@ -1,10 +1,8 @@
-use std::ops::Index;
-
 use bitvec::{vec::BitVec, prelude::Msb0};
 use can_config_rs::config;
 use serde::{
     ser::{SerializeMap, SerializeSeq},
-    Serialize, Serializer, Deserialize,
+    Serialize, Serializer,
 };
 use config::{Type, SignalType};
 
@@ -80,14 +78,12 @@ impl TypeFrame {
     pub fn rtr(&self) -> bool {
         self.rtr
     }
+    #[allow(dead_code)]
     pub fn dlc(&self) -> u8 {
         self.dlc
     }
     pub fn value(&self) -> &Vec<FrameType> {
         &self.value
-    }
-    pub fn into_value(self) -> Vec<FrameType> {
-        self.value
     }
     pub fn name(&self) -> &str {
         self.message_ref.name()
@@ -95,6 +91,7 @@ impl TypeFrame {
     pub fn description(&self) -> Option<&str> {
         self.message_ref.description()
     }
+    #[allow(dead_code)]
     pub fn data(&self) -> u64 {
         self.data
     }
@@ -113,9 +110,6 @@ impl FrameType {
     pub fn value(&self) -> &TypeValue {
         &self.value
     }
-    pub fn into_value(self) -> TypeValue {
-        self.value
-    }
     pub fn name(&self) -> &str {
         &self.name
     }
@@ -129,9 +123,6 @@ pub enum TypeValue {
     Composite(CompositeTypeValue),
     Root(Vec<FrameType>),
     Enum(config::TypeRef, String),
-
-    #[allow(unused)]
-    Array(ArrayTypeValue),
 }
 
 #[derive(Clone, Debug)]
@@ -159,33 +150,6 @@ impl CompositeTypeValue {
     #[allow(unused)]
     pub fn ty(&self) -> &config::TypeRef {
         &self.ty
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct ArrayTypeValue {
-    values: Vec<TypeValue>,
-}
-
-impl ArrayTypeValue {
-
-    #[allow(unused)]
-    pub fn new(values: Vec<TypeValue>) -> Self {
-        Self { values }
-    }
-    pub fn size(&self) -> usize {
-        self.values.len()
-    }
-    pub fn at(&self, index: usize) -> Option<&TypeValue> {
-        self.values.get(index)
-    }
-}
-
-impl Index<usize> for ArrayTypeValue {
-    type Output = TypeValue;
-
-    fn index(&self, index: usize) -> &Self::Output {
-        &self.values[index]
     }
 }
 
@@ -249,7 +213,6 @@ impl Serialize for TypeFrame {
                             Ok(())
                         }
                         TypeValue::Root(_) => panic!(),
-                        TypeValue::Array(_) => todo!(),
                     }
                 }
 
@@ -284,7 +247,6 @@ impl Serialize for TypeValue {
             }
             TypeValue::Root(_) => panic!(),
             TypeValue::Enum(_, v) => serializer.serialize_str(v),
-            TypeValue::Array(_) => todo!(),
         }
     }
 }
@@ -356,7 +318,6 @@ impl TypeValue {
                         panic!("variant name not known!");
                     };
                 },
-                (TypeValue::Array(_), config::Type::Array { len: _, ty: _ }) => todo!(),
                 _ => panic!("TypeValue and config::Type did not match!")
             };
         }

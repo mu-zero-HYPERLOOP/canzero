@@ -31,9 +31,11 @@ impl UndefinedFrame {
     pub fn rtr(&self) -> bool {
         self.rtr
     }
+    #[allow(unused)]
     pub fn dlc(&self) -> u8 {
         self.dlc
     }
+    #[allow(unused)]
     pub fn data(&self) -> u64 {
         self.data
     }

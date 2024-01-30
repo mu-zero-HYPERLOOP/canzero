@@ -4,7 +4,6 @@ use can_config_rs::config::{self, Type};
 
 use crate::cnl::{
     errors::Result,
-    errors::Error,
     can_frame::CanFrame,
     frame::{
         type_frame::{CompositeTypeValue, FrameType, TypeFrame, TypeValue},

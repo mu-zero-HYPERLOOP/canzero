@@ -10,6 +10,8 @@ pub enum ConnectionStatus {
     CanConnected,
 
     // Here it is connected to the CAN buses and heartbeats are received
+    // TODO remove allow dead code before release!
+    #[allow(dead_code)]
     NetworkConnected,
 
     // Here the CAN is disconnected this can basically only happen if

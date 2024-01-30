@@ -39,27 +39,7 @@ impl CanFrame {
         }
     }
 
-
-    #[allow(unused)]
-    pub fn new_remote(id: u32, dlc: u8) -> Self {
-        let ide = if id <= 4087 { false } else { true };
-        Self {
-            id,
-            ide,
-            rtr: true,
-            dlc,
-            data: 0,
-        }
-    }
-    pub fn new_ext_frame(id: u32, rtr: bool, dlc: u8) -> Self {
-        Self {
-            id,
-            ide: true,
-            rtr,
-            dlc,
-            data: 0,
-        }
-    }
+    // TODO refactoring required of the can adapters to account for this bullshit!
 
     #[cfg(feature = "socket-can")]
     pub fn from_raw(frame: can_frame) -> Self {
@@ -98,9 +78,11 @@ impl CanFrame {
     pub fn get_id(&self) -> u32 {
         self.id
     }
+    #[allow(dead_code)]
     pub fn set_id(&mut self, id: u32) {
         self.id = id;
     }
+    #[allow(dead_code)]
     pub fn set_ext_id(&mut self, id: u32) {
         self.id = id;
         self.ide = true;
@@ -108,30 +90,36 @@ impl CanFrame {
     pub fn get_ide_flag(&self) -> bool {
         self.ide
     }
+    #[allow(dead_code)]
     pub fn set_ide_flag(&mut self, ide: bool) {
         self.ide = ide;
     }
     pub fn get_rtr_flag(&self) -> bool {
         self.rtr
     }
+    #[allow(dead_code)]
     pub fn set_rtr_flag(&mut self, rtr: bool) {
         self.rtr = rtr
     }
     pub fn get_dlc(&self) -> u8 {
         self.dlc
     }
+    #[allow(dead_code)]
     pub fn set_dlc(&mut self, dlc: u8) {
         self.dlc = dlc;
     }
     pub fn get_data_u64(&self) -> u64 {
         self.data
     }
+    #[allow(dead_code)]
     pub fn get_data_8u8(&self) -> [u8; 8] {
         unsafe { std::mem::transmute::<u64, [u8; 8]>(self.data) }
     }
+    #[allow(dead_code)]
     pub fn set_data_u64(&mut self, data: u64) {
         self.data = data;
     }
+    #[allow(dead_code)]
     pub fn set_data_8u8(&mut self, data: [u8; 8]) {
         self.data = u64::from_be_bytes(data);
     }

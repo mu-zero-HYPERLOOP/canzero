@@ -4,11 +4,19 @@ use tauri::Manager;
 
 
 
+
+// TODO remove allow dead_code before release!
 #[derive(Clone)]
 pub enum NotificationLevel {
+    #[allow(dead_code)]
     Info, 
+
+    #[allow(dead_code)]
     Debug,
+
+    #[allow(dead_code)]
     Warning,
+
     Error,
 }
 
@@ -51,12 +59,14 @@ impl NotificationStream {
     pub fn new(app_handle : &tauri::AppHandle) -> NotificationStream {
         NotificationStream { app_handle: Arc::new(app_handle.clone()) }
     }
+    // TODO check me again before release!
+    #[allow(dead_code)]
     pub fn notify(&self, notification : Notification) {
-        self.app_handle.emit_all("notification", notification);
+        self.app_handle.emit_all("notification", notification).expect("failed to emit notification");
     }
 
     pub fn notify_error(&self, reason : &str, description : &str) {
-        self.app_handle.emit_all("notification", Notification::make_error(reason, description));
+        self.app_handle.emit_all("notification", Notification::make_error(reason, description)).expect("failed to emit notification");
     }
 }
 

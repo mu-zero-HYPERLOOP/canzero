@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
 use can_config_rs::config;
-use tokio::sync::Mutex;
 
 use crate::cnl::tx::TxCom;
 

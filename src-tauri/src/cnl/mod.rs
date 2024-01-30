@@ -42,6 +42,8 @@ pub struct CNL {
     can_buses : Vec<Arc<CAN>>,
     trace: Arc<TraceObject>,
     rx: RxCom,
+    // TODO remove allow dead_code before release!
+    #[allow(dead_code)]
     tx: Arc<TxCom>,
     network: Arc<NetworkObject>,
     notification_stream: NotificationStream,

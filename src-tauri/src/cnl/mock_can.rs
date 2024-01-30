@@ -96,7 +96,7 @@ pub struct MockCan {
 }
 
 impl MockCan {
-    pub fn create(bus_config : &config::bus::BusRef, network_ref: &config::NetworkRef) -> Self {
+    pub fn create(_bus_config : &config::bus::BusRef, network_ref: &config::NetworkRef) -> Self {
         Self {
             network_ref: network_ref.clone(),
             rng: Mutex::new(rand::thread_rng()),
@@ -125,28 +125,6 @@ impl MockCan {
             1 => Ok(Timestamped::now(random_stream_frame(&mut rng, &self.network_ref))),
             _ => panic!(),
         }
-
-        // let message_index = self.rng.lock().expect("failed to acquire mock can lock").gen_range(0..self.network_ref.messages().len());
-        // let message_ref = &self.network_ref.messages()[message_index];
-        //
-        // // signal frame.
-        // let (id, ide) = match message_ref.id() {
-        //     config::MessageId::StandardId(id) => (*id, false),
-        //     config::MessageId::ExtendedId(id) => (*id, true),
-        // };
-        // let mut dlc = 0;
-        // let data = self.rng.lock().expect("failed to acquire mock can lock").gen();
-        // for signal in message_ref.signals() {
-        //     dlc += signal.size();
-        // }
-        //
-        // Ok(CanFrame::new(
-        //     id,
-        //     ide,
-        //     false,
-        //     dlc,
-        //     data,
-        // ))
     }
     pub async fn receive_err(&mut self) -> Timestamped<CanError> {
         // await for random amount of time.

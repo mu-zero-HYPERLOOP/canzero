@@ -78,21 +78,22 @@ impl SignalFrame {
     pub fn rtr(&self) -> bool {
         self.rtr
     }
+    #[allow(unused)]
     pub fn dlc(&self) -> u8 {
         self.dlc
     }
+    #[allow(unused)]
     pub fn signals(&self) -> &Vec<Signal> {
         &self.signals
-    }
-    pub fn into_signals(self) -> Vec<Signal> {
-        self.signals
     }
     pub fn name(&self) -> &str {
         self.message_ref.name()
     }
+    #[allow(unused)]
     pub fn description(&self) -> Option<&str> {
         self.message_ref.description()
     }
+    #[allow(unused)]
     pub fn data(&self) -> u64 {
         self.data
     }

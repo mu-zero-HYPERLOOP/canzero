@@ -1,7 +1,5 @@
 use can_config_rs::config;
 
-use crate::cnl::frame::type_frame::TypeValue;
-
 pub struct CommandObject {
     command_ref: config::CommandRef,
 }
@@ -25,27 +23,13 @@ impl CommandObject {
     }
 }
 
-pub struct InvokeCommandBuilder<'a> {
-
-    #[allow(unused)] //FIXME
-    command_object: &'a CommandObject,
-    arguments: Vec<(String, TypeValue)>,
+pub struct InvokeCommandBuilder {
 }
 
-impl<'a> InvokeCommandBuilder<'a> {
-    pub fn new(command_object: &'a CommandObject) -> Self {
+impl InvokeCommandBuilder {
+    pub fn new(_command_object: &CommandObject) -> Self {
         InvokeCommandBuilder {
-            arguments: vec![],
-            command_object,
         }
-    }
-
-    #[allow(unused)] //FIXME
-    pub fn argument(&mut self, name: &str, value: TypeValue) {
-        self.arguments.push((name.to_owned(), value));
-    }
-    pub fn invoke(self) {
-        // TODO actually invoke the command req.
     }
 }
 

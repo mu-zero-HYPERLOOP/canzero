@@ -1,5 +1,4 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-use rand::{Rng, SeedableRng};
 use serde::Serialize;
 use tauri::Manager;
 
@@ -13,7 +12,6 @@ use crate::{
 
 mod cnl;
 mod commands;
-mod observers;
 mod state;
 mod notification;
 

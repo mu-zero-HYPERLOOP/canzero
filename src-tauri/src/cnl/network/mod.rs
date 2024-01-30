@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
 use can_config_rs::config;
-use tokio::sync::Mutex;
 
 use self::node_object::NodeObject;
 
@@ -13,7 +12,6 @@ pub mod object_entry_object;
 
 pub struct NetworkObject {
     nodes: Vec<Arc<NodeObject>>,
-    network_ref: config::NetworkRef,
 }
 
 impl NetworkObject {
@@ -24,7 +22,6 @@ impl NetworkObject {
                 .iter()
                 .map(|node_config| Arc::new(NodeObject::create(node_config, app_handle, tx_com.clone())))
                 .collect(),
-            network_ref: network_config.clone(),
         }
     }
     pub fn nodes(&self) -> &Vec<Arc<NodeObject>> {

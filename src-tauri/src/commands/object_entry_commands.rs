@@ -5,7 +5,7 @@ use serde::Serialize;
 use crate::{
     cnl::{
         frame::type_frame::{CompositeTypeValue, FrameType, TypeValue},
-        network::object_entry_object::{ObjectEntryEvent},
+        network::object_entry_object::ObjectEntryEvent,
     },
     notification::NotificationStream,
     state::cnl_state::CNLState,
@@ -294,7 +294,7 @@ pub async fn request_object_entry_value(
     let Some(node) = cnl.nodes().iter().find(|no| no.name() == &node_name) else {
         return Err(());
     };
-    let Some(object_entry_object) = node
+    let Some(_) = node
         .object_entries()
         .iter()
         .find(|oe| oe.name() == &object_entry_name)
