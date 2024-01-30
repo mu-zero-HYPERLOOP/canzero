@@ -26,19 +26,6 @@ struct Graphable {
     y: f64,
 }
 
-#[allow(unused)]
-#[tauri::command]
-fn initialize_graph(node_name: String, oe_name: String) -> InitialGraphData {
-    InitialGraphData {
-        values: (1..=500)
-            .map(|n| Graphable {
-                x: f64::from(n),
-                y: 0f64,
-            })
-            .collect(),
-    }
-}
-
 fn main() {
     let _ = fix_path_env::fix();
     println!("Hello, World!");
@@ -70,7 +57,6 @@ fn main() {
             object_entry_commands::request_object_entry_value,
             object_entry_commands::set_object_entry_value,
             connection_status::get_connection_status,
-            initialize_graph,
         ])
         .run(tauri::generate_context!())
         .expect("Error while running tauri application");
