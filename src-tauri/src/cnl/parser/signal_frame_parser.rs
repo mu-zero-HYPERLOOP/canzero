@@ -1,12 +1,11 @@
 use can_config_rs::config;
 
 use crate::cnl::{
-    can_frame::CanFrame,
     errors::Result,
     frame::{
         signal_frame::{Signal, SignalFrame, SignalValue},
         Frame,
-    },
+    }, can_adapter::can_frame::CanFrame,
 };
 
 enum SignalParser {

@@ -1,4 +1,9 @@
-use crate::cnl::{errors::Result,can_frame::CanFrame, frame::Frame, parser::type_frame_parser::TypeFrameParser, timestamped::Timestamped};
+use crate::cnl::{
+    can_adapter::{TCanFrame, timestamped::Timestamped},
+    errors::Result,
+    frame::{Frame, TFrame},
+    parser::type_frame_parser::TypeFrameParser,
+};
 
 pub struct CommandRespFrameHandler {
     parser: TypeFrameParser,
@@ -9,7 +14,7 @@ impl CommandRespFrameHandler {
     pub fn create(parser: TypeFrameParser) -> Self {
         Self { parser }
     }
-    pub async fn handle(&self, can_frame: &Timestamped<CanFrame>) -> Result<Timestamped<Frame>> {
+    pub async fn handle(&self, can_frame: &TCanFrame) -> Result<TFrame> {
         let frame = self.parser.parse(can_frame)?;
         let Frame::TypeFrame(_type_frame) = &frame else {
             return Err(crate::cnl::errors::Error::InvalidCommandMessageFormat);

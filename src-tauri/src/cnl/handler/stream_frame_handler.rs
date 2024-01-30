@@ -5,8 +5,8 @@ use can_config_rs::config;
 use crate::cnl::{
     errors::Result,
     errors::Error,
-    can_frame::CanFrame, frame::Frame, network::object_entry_object::ObjectEntryObject,
-    parser::type_frame_parser::TypeFrameParser, timestamped::Timestamped,
+    frame::{Frame, TFrame}, network::object_entry_object::ObjectEntryObject,
+    parser::type_frame_parser::TypeFrameParser, can_adapter::{TCanFrame, timestamped::Timestamped}
 };
 
 pub struct StreamFrameHandler {
@@ -39,7 +39,7 @@ impl StreamFrameHandler {
             object_entries: mapped_object_entries,
         }
     }
-    pub async fn handle(&self, can_frame: &Timestamped<CanFrame>) -> Result<Timestamped<Frame>> {
+    pub async fn handle(&self, can_frame: &TCanFrame) -> Result<TFrame> {
         let frame = self.parser.parse(can_frame)?;
         let Frame::TypeFrame(type_frame) = &frame else {
             return Err(Error::InvalidStreamMessageFormat);

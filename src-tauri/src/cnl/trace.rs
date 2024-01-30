@@ -8,7 +8,7 @@ use serde::{ser::SerializeMap, Serialize, Serializer};
 use tauri::Manager;
 use tokio::sync::{mpsc, Mutex};
 
-use super::{frame::{Frame, UniqueFrameKey}, timestamped::Timestamped};
+use super::frame::{Frame, UniqueFrameKey, TFrame};
 
 type TraceStore = Arc<tokio::sync::Mutex<HashMap<UniqueFrameKey, TraceObjectEvent>>>;
 
@@ -28,7 +28,7 @@ impl TraceObject {
         }
     }
 
-    pub async fn push_frame(&self, frame: Timestamped<Frame>) {
+    pub async fn push_frame(&self, frame: TFrame) {
         let (arrive_instant, frame) = frame.destruct();
         let key = frame.unique_key();
         let mut unlocked_trace = self.trace.lock().await;

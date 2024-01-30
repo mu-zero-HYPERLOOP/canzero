@@ -4,11 +4,10 @@ use can_config_rs::config::{self, Type};
 
 use crate::cnl::{
     errors::Result,
-    can_frame::CanFrame,
     frame::{
         type_frame::{CompositeTypeValue, FrameType, TypeFrame, TypeValue},
         Frame,
-    },
+    }, can_adapter::can_frame::CanFrame,
 };
 
 enum TypeParser {

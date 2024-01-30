@@ -1,4 +1,4 @@
-use crate::cnl::{errors::Result, can_frame::CanFrame, frame::Frame, parser::MessageParser, timestamped::Timestamped};
+use crate::cnl::{errors::Result,frame::TFrame, parser::MessageParser, can_adapter::{TCanFrame, timestamped::Timestamped}};
 
 
 pub struct EmptyFrameHandler {
@@ -10,7 +10,7 @@ impl EmptyFrameHandler {
         Self { parser }
     }
 
-    pub async fn handle(&self, can_frame: &Timestamped<CanFrame>) -> Result<Timestamped<Frame>> {
+    pub async fn handle(&self, can_frame: &TCanFrame) -> Result<TFrame> {
         Ok(Timestamped::new(can_frame.timestamp().clone(), self.parser.parse(can_frame)?))
     }
 }

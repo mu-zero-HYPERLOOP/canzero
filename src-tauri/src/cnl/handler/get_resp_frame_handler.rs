@@ -3,14 +3,13 @@ use std::sync::Arc;
 use can_config_rs::config;
 
 use crate::cnl::{
-    can_frame::CanFrame,
     errors::{Result, Error},
     frame::{
         type_frame::{CompositeTypeValue, TypeValue, FrameType},
-        Frame,
+        Frame, TFrame,
     },
     network::NetworkObject,
-    parser::type_frame_parser::TypeFrameParser, timestamped::Timestamped,
+    parser::type_frame_parser::TypeFrameParser, can_adapter::{TCanFrame, timestamped::Timestamped},
 };
 
 pub struct GetRespFrameHandler {
@@ -112,7 +111,7 @@ impl GetRespFrameHandler {
     // for each frame a lookup is done to get the correct handler afterwards.
     // This handler is only invoked for the get resp message of the config therefor the
     // format can be assumed to be the same for every frame!
-    pub async fn handle(&self, can_frame: &Timestamped<CanFrame>) -> Result<Timestamped<Frame>> {
+    pub async fn handle(&self, can_frame: &TCanFrame) -> Result<TFrame> {
         // a small example of how to parse the type frame!
         let frame = self.parser.parse(can_frame)?;
         let Frame::TypeFrame(type_frame) = &frame else {

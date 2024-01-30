@@ -1,45 +1,35 @@
-#[cfg(feature = "socket-can")]
-mod can;
-
-#[cfg(feature = "mock-can")]
-mod mock_can;
-
-pub mod connection;
-mod can_frame;
 pub mod command;
+pub mod connection;
 pub mod errors;
 pub mod frame;
 mod handler;
 pub mod network;
 pub mod parser;
 mod rx;
-mod tx;
-pub mod timestamped;
 pub mod trace;
+mod tx;
+
+pub mod can_adapter;
 
 use std::sync::Arc;
 
 use crate::notification::NotificationStream;
 
 use self::{
+    can_adapter::CanAdapter,
     command::Command,
+    connection::{ConnectionObject, ConnectionStatus},
     network::{node_object::NodeObject, NetworkObject},
     rx::RxCom,
-    trace::TraceObject, connection::{ConnectionObject, ConnectionStatus},
+    trace::TraceObject,
     tx::TxCom,
 };
 
 use can_config_rs::config;
 
-#[cfg(feature = "socket-can")]
-pub type CAN = can::CAN;
-
-#[cfg(feature = "mock-can")]
-pub type CAN = mock_can::MockCan;
-
-// CaNetwork Layer
+// Can Network Layer (CNL)
 pub struct CNL {
-    can_buses : Vec<Arc<CAN>>,
+    can_buses: Vec<Arc<CanAdapter>>,
     trace: Arc<TraceObject>,
     rx: RxCom,
     // TODO remove allow dead_code before release!
@@ -47,19 +37,19 @@ pub struct CNL {
     tx: Arc<TxCom>,
     network: Arc<NetworkObject>,
     notification_stream: NotificationStream,
-    connection_object : Arc<ConnectionObject>,
+    connection_object: Arc<ConnectionObject>,
 }
 
 impl CNL {
     pub fn create(network_config: &config::NetworkRef, app_handle: &tauri::AppHandle) -> Self {
-    
-        let connection_object = ConnectionObject::new(ConnectionStatus::CanDisconnected, app_handle);
+        let connection_object =
+            ConnectionObject::new(ConnectionStatus::CanDisconnected, app_handle);
 
-        
-        let can_buses = network_config.buses().iter().map(|bus_config| {
-            #[cfg(feature = "mock-can")]
-            Arc::new(mock_can::MockCan::create(bus_config, network_config))
-        }).collect();
+        let can_buses = network_config
+            .buses()
+            .iter()
+            .map(|bus_config| Arc::new(CanAdapter::create(bus_config, network_config)))
+            .collect();
 
         connection_object.set_status(ConnectionStatus::CanConnected);
 
@@ -67,7 +57,11 @@ impl CNL {
 
         let tx = Arc::new(TxCom::create(network_config.clone()));
 
-        let network = Arc::new(NetworkObject::create(network_config, app_handle, tx.clone()));
+        let network = Arc::new(NetworkObject::create(
+            network_config,
+            app_handle,
+            tx.clone(),
+        ));
 
         let rx = RxCom::create(network_config, &trace, &network, app_handle);
         Self {
@@ -77,7 +71,7 @@ impl CNL {
             trace,
             network,
             notification_stream: NotificationStream::new(&app_handle),
-            connection_object : Arc::new(connection_object),
+            connection_object: Arc::new(connection_object),
         }
     }
     pub fn start(&mut self) {

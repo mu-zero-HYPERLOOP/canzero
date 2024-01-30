@@ -5,6 +5,8 @@ use crate::cnl::frame::signal_frame::SignalFrame;
 use crate::cnl::frame::type_frame::TypeFrame;
 use crate::cnl::frame::undefined_frame::UndefinedFrame;
 
+use super::can_adapter::timestamped::Timestamped;
+
 pub mod error_frame;
 pub mod signal_frame;
 pub mod type_frame;
@@ -19,6 +21,8 @@ pub mod undefined_frame;
  *   ErrorFrame? : ErrorFrame,
  * }
  */
+
+pub type TFrame = Timestamped<Frame>;
 
 pub type UniqueFrameKey = (u32, bool);
 

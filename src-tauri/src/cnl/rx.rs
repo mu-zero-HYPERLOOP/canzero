@@ -1,14 +1,14 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
+use crate::cnl::can_adapter::timestamped::Timestamped;
+use crate::cnl::can_adapter::{TCanFrame, TCanError};
 use crate::cnl::frame::error_frame::ErrorFrame;
 use crate::cnl::frame::undefined_frame::UndefinedFrame;
-use crate::cnl::timestamped::Timestamped;
 use crate::notification::NotificationStream;
+use super::can_adapter::CanAdapter;
 use super::errors::Result;
 
-use super::can_frame::CanError;
-use super::can_frame::CanFrame;
 use super::frame::Frame;
 use super::handler::empty_frame_handler::EmptyFrameHandler;
 use super::handler::get_resp_frame_handler::GetRespFrameHandler;
@@ -94,7 +94,7 @@ impl RxCom {
             app_handle: app_handle.clone(),
         }
     }
-    pub fn start(&mut self, can: &Arc<super::CAN>) {
+    pub fn start(&mut self, can: &Arc<CanAdapter>) {
         tokio::spawn(can_receiver(
             can.clone(),
             self.parser_lookup.clone(),
@@ -108,13 +108,13 @@ type Lookup = HashMap<(u32, bool), MessageHandler>;
 type LookupRef = Arc<Lookup>;
 
 async fn can_receiver(
-    can: Arc<super::CAN>,
+    can: Arc<CanAdapter>,
     lookup: LookupRef,
     trace: Arc<TraceObject>,
     app_handle: tauri::AppHandle,
 ) {
     async fn receive_msg(
-        frame: std::result::Result<Timestamped<CanFrame>, Timestamped<CanError>>,
+        frame: std::result::Result<TCanFrame, TCanError>,
         lookup: LookupRef,
         trace: Arc<TraceObject>,
     ) -> Result<()> {
