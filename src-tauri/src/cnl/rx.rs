@@ -94,7 +94,7 @@ impl RxCom {
             app_handle: app_handle.clone(),
         }
     }
-    pub fn start(&mut self, can: &Arc<super::CAN>) {
+    pub fn start(&mut self, can: &Arc<super::CanAdapter>) {
         tokio::spawn(can_receiver(
             can.clone(),
             self.parser_lookup.clone(),
@@ -108,7 +108,7 @@ type Lookup = HashMap<(u32, bool), MessageHandler>;
 type LookupRef = Arc<Lookup>;
 
 async fn can_receiver(
-    can: Arc<super::CAN>,
+    can: Arc<super::CanAdapter>,
     lookup: LookupRef,
     trace: Arc<TraceObject>,
     app_handle: tauri::AppHandle,

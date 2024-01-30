@@ -1,29 +1,45 @@
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
 
 use can_config_rs::config;
 
 use crate::cnl::can_frame::CanFrame;
 
-use super::CAN;
+use super::CanAdapter;
 
 pub struct TxCom {
-    // needed to find right bus for messages
     network_ref: config::NetworkRef,
-    getter_can_adapter: Arc<CAN>,
+    set_req_can_adapter: Arc<CanAdapter>,
+    my_node_id: u8,
+    frag_time_ms: u64,
 }
 
 impl TxCom {
-    pub fn create(network_ref: config::NetworkRef, getter_can_adapter: &Arc<CAN>) -> TxCom {
+    pub fn create(network_ref: &config::NetworkRef, can_adapters: &Vec<Arc<CanAdapter>>) -> TxCom {
+        println!("hey3");
+        let set_req_bus_id = network_ref.set_req_message().bus().id();
+        println!("hey3");
+        let can_dap_opt = can_adapters.iter().find(|adapter| adapter.id() == set_req_bus_id);
+        println!("{}", can_dap_opt.is_some());
+        let can_adap = match can_adapters.iter().find(|adapter| adapter.id() == set_req_bus_id) {
+                Some(adapter) => adapter.clone(),
+                None => {
+                    println!("I fucked up");
+                    panic!("can adapter for set requests missing!");
+                }
+        };
+        println!("hey4");
+
         TxCom {
-            network_ref,
-            getter_can_adapter: getter_can_adapter.clone(),
+            network_ref: network_ref.clone(),
+            my_node_id: network_ref.nodes().len() as u8,
+            set_req_can_adapter: can_adap,
+            frag_time_ms: 50, 
         }
     }
 
     pub fn send_set_request(&self, server_id: u16, oe_id: u32, val: Vec<u32>, last_fill: u8) {
         println!("attempted send of {val:?}");
 
-        let client_id: u64 = 0x0; // need my own node id! how?
         let (set_request_id, ide) = match self.network_ref.set_req_message().id() {
             config::MessageId::StandardId(id) => (*id, false),
             config::MessageId::ExtendedId(id) => (*id, true),
@@ -41,7 +57,7 @@ impl TxCom {
             // oe-id
             data_curr |= (oe_id as u64) << 48;
             // client-id
-            data_curr |= client_id << 40;
+            data_curr |= (self.my_node_id as u64) << 40;
             // server-id
             data_curr |= (server_id as u64) << 32;
             // data
@@ -51,15 +67,19 @@ impl TxCom {
             frame_data.push(CanFrame::new(set_request_id, ide, false, dlc, data_curr));
         }
 
-        let can_adapter = self.ne
-        fragmented_can_send(frame_data, );
-
-
+        fragmented_can_send(frame_data, self.set_req_can_adapter.clone(), self.frag_time_ms);
     }
 }
 
-async fn fragmented_can_send(
+fn fragmented_can_send(
     frames: Vec<CanFrame>,
-    can_adapter: &Arc<CAN>,
+    can_adapter: Arc<CanAdapter>,
+    frag_time_ms: u64,
 ) {
+    tokio::spawn(async move {
+        for frame in frames {
+            can_adapter.send(frame).await;
+            tokio::time::sleep(Duration::from_millis(frag_time_ms)).await;
+        }
+    });
 }

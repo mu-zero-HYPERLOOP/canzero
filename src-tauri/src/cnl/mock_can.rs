@@ -105,6 +105,10 @@ impl MockCan {
         }
     }
 
+    pub fn id(&self) -> u32 {
+        self.bus_config.id()
+    }
+
     #[allow(unused)]
     pub async fn send(&self, frame: CanFrame) {
         println!("mock-can : sending {frame:?}");

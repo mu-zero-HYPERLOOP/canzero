@@ -1,3 +1,4 @@
+use can_config_rs::config;
 use tokio::{
     runtime::Handle,
     sync::mpsc::Sender,
@@ -6,37 +7,28 @@ use tokio::{
 
 use self::socket::OwnedCanSocket;
 
-use super::can_frame::{CanError, CanFrame};
+use super::{can_frame::{CanError, CanFrame}, timestamped::Timestamped};
 
 mod socket;
 
-pub enum CanModule {
-    CAN0,
-    CAN1,
-}
-
-pub struct CAN {
+pub struct SocketCanAdapter {
     socket: OwnedCanSocket,
     rx: Mutex<Receiver<Timestamped<CanFrame>>>,
     err_rx: Mutex<Receiver<Timestamped<CanError>>>,
-    tx: Sender<Timestamped<CanFrame>>,
+    tx: Sender<CanFrame>,
     bus_config: config::bus::BusRef,
 }
 
-impl CAN {
+impl SocketCanAdapter {
     pub fn create(
-        module: CanModule,
         recv_errors: bool,
         bus_config: &config::bus::BusRef,
-    ) -> Result<CAN, std::io::Error> {
-        let ifname = match module {
-            CanModule::CAN0 => "can0",
-            CanModule::CAN1 => "can1",
-        };
+    ) -> Result<SocketCanAdapter, std::io::Error> {
+        let ifname = bus_config.name();
         let socket = OwnedCanSocket::open(ifname)?;
 
-        let (tx, rx) = tokio::sync::mpsc::channel::<CanFrame>(16);
-        let (err_tx, err_rx) = tokio::sync::mpsc::channel::<CanError>(16);
+        let (tx, rx) = tokio::sync::mpsc::channel::<Timestamped<CanFrame>>(16);
+        let (err_tx, err_rx) = tokio::sync::mpsc::channel::<Timestamped<CanError>>(16);
 
         let (txtx, mut txrx) = tokio::sync::mpsc::channel::<CanFrame>(16);
 
@@ -72,13 +64,17 @@ impl CAN {
                 .expect("failed to write to socket");
         });
 
-        Ok(CAN {
+        Ok(SocketCanAdapter {
             tx: txtx,
             socket,
             rx: Mutex::new(rx),
             err_rx: Mutex::new(err_rx),
             bus_config: bus_config.clone(),
         })
+    }
+
+    pub fn id(&self) -> u32 {
+        self.bus_config.id()
     }
 
     pub async fn send(&self, frame: CanFrame) {
@@ -98,13 +94,11 @@ impl CAN {
         }
     }
 
-    pub async fn receive_err(&mut self) -> CanError {
+    pub async fn receive_err(&mut self) -> Timestamped<CanError> {
         let error = self.err_rx.lock().await.recv().await;
         match error {
             Some(error) => error,
-            None => CanError::Disconnect(format!("can receive thread closed rx channel")),
+            None => Timestamped::now(CanError::Disconnect(format!("can receive thread closed rx channel")))
         }
     }
 }
-unsafe impl Send for CAN {}
-unsafe impl Sync for CAN {}

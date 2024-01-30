@@ -8,7 +8,8 @@ pub use libc::{
     CAN_RAW_RECV_OWN_MSGS, CAN_RTR_FLAG, CAN_SFF_MASK, PF_CAN, SOCK_RAW, SOL_CAN_BASE, SOL_CAN_RAW,
 };
 
-use crate::can::can_frame::{CanError, CanFrame};
+use crate::cnl::can_frame::{CanFrame, CanError};
+
 
 #[derive(Clone)]
 struct CanSocket {

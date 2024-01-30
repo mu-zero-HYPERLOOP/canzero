@@ -32,14 +32,14 @@ use self::{
 use can_config_rs::config;
 
 #[cfg(feature = "socket-can")]
-pub type CAN = can::CAN;
+pub type CanAdapter = can::SocketCanAdapter;
 
 #[cfg(feature = "mock-can")]
 pub type CAN = mock_can::MockCan;
 
 // CaNetwork Layer
 pub struct CNL {
-    can_adapters : Vec<Arc<CAN>>,
+    can_adapters : Vec<Arc<CanAdapter>>,
     trace: Arc<TraceObject>,
     rx: RxCom,
     tx: Arc<TxCom>,
@@ -57,15 +57,23 @@ impl CNL {
         let can_adapters = network_config.buses().iter().map(|bus_config| {
             #[cfg(feature = "mock-can")]
             Arc::new(mock_can::MockCan::create(bus_config, network_config))
+
+            #[cfg(feature = "socket-can")]
+            Arc::new(can::SocketCanAdapter::create(true, bus_config).expect("could not create can adapter"))
         }).collect();
+        println!("hey1");
 
         connection_object.set_status(ConnectionStatus::CanConnected);
+        println!("hey2");
 
         let trace = Arc::new(TraceObject::create(app_handle));
+        println!("hey2");
 
-        let tx = Arc::new(TxCom::create(network_config.clone()));
+        let tx = Arc::new(TxCom::create(&network_config, &can_adapters));
+        println!("hey2");
 
         let network = Arc::new(NetworkObject::create(network_config, app_handle, tx.clone()));
+        println!("hey2");
 
         let rx = RxCom::create(network_config, &trace, &network, app_handle);
         Self {
@@ -92,7 +100,7 @@ impl CNL {
         self.network.nodes()
     }
 
-    pub fn can_adapters(&self) -> &Vec<Arc<CAN>> {
+    pub fn can_adapters(&self) -> &Vec<Arc<CanAdapter>> {
         &self.can_adapters
     }
 
