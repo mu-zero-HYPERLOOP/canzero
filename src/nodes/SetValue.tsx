@@ -5,6 +5,7 @@ import {
     FormControl,
     FormHelperText,
     InputAdornment,
+    MenuItem,
     Modal,
     OutlinedInput,
     Paper,
@@ -25,6 +26,7 @@ import ObjectEntryEvent from "./types/ObjectEntryEvent.ts";
 import {invoke} from "@tauri-apps/api";
 import ObjectEntryListenLatestResponse from "./types/ObjectEntryListenLatestResponse.ts";
 import {listen} from "@tauri-apps/api/event";
+import TextField from "@mui/material/TextField";
 
 const INVALID_CHARACTERS: string = "Invalid characters"
 const NEGATIVE: string = "Value must be positive"
@@ -175,8 +177,26 @@ function EditDialog({onClose, open, nodeName, objectEntryName, objectEntryInfo}:
                     <FormHelperText id="outlined-weight-helper-text1">
                         {error ? errorMsg : 'Set Value:'}
                     </FormHelperText>
-                    <OutlinedInput
-                        placeholder={value ? `${value.value}` : undefined}
+                    {isStringArray(objectEntryInfo.ty) ?
+                        <TextField
+                            id="outlined-select-value"
+                            select
+                            label="Select:"
+                            placeholder={value ? `${String(value.value)}` : undefined}
+                            onAnimationStart={() => setError(false)}
+                            onChange={(event) => {
+                                newValue.current = event.target.value
+                            }}
+                            error={error}
+                        >
+                            {objectEntryInfo.ty.map((option) => (
+                                <MenuItem key={option} value={option}>
+                                    {option}
+                                </MenuItem>
+                            ))}
+                        </TextField> :
+                        <OutlinedInput
+                        placeholder={value ? `${Number(value.value)}` : undefined}
                         id="outlined-adornment-weight1"
                         endAdornment={adornment}
                         aria-describedby="outlined-weight-helper-text1"
@@ -189,7 +209,7 @@ function EditDialog({onClose, open, nodeName, objectEntryName, objectEntryInfo}:
                             checkInput(newValue.current, objectEntryInfo.ty, setError, setErrorMsg)
                         }}
                         error={error}
-                    />
+                    />}
                 </FormControl>
                 <Box component="form"
                      sx={{
