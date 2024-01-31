@@ -18,25 +18,11 @@ impl StreamFrameHandler {
     #[allow(unused)]
     pub fn create(
         stream: &config::stream::StreamRef,
-        node_object_entries: &Vec<Arc<ObjectEntryObject>>,
+        stream_object_entry_objects: &Vec<Arc<ObjectEntryObject>>,
     ) -> Self {
-        let mapped_object_entries = stream
-            .mapping()
-            .into_iter()
-            .map(|oe_opt| {
-                let oe = oe_opt
-                    .to_owned()
-                    .expect("expected a tx stream got rx stream");
-                node_object_entries
-                    .into_iter()
-                    .find(|oeo| oe.name() == oeo.name())
-                    .expect("the object entries provided don't contain the oe the stream mapps")
-                    .clone()
-            })
-            .collect();
         Self {
             parser: TypeFrameParser::new(stream.message()),
-            object_entries: mapped_object_entries,
+            object_entries: stream_object_entry_objects.clone(),
         }
     }
     pub async fn handle(&self, can_frame: &TCanFrame) -> Result<TFrame> {
@@ -47,7 +33,7 @@ impl StreamFrameHandler {
         for (attrib, oeo) in type_frame.value().iter().zip(&self.object_entries) {
             // notify the oeo one after another
             // Interesstingly not possible in rusts async model to await all
-            // at once at least not useful if you think about it !
+            // at once at least not useful if you think about it =^)
             oeo.push_value(attrib.value().clone(), can_frame.timestamp())
                 .await;
         }

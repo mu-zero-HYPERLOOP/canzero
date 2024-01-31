@@ -46,7 +46,7 @@ impl CanAdapterInterface for MockCanAdapter {
             _ => panic!(),
         }
     }
-    async fn receive_err(&mut self) -> TCanError {
+    async fn receive_err(&self) -> TCanError {
         // await for random amount of time.
         let timeout: u64 = self
             .rng

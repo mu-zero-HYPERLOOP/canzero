@@ -13,7 +13,7 @@ pub mod can_adapter;
 
 use std::sync::Arc;
 
-use crate::notification::NotificationStream;
+use crate::notification::{notify_error, NotificationStream};
 
 use self::{
     can_adapter::CanAdapter,
@@ -29,15 +29,15 @@ use can_config_rs::config;
 
 // Can Network Layer (CNL)
 pub struct CNL {
-    can_buses: Vec<Arc<CanAdapter>>,
     trace: Arc<TraceObject>,
     rx: RxCom,
+
     // TODO remove allow dead_code before release!
     #[allow(dead_code)]
     tx: Arc<TxCom>,
     network: Arc<NetworkObject>,
-    notification_stream: NotificationStream,
     connection_object: Arc<ConnectionObject>,
+    app_handle: tauri::AppHandle,
 }
 
 impl CNL {
@@ -45,7 +45,7 @@ impl CNL {
         let connection_object =
             ConnectionObject::new(ConnectionStatus::CanDisconnected, app_handle);
 
-        let can_buses = network_config
+        let can_adapters = network_config
             .buses()
             .iter()
             .map(|bus_config| Arc::new(CanAdapter::create(bus_config, network_config)))
@@ -63,20 +63,14 @@ impl CNL {
             tx.clone(),
         ));
 
-        let rx = RxCom::create(network_config, &trace, &network, app_handle);
+        let rx = RxCom::create(network_config, &trace, &network, app_handle, &can_adapters);
         Self {
-            can_buses,
             rx,
             tx,
             trace,
             network,
-            notification_stream: NotificationStream::new(&app_handle),
             connection_object: Arc::new(connection_object),
-        }
-    }
-    pub fn start(&mut self) {
-        for can_bus in &self.can_buses {
-            self.rx.start(can_bus);
+            app_handle: app_handle.clone(),
         }
     }
 
@@ -90,16 +84,21 @@ impl CNL {
 
     pub fn command(&self, command: Command) {
         match &command {
-            Command::Emergency => self.notification_stream.notify_error(
+            Command::Emergency => notify_error(
+                &self.app_handle,
                 "Unimplemented",
                 "The command emergency is not yet implemented",
             ),
-            Command::Launch => self
-                .notification_stream
-                .notify_error("Unimplemented", "The command launch is not yet implemented"),
-            Command::Abort => self
-                .notification_stream
-                .notify_error("Unimplemented", "The command abort is not yet implemented"),
+            Command::Launch => notify_error(
+                &self.app_handle,
+                "Unimplemented",
+                "The command launch is not yet implemented",
+            ),
+            Command::Abort => notify_error(
+                &self.app_handle,
+                "Unimplemented",
+                "The command abort is not yet implemented",
+            ),
         }
     }
     pub fn connection_object(&self) -> &Arc<ConnectionObject> {

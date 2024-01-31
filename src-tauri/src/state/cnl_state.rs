@@ -21,8 +21,7 @@ impl CNLState {
         let test_config_path = app_handle.path_resolver().resolve_resource(config_path).expect("failed to resolve resource test.yaml");
         let network_config = can_yaml_config_rs::parse_yaml_config_from_file(
             test_config_path.to_str().expect("config path is not a valid unicode string")).unwrap();
-        let mut cnl = CNL::create(&network_config, app_handle);
-        cnl.start();
+        let cnl = CNL::create(&network_config, app_handle);
         Self {
             cnl: Mutex::new(cnl),
         }

@@ -92,7 +92,7 @@ impl CanAdapterInterface for SocketCanAdapter {
         }
     }
 
-    async fn receive_err(&mut self) -> Timestamped<CanError> {
+    async fn receive_err(&self) -> Timestamped<CanError> {
         let error = self.err_rx.lock().await.recv().await;
         match error {
             Some(error) => error,

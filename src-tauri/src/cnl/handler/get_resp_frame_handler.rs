@@ -20,10 +20,10 @@ pub struct GetRespFrameHandler {
 
 impl GetRespFrameHandler {
     pub fn create(
-        parser: TypeFrameParser,
         network: &Arc<NetworkObject>,
         get_resp_msg: &config::MessageRef,
     ) -> Self {
+        let parser = TypeFrameParser::new(get_resp_msg);
         // example of how to read a NetworkObject for ids!
         for node in network.nodes() {
             let _node_id = node.id();
