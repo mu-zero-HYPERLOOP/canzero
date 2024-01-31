@@ -7,6 +7,24 @@ buses:
   can1:
     baudrate: 1000000
 
+enum_types:
+  global_state_t:
+    init: 0
+    setup: 1
+    idle : 2
+    prepare: 3
+    ready: 4
+    start_levitation: 5
+    levitation: 6
+    start_propulsion: 7
+    curusing: 8
+    braking: 9
+    stop_levitation: 10
+    end_of_run : 11
+    safe_to_approach: 12
+    emergency: 13
+
+
 nodes: 
   secu: 
     description: Sensor Electronics Control Unit
@@ -79,7 +97,7 @@ nodes:
         access: global
         description: state of the cooling system
       global_state:
-        type: u8
+        type: global_state_t
         access: global
         descríption: state of the overall pod
 
