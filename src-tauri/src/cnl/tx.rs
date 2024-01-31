@@ -15,11 +15,8 @@ pub struct TxCom {
 
 impl TxCom {
     pub fn create(network_ref: &config::NetworkRef, can_adapters: &Vec<Arc<CanAdapter>>) -> TxCom {
-        println!("hey3");
         let set_req_bus_id = network_ref.set_req_message().bus().id();
-        println!("hey3");
         let can_dap_opt = can_adapters.iter().find(|adapter| adapter.id() == set_req_bus_id);
-        println!("{}", can_dap_opt.is_some());
         let can_adap = match can_adapters.iter().find(|adapter| adapter.id() == set_req_bus_id) {
                 Some(adapter) => adapter.clone(),
                 None => {
@@ -27,7 +24,6 @@ impl TxCom {
                     panic!("can adapter for set requests missing!");
                 }
         };
-        println!("hey4");
 
         TxCom {
             network_ref: network_ref.clone(),
@@ -67,9 +63,9 @@ impl TxCom {
             frame_data.push(CanFrame::new(set_request_id, ide, false, dlc, data_curr));
         }
 
-        let test_frame = vec![CanFrame::new(set_request_id, ide, false, 2, 
-                                            0xff_00)];
+        let test_frame = vec![CanFrame::new(set_request_id, ide, false, 2, 0x5544)];
         fragmented_can_send(test_frame, self.set_req_can_adapter.clone(), self.frag_time_ms);
+        //fragmented_can_send(frame_data, self.set_req_can_adapter.clone(), self.frag_time_ms);
     }
 }
 

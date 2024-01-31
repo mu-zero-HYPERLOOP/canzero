@@ -61,19 +61,14 @@ impl CNL {
             #[cfg(feature = "socket-can")]
             Arc::new(can::SocketCanAdapter::create(true, bus_config).expect("could not create can adapter"))
         }).collect();
-        println!("hey1");
 
         connection_object.set_status(ConnectionStatus::CanConnected);
-        println!("hey2");
 
         let trace = Arc::new(TraceObject::create(app_handle));
-        println!("hey2");
 
         let tx = Arc::new(TxCom::create(&network_config, &can_adapters));
-        println!("hey2");
 
         let network = Arc::new(NetworkObject::create(network_config, app_handle, tx.clone()));
-        println!("hey2");
 
         let rx = RxCom::create(network_config, &trace, &network, app_handle);
         Self {
