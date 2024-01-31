@@ -7,8 +7,7 @@ use crate::{
         frame::type_frame::{CompositeTypeValue, FrameType, TypeValue},
         network::object_entry_object::ObjectEntryEvent,
     },
-    notification::NotificationStream,
-    state::cnl_state::CNLState,
+    state::cnl_state::CNLState, notification::notify_error,
 };
 
 use can_config_rs::config;
@@ -52,9 +51,7 @@ pub async fn set_object_entry_value(
         match oe_type.as_ref() {
             Type::Primitive(SignalType::SignedInt { size }) => {
                 if let Some(val) = json_value.as_i64() {
-                    if 2i64.pow((*size - 1) as u32) > val
-                        && 2i64.pow((*size - 1) as u32) >= -val
-                    {
+                    if 2i64.pow((*size - 1) as u32) > val && 2i64.pow((*size - 1) as u32) >= -val {
                         Ok(TypeValue::Signed(val))
                     } else {
                         return Err(());
@@ -137,7 +134,7 @@ pub async fn set_object_entry_value(
                 } else {
                     return Err(());
                 }
-            },
+            }
             Type::Array { len: _, ty: _ } => todo!(),
         }
     }
@@ -304,7 +301,8 @@ pub async fn request_object_entry_value(
 
     tokio::time::sleep(Duration::from_millis(1000)).await;
 
-    NotificationStream::new(&app_handle).notify_error(
+    notify_error(
+        &app_handle,
         "Unimplemented",
         "request object entry value is not yet implemented",
     );

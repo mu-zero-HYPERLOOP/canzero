@@ -48,37 +48,6 @@ impl Notification {
     }
 }
 
-#[deprecated]
-#[derive(Clone)]
-pub struct NotificationStream {
-    app_handle: Arc<tauri::AppHandle>,
-}
-
-impl NotificationStream {
-    pub fn new(app_handle: &tauri::AppHandle) -> NotificationStream {
-        NotificationStream {
-            app_handle: Arc::new(app_handle.clone()),
-        }
-    }
-    // TODO check me again before release!
-    #[deprecated]
-    pub fn notify(&self, notification: Notification) {
-        self.app_handle
-            .emit_all("notification", notification)
-            .expect("failed to emit notification");
-    }
-
-    #[deprecated]
-    pub fn notify_error(&self, reason: &str, description: &str) {
-        self.app_handle
-            .emit_all(
-                "notification",
-                Notification::make_error(reason, description),
-            )
-            .expect("failed to emit notification");
-    }
-}
-
 pub fn notify_error(app_handle : &tauri::AppHandle, reason: &str, description: &str) {
     app_handle
         .emit_all(

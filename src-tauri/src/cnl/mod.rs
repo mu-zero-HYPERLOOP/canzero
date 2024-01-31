@@ -1,4 +1,3 @@
-pub mod command;
 pub mod connection;
 pub mod errors;
 pub mod frame;
@@ -13,11 +12,8 @@ pub mod can_adapter;
 
 use std::sync::Arc;
 
-use crate::notification::{notify_error, NotificationStream};
-
 use self::{
     can_adapter::CanAdapter,
-    command::Command,
     connection::{ConnectionObject, ConnectionStatus},
     network::{node_object::NodeObject, NetworkObject},
     rx::RxCom,
@@ -30,6 +26,10 @@ use can_config_rs::config;
 // Can Network Layer (CNL)
 pub struct CNL {
     trace: Arc<TraceObject>,
+
+    // NOTE RxCom is a zero sized struct just here for 
+    // easier understanding of the hierarchie of the CNL!
+    #[allow(dead_code)]
     rx: RxCom,
 
     // TODO remove allow dead_code before release!
@@ -37,7 +37,6 @@ pub struct CNL {
     tx: Arc<TxCom>,
     network: Arc<NetworkObject>,
     connection_object: Arc<ConnectionObject>,
-    app_handle: tauri::AppHandle,
 }
 
 impl CNL {
@@ -70,7 +69,6 @@ impl CNL {
             trace,
             network,
             connection_object: Arc::new(connection_object),
-            app_handle: app_handle.clone(),
         }
     }
 
@@ -82,25 +80,6 @@ impl CNL {
         self.network.nodes()
     }
 
-    pub fn command(&self, command: Command) {
-        match &command {
-            Command::Emergency => notify_error(
-                &self.app_handle,
-                "Unimplemented",
-                "The command emergency is not yet implemented",
-            ),
-            Command::Launch => notify_error(
-                &self.app_handle,
-                "Unimplemented",
-                "The command launch is not yet implemented",
-            ),
-            Command::Abort => notify_error(
-                &self.app_handle,
-                "Unimplemented",
-                "The command abort is not yet implemented",
-            ),
-        }
-    }
     pub fn connection_object(&self) -> &Arc<ConnectionObject> {
         &self.connection_object
     }
