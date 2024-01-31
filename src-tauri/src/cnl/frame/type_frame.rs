@@ -1,10 +1,10 @@
 use std::{ops::Index, mem::size_of};
 
-use bitvec::{vec::BitVec, prelude::Msb0, store::BitStore};
+use bitvec::{vec::BitVec, prelude::Lsb0, store::BitStore};
 use can_config_rs::config;
 use serde::{
     ser::{SerializeMap, SerializeSeq},
-    Serialize, Serializer, Deserialize,
+    Serialize, Serializer
 };
 use config::{Type, SignalType};
 
@@ -291,12 +291,12 @@ impl Serialize for TypeValue {
 
 impl TypeValue {
     pub fn get_as_bin<T>(&self, ty: &config::Type) -> (Vec<T>, u8) where T: BitStore {
-        let mut bit_vec: BitVec<T, Msb0> = BitVec::new();
+        let mut bit_vec: BitVec<T, Lsb0> = BitVec::new();
 
         fn continue_get_as_bin<T>(
                 type_value: &TypeValue, 
                 ty: &config::Type, 
-                bit_vec: &mut BitVec<T, Msb0>, 
+                bit_vec: &mut BitVec<T, Lsb0>, 
             ) where T: BitStore {
             match (type_value, ty) {
                 (TypeValue::Unsigned(val), Type::Primitive(SignalType::UnsignedInt{ size })) => {

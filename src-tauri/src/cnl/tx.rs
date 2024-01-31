@@ -37,7 +37,7 @@ impl TxCom {
         }
     }
 
-    pub fn send_set_request(&self, server_id: u16, oe_id: u32, val: Vec<u32>, last_fill: u8) {
+    pub fn send_set_request(&self, server_id: u8, oe_id: u32, val: Vec<u32>, last_fill: u8) {
         println!("attempted send of {val:?}");
 
         let (set_request_id, ide) = match self.network_ref.set_req_message().id() {
@@ -49,25 +49,27 @@ impl TxCom {
 
         for i in 0..frames_to_send {
             // SOF
-            let mut data_curr = if i == 0 { 1u64 << 63 } else { 0u64 };
+            let mut data_curr = if i == 0 { 1u64 } else { 0u64 };
             // EOF
-            data_curr |= if i == frames_to_send - 1 { 1u64 << 62 } else { 0u64 };
+            data_curr |= if i == frames_to_send - 1 { 1u64 << 1 } else { 0u64 };
             // toggle
-            data_curr |= ((i % 2) as u64) << 61;
+            data_curr |= ((i % 2) as u64) << 3;
             // oe-id
-            data_curr |= (oe_id as u64) << 48;
+            data_curr |= (oe_id as u64) << 4;
             // client-id
-            data_curr |= (self.my_node_id as u64) << 40;
+            data_curr |= (self.my_node_id as u64) << 16;
             // server-id
-            data_curr |= (server_id as u64) << 32;
+            data_curr |= (server_id as u64) << 24;
             // data
-            data_curr |= val[i] as u64;
+            data_curr |= (val[i] as u64) << 32;
 
             let dlc = if i == frames_to_send - 1 { 4 + last_fill } else { 8 };
             frame_data.push(CanFrame::new(set_request_id, ide, false, dlc, data_curr));
         }
 
-        fragmented_can_send(frame_data, self.set_req_can_adapter.clone(), self.frag_time_ms);
+        let test_frame = vec![CanFrame::new(set_request_id, ide, false, 2, 
+                                            0xff_00)];
+        fragmented_can_send(test_frame, self.set_req_can_adapter.clone(), self.frag_time_ms);
     }
 }
 

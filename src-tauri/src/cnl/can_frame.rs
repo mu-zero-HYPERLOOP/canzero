@@ -29,6 +29,7 @@ unsafe impl Send for CanError {}
 unsafe impl Sync for CanError {}
 
 impl CanFrame {
+    /// LSB of data attribute corresponds to first bit of data field in CAN message
     pub fn new(id: u32, ide: bool, rtr: bool, dlc: u8, data: u64) -> Self {
         Self {
             id,

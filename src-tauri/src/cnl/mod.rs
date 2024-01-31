@@ -34,8 +34,8 @@ use can_config_rs::config;
 #[cfg(feature = "socket-can")]
 pub type CanAdapter = can::SocketCanAdapter;
 
-#[cfg(feature = "mock-can")]
-pub type CAN = mock_can::MockCan;
+//#[cfg(feature = "mock-can")]
+//pub type CanAdapter = mock_can::MockCan;
 
 // CaNetwork Layer
 pub struct CNL {
@@ -55,8 +55,8 @@ impl CNL {
 
         
         let can_adapters = network_config.buses().iter().map(|bus_config| {
-            #[cfg(feature = "mock-can")]
-            Arc::new(mock_can::MockCan::create(bus_config, network_config))
+            //#[cfg(feature = "mock-can")]
+            //Arc::new(mock_can::MockCan::create(bus_config, network_config))
 
             #[cfg(feature = "socket-can")]
             Arc::new(can::SocketCanAdapter::create(true, bus_config).expect("could not create can adapter"))

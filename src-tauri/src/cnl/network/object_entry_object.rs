@@ -75,6 +75,9 @@ impl ObjectEntryObject {
     pub fn latest_event_name(&self) -> &str {
         &self.latest_event_name
     }
+    pub fn node_id(&self) -> u8 {
+        self.object_entry_ref.node().id() as u8
+    }
 
     pub async fn push_value(&self, value: TypeValue, arrive_instance: &std::time::Instant) {
         let mut store = self.store.lock().await;
@@ -200,7 +203,9 @@ impl ObjectEntryObject {
         let (bit_value, last_fill) = type_value.get_as_bin(self.ty());
         let config_type = self.ty();
         println!("{config_type:?}");
-        self.tx().send_set_request(5, 2, bit_value, last_fill);
+        let server_id = self.node_id();
+        let oe_id = self.id();
+        self.tx().send_set_request(server_id, oe_id, bit_value, last_fill);
     }
 }
 
