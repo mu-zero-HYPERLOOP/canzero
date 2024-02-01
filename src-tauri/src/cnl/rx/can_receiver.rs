@@ -4,7 +4,7 @@ use can_config_rs::config::MessageRef;
 
 use crate::{
     cnl::{
-        can_adapter::{timestamped::Timestamped, CanAdapter, TCanError, TCanFrame},
+        can_adapter::{CanAdapter, TCanError, TCanFrame},
         network::NetworkObject,
         rx::handler_lookup::HandlerLookup,
         trace::TraceObject,
@@ -39,14 +39,14 @@ impl CanReceiver {
                 Ok(frame) => match receiver_data.lookup.get_handler(frame.key()) {
                     Some(handler) => {
                         let frame = handler.handle(&frame).await?;
-                        receiver_data.trace.push_frame(frame);
+                        receiver_data.trace.push_normal_frame(frame).await;
                     }
                     None => {
-                        receiver_data.trace.push_undefined_frame(frame);
+                        receiver_data.trace.push_undefined_frame(frame).await;
                     }
                 },
                 Err(error) => {
-                    receiver_data.trace.push_error_frame(error);
+                    receiver_data.trace.push_error_frame(error).await;
                 }
             };
             Ok(())

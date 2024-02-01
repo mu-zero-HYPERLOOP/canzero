@@ -83,7 +83,7 @@ impl EncodedDeserializer {
                     entries
                         .iter()
                         .find(|(_, value)| value == &unsigned_value)
-                        .unwrap_or(&("UNKNOWN".to_owned(), 0))
+                        .unwrap_or(&("UNDEFINED".to_owned(), 0))
                         .0
                         .clone(),
                 )

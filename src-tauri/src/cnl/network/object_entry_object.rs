@@ -180,25 +180,6 @@ impl ObjectEntryObject {
         history_observables.remove(remove_index);
     }
 
-    // pub async fn history_of(&self, duration: Duration) -> Vec<ObjectEntryEvent> {
-    //     let store_lock = self.store.lock().await;
-    //     let history = &store_lock.history;
-    //     let now = std::time::Instant::now().duration_since(self.start_time);
-    //     let breakpoint = now.saturating_sub(duration);
-    //     println!("now = {now:?}, breakpoint = {breakpoint:?}");
-    //     let mut breakpoint_index = None;
-    //     for (i, event) in history.iter().enumerate().rev() {
-    //         if event.timestamp <= breakpoint {
-    //             breakpoint_index = Some(i);
-    //             break;
-    //         }
-    //     }
-    //     let breakpoint_index = breakpoint_index.unwrap_or(0);
-    //     let x = history[breakpoint_index..].to_vec();
-    //     println!("sizeof history_of = {}", x.len());
-    //     x
-    // }
-
     pub fn set_request(&self, value: Value) {
         let (bit_value, last_fill) = value.get_as_bin(self.ty());
         let server_id = self.node_id();

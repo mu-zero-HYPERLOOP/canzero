@@ -177,13 +177,6 @@ impl Value {
                     for (attrib, (_, attrib_ty)) in value_attributes.iter().zip(struct_attributes) {
                         continue_get_as_bin(attrib.value(), attrib_ty, bit_vec);
                     }
-                    // for (nested_val, nested_type) in val
-                    //     .attributes()
-                    //     .iter()
-                    //     .zip(attribs.iter().map(|attr| attr.1.clone()))
-                    // {
-                    //     continue_get_as_bin(nested_val.value(), nested_type.as_ref(), bit_vec)
-                    // }
                 }
                 (
                     Value::EnumValue(variant_name),
@@ -234,8 +227,8 @@ impl Serialize for Frame {
             Some(desc) => map.serialize_entry("description", desc)?,
             None => (),
         };
-        map.serialize_entry("attributes", self.attributes());
-        map.serialize_entry("data", &self.data());
+        map.serialize_entry("attributes", self.attributes())?;
+        map.serialize_entry("data", &self.data())?;
         map.end()
     }
 }

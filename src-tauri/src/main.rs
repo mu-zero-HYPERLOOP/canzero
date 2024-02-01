@@ -15,17 +15,6 @@ mod commands;
 mod state;
 mod notification;
 
-#[derive(Serialize)]
-struct InitialGraphData {
-    values: Vec<Graphable>,
-}
-
-#[derive(Serialize, Clone)]
-struct Graphable {
-    x: f64,
-    y: f64,
-}
-
 fn main() {
     let _ = fix_path_env::fix();
     println!("Hello, World!");

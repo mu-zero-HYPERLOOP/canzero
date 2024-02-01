@@ -1,5 +1,6 @@
 use std::{collections::HashMap, sync::Arc};
 
+use bitvec::view::AsBits;
 use can_config_rs::config;
 
 use crate::cnl::{
@@ -23,28 +24,28 @@ struct GetRespFrame {
 impl GetRespFrame {
     pub fn new(frame: &Frame) -> Self {
         let Some(header) = frame.attribute("header") else {
-            panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame");
+            panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame : header missing");
         };
         let Some(Value::UnsignedValue(sof)) = header.attribute("sof") else {
-            panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame");
+            panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame : header.sof missing");
         };
         let Some(Value::UnsignedValue(eof)) = header.attribute("eof") else {
-            panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame");
+            panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame : header.eof missing");
         };
         let Some(Value::UnsignedValue(toggle)) = header.attribute("toggle") else {
-            panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame");
+            panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame : header.toggle missing");
         };
         let Some(Value::UnsignedValue(object_entry_id)) = header.attribute("od_index") else {
-            panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame");
+            panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame : header.od_index missing");
         };
         let Some(Value::UnsignedValue(client_id)) = header.attribute("client_id") else {
-            panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame");
+            panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame : header.client_id missing");
         };
         let Some(Value::UnsignedValue(server_id)) = header.attribute("server_id") else {
-            panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame");
+            panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame : header.server_id missing");
         };
-        let Some(Value::UnsignedValue(data)) = header.attribute("data") else {
-            panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame");
+        let Some(Value::UnsignedValue(data)) = frame.attribute("data") else {
+            panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame : header.data missing");
         };
         Self {
             sof: *sof != 0,
@@ -74,13 +75,13 @@ struct GetResp {
 }
 
 impl GetResp {
-    fn receive(&mut self, frame: GetRespFrame, timestamp : &std::time::Instant) -> Result<()> {
+    async fn receive(&mut self, frame: GetRespFrame, timestamp : &std::time::Instant) -> Result<()> {
         let (expected_sof, expected_toggle) = match &self.state {
             GetRespState::Ready => (true, false),
             GetRespState::FragmentationToggleLow => (false, false),
             GetRespState::FragmentationToggleHigh => (false, true),
         };
-        let expected_eof = (self.buffer.len() + 1) as u32 == self.size;
+        let expected_eof = (self.buffer.len() + 1) as u32 == self.size.div_ceil(32);
 
         if expected_sof != frame.sof {
             return Err(Error::InvalidGetResponseSofFlag);
@@ -97,9 +98,10 @@ impl GetResp {
 
         if frame.eof {
             let value = self.type_deserializer
-                .deserialize(unsafe { std::mem::transmute(self.buffer.as_slice()) });
-            self.object_entry.push_value(value, timestamp);
+                .deserialize(&self.buffer.as_slice().as_bits());
+            self.object_entry.push_value(value, timestamp).await;
             self.state = GetRespState::Ready;
+            self.buffer.clear();
         }else {
             // update fragmentation state!
             self.state = match self.state {
@@ -121,12 +123,10 @@ struct GetRespIdentifier {
 pub struct GetRespFrameHandler {
     frame_deserializer: FrameDeserializer,
     get_resp_lookup: HashMap<GetRespIdentifier, tokio::sync::Mutex<GetResp>>,
-    get_resp_msg: config::MessageRef,
 }
 
 impl GetRespFrameHandler {
     pub fn create(network: &Arc<NetworkObject>, get_resp_msg: &config::MessageRef) -> Self {
-        let frame_deserializer = FrameDeserializer::new(get_resp_msg);
         let mut get_resp_lookup = HashMap::new();
         for node in network.nodes() {
             let node_id = node.id() as u8;
@@ -141,7 +141,7 @@ impl GetRespFrameHandler {
                         buffer: vec![],
                         state: GetRespState::Ready,
                         size: object_entry.ty().size(),
-                        type_deserializer: TypeDeserializer::new(object_entry.ty(), 32),
+                        type_deserializer: TypeDeserializer::new(object_entry.ty()),
                     }),
                 );
             }
@@ -149,7 +149,6 @@ impl GetRespFrameHandler {
         Self {
             frame_deserializer: FrameDeserializer::new(get_resp_msg),
             get_resp_lookup,
-            get_resp_msg: get_resp_msg.clone(),
         }
     }
 
@@ -175,7 +174,7 @@ impl GetRespFrameHandler {
             return Err(Error::InvalidGetResponseServerOrObjectEntryNotFound);
         };
 
-        get_resp.lock().await.receive(get_resp_frame, can_frame.timestamp())?;
+        get_resp.lock().await.receive(get_resp_frame, can_frame.timestamp()).await?;
 
         Ok(Timestamped::new(can_frame.timestamp().clone(), frame))
     }

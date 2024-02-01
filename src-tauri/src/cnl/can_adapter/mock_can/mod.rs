@@ -69,6 +69,7 @@ fn random_get_resp(rng: &mut ThreadRng, network_config: &config::NetworkRef) -> 
         .flatten()
         .collect();
     let object_entry = object_entries[rng.gen_range(0..object_entries.len())];
+    let server_id = object_entry.node().id();
 
     let msg = network_config.get_resp_message();
 
@@ -77,47 +78,55 @@ fn random_get_resp(rng: &mut ThreadRng, network_config: &config::NetworkRef) -> 
         config::MessageId::ExtendedId(id) => (*id, true),
     };
 
-    let [sof_signal,
-        eof_signal,
-        toggle_signal,
-        object_entry_id_signal,
-        client_id_signal,
-        server_id_signal,
-        value_signal]: &[Arc<config::signal::Signal>] = &msg.signals().as_slice() else {
-        panic!();
-    };
+    // let [sof_signal,
+    //     eof_signal,
+    //     toggle_signal,
+    //     object_entry_id_signal,
+    //     client_id_signal,
+    //     server_id_signal,
+    //     value_signal]: &[Arc<config::signal::Signal>] = &msg.signals().as_slice() else {
+    //     panic!();
+    // };
     let oe_value: u32 = rng.gen();
     let sof = 1;
     let eof = 1;
-    let toggle = 1;
+    let toggle = 0;
     let object_entry_id = object_entry.id();
-    let server_id = 0;
+    let server_id = server_id;
     let client_id = network_config.nodes().len();
 
     let mut value = 0;
-    value |= (((0xFFFFFFFFFFFFFFFF as u64 >> (64 - sof_signal.size())) & (sof))
-        << (64 - sof_signal.size()))
-        >> sof_signal.byte_offset();
-    value |= (((0xFFFFFFFFFFFFFFFF as u64 >> (64 - eof_signal.size())) & (eof))
-        << (64 - eof_signal.size()))
-        >> eof_signal.byte_offset();
-    value |= (((0xFFFFFFFFFFFFFFFF as u64 >> (64 - toggle_signal.size())) & (toggle))
-        << (64 - toggle_signal.size()))
-        >> toggle_signal.byte_offset();
+    value |= sof;
+    value |= eof << 1;
+    value |= toggle << 2;
+    value |= (object_entry_id as u64) << 3;
+    value |= (client_id as u64) << 16;
+    value |= (server_id as u64) << 24;
+    value |= (oe_value as u64) << 32;
 
-    value |= (((0xFFFFFFFFFFFFFFFF as u64 >> (64 - object_entry_id_signal.size()))
-        & (object_entry_id as u64))
-        << (64 - object_entry_id_signal.size()))
-        >> object_entry_id_signal.byte_offset();
-    value |= (((0xFFFFFFFFFFFFFFFF as u64 >> (64 - client_id_signal.size())) & (client_id as u64))
-        >> (64 - client_id_signal.size()))
-        << client_id_signal.byte_offset();
-    value |= (((0xFFFFFFFFFFFFFFFF as u64 >> (64 - server_id_signal.size())) & (server_id as u64))
-        << (64 - server_id_signal.size()))
-        >> server_id_signal.byte_offset();
-    value |= (((0xFFFFFFFFFFFFFFFF as u64 >> (64 - value_signal.size())) & (oe_value as u64))
-        << (64 - value_signal.size()))
-        >> value_signal.byte_offset();
+    // value |= (((0xFFFFFFFFFFFFFFFF as u64 >> (64 - sof_signal.size())) & (sof))
+    //     << (64 - sof_signal.size()))
+    //     >> sof_signal.byte_offset();
+    // value |= (((0xFFFFFFFFFFFFFFFF as u64 >> (64 - eof_signal.size())) & (eof))
+    //     << (64 - eof_signal.size()))
+    //     >> eof_signal.byte_offset();
+    // value |= (((0xFFFFFFFFFFFFFFFF as u64 >> (64 - toggle_signal.size())) & (toggle))
+    //     << (64 - toggle_signal.size()))
+    //     >> toggle_signal.byte_offset();
+    //
+    // value |= (((0xFFFFFFFFFFFFFFFF as u64 >> (64 - object_entry_id_signal.size()))
+    //     & (object_entry_id as u64))
+    //     << (64 - object_entry_id_signal.size()))
+    //     >> object_entry_id_signal.byte_offset();
+    // value |= (((0xFFFFFFFFFFFFFFFF as u64 >> (64 - client_id_signal.size())) & (client_id as u64))
+    //     >> (64 - client_id_signal.size()))
+    //     << client_id_signal.byte_offset();
+    // value |= (((0xFFFFFFFFFFFFFFFF as u64 >> (64 - server_id_signal.size())) & (server_id as u64))
+    //     << (64 - server_id_signal.size()))
+    //     >> server_id_signal.byte_offset();
+    // value |= (((0xFFFFFFFFFFFFFFFF as u64 >> (64 - value_signal.size())) & (oe_value as u64))
+    //     << (64 - value_signal.size()))
+    //     >> value_signal.byte_offset();
 
     CanFrame::new(id, ide, false, msg.dlc(), value)
 }
