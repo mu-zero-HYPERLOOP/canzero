@@ -4,8 +4,7 @@ use can_config_rs::config::MessageRef;
 
 use crate::{
     cnl::{
-        can_adapter::{timestamped::Timestamped, CanAdapter, TCanError, TCanFrame},
-        frame::{error_frame::ErrorFrame, undefined_frame::UndefinedFrame, Frame},
+        can_adapter::{CanAdapter, TCanError, TCanFrame},
         network::NetworkObject,
         rx::handler_lookup::HandlerLookup,
         trace::TraceObject,
@@ -36,26 +35,20 @@ impl CanReceiver {
             frame: std::result::Result<TCanFrame, TCanError>,
             receiver_data: Arc<CanReceiverData>,
         ) -> Result<()> {
-            let frame = match frame {
+            match frame {
                 Ok(frame) => match receiver_data.lookup.get_handler(frame.key()) {
-                    Some(handler) => handler.handle(&frame).await?,
-                    None => Timestamped::new(
-                        frame.timestamp().clone(),
-                        Frame::UndefinedFrame(UndefinedFrame::new(
-                            frame.get_id(),
-                            frame.get_ide_flag(),
-                            frame.get_rtr_flag(),
-                            frame.get_dlc(),
-                            frame.get_data_u64(),
-                        )),
-                    ),
+                    Some(handler) => {
+                        let frame = handler.handle(&frame).await?;
+                        receiver_data.trace.push_normal_frame(frame).await;
+                    }
+                    None => {
+                        receiver_data.trace.push_undefined_frame(frame).await;
+                    }
                 },
-                Err(error) => Timestamped::new(
-                    error.timestamp().clone(),
-                    Frame::ErrorFrame(ErrorFrame::new(&error)),
-                ),
+                Err(error) => {
+                    receiver_data.trace.push_error_frame(error).await;
+                }
             };
-            receiver_data.trace.push_frame(frame).await;
             Ok(())
         }
 

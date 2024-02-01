@@ -4,13 +4,33 @@ use std::{
     time::{Duration, Instant},
 };
 
+use can_config_rs::config::MessageId;
 use serde::{ser::SerializeMap, Serialize, Serializer};
 use tauri::Manager;
 use tokio::sync::{mpsc, Mutex};
 
-use super::frame::{Frame, UniqueFrameKey, TFrame};
+use crate::cnl::frame::Value;
 
-type TraceStore = Arc<tokio::sync::Mutex<HashMap<UniqueFrameKey, TraceObjectEvent>>>;
+use super::{
+    can_adapter::{can_error::CanError, can_frame::CanFrame, TCanError, TCanFrame},
+    frame::{Attribute, Frame, TFrame},
+};
+
+type TraceStore = Arc<tokio::sync::Mutex<HashMap<TraceFrameKey, TraceObjectEvent>>>;
+
+#[derive(Clone)]
+enum TraceFrame {
+    Frame(Frame),
+    UndefinedFrame(CanFrame),
+    ErrorFrame(CanError),
+}
+
+#[derive(PartialEq, Eq, Hash, Clone)]
+enum TraceFrameKey {
+    FrameKey(MessageId),
+    UndefinedKey(u32),
+    ErrorKey(u64),
+}
 
 pub struct TraceObject {
     observable: TraceObjectObservable,
@@ -28,9 +48,33 @@ impl TraceObject {
         }
     }
 
-    pub async fn push_frame(&self, frame: TFrame) {
-        let (arrive_instant, frame) = frame.destruct();
-        let key = frame.unique_key();
+    pub async fn push_undefined_frame(&self, undefined_frame: TCanFrame) {
+        let (timestamp, undefined_frame) = undefined_frame.destruct();
+        let key = TraceFrameKey::UndefinedKey(undefined_frame.key());
+        self.push_frame(key, TraceFrame::UndefinedFrame(undefined_frame), timestamp)
+            .await
+    }
+
+    pub async fn push_error_frame(&self, error_frame: TCanError) {
+        let (timestamp, error_frame) = error_frame.destruct();
+        let key = TraceFrameKey::ErrorKey(error_frame.erno());
+        self.push_frame(key, TraceFrame::ErrorFrame(error_frame), timestamp)
+            .await
+    }
+
+    pub async fn push_normal_frame(&self, frame: TFrame) {
+        let (timestamp, frame) = frame.destruct();
+        let key = TraceFrameKey::FrameKey(frame.id().clone());
+        self.push_frame(key, TraceFrame::Frame(frame), timestamp)
+            .await
+    }
+
+    async fn push_frame(
+        &self,
+        key: TraceFrameKey,
+        frame: TraceFrame,
+        arrive_instant: std::time::Instant,
+    ) {
         let mut unlocked_trace = self.trace.lock().await;
         let prev = unlocked_trace.get_mut(&key);
         let timestamp = arrive_instant.duration_since(self.start_time.clone());
@@ -50,9 +94,11 @@ impl TraceObject {
                 let trace_object = TraceObjectEvent {
                     frame,
                     timestamp: TraceTimestamp { timestamp },
-                    delta_time: TraceDeltaTime { delta_time: timestamp },
+                    delta_time: TraceDeltaTime {
+                        delta_time: timestamp,
+                    },
                 };
-                unlocked_trace.insert(key, trace_object.clone());
+                unlocked_trace.insert(key.clone(), trace_object.clone());
                 trace_object
             }
         };
@@ -60,7 +106,7 @@ impl TraceObject {
 
         // instead of copying the trace_object we can store the key to update
         // the view later!
-        self.observable.notify(key).await;
+        self.observable.notify(&key).await;
     }
 
     pub fn listen(&self) {
@@ -85,7 +131,7 @@ impl TraceObject {
 
 #[derive(Clone)]
 pub struct TraceObjectEvent {
-    frame: Frame,
+    frame: TraceFrame,
     timestamp: TraceTimestamp,
     delta_time: TraceDeltaTime,
 }
@@ -165,7 +211,7 @@ impl Serialize for TraceObjectEvent {
 
 enum TraceObjectObservableMsg {
     Poison,
-    Value(UniqueFrameKey),
+    Value(TraceFrameKey),
 }
 
 struct TraceObjectObservable {
@@ -194,10 +240,10 @@ impl TraceObjectObservable {
         }
     }
 
-    pub async fn notify(&self, key: UniqueFrameKey) {
+    pub async fn notify(&self, key: &TraceFrameKey) {
         if self.listen_count.load(std::sync::atomic::Ordering::SeqCst) != 0 {
             self.tx
-                .send(TraceObjectObservableMsg::Value(key))
+                .send(TraceObjectObservableMsg::Value(key.clone()))
                 .await
                 .unwrap();
         }
@@ -251,7 +297,7 @@ impl TraceObjectObservable {
         let mut rx = rx.lock().await;
         let mut next_batch_time = tokio::time::Instant::now();
         let mut timeout = tokio::time::Instant::now() + Duration::from_secs(0xFFFF);
-        let mut batch: HashSet<UniqueFrameKey> = HashSet::new();
+        let mut batch: HashSet<TraceFrameKey> = HashSet::new();
         loop {
             match tokio::time::timeout_at(timeout, rx.recv()).await {
                 Ok(opt) => {
@@ -307,5 +353,82 @@ impl TraceObjectObservable {
             }
         }
         println!("stop notify task for {event_name}");
+    }
+}
+
+impl Serialize for TraceFrame {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match &self {
+            TraceFrame::Frame(frame) => {
+                struct FlatFrame<'a> {
+                    frame: &'a Frame,
+                }
+                impl<'a> Serialize for FlatFrame<'a> {
+                    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+                    where
+                        S: Serializer,
+                    {
+                        let frame = self.frame;
+                        #[derive(Serialize)]
+                        struct FlatAttribute<'a> {
+                            name: String,
+                            value: &'a Value,
+                        }
+
+                        // NOTE: serialize attributes flat
+                        fn flatten_attributes<'a,'b,'c>(
+                            attribute: &'a Attribute,
+                            prefix: &str,
+                            seq: &'c mut Vec<FlatAttribute<'b>>,
+                        ) where 'a : 'b {
+                            match attribute.value() {
+                                Value::SignedValue(_)
+                                | Value::RealValue(_)
+                                | Value::EnumValue(_)
+                                | Value::UnsignedValue(_) => seq.push(FlatAttribute {
+                                    name: format!("{prefix}{}", attribute.name()),
+                                    value: attribute.value(),
+                                }),
+                                Value::StructValue(attributes) => {
+                                    for attrib in attributes {
+                                        flatten_attributes(
+                                            attrib,
+                                            &format!("{prefix}{}.", attribute.name()),
+                                            seq,
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        let mut flat_attributes = vec![];
+                        for attrib in frame.attributes() {
+                            flatten_attributes(attrib, "", &mut flat_attributes);
+                        }
+
+                        let mut map = serializer.serialize_map(None)?;
+
+                        map.serialize_entry("id", &frame.id().as_u32())?;
+                        map.serialize_entry("ide", &frame.ide())?;
+                        map.serialize_entry("rtr", &frame.rtr())?;
+                        map.serialize_entry("dlc", &frame.dlc())?;
+                        map.serialize_entry("name", frame.name())?;
+                        map.serialize_entry("data", &frame.data())?;
+                        map.serialize_entry("attributes", &flat_attributes)?;
+
+                        map.end()
+                    }
+                }
+                serializer.serialize_newtype_variant("Frame", 0, "TypeFrame", &FlatFrame { frame })
+            }
+            TraceFrame::UndefinedFrame(can_frame) => {
+                serializer.serialize_newtype_variant("Frame", 1, "UndefinedFrame", can_frame)
+            }
+            TraceFrame::ErrorFrame(error_frame) => {
+                serializer.serialize_newtype_variant("Frame", 2, "ErrorFrame", error_frame)
+            }
+        }
     }
 }

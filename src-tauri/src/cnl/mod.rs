@@ -3,10 +3,10 @@ pub mod errors;
 pub mod frame;
 mod handler;
 pub mod network;
-pub mod parser;
 mod rx;
 pub mod trace;
 mod tx;
+mod deserialize;
 
 pub mod can_adapter;
 

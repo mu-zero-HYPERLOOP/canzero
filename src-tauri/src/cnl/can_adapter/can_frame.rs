@@ -1,4 +1,6 @@
-#[derive(Debug)]
+use serde::{Serialize, ser::SerializeMap};
+
+#[derive(Debug, Clone)]
 pub struct CanFrame {
     id: u32,
     dlc: u8,
@@ -8,8 +10,6 @@ pub struct CanFrame {
 enum CanFrameIdFlags {
     IdeMask = 0x80000000,
     RtrMask = 0x40000000,
-    #[allow(dead_code)]
-    StdMask = 0x7FF,
     ExtMask = 0x1FFFFFFF,
 }
 
@@ -42,39 +42,24 @@ impl CanFrame {
         self.id
     }
 
-    pub fn get_id(&self) -> u32 {
-        self.id & CanFrameIdFlags::ExtMask as u32
-    }
-    #[allow(dead_code)]
-    pub fn set_id(&mut self, id: u32) {
-        self.id = id;
-    }
-    pub fn get_ide_flag(&self) -> bool {
-        (self.id & CanFrameIdFlags::IdeMask as u32) != 0
-    }
-    pub fn get_rtr_flag(&self) -> bool {
-        (self.id & CanFrameIdFlags::RtrMask as u32) != 0
-    }
-    pub fn get_dlc(&self) -> u8 {
-        self.dlc
-    }
-    #[allow(dead_code)]
-    pub fn set_dlc(&mut self, dlc: u8) {
-        self.dlc = dlc;
-    }
     pub fn get_data_u64(&self) -> u64 {
         self.data
     }
-    #[allow(dead_code)]
-    pub fn get_data_8u8(&self) -> [u8; 8] {
-        unsafe { std::mem::transmute::<u64, [u8; 8]>(self.data) }
-    }
-    #[allow(dead_code)]
-    pub fn set_data_u64(&mut self, data: u64) {
-        self.data = data;
-    }
-    #[allow(dead_code)]
-    pub fn set_data_8u8(&mut self, data: [u8; 8]) {
-        self.data = u64::from_be_bytes(data);
+}
+
+impl Serialize for CanFrame {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer {
+        let mut map = serializer.serialize_map(Some(5))?;
+        let id = self.id & CanFrameIdFlags::ExtMask as u32;
+        map.serialize_entry("id", &id)?;
+        let ide = (self.id & CanFrameIdFlags::IdeMask as u32) != 0;
+        map.serialize_entry("ide", &ide)?;
+        let rtr = (self.id & CanFrameIdFlags::RtrMask as u32) != 0;
+        map.serialize_entry("rtr", &rtr)?;
+        map.serialize_entry("dlc", &self.dlc)?;
+        map.serialize_entry("data", &self.data)?;
+        map.end()
     }
 }

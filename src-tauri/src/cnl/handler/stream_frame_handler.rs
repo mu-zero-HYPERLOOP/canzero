@@ -3,14 +3,15 @@ use std::sync::Arc;
 use can_config_rs::config;
 
 use crate::cnl::{
+    can_adapter::{timestamped::Timestamped, TCanFrame},
+    deserialize::FrameDeserializer,
     errors::Result,
-    errors::Error,
-    frame::{Frame, TFrame}, network::object_entry_object::ObjectEntryObject,
-    parser::type_frame_parser::TypeFrameParser, can_adapter::{TCanFrame, timestamped::Timestamped}
+    frame::TFrame,
+    network::object_entry_object::ObjectEntryObject,
 };
 
 pub struct StreamFrameHandler {
-    parser: TypeFrameParser,
+    frame_deserializer: FrameDeserializer,
     object_entries: Vec<Arc<ObjectEntryObject>>,
 }
 
@@ -21,21 +22,17 @@ impl StreamFrameHandler {
         stream_object_entry_objects: &Vec<Arc<ObjectEntryObject>>,
     ) -> Self {
         Self {
-            parser: TypeFrameParser::new(stream.message()),
+            frame_deserializer: FrameDeserializer::new(stream.message()),
             object_entries: stream_object_entry_objects.clone(),
         }
     }
     pub async fn handle(&self, can_frame: &TCanFrame) -> Result<TFrame> {
-        let frame = self.parser.parse(can_frame)?;
-        let Frame::TypeFrame(type_frame) = &frame else {
-            return Err(Error::InvalidStreamMessageFormat);
-        };
-        for (attrib, oeo) in type_frame.value().iter().zip(&self.object_entries) {
-            // notify the oeo one after another
-            // Interesstingly not possible in rusts async model to await all
-            // at once at least not useful if you think about it =^)
-            oeo.push_value(attrib.value().clone(), can_frame.timestamp())
-                .await;
+        let frame = self
+            .frame_deserializer
+            .deserialize(can_frame.get_data_u64());
+
+        for (attrib, oeo) in frame.attributes().iter().zip(&self.object_entries) {
+            oeo.push_value(attrib.value().clone(), can_frame.timestamp()).await
         }
 
         Ok(Timestamped::new(can_frame.timestamp().clone(), frame))

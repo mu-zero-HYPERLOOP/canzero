@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use tauri::Manager;
 
 // TODO remove allow dead_code before release!
