@@ -4,13 +4,21 @@ use std::{
     time::{Duration, Instant},
 };
 
+use can_config_rs::config::MessageId;
 use serde::{ser::SerializeMap, Serialize, Serializer};
 use tauri::Manager;
 use tokio::sync::{mpsc, Mutex};
 
-use super::frame::{Frame, UniqueFrameKey, TFrame};
+use super::{frame::{TFrame, Frame}, can_adapter::{can_frame::CanFrame, can_error::CanError, TCanError, TCanFrame}};
 
-type TraceStore = Arc<tokio::sync::Mutex<HashMap<UniqueFrameKey, TraceObjectEvent>>>;
+type TraceStore = Arc<tokio::sync::Mutex<HashMap<MessageId, TraceObjectEvent>>>;
+
+#[derive(Clone)]
+enum TraceFrame {
+    Frame(Frame),
+    UndefinedFrame(CanFrame),
+    ErrorFrame(CanError),
+}
 
 pub struct TraceObject {
     observable: TraceObjectObservable,
@@ -28,16 +36,25 @@ impl TraceObject {
         }
     }
 
+    pub async fn push_undefined_frame(&self, undefined_frame: TCanFrame) {
+        // TODO implement me dady
+    }
+
+    pub async fn push_error_frame(&self, error_frame : TCanError) {
+        // TODO implement me dady
+    }
+
     pub async fn push_frame(&self, frame: TFrame) {
         let (arrive_instant, frame) = frame.destruct();
-        let key = frame.unique_key();
+        let frame_id = frame.id().clone();
+        let trace_frame = TraceFrame::Frame(frame);
         let mut unlocked_trace = self.trace.lock().await;
-        let prev = unlocked_trace.get_mut(&key);
+        let prev = unlocked_trace.get_mut(&frame_id);
         let timestamp = arrive_instant.duration_since(self.start_time.clone());
         match prev {
             Some(prev) => {
                 let trace_object = TraceObjectEvent {
-                    frame,
+                    frame : trace_frame,
                     timestamp: TraceTimestamp { timestamp },
                     delta_time: TraceDeltaTime {
                         delta_time: timestamp.saturating_sub(prev.timestamp.timestamp),
@@ -48,11 +65,11 @@ impl TraceObject {
             }
             None => {
                 let trace_object = TraceObjectEvent {
-                    frame,
+                    frame : trace_frame,
                     timestamp: TraceTimestamp { timestamp },
                     delta_time: TraceDeltaTime { delta_time: timestamp },
                 };
-                unlocked_trace.insert(key, trace_object.clone());
+                unlocked_trace.insert(frame_id.clone(), trace_object.clone());
                 trace_object
             }
         };
@@ -60,7 +77,7 @@ impl TraceObject {
 
         // instead of copying the trace_object we can store the key to update
         // the view later!
-        self.observable.notify(key).await;
+        self.observable.notify(&frame_id).await;
     }
 
     pub fn listen(&self) {
@@ -85,7 +102,7 @@ impl TraceObject {
 
 #[derive(Clone)]
 pub struct TraceObjectEvent {
-    frame: Frame,
+    frame: TraceFrame,
     timestamp: TraceTimestamp,
     delta_time: TraceDeltaTime,
 }
@@ -165,7 +182,7 @@ impl Serialize for TraceObjectEvent {
 
 enum TraceObjectObservableMsg {
     Poison,
-    Value(UniqueFrameKey),
+    Value(MessageId),
 }
 
 struct TraceObjectObservable {
@@ -194,10 +211,10 @@ impl TraceObjectObservable {
         }
     }
 
-    pub async fn notify(&self, key: UniqueFrameKey) {
+    pub async fn notify(&self, key: &MessageId) {
         if self.listen_count.load(std::sync::atomic::Ordering::SeqCst) != 0 {
             self.tx
-                .send(TraceObjectObservableMsg::Value(key))
+                .send(TraceObjectObservableMsg::Value(key.clone()))
                 .await
                 .unwrap();
         }
@@ -251,7 +268,7 @@ impl TraceObjectObservable {
         let mut rx = rx.lock().await;
         let mut next_batch_time = tokio::time::Instant::now();
         let mut timeout = tokio::time::Instant::now() + Duration::from_secs(0xFFFF);
-        let mut batch: HashSet<UniqueFrameKey> = HashSet::new();
+        let mut batch: HashSet<MessageId> = HashSet::new();
         loop {
             match tokio::time::timeout_at(timeout, rx.recv()).await {
                 Ok(opt) => {
@@ -307,5 +324,15 @@ impl TraceObjectObservable {
             }
         }
         println!("stop notify task for {event_name}");
+    }
+}
+
+
+impl Serialize for TraceFrame {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer {
+        //TODO implement be daddy.
+        todo!()
     }
 }

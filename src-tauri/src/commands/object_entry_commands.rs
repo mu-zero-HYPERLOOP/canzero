@@ -2,11 +2,9 @@ use std::time::Duration;
 
 use serde::Serialize;
 
+use crate::cnl::frame::{Value, Attribute};
 use crate::{
-    cnl::{
-        frame::type_frame::{CompositeTypeValue, FrameType, TypeValue},
-        network::object_entry_object::ObjectEntryEvent,
-    },
+    cnl::network::object_entry_object::ObjectEntryEvent,
     state::cnl_state::CNLState, notification::notify_error,
 };
 
@@ -44,15 +42,15 @@ pub async fn set_object_entry_value(
         Err(_) => return Err(()),
     };
 
-    fn parse_type_value(
+    fn parse_value(
         oe_type: &config::TypeRef,
         json_value: &serde_json::Value,
-    ) -> Result<TypeValue, ()> {
+    ) -> Result<Value, ()> {
         match oe_type.as_ref() {
             Type::Primitive(SignalType::SignedInt { size }) => {
                 if let Some(val) = json_value.as_i64() {
                     if 2i64.pow((*size - 1) as u32) > val && 2i64.pow((*size - 1) as u32) >= -val {
-                        Ok(TypeValue::Signed(val))
+                        Ok(Value::SignedValue(val))
                     } else {
                         return Err(());
                     }
@@ -63,7 +61,7 @@ pub async fn set_object_entry_value(
             Type::Primitive(SignalType::UnsignedInt { size }) => {
                 if let Some(val) = json_value.as_u64() {
                     if 2u64.pow(*size as u32) > val {
-                        Ok(TypeValue::Unsigned(val))
+                        Ok(Value::UnsignedValue(val))
                     } else {
                         return Err(());
                     }
@@ -80,7 +78,7 @@ pub async fn set_object_entry_value(
                     let min = *offset;
                     let max = (0xffffffffffffffff as u64 >> (64 - size)) as f64 * scale + offset;
                     if val >= min && val <= max {
-                        Ok(TypeValue::Real(val))
+                        Ok(Value::RealValue(val))
                     } else {
                         return Err(());
                     }
@@ -96,12 +94,12 @@ pub async fn set_object_entry_value(
                 visibility: _,
             } => {
                 if let Some(map) = json_value.as_object() {
-                    let mut frame_types = vec![];
+                    let mut attributes : Vec<Attribute> = vec![];
 
                     for (name, attr_type) in attribs {
                         if let Some(val) = map.get(name) {
-                            if let Ok(type_val) = parse_type_value(attr_type, val) {
-                                frame_types.push(FrameType::new(name.clone(), type_val))
+                            if let Ok(type_val) = parse_value(attr_type, val) {
+                                attributes.push(Attribute::new(name, type_val));
                             } else {
                                 return Err(());
                             }
@@ -109,11 +107,7 @@ pub async fn set_object_entry_value(
                             return Err(());
                         }
                     }
-
-                    Ok(TypeValue::Composite(CompositeTypeValue::new(
-                        frame_types,
-                        oe_type,
-                    )))
+                    Ok(Value::StructValue(attributes))
                 } else {
                     return Err(());
                 }
@@ -127,7 +121,8 @@ pub async fn set_object_entry_value(
             } => {
                 if let Some(variant_str) = json_value.as_str() {
                     if entries.iter().any(|e| e.0 == variant_str) {
-                        Ok(TypeValue::Enum(oe_type.clone(), variant_str.to_string()))
+                        Ok(Value::EnumValue(variant_str.to_string()))
+                        // Ok(TypeValue::Enum(oe_type.clone(), variant_str.to_string()))
                     } else {
                         return Err(());
                     }
@@ -139,13 +134,13 @@ pub async fn set_object_entry_value(
         }
     }
 
-    let type_value = match parse_type_value(oe_type, &json_value) {
+    let value = match parse_value(oe_type, &json_value) {
         Ok(x) => x,
         Err(_) => return Err(()),
     };
 
-    println!("parsed value: {type_value:?}");
-    object_entry_object.set_request(type_value);
+    println!("parsed value: {value:?}");
+    object_entry_object.set_request(value);
 
     Ok(())
 }

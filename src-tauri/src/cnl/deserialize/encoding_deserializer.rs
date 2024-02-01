@@ -1,6 +1,8 @@
 use can_config_rs::config::{SignalRef, Type, TypeSignalEncoding};
 
-use super::{signal_deserializer::SignalDeserializer, AttributeDeserializer, Value};
+use crate::cnl::frame::Value;
+
+use super::{signal_deserializer::SignalDeserializer, AttributeDeserializer};
 
 pub enum EncodedDeserializer {
     PrimitiveDeserializer(SignalDeserializer),

@@ -1,9 +1,9 @@
 use can_config_rs::config::SignalRef;
 
-use super::Value;
+use crate::cnl::frame::Value;
 
 pub struct SignalDeserializer {
-    bit_size: u32,
+    bit_mask: u64,
     bit_offset: u32,
     type_info: SignalDeserializerTypeInfo,
 }
@@ -20,7 +20,7 @@ impl SignalDeserializer {
         let bit_size = signal.size() as u32;
         Self {
             bit_offset,
-            bit_size,
+            bit_mask : (u64::MAX.overflowing_shr(u64::BITS - bit_size)).0,
             type_info: match signal.ty() {
                 can_config_rs::config::SignalType::UnsignedInt { size: _ } => {
                     SignalDeserializerTypeInfo::UnsignedSignalDeserializer
@@ -42,7 +42,7 @@ impl SignalDeserializer {
 
     pub fn deserialize(&self, data: u64) -> Value {
         let unsigned_bits =
-            data.overflowing_shr(self.bit_offset).0 & (u64::MAX >> (u64::BITS - self.bit_size));
+            data.overflowing_shr(self.bit_offset).0 & self.bit_mask;
         match &self.type_info {
             SignalDeserializerTypeInfo::DecimalSignalDeserializer { offset, scale } => {
                 Value::RealValue(unsigned_bits as f64 * scale + offset)

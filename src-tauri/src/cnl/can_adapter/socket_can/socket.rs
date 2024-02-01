@@ -77,7 +77,7 @@ impl CanSocket {
         if ret as usize == mem::size_of::<can_frame>() {
             Ok(())
         } else {
-            Err(CanError::Io(std::io::Error::last_os_error()))
+            Err(CanError::Io(Arc::new(std::io::Error::last_os_error())))
         }
     }
 }

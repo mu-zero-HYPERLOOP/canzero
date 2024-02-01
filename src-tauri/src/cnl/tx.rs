@@ -1,7 +1,5 @@
 use can_config_rs::config;
 
-use super::frame::type_frame::TypeValue;
-
 
 pub struct TxCom {
     // needed to find right bus for messages

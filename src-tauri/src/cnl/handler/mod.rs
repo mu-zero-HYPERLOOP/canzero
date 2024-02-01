@@ -18,11 +18,10 @@ pub enum MessageHandler {
     EmptyFrameHandler(EmptyFrameHandler),
     GetRespFrameHandler(GetRespFrameHandler),
     SetRespFrameHandler(SetRespFrameHandler),
+    StreamFrameHandler(StreamFrameHandler),
 
     #[allow(unused)]
     CommandRespFrameHandler(CommandRespFrameHandler),
-    #[allow(unused)]
-    StreamFrameHandler(StreamFrameHandler),
 }
 
 impl MessageHandler {

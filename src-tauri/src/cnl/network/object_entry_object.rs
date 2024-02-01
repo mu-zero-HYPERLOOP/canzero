@@ -11,7 +11,7 @@ use serde::{ser::SerializeMap, Serialize};
 use tauri::Manager;
 use tokio::sync::{mpsc, Mutex};
 
-use crate::cnl::{frame::type_frame::TypeValue, tx::TxCom};
+use crate::cnl::{tx::TxCom, frame::Value};
 
 pub struct ObjectEntryObject {
     object_entry_ref: config::ObjectEntryRef,
@@ -76,7 +76,7 @@ impl ObjectEntryObject {
         &self.latest_event_name
     }
 
-    pub async fn push_value(&self, value: TypeValue, arrive_instance: &std::time::Instant) {
+    pub async fn push_value(&self, value: Value, arrive_instance: &std::time::Instant) {
         let mut store = self.store.lock().await;
         let timestamp = arrive_instance.duration_since(self.start_time);
         let delta_time = match store.latest_value() {
@@ -196,17 +196,17 @@ impl ObjectEntryObject {
     //     x
     // }
 
-    pub fn set_request(&self, type_value: TypeValue) {
-        let bit_value = type_value.get_as_bin(self.ty());
+    pub fn set_request(&self, value: Value) {
+        let bit_value = value.get_as_bin(self.ty());
         let config_type = self.ty();
         println!("{config_type:?}");
-        self.tx().send_set_request(5, 2, &bit_value);
+        self.tx().send_set_request(5, 2, &bit_value.0);
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct ObjectEntryEvent {
-    value: TypeValue,
+    value: Value,
     timestamp: Duration,
     delta_time: Duration,
 }
