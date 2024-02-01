@@ -3,7 +3,6 @@ pub mod errors;
 pub mod frame;
 mod handler;
 pub mod network;
-pub mod parser;
 mod rx;
 pub mod trace;
 mod tx;

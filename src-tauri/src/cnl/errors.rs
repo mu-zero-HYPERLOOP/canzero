@@ -2,10 +2,11 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Debug)]
 pub enum Error {
+    InvalidGetResponseSofFlag,
+    InvalidGetResponseEofFlag,
+    InvalidGetResponseToggleFlag,
     InvalidGetResponseFormat,
-    InvalidGetResponseFieldFormat { field: &'static str },
-    InvalidGetResponseServerNotFound,
-    InvalidGetResponseObjectEntryNotFound,
+    InvalidGetResponseServerOrObjectEntryNotFound,
     InvalidSetResponseFormat,
     InvalidStreamMessageFormat,
     FragmentationError,
@@ -15,27 +16,20 @@ pub enum Error {
 impl Error {
     pub fn reason(&self) -> &str {
         match &self {
-            Error::InvalidGetResponseFormat => "invalid get response",
-            Error::InvalidGetResponseFieldFormat { field: _ } => "invalid get response",
-            Error::InvalidGetResponseServerNotFound => "invalid get response",
-            Error::InvalidGetResponseObjectEntryNotFound => "invalid get response",
             Error::InvalidSetResponseFormat => "invalid set response",
             Error::InvalidStreamMessageFormat => "invalid stream message",
             Error::FragmentationError => "fragmentation error",
             Error::InvalidCommandMessageFormat => "invalid command message",
+            Error::InvalidGetResponseSofFlag => "invalid get response: invalid sof bit",
+            Error::InvalidGetResponseEofFlag => "invalid get response: invalid eof bit",
+            Error::InvalidGetResponseToggleFlag => "invalid get response: invalid toggle bit",
+            Error::InvalidGetResponseFormat => "invalid get response format",
+            Error::InvalidGetResponseServerOrObjectEntryNotFound => "invalid get response: server or object entry not found",
         }
     }
 
     pub fn description(&self) -> &str {
         match &self {
-            Error::InvalidGetResponseFormat => {
-                "the get response message was associated with the wrong message type"
-            }
-            Error::InvalidGetResponseFieldFormat { field: _ } => {
-                "failed to parse field {field} from the get response message"
-            }
-            Error::InvalidGetResponseServerNotFound => "server not found",
-            Error::InvalidGetResponseObjectEntryNotFound => "object entry not found",
             Error::InvalidSetResponseFormat => {
                 "the set response message was associated with the wrong message type"
             }
@@ -46,6 +40,11 @@ impl Error {
             Error::InvalidCommandMessageFormat => {
                 "a command message was associated with the wrong message type"
             }
+            Error::InvalidGetResponseSofFlag => "invalid get response: invalid sof bit",
+            Error::InvalidGetResponseEofFlag => "invalid get response: invalid eof bit",
+            Error::InvalidGetResponseToggleFlag => "invalid get response: invalid toggle bit",
+            Error::InvalidGetResponseFormat => "invalid get response format",
+            Error::InvalidGetResponseServerOrObjectEntryNotFound => "invalid get response: server not found",
         }
     }
 }

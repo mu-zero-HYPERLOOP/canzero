@@ -1,8 +1,10 @@
+use std::sync::Arc;
 
-#[derive(Debug)]
+
+#[derive(Debug, Clone)]
 pub enum CanError {
     #[allow(unused)]
-    Io(std::io::Error),
+    Io(Arc<std::io::Error>),
     #[allow(unused)]
     Disconnect(String),
     #[allow(unused)]
