@@ -7,7 +7,7 @@ export interface ObjectEntryComposite {
 }
 
 interface ObjectEntryEvent {
-  value: number | string | ObjectEntryComposite
+  value: ObjectEntryValue
   timestamp: number,
   delta_time: number,
 }
