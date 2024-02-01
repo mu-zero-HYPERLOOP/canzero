@@ -67,6 +67,7 @@ impl SocketCanAdapter {
             socket,
             rx: Mutex::new(rx),
             err_rx: Mutex::new(err_rx),
+            bus_config: bus_config.clone(),
         })
     }
 

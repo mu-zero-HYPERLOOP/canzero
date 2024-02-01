@@ -143,10 +143,10 @@ fn random_stream_frame(rng: &mut ThreadRng, network_config: &config::NetworkRef)
     CanFrame::new(id, ide, false, dlc, data)
 }
 
-// NOTE this is allowed only because it is only used during testing 
-// for release builds no unsafe blocks unless very obviously safe
-// is allowed! 
-// NOTE unsafe is required because NetworkRef doesn't 
-// implement send and sync, even thou it's immutable DUH!
+// NOTE: this is allowed only because it is only used during testing.
+// For release builds no unsafe blocks unless very obviously safe
+// are allowed! 
+// NOTE: unsafe is required because NetworkRef doesn't 
+// implement send and sync, even tho it's immutable DUH!
 unsafe impl Send for MockCanAdapter {}
 unsafe impl Sync for MockCanAdapter {}

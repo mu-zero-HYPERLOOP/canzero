@@ -144,7 +144,7 @@ pub async fn set_object_entry_value(
         Err(_) => return Err(()),
     };
 
-    println!("parsed value: {type_value:?}");
+    println!("set request parsed value: {type_value:?}");
     object_entry_object.set_request(type_value);
 
     Ok(())

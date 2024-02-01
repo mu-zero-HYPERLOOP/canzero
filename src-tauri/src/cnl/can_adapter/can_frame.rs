@@ -14,6 +14,12 @@ enum CanFrameIdFlags {
 }
 
 impl CanFrame {
+    /// Least significant byte of data attribute corresponds to first byte of data field in CAN message.
+    /// Just think about it as a char-array.
+    /// Bit order within each byte should not be a concern
+    /// (bits not really addressable in a byte-addressable system).
+    /// Just think about it as least significant bit in each byte is also
+    /// least significant bit in CAN message and at receiver.
     pub fn new(id: u32, ide: bool, rtr: bool, dlc: u8, data: u64) -> Self {
         Self {
             id: id

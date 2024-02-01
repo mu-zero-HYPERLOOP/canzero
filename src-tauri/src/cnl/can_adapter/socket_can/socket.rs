@@ -9,6 +9,7 @@ pub use libc::{
 
 use crate::cnl::can_adapter::{can_error::CanError, can_frame::CanFrame};
 
+
 #[derive(Clone)]
 struct CanSocket {
     fd: c_int,
