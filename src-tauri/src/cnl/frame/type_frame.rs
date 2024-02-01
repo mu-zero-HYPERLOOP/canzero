@@ -1,12 +1,16 @@
-use std::{ops::Index, mem::size_of};
+use std::{mem::size_of, ops::Index};
 
-use bitvec::{vec::BitVec, prelude::Lsb0, store::BitStore};
+use bitvec::{
+    prelude::{BitOrder, Lsb0},
+    store::BitStore,
+    vec::BitVec,
+};
 use can_config_rs::config;
+use config::{SignalType, Type};
 use serde::{
     ser::{SerializeMap, SerializeSeq},
-    Serialize, Serializer
+    Serialize, Serializer,
 };
-use config::{Type, SignalType};
 
 /**
  *
@@ -168,7 +172,6 @@ pub struct ArrayTypeValue {
 }
 
 impl ArrayTypeValue {
-
     #[allow(unused)]
     pub fn new(values: Vec<TypeValue>) -> Self {
         Self { values }
@@ -270,7 +273,8 @@ impl Serialize for TypeFrame {
 impl Serialize for TypeValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: Serializer {
+        S: Serializer,
+    {
         match &self {
             TypeValue::Unsigned(v) => serializer.serialize_u64(*v),
             TypeValue::Signed(v) => serializer.serialize_i64(*v),
@@ -290,80 +294,105 @@ impl Serialize for TypeValue {
 }
 
 impl TypeValue {
-    pub fn get_as_bin<T>(&self, ty: &config::Type) -> (Vec<T>, u8) where T: BitStore {
-        let mut bit_vec: BitVec<T, Lsb0> = BitVec::new();
+    pub fn get_as_bin<S>(&self, ty: &config::Type) -> (Vec<S>, u8)
+    where
+        S: BitStore,
+    {
+        let mut bit_vec: BitVec<S, Lsb0> = BitVec::new();
 
-        fn continue_get_as_bin<T>(
-                type_value: &TypeValue, 
-                ty: &config::Type, 
-                bit_vec: &mut BitVec<T, Lsb0>, 
-            ) where T: BitStore {
+        fn continue_get_as_bin<S, O>(
+            type_value: &TypeValue,
+            ty: &config::Type,
+            bit_vec: &mut BitVec<S, O>,
+        ) where
+            S: BitStore,
+            O: BitOrder,
+        {
             match (type_value, ty) {
-                (TypeValue::Unsigned(val), Type::Primitive(SignalType::UnsignedInt{ size })) => {
-                    for i in (0..*size).rev() {
+                (TypeValue::Unsigned(val), Type::Primitive(SignalType::UnsignedInt { size })) => {
+                    for i in 0..*size {
                         let bit_int = (*val >> i) & 0x1;
                         bit_vec.push(if bit_int == 0 { false } else { true });
                     }
-                },
-                (TypeValue::Signed(val), config::Type::Primitive(SignalType::SignedInt{ size })) => {
-                    for i in (0..*size).rev() {
+                }
+                (
+                    TypeValue::Signed(val),
+                    config::Type::Primitive(SignalType::SignedInt { size }),
+                ) => {
+                    for i in 0..*size {
                         let bit_int = (*val >> i) & 0x1;
                         bit_vec.push(if bit_int == 0 { false } else { true });
                     }
-                },
-                (TypeValue::Real(val), config::Type::Primitive(SignalType::Decimal { size, offset, scale })) => {
+                }
+                (
+                    TypeValue::Real(val),
+                    config::Type::Primitive(SignalType::Decimal {
+                        size,
+                        offset,
+                        scale,
+                    }),
+                ) => {
                     let base_float = (val - offset) / scale;
                     let base_bits = base_float.round() as i64;
-                    // just in case floating point errors fuck us. 
+                    // just in case floating point errors fuck us.
                     // not sure if actually needed.
-                    let base_bits: u64 = if base_bits < 0 { 
-                        0 
-                    } else if (base_bits >> size) > 0 { 
-                        0xffff_ffff_ffff_ffff 
+                    let base_bits: u64 = if base_bits < 0 {
+                        0
+                    } else if (base_bits >> size) > 0 {
+                        0xffff_ffff_ffff_ffff
                     } else {
                         base_bits as u64
                     };
-                    for i in (0..*size).rev() {
+                    for i in 0..*size {
                         let bit_int = (base_bits >> i) & 0x1;
                         bit_vec.push(if bit_int == 0 { false } else { true });
                     }
-                },
-                (TypeValue::Composite(val), config::Type::Struct { 
-                    name: _, 
-                    description: _, 
-                    attribs, 
-                    visibility: _ 
-                }) => {
-                    for (nested_val, nested_type) in val.attributes().iter().zip(
-                        attribs.iter().map(|attr| attr.1.clone())) {
+                }
+                (
+                    TypeValue::Composite(val),
+                    config::Type::Struct {
+                        name: _,
+                        description: _,
+                        attribs,
+                        visibility: _,
+                    },
+                ) => {
+                    for (nested_val, nested_type) in val
+                        .attributes()
+                        .iter()
+                        .zip(attribs.iter().map(|attr| attr.1.clone()))
+                    {
                         continue_get_as_bin(nested_val.value(), nested_type.as_ref(), bit_vec)
                     }
-                },
-                (TypeValue::Enum(_, variant_name), config::Type::Enum { 
-                    name: _, 
-                    description: _, 
-                    size, 
-                    entries, 
-                    visibility: _
-                }) => {
+                }
+                (
+                    TypeValue::Enum(_, variant_name),
+                    config::Type::Enum {
+                        name: _,
+                        description: _,
+                        size,
+                        entries,
+                        visibility: _,
+                    },
+                ) => {
                     if let Some(enum_val) = entries.iter().find(|(name, _)| name == variant_name) {
                         let bit_val = enum_val.1;
-                        for i in (0..*size).rev() {
+                        for i in 0..*size {
                             let bit_int = (bit_val >> i) & 0x1;
                             bit_vec.push(if bit_int == 0 { false } else { true });
                         }
                     } else {
-                        panic!("variant name not known!");
+                        panic!("enum variant name not known!");
                     };
-                },
+                }
                 (TypeValue::Array(_), config::Type::Array { len: _, ty: _ }) => todo!(),
-                _ => panic!("TypeValue and config::Type did not match!")
+                _ => panic!("TypeValue and config::Type did not match!"),
             };
         }
 
         continue_get_as_bin(self, ty, &mut bit_vec);
         let num_bytes = (bit_vec.len() + 7) / 8;
-        let last_fill: u8 = (num_bytes % size_of::<T>()) as u8;
+        let last_fill: u8 = (num_bytes % size_of::<S>()) as u8;
 
         bit_vec.set_uninitialized(false);
         let vec_t = bit_vec.into_vec();
@@ -371,4 +400,3 @@ impl TypeValue {
         return (vec_t, last_fill);
     }
 }
-

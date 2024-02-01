@@ -201,8 +201,6 @@ impl ObjectEntryObject {
 
     pub fn set_request(&self, type_value: TypeValue) {
         let (bit_value, last_fill) = type_value.get_as_bin(self.ty());
-        let config_type = self.ty();
-        println!("{config_type:?}");
         let server_id = self.node_id();
         let oe_id = self.id();
         self.tx().send_set_request(server_id, oe_id, bit_value, last_fill);
