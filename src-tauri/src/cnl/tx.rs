@@ -1,6 +1,7 @@
 use std::{sync::Arc, time::Duration};
 
 use can_config_rs::config;
+use tokio::time;
 
 use crate::cnl::can_adapter::can_frame::CanFrame;
 
@@ -102,9 +103,11 @@ impl TxCom {
 
 fn fragmented_can_send(frames: Vec<CanFrame>, can_adapter: Arc<CanAdapter>, frag_time_ms: u64) {
     tokio::spawn(async move {
+        let mut interval = time::interval(Duration::from_millis(frag_time_ms));
         for frame in frames {
+            // first tick completes instantaniously
+            interval.tick().await;
             can_adapter.send(frame).await;
-            tokio::time::sleep(Duration::from_millis(frag_time_ms)).await;
         }
     });
 }

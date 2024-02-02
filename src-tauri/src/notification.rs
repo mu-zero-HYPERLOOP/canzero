@@ -37,20 +37,30 @@ pub struct Notification {
 }
 
 impl Notification {
-    pub fn make_error(title: &str, msg: &str) -> Notification {
+    pub fn new(level: NotificationLevel, title: &str, msg: &str) -> Notification {
         Notification {
-            level: NotificationLevel::Error,
+            level,
             title: title.to_owned(),
             message: msg.to_owned(),
         }
     }
 }
 
+
 pub fn notify_error(app_handle : &tauri::AppHandle, reason: &str, description: &str) {
     app_handle
         .emit_all(
             "notification",
-            Notification::make_error(reason, description),
+            Notification::new(NotificationLevel::Error, reason, description),
+        )
+        .expect("failed to emit notification");
+}
+
+pub fn notify_warning(app_handle : &tauri::AppHandle, reason: &str, description: &str) {
+    app_handle
+        .emit_all(
+            "notification",
+            Notification::new(NotificationLevel::Warning, reason, description),
         )
         .expect("failed to emit notification");
 }

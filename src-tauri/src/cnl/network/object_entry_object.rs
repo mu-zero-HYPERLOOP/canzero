@@ -11,7 +11,7 @@ use serde::{ser::SerializeMap, Serialize};
 use tauri::Manager;
 use tokio::sync::{mpsc, Mutex};
 
-use crate::cnl::{tx::TxCom, frame::Value};
+use crate::{cnl::{tx::TxCom, frame::Value}, notification::notify_warning};
 
 pub struct ObjectEntryObject {
     object_entry_ref: config::ObjectEntryRef,
@@ -24,6 +24,7 @@ pub struct ObjectEntryObject {
     history_event_name_prefix: String,
     app_handle: tauri::AppHandle,
     tx_com: Arc<TxCom>,
+    open_set_request: bool,
 }
 
 impl ObjectEntryObject {
@@ -57,7 +58,8 @@ impl ObjectEntryObject {
             history_observables_id_acc: AtomicU64::new(0),
             history_event_name_prefix: history_event_name,
             app_handle: app_handle.clone(),
-            tx_com
+            tx_com,
+            open_set_request: false,
         }
     }
     pub fn name(&self) -> &str {
@@ -185,10 +187,23 @@ impl ObjectEntryObject {
     }
 
     pub fn set_request(&self, value: Value) {
+        if self.open_set_request {
+            notify_warning(&self.app_handle, "other set request still open -- ignoring"
+                           , "An older set request for the same object entry is still in progress.
+                           Thus this set request is ignored")
+            
+
+        }
         let (bit_value, last_fill) = value.get_as_bin(self.ty());
         let server_id = self.node_id();
         let oe_id = self.id();
-        self.tx().send_set_request(server_id, oe_id, bit_value, last_fill);
+
+        tokio::spawn(async move {
+            
+
+            self.tx().send_set_request(server_id, oe_id, bit_value, last_fill);
+        });
+
     }
 }
 
