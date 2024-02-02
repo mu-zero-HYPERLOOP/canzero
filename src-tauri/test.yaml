@@ -1,10 +1,6 @@
 
-baudrate : 10
-
 buses:
   can0:
-    baudrate: 1000000
-  can1:
     baudrate: 1000000
 
 enum_types:
@@ -29,36 +25,6 @@ nodes:
   secu: 
     description: Sensor Electronics Control Unit
     object_dictionary:
-      cpu_temperature:
-        type : d8<-10..100>
-        access : global
-        description : CPU Temperature
-        unit : °C
-      bcu_temperature:
-        type : d8<-10..100>
-        access : global
-        description : BCU Temperature
-        unit : °C
-      pressure_sensor_0:
-        type : d8<-1..20>
-        access : global
-        description : Pressure Value 1
-        unit : bar
-      pressure_sensor_1:
-        type : d8<-1..20>
-        access : global
-        description : Pressure Value 1
-        unit : bar
-      pressure_sensor_2:
-        type : d8<-1..20>
-        access : global
-        description : Pressure Value 1
-        unit : bar
-      pressure_sensor_3:
-        type : d8<-1..20>
-        access : global
-        description : Pressure Value 1
-        unit : bar
       position:
         type : d32<-1..100>
         access : global
@@ -69,128 +35,22 @@ nodes:
         access : global
         description: estimated velocity of the pod
         unit: m/s
-      acceleration_x:
-        type : d16<-10..10>
-        access: global
-        description: x acceleration of the pod
-        unit: m/s²
-      acceleration_y:
-        type : d16<-10..10>
-        access: global
-        description: x acceleration of the pod
-        unit: m/s²
-      acceleration_z:
-        type : d16<-10..10>
-        access: global
-        description: x acceleration of the pod
-        unit: m/s²
-      levitation_state:
-        type: u8
-        access: global
-        description: state of the MLUs
-      guidance_state:
-        type: u2
-        access: global
-        description: state of the MGU
-      cooling_state:
-        type: u8
-        access: global
-        description: state of the cooling system
       global_state:
         type: global_state_t
-        access: global
-        descríption: state of the overall pod
+        access : global
+        description: state of the pod
+      test:
+        type: u8
+        access : global
+        description : test oe
 
     tx_streams:
-      ecu_temperatures:
-        description : Stream of CPU temperatures of the ECU
-        interval : 10s
-        mapping:
-          - cpu_temperature
-          - bcu_temperature
-      pressure_values:
-        description : Pressure values of the pod
-        interval : 100ms
-        mapping:
-          - pressure_sensor_0
-          - pressure_sensor_1
-          - pressure_sensor_2
-          - pressure_sensor_3
       position_and_velocity:
         description : Position and velocity values of the pod
         interval : 100ms
         mapping:
           - position
           - velocity
-      acceleration:
-        description: Acceleration of the pods X,Y,Z axis
-        internal: 100ms
-        mapping:
-          - acceleration_x
-          - acceleration_y
-          - acceleration_z
-      states:
-        description: States of the subsytems
-        interval : 100ms
-        mapping:
-          - levitation_state
-          - guidance_state
-          - cooling_state
-          - global_state
-        
-
-    commands:
-      configure_temperatures:
-        description: Samples the temperature multiple times to configure the filters.
-        arguments: 
-          - sample_count: u32
-        callee:
-          - master
-      test1:
-        arguments: 
-          - sample_count: u32
-        callee:
-          - master
-      test2:
-        arguments: 
-          - sample_count: u32
-        callee:
-          - master
-      test3:
-        arguments: 
-          - sample_count: u32
-        callee:
-          - master
-      test4:
-        arguments: 
-          - sample_count: u32
-        callee:
-          - master
-      test5:
-        arguments: 
-          - sample_count: u32
-        callee:
-          - master
-      test6:
-        arguments: 
-          - sample_count: u32
-        callee:
-          - master
-  master:
-    description : Master node running the main state machine
-    object_dictionary:
-      secu_cpu_temperature:
-        type : d8<-10..100>
-        access : global
-        description : CPU Temperature of the SECU.
-    rx_streams:
-      secu:
-        ecu_temperatures:
-          cpu_temperature : secu_cpu_temperature
-          bcu_temperature : secu_bcu_temperature
-
-
-
       
 
 

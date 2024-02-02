@@ -1,14 +1,12 @@
-use std::mem;
+use std::{mem, sync::Arc};
 
 use libc::{c_int, c_void, can_frame, read, sa_family_t, sockaddr_can, write};
 pub use libc::{
-    AF_CAN, CANFD_MTU, CAN_EFF_FLAG, CAN_EFF_MASK, CAN_ERR_FLAG, CAN_MTU, CAN_RAW,
-    CAN_RAW_ERR_FILTER, CAN_RAW_FD_FRAMES, CAN_RAW_FILTER, CAN_RAW_JOIN_FILTERS, CAN_RAW_LOOPBACK,
-    CAN_RAW_RECV_OWN_MSGS, CAN_RTR_FLAG, CAN_SFF_MASK, PF_CAN, SOCK_RAW, SOL_CAN_BASE, SOL_CAN_RAW,
+    AF_CAN, CAN_EFF_FLAG, CAN_EFF_MASK, CAN_ERR_FLAG, CAN_RAW, CAN_RTR_FLAG, CAN_SFF_MASK, PF_CAN,
+    SOCK_RAW,
 };
 
 use crate::cnl::can_adapter::{can_error::CanError, can_frame::CanFrame};
-
 
 #[derive(Clone)]
 struct CanSocket {
@@ -53,13 +51,12 @@ impl CanSocket {
         if rd as usize == n {
             // parse can_frame into CanFrame
             if frame.can_id & CAN_ERR_FLAG != 0 {
-                return Err(CanError::Can(u64::from_be_bytes(frame.data)));
+                return Err(CanError::Can(unsafe { std::mem::transmute(frame.data) }));
             } else {
-                // TODO
                 Ok(frame_from_socket_can_frame(&frame))
             }
         } else {
-            Err(CanError::Io(std::io::Error::last_os_error()))
+            Err(CanError::Io(Arc::new(std::io::Error::last_os_error())))
         }
     }
 
@@ -95,7 +92,7 @@ pub fn frame_from_socket_can_frame(frame: &can_frame) -> CanFrame {
         frame.can_id & CAN_RTR_FLAG != 0,
         ide,
         frame.can_dlc,
-        u64::from_be_bytes(frame.data),
+        u64::from_le_bytes(frame.data),
     )
 }
 
@@ -134,14 +131,6 @@ impl OwnedCanSocket {
         CanSocketRef {
             socket: self.socket.clone(),
         }
-    }
-
-    pub fn receive(&self) -> Result<CanFrame, CanError> {
-        self.socket.receive()
-    }
-
-    pub fn transmit(&self, frame: &CanFrame) -> Result<(), CanError> {
-        self.socket.transmit(frame)
     }
 }
 

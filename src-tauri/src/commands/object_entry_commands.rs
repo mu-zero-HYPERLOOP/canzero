@@ -275,18 +275,16 @@ pub async fn unlisten_from_history_of_object_entry(
 
 #[tauri::command]
 pub async fn request_object_entry_value(
-    app_handle: tauri::AppHandle,
     state: tauri::State<'_, CNLState>,
     node_name: String,
     object_entry_name: String,
 ) -> Result<(), ()> {
-    println!("invoked request_object_entry_value({node_name}, {object_entry_name})");
     let cnl = state.lock().await;
 
     let Some(node) = cnl.nodes().iter().find(|no| no.name() == &node_name) else {
         return Err(());
     };
-    let Some(_) = node
+    let Some(object_entry) = node
         .object_entries()
         .iter()
         .find(|oe| oe.name() == &object_entry_name)
@@ -294,13 +292,7 @@ pub async fn request_object_entry_value(
         return Err(());
     };
 
-    tokio::time::sleep(Duration::from_millis(1000)).await;
-
-    notify_error(
-        &app_handle,
-        "Unimplemented",
-        "request object entry value is not yet implemented",
-    );
+    object_entry.request_current_value().await;
 
     Ok(())
 }

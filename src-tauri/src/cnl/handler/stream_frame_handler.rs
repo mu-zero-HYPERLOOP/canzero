@@ -16,7 +16,6 @@ pub struct StreamFrameHandler {
 }
 
 impl StreamFrameHandler {
-    #[allow(unused)]
     pub fn create(
         stream: &config::stream::StreamRef,
         stream_object_entry_objects: &Vec<Arc<ObjectEntryObject>>,
@@ -30,7 +29,6 @@ impl StreamFrameHandler {
         let frame = self
             .frame_deserializer
             .deserialize(can_frame.get_data_u64());
-
         for (attrib, oeo) in frame.attributes().iter().zip(&self.object_entries) {
             oeo.push_value(attrib.value().clone(), can_frame.timestamp()).await
         }

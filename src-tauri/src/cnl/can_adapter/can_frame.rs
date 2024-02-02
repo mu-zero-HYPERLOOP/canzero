@@ -42,8 +42,28 @@ impl CanFrame {
         self.id
     }
 
+    #[allow(unused)]
+    pub fn get_id(&self) -> u32 {
+        self.id & CanFrameIdFlags::ExtMask as u32
+    }
+    #[allow(unused)]
+    pub fn get_ide_flag(&self) -> bool {
+        (self.id & CanFrameIdFlags::IdeMask as u32) != 0
+    }
+    #[allow(unused)]
+    pub fn get_rtr_flag(&self) -> bool {
+        (self.id & CanFrameIdFlags::RtrMask as u32) != 0
+    }
+    #[allow(unused)]
+    pub fn get_dlc(&self) -> u8 {
+        self.dlc
+    }
     pub fn get_data_u64(&self) -> u64 {
         self.data
+    }
+    #[allow(dead_code)]
+    pub fn get_data_8u8(&self) -> [u8; 8] {
+        unsafe { std::mem::transmute::<u64, [u8; 8]>(self.data) }
     }
 }
 

@@ -79,6 +79,10 @@ impl ObjectEntryObject {
         self.object_entry_ref.node().id() as u8
     }
 
+    pub async fn request_current_value(&self) {
+        self.tx_com.send_get_req(self.node_id(), self.id() as u16).await;
+    }
+
     pub async fn push_value(&self, value: Value, arrive_instance: &std::time::Instant) {
         let mut store = self.store.lock().await;
         let timestamp = arrive_instance.duration_since(self.start_time);

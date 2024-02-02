@@ -152,12 +152,7 @@ impl GetRespFrameHandler {
         }
     }
 
-    // gets invoked in rx.rs -> fn can_receiver(..).
-    // for each frame a lookup is done to get the correct handler afterwards.
-    // This handler is only invoked for the get resp message of the config therefor the
-    // format can be assumed to be the same for every frame!
     pub async fn handle(&self, can_frame: &TCanFrame) -> Result<TFrame> {
-        // a small example of how to parse the type frame!
         let frame = self
             .frame_deserializer
             .deserialize(can_frame.get_data_u64());
@@ -169,7 +164,7 @@ impl GetRespFrameHandler {
             object_entry_id: get_resp_frame.object_entry_id,
         };
 
-        // lookup
+        // lookup the correct GetResp "similar to handlers"
         let Some(get_resp) = self.get_resp_lookup.get(&get_resp_identifier) else {
             return Err(Error::InvalidGetResponseServerOrObjectEntryNotFound);
         };

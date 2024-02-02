@@ -9,28 +9,30 @@ use super::CanAdapter;
 pub struct TxCom {
     network_ref: config::NetworkRef,
     set_req_can_adapter: Arc<CanAdapter>,
+    get_req_can_adapter: Arc<CanAdapter>,
     my_node_id: u8,
     frag_time_ms: u64,
 }
 
 impl TxCom {
     pub fn create(network_ref: &config::NetworkRef, can_adapters: &Vec<Arc<CanAdapter>>) -> TxCom {
-        let set_req_bus_id = network_ref.set_req_message().bus().id();
-        let can_adap = match can_adapters
+        let set_req_can_adapter = can_adapters
             .iter()
-            .find(|adapter| adapter.bus().id() == set_req_bus_id)
-        {
-            Some(adapter) => adapter.clone(),
-            None => {
-                println!("I fucked up");
-                panic!("can adapter for set requests missing!");
-            }
-        };
+            .find(|adapter| adapter.bus().id() == network_ref.set_req_message().bus().id())
+            .expect("DETECTED INVALID CONFIG: no set_req message in the config")
+            .clone();
+
+        let get_req_can_adapter = can_adapters
+            .iter()
+            .find(|adapter| adapter.bus().id() == network_ref.get_req_message().bus().id())
+            .expect("DETECTED INVALID CONFIG: no get_req message in the config")
+            .clone();
 
         TxCom {
             network_ref: network_ref.clone(),
             my_node_id: network_ref.nodes().len() as u8,
-            set_req_can_adapter: can_adap,
+            set_req_can_adapter,
+            get_req_can_adapter,
             frag_time_ms: 50,
         }
     }
@@ -80,6 +82,21 @@ impl TxCom {
             self.set_req_can_adapter.clone(),
             self.frag_time_ms,
         );
+    }
+
+    pub async fn send_get_req(&self, server_id: u8, object_entry_id: u16) {
+        let mut data : u64= 0;
+        data |= object_entry_id as u64;
+        data |= (self.network_ref.nodes().len() as u64) << 13;
+        data |= (server_id as u64) << 22;
+
+        self.get_req_can_adapter.send(CanFrame::new(
+            self.network_ref.get_req_message().id().as_u32(),
+            self.network_ref.get_req_message().id().ide(),
+            false,
+            self.network_ref.get_req_message().dlc(),
+            data,
+        )).await;
     }
 }
 
