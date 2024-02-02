@@ -64,3 +64,12 @@ pub fn notify_warning(app_handle : &tauri::AppHandle, reason: &str, description:
         )
         .expect("failed to emit notification");
 }
+
+pub fn notify_info(app_handle : &tauri::AppHandle, reason: &str, description: &str) {
+    app_handle
+        .emit_all(
+            "notification",
+            Notification::new(NotificationLevel::Info, reason, description),
+        )
+        .expect("failed to emit notification");
+}
