@@ -28,19 +28,19 @@ import ObjectEntryListenLatestResponse from "./types/ObjectEntryListenLatestResp
 import {listen} from "@tauri-apps/api/event";
 import TextField from "@mui/material/TextField";
 
-const INVALID_CHARACTERS: string = "Invalid characters"
 const NEGATIVE: string = "Value must be positive"
 const NON_INTEGER: string = "Value must be an integer"
 const NOT_A_NUMBER: string = "Value is not a number"
+//const OUT_OF_RANGE: string = "Value out of range"
 
 function checkInput(val: string, type: ObjectEntryType, setError: (error: boolean) => void, setErrorMsg: (errorMsg: string | null) => void) {
     if (val === "" || isStringArray(type)) {
         setError(false)
         return;
     } else if (isInt(type)) {
-        let regExp = /[a-z]/i;
+        let regExp =  /^-?\d*[.]?\d+$/;
         let num = parseInt(val)
-        if (regExp.test(val)) setErrorMsg(INVALID_CHARACTERS)
+        if (!regExp.test(val)) setErrorMsg(NOT_A_NUMBER)
         else if (isNaN(num)) setErrorMsg(NOT_A_NUMBER)
         else if (val.includes(".")) setErrorMsg(NON_INTEGER)
         else {
@@ -48,9 +48,9 @@ function checkInput(val: string, type: ObjectEntryType, setError: (error: boolea
             return;
         }
     } else if (isUint(type)) {
-        let regExp = /[a-z]/i;
+        let regExp = /^-?\d*[.]?\d+$/;
         let num = parseInt(val)
-        if (regExp.test(val)) setErrorMsg(INVALID_CHARACTERS)
+        if (!regExp.test(val)) setErrorMsg(NOT_A_NUMBER)
         else if (isNaN(num)) setErrorMsg(NOT_A_NUMBER)
         else if (val.includes(".")) setErrorMsg(NON_INTEGER)
         else if (num < 0) setErrorMsg(NEGATIVE)
@@ -59,9 +59,9 @@ function checkInput(val: string, type: ObjectEntryType, setError: (error: boolea
             return;
         }
     } else if (isReal(type)) {
-        let regExp = /[a-z]/i;
+        let regExp = /^-?\d*[.]?\d+$/;
         let num = parseFloat(val)
-        if (regExp.test(val)) setErrorMsg(INVALID_CHARACTERS)
+        if (!regExp.test(val)) setErrorMsg(NOT_A_NUMBER)
         else if (isNaN(num)) setErrorMsg(NOT_A_NUMBER)
         else {
             setError(false)
@@ -71,16 +71,16 @@ function checkInput(val: string, type: ObjectEntryType, setError: (error: boolea
     setError(true)
 }
 
-function invokeBackend(node: string, objectEntry: string, val: ObjectEntryValue, setError: {
+function invokeBackend(node: string, objectEntry: string, val: ObjectEntryValue, setGlobalError: {
     (value: SetStateAction<boolean>): void;
     (arg0: boolean): void;
 }) {
-    setError(false)
+    setGlobalError(false)
     invoke("set_object_entry_value", {
         nodeName: node,
         objectEntryName: objectEntry,
         newValueJson: JSON.stringify(val),
-    }).catch((_) => setError(true));
+    }).catch((_) => setGlobalError(true));
 }
 
 function convertMutableObjectEntryValue(value: MutableObjectEntryValue, ty: ObjectEntryType): ObjectEntryValue {
@@ -109,14 +109,14 @@ function updateMutableObjectEntryValue(newValue: MutableObjectEntryValue, value:
     }
 }
 
-function sendInput(node: string, objectEntry: string, type: ObjectEntryType, value: ObjectEntryEvent | null, newValue: MutableObjectEntryValue, setError: {
+function sendInput(node: string, objectEntry: string, type: ObjectEntryType, value: ObjectEntryEvent | null, newValue: MutableObjectEntryValue, setGlobalError: {
     (value: SetStateAction<boolean>): void;
     (arg0: boolean): void;
 }) {
     if (!value) {
-        invokeBackend(node, objectEntry, convertMutableObjectEntryValue(newValue, type), setError)
+        invokeBackend(node, objectEntry, convertMutableObjectEntryValue(newValue, type), setGlobalError)
     } else {
-        invokeBackend(node, objectEntry, updateMutableObjectEntryValue(newValue, value.value, type), setError)
+        invokeBackend(node, objectEntry, updateMutableObjectEntryValue(newValue, value.value, type), setGlobalError)
     }
 }
 
@@ -126,9 +126,11 @@ interface DisplayTextFieldsProps {
     value: ObjectEntryValue | undefined,
     newValue: MutableObjectEntryValue,
     name?: string,
+    localErrors: boolean[],
+    setLocalErrors: (localError: boolean[]) => void,
 }
 
-function DisplayTextFields({ty, unit, value, newValue, name}: Readonly<DisplayTextFieldsProps>) {
+function DisplayTextFields({ty, unit, value, newValue, name, localErrors, setLocalErrors}: Readonly<DisplayTextFieldsProps>) {
     let [errorMsg, setErrorMsg] = useState<string | null>(null)
     let [error, setError] = useState<boolean>(false)
 
@@ -139,7 +141,7 @@ function DisplayTextFields({ty, unit, value, newValue, name}: Readonly<DisplayTe
         return (
             <FormControl sx={{width: '25ch'}} variant="outlined">
                 <FormHelperText id="outlined-weight-helper-text1">
-                    {error ? errorMsg : 'Set Value:'}
+                    {'Set Value:'}
                 </FormHelperText>
                 <TextField
                     id="outlined-select-value"
@@ -165,14 +167,16 @@ function DisplayTextFields({ty, unit, value, newValue, name}: Readonly<DisplayTe
     } else if (isObjectEntryCompositeType(ty)) {
         (newValue as MutableObjectEntryComposite).value.forEach(function (newVal, index) {
             if (value) {
-                return <DisplayTextFields ty={ty.attributes[index].type} unit={unit} value={(value as ObjectEntryComposite).value[index].value} newValue={newVal.value} name={ty.name}/>
+                return <DisplayTextFields ty={ty.attributes[index].type} unit={unit} value={(value as ObjectEntryComposite).value[index].value} newValue={newVal.value} name={ty.name} localErrors={localErrors} setLocalErrors={setLocalErrors}/>
             } else {
-                return <DisplayTextFields ty={ty.attributes[index].type} unit={unit} value={value} newValue={newVal.value} name={ty.name}/>
+                return <DisplayTextFields ty={ty.attributes[index].type} unit={unit} value={value} newValue={newVal.value} name={ty.name} localErrors={localErrors} setLocalErrors={setLocalErrors}/>
             }
         })
 
 
     } else {
+        localErrors.push(error)
+        setLocalErrors(localErrors)
         return (
             <FormControl sx={{width: '25ch'}} variant="outlined">
                 <FormHelperText id="outlined-weight-helper-text1">
@@ -189,7 +193,7 @@ function DisplayTextFields({ty, unit, value, newValue, name}: Readonly<DisplayTe
                     onAnimationStart={() => setError(false)}
                     onChange={(event) => {
                         checkInput(event.target.value, ty, setError, setErrorMsg);
-                        (event.target.value === "") ? (newValue as MutableRefObject<number>).current = NaN : (newValue as MutableRefObject<number>).current = Number(event.target.value)
+                        (newValue as MutableRefObject<number>).current = parseInt(event.target.value)
                     }}
                     startAdornment={startAdornment}
                     error={error}
@@ -238,22 +242,20 @@ function createInitial(ty: ObjectEntryType ): MutableObjectEntryValue {
     }
 }
 
-function isDisabled(ty: ObjectEntryType, newValue: MutableObjectEntryValue): boolean {
-
-    // TODO: Check textfields
-
+function isInitial(ty: ObjectEntryType, newValue: MutableObjectEntryValue): boolean {
     if (isInt(ty) || isUint(ty) || isReal(ty)) {
         return isNaN((newValue as MutableRefObject<number>).current)
     } else if (isStringArray(ty)) {
         return (newValue as MutableRefObject<string>).current === ""
     } else {
-        return !(newValue as MutableObjectEntryComposite).value.map((value, index) => isDisabled(ty.attributes[index].type, value.value)).includes(false)
+        return !(newValue as MutableObjectEntryComposite).value.map((value, index) => isInitial(ty.attributes[index].type, value.value)).includes(false)
     }
 }
 
 function EditDialog({onClose, open, nodeName, objectEntryName, objectEntryInfo}: Readonly<EditDialogProps>) {
     let [value, setValue] = useState<ObjectEntryEvent | null>(null);
-    let [error, setError] = useState<boolean>(false);
+    let [globalError, setGlobalError] = useState<boolean>(false);
+    let [localErrors, setLocalErrors] = useState<boolean[]>([])
     let newValue: MutableObjectEntryValue = createInitial(objectEntryInfo.ty)
 
     async function registerListener() {
@@ -301,7 +303,7 @@ function EditDialog({onClose, open, nodeName, objectEntryName, objectEntryInfo}:
                     </Typography>
                 </Stack>
                 <DisplayTextFields ty={objectEntryInfo.ty} unit={objectEntryInfo.unit} value={value?.value}
-                                   newValue={newValue}/>
+                                   newValue={newValue} localErrors={localErrors} setLocalErrors={setLocalErrors}/>
                 <Box component="form"
                      sx={{
                          display: "flex",
@@ -313,12 +315,11 @@ function EditDialog({onClose, open, nodeName, objectEntryName, objectEntryInfo}:
                         sx={{
                             marginLeft: "auto",
                         }}
-                        // TODO: proper error message
-                        color={error ? "error" : "primary"}
-                        disabled={isDisabled(objectEntryInfo.ty, newValue)}
+                        // TODO: proper error message maybe red box
+                        color={globalError ? "error" : "primary"}
+                        disabled={isInitial(objectEntryInfo.ty, newValue) || localErrors.includes(true)}
                         onClick={() => {
-                            sendInput(nodeName, objectEntryName, objectEntryInfo.ty, value, newValue, setError)
-                            console.log(newValue)
+                            sendInput(nodeName, objectEntryName, objectEntryInfo.ty, value, newValue, setGlobalError)
                         }}
                     >
                         Upload
