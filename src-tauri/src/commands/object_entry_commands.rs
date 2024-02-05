@@ -140,7 +140,7 @@ pub async fn set_object_entry_value(
     };
 
     println!("set request parsed value: {value:?}");
-    object_entry_object.set_request(value);
+    object_entry_object.set_request(value).await;
 
     Ok(())
 }

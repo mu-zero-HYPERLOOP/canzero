@@ -1,6 +1,6 @@
 use std::{
     sync::{
-        atomic::{AtomicU64, AtomicUsize},
+        atomic::{AtomicBool, AtomicU64, AtomicUsize},
         Arc,
     },
     time::Duration,
@@ -9,9 +9,12 @@ use std::{
 use can_config_rs::config;
 use serde::{ser::SerializeMap, Serialize};
 use tauri::Manager;
-use tokio::sync::{mpsc, Mutex};
+use tokio::{sync::{mpsc, Mutex}, time::Timeout};
 
-use crate::cnl::{tx::TxCom, frame::Value};
+use crate::{
+    cnl::{frame::Value, tx::TxCom},
+    notification::{notify_error, notify_info, notify_warning},
+};
 
 pub struct ObjectEntryObject {
     object_entry_ref: config::ObjectEntryRef,
@@ -24,6 +27,9 @@ pub struct ObjectEntryObject {
     history_event_name_prefix: String,
     app_handle: tauri::AppHandle,
     tx_com: Arc<TxCom>,
+    open_set_request: AtomicBool,
+    set_request_num: AtomicU64,
+    set_request_timeout: Duration,
 }
 
 impl ObjectEntryObject {
@@ -57,7 +63,10 @@ impl ObjectEntryObject {
             history_observables_id_acc: AtomicU64::new(0),
             history_event_name_prefix: history_event_name,
             app_handle: app_handle.clone(),
-            tx_com
+            tx_com,
+            open_set_request: AtomicBool::new(false),
+            set_request_num: AtomicU64::new(0),
+            set_request_timeout: Duration::from_millis(100),
         }
     }
     pub fn name(&self) -> &str {
@@ -80,7 +89,9 @@ impl ObjectEntryObject {
     }
 
     pub async fn request_current_value(&self) {
-        self.tx_com.send_get_req(self.node_id(), self.id() as u16).await;
+        self.tx_com
+            .send_get_req(self.node_id(), self.id() as u16)
+            .await;
     }
 
     pub async fn push_value(&self, value: Value, arrive_instance: &std::time::Instant) {
@@ -184,11 +195,74 @@ impl ObjectEntryObject {
         history_observables.remove(remove_index);
     }
 
-    pub fn set_request(&self, value: Value) {
+    pub fn push_set_response(&self, result: crate::cnl::errors::Result<()>) {
+        if !self
+            .open_set_request
+            .swap(false, std::sync::atomic::Ordering::SeqCst)
+        {
+            notify_info(
+                &self.app_handle,
+                "set response came in after timeout",
+                &format!(
+                    "The set response for object entry with id {} of node {} came in too late",
+                    self.id(),
+                    self.node_id()
+                ),
+            );
+            return;
+        };
+
+        match result {
+            Ok(_) => {
+                notify_info(
+                    &self.app_handle,
+                    "set request successfull",
+                    &format!(
+                        "Object entry with id {} of node {} was set",
+                        self.id(),
+                        self.node_id()
+                    ),
+                );
+            }
+            Err(err) => {
+                notify_error(&self.app_handle, err.reason(), err.description());
+            }
+        }
+    }
+
+    pub async fn set_request(&self, value: Value) {
+        if self
+            .open_set_request
+            .fetch_or(true, std::sync::atomic::Ordering::SeqCst)
+        {
+            notify_warning(
+                &self.app_handle,
+                "other set request still open -- ignoring",
+                "An older set request for the same object entry is still in progress.
+                 Thus this set request is ignored",
+            );
+            return;
+        }
+        self.set_request_num.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
         let (bit_value, last_fill) = value.get_as_bin(self.ty());
         let server_id = self.node_id();
         let oe_id = self.id();
-        self.tx().send_set_request(server_id, oe_id, bit_value, last_fill);
+
+        self.tx()
+            .send_set_request(server_id, oe_id, bit_value, last_fill)
+            .await;
+        let my_set_req_num = self.set_request_num.load(std::sync::atomic::Ordering::SeqCst);
+        tokio::time::sleep(self.set_request_timeout).await;
+        if self.open_set_request.load(std::sync::atomic::Ordering::SeqCst) {
+            if self.set_request_num.load(std::sync::atomic::Ordering::SeqCst) == my_set_req_num {
+                self.open_set_request.store(false, std::sync::atomic::Ordering::SeqCst);
+                notify_error(&self.app_handle, "set request timed out",
+                    &format!(
+                        "Set request for object entry with id {} of node {} timed out",
+                        self.id(),
+                        self.node_id()));
+            }
+        }
     }
 }
 
