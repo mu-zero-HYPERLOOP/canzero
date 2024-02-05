@@ -1,43 +1,99 @@
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
 use can_config_rs::config::MessageRef;
 
-use crate::cnl::{
-    can_adapter::{timestamped::Timestamped, TCanFrame},
-    errors::Result,
-    frame::TFrame,
-    network::{NetworkObject, node_object}, deserialize::FrameDeserializer,
+use crate::{
+    cnl::{
+        self,
+        can_adapter::{timestamped::Timestamped, TCanFrame},
+        deserialize::FrameDeserializer,
+        errors::{Error, Result},
+        frame::{Frame, TFrame, Value},
+        network::{object_entry_object::ObjectEntryObject, NetworkObject},
+    },
 };
+
+struct SetResponseFrame {
+    client_id: u8,
+    server_id: u8,
+    result: cnl::errors::Result<()>,
+    oe_index: u32,
+}
+
+impl SetResponseFrame {
+    pub fn create(frame: &Frame) -> SetResponseFrame {
+        let Some(header) = frame.attribute("header") else {
+            panic!("DETECTED INVALID CONFIG: invalid format of set_resp_frame : header missing");
+        };
+        let Some(Value::UnsignedValue(object_entry_id)) = header.attribute("od_index") else {
+            panic!("DETECTED INVALID CONFIG: invalid format of set_resp_frame : header.od_index missing");
+        };
+        let Some(Value::UnsignedValue(client_id)) = header.attribute("client_id") else {
+            panic!("DETECTED INVALID CONFIG: invalid format of set_resp_frame : header.client_id missing");
+        };
+        let Some(Value::UnsignedValue(server_id)) = header.attribute("server_id") else {
+            panic!("DETECTED INVALID CONFIG: invalid format of set_resp_frame : header.server_id missing");
+        };
+        let Some(Value::EnumValue(erno)) = header.attribute("erno") else {
+            panic!(
+                "DETECTED INVALID CONFIG: invalid format of set_resp_frame : header.erno missing"
+            );
+        };
+        // TODO: find out how to use erno
+        let result = Ok(());
+        Self {
+            client_id: *client_id as u8,
+            server_id: *server_id as u8,
+            oe_index: *object_entry_id as u32,
+            result,
+        }
+    }
+}
+
+#[derive(PartialEq, Eq, Hash)]
+struct SetResponseIdentifier {
+    server_id: u8,
+    oe_index: u32,
+}
 
 pub struct SetRespFrameHandler {
     frame_deserializer: FrameDeserializer,
-    network_object: Arc<NetworkObject>,
+    set_resp_lookup: HashMap<SetResponseIdentifier, Arc<ObjectEntryObject>>,
 }
 
 impl SetRespFrameHandler {
     pub fn create(network_object: &Arc<NetworkObject>, set_resp_msg: &MessageRef) -> Self {
+        let mut set_resp_lookup = HashMap::new();
+        for node in network_object.nodes() {
+            let node_id = node.id() as u8;
+            for object_entry in node.object_entries() {
+                set_resp_lookup.insert(
+                    SetResponseIdentifier {
+                        server_id: node_id,
+                        oe_index: object_entry.id(),
+                    },
+                    object_entry.clone(),
+                );
+            }
+        }
         Self {
-            frame_deserializer : FrameDeserializer::new(set_resp_msg),
-            network_object: network_object.clone(),
+            frame_deserializer: FrameDeserializer::new(set_resp_msg),
+            set_resp_lookup,
         }
     }
     pub async fn handle(&self, can_frame: &TCanFrame) -> Result<TFrame> {
-        let frame = self.frame_deserializer.deserialize(can_frame.get_data_u64());
-        // TODO: replace with decent getter through parsed attr. currently not exposed by config?
-        let server_id = ((frame.data() >> 24) & 0xff) as u8;
-        let oe_id = ((frame.data() >> 3) & 0x1fff) as u32;
-        let node_object = self.network_object.nodes().iter().find(|n| (n.id() as u8) == server_id);
-        if let Some(node_object) = node_object {
-            if let Some(oe_object) = node_object.object_entries().iter().find(|oe| oe.id() == oe_id) {
-                // TODO: replace with actual value from message
-                oe_object.push_set_response(Ok(()))
-            } else {
-                // ignore or notify instead??
-                panic!("object entry with given node does not exist");
-            };
+        let frame = self
+            .frame_deserializer
+            .deserialize(can_frame.get_data_u64());
+        let set_resp = SetResponseFrame::create(&frame);
+        let set_resp_id = SetResponseIdentifier {
+            server_id: set_resp.server_id,
+            oe_index: set_resp.oe_index,
+        };
+        if let Some(oe_object) = self.set_resp_lookup.get(&set_resp_id) {
+            oe_object.push_set_response(set_resp.result);
         } else {
-            // just ignore instead?
-            panic!("node with given id does not exist");
+            return Err(Error::InvalidSetResponseServerOrObjectEntryNotFound);
         };
 
         Ok(Timestamped::new(can_frame.timestamp().clone(), frame))

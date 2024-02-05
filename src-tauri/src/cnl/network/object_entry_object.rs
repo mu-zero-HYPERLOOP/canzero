@@ -9,10 +9,10 @@ use std::{
 use can_config_rs::config;
 use serde::{ser::SerializeMap, Serialize};
 use tauri::Manager;
-use tokio::{sync::{mpsc, Mutex}, time::Timeout};
+use tokio::sync::{mpsc, Mutex};
 
 use crate::{
-    cnl::{frame::Value, tx::TxCom},
+    cnl::{frame::Value, tx::TxCom, self},
     notification::{notify_error, notify_info, notify_warning},
 };
 
@@ -195,7 +195,7 @@ impl ObjectEntryObject {
         history_observables.remove(remove_index);
     }
 
-    pub fn push_set_response(&self, result: crate::cnl::errors::Result<()>) {
+    pub fn push_set_response(&self, result: cnl::errors::Result<()>) {
         if !self
             .open_set_request
             .swap(false, std::sync::atomic::Ordering::SeqCst)
