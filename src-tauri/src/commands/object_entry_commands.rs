@@ -3,10 +3,8 @@ use std::time::Duration;
 use serde::Serialize;
 
 use crate::cnl::frame::{Value, Attribute};
-use crate::{
-    cnl::network::object_entry_object::ObjectEntryEvent,
-    state::cnl_state::CNLState, notification::notify_error,
-};
+use crate::cnl::network::object_entry_object::latest::event::OwnedObjectEntryEvent;
+use crate::state::cnl_state::CNLState;
 
 use can_config_rs::config;
 use can_config_rs::config::{SignalType, Type};
@@ -148,7 +146,7 @@ pub async fn set_object_entry_value(
 #[derive(Debug, Clone, Serialize)]
 pub struct ObjectEntryListenLatestResponse {
     event_name: String,
-    latest: Option<ObjectEntryEvent>,
+    latest: Option<OwnedObjectEntryEvent>,
 }
 
 #[tauri::command]
@@ -174,7 +172,7 @@ pub async fn listen_to_latest_object_entry_value(
 
     let x = ObjectEntryListenLatestResponse {
         event_name: object_entry_object.latest_event_name().to_owned(),
-        latest: object_entry_object.latest().await,
+        latest: object_entry_object.latest_event().await.map(|x| x.to_owned()),
     };
 
     Ok(x)
@@ -208,7 +206,7 @@ pub async fn unlisten_from_latest_object_entry_value(
 #[derive(Debug, Clone, Serialize)]
 pub struct ObjectEntryListenHistoryResponse {
     event_name: String,
-    history: Vec<ObjectEntryEvent>,
+    history: Vec<OwnedObjectEntryEvent>,
 }
 
 #[tauri::command]
