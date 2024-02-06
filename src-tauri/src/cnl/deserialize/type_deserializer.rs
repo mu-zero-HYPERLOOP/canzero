@@ -1,6 +1,6 @@
 use std::io::Read;
 
-use bitvec::{slice::BitSlice, vec::BitVec};
+use bitvec::slice::BitSlice;
 use can_config_rs::config::{SignalType, Type};
 
 use crate::cnl::frame::{Attribute, Value};

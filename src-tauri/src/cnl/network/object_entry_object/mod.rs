@@ -7,7 +7,6 @@ use std::{
 };
 
 use can_config_rs::config;
-use tauri::Manager;
 use tokio::sync::Mutex;
 
 use crate::{
@@ -20,11 +19,13 @@ use crate::{
 use self::{
     database::value::ObjectEntryValue,
     history::ObjectEntryHistroyObservable,
+    info::{ty::ObjectEntryType, ObjectEntryInformation},
     latest::{event::OwnedObjectEntryEvent, ObjectEntryLatestObservable},
 };
 
 mod database;
 pub mod history;
+pub mod info;
 pub mod latest;
 
 pub struct ObjectEntryObject {
@@ -83,14 +84,8 @@ impl ObjectEntryObject {
     pub fn name(&self) -> &str {
         self.object_entry_ref.name()
     }
-    pub fn description(&self) -> Option<&str> {
-        self.object_entry_ref.description()
-    }
     pub fn id(&self) -> u32 {
         self.object_entry_ref.id()
-    }
-    pub fn unit(&self) -> Option<&str> {
-        self.object_entry_ref.unit()
     }
     pub fn latest_event_name(&self) -> &str {
         &self.latest_event_name
@@ -292,5 +287,15 @@ impl ObjectEntryObject {
                 );
             }
         }
+    }
+
+    pub fn information(&self) -> ObjectEntryInformation {
+        ObjectEntryInformation::new(
+            self.object_entry_ref.name().to_owned(),
+            self.object_entry_ref.description().map(str::to_owned),
+            self.object_entry_ref.id() as u16,
+            self.object_entry_ref.unit().map(str::to_owned),
+            ObjectEntryType::new(self.object_entry_ref.ty()),
+        )
     }
 }
