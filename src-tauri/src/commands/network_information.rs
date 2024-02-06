@@ -26,7 +26,7 @@ pub async fn network_information(
 pub struct NodeInformation {
     name: String,
     description: Option<String>,
-    id: u16,
+    id: u8,
     object_entries: Vec<String>,
     commands: Vec<String>,
 }

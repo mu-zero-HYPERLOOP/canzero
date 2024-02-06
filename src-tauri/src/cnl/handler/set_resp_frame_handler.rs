@@ -2,19 +2,17 @@ use std::{collections::HashMap, sync::Arc};
 
 use can_config_rs::config::MessageRef;
 
-use crate::{
-    cnl::{
-        self,
-        can_adapter::{timestamped::Timestamped, TCanFrame},
-        deserialize::FrameDeserializer,
-        errors::{Error, Result},
-        frame::{Frame, TFrame, Value},
-        network::{object_entry_object::ObjectEntryObject, NetworkObject},
-    },
+use crate::cnl::{
+    self,
+    can_adapter::{timestamped::Timestamped, TCanFrame},
+    deserialize::FrameDeserializer,
+    errors::{Error, Result},
+    frame::{Frame, TFrame, Value},
+    network::{object_entry_object::ObjectEntryObject, NetworkObject},
 };
 
 struct SetResponseFrame {
-    client_id: u8,
+    // client_id: u8,
     server_id: u8,
     result: cnl::errors::Result<()>,
     oe_index: u32,
@@ -28,9 +26,6 @@ impl SetResponseFrame {
         let Some(Value::UnsignedValue(object_entry_id)) = header.attribute("od_index") else {
             panic!("DETECTED INVALID CONFIG: invalid format of set_resp_frame : header.od_index missing");
         };
-        let Some(Value::UnsignedValue(client_id)) = header.attribute("client_id") else {
-            panic!("DETECTED INVALID CONFIG: invalid format of set_resp_frame : header.client_id missing");
-        };
         let Some(Value::UnsignedValue(server_id)) = header.attribute("server_id") else {
             panic!("DETECTED INVALID CONFIG: invalid format of set_resp_frame : header.server_id missing");
         };
@@ -39,10 +34,14 @@ impl SetResponseFrame {
                 "DETECTED INVALID CONFIG: invalid format of set_resp_frame : header.erno missing"
             );
         };
-        // TODO: find out how to use erno
-        let result = Ok(());
+        // TODO: properly use erno
+        let result = if erno == "Success" {
+            Ok(())
+        } else {
+            println!("setter returned with an error");
+            Ok(())
+        };
         Self {
-            client_id: *client_id as u8,
             server_id: *server_id as u8,
             oe_index: *object_entry_id as u32,
             result,

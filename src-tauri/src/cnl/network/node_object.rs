@@ -28,7 +28,7 @@ impl NodeObject {
             node_ref: node_config.clone(),
         }
     }
-    pub fn id(&self) -> u16 {
+    pub fn id(&self) -> u8 {
         self.node_ref.id()
     }
     pub fn name(&self) -> &str {
