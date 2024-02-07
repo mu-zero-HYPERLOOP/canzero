@@ -20,6 +20,11 @@ enum_types:
     safe_to_approach: 12
     emergency: 13
 
+struct_types:
+  test_struct:
+    first_value: d8<-10..100>
+    second_value: d8<10..100>
+
 
 nodes: 
   secu: 
@@ -39,6 +44,10 @@ nodes:
         type: global_state_t
         access : global
         description: state of the pod
+      struct_test:
+        type: test_struct
+        access : global
+        description: test struct
       test:
         type: u8
         access : global
