@@ -1,5 +1,4 @@
 
-
 export type TypeId = "int" | "uint" | "real" | "enum" | "struct"
 
 
@@ -33,4 +32,21 @@ export interface EnumTypeInfo {
 export interface StructTypeInfo {
   name : string,
   attributes : { [name : string] : Type}
+}
+
+export function isInt(type: TypeId): type is "int" {
+  return type === "int";
+}
+export function isUInt(type: TypeId): type is "uint" {
+  return type === "uint";
+}
+export function isReal(type: TypeId): type is "real" {
+  return type === "real";
+}
+export function isEnum(type: TypeId): type is "enum" {
+  return type === "enum";
+}
+
+export function isStruct(type: TypeId): type is "struct" {
+  return type === "struct";
 }

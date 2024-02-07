@@ -1,4 +1,4 @@
-import { Value } from "./Value";
+import { Value } from "../Value";
 
 export interface ObjectEntryEvent {
   value: Value
