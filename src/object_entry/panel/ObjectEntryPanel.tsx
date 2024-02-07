@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { ObjectEntryInformation } from "./types/ObjectEntryInformation.ts";
+import { ObjectEntryInformation } from "../types/ObjectEntryInformation.ts";
 import { invoke } from "@tauri-apps/api";
 import {
   Paper,
   Skeleton,
   Typography
 } from "@mui/material";
-import { NodeInformation } from "../nodes/types/NodeInformation.ts";
+import { NodeInformation } from "../../nodes/types/NodeInformation.ts";
 import RefreshButton from "./RefreshButton.tsx";
 import ObjectEntryGraph from "../graph/ObjectEntryGraph.tsx";
 import ExportButton from "./ExportButton.tsx";

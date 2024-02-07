@@ -13,11 +13,10 @@ import {
   Stack,
   Typography
 } from "@mui/material";
-import CreateIcon from "@mui/icons-material/Create";
 import { invoke } from "@tauri-apps/api";
 import { listen } from "@tauri-apps/api/event";
 import TextField from "@mui/material/TextField";
-import { StructTypeInfo, Type } from "../types/Type.tsx";
+import {EnumTypeInfo, isEnum, isInt, isReal, isStruct, isUInt, StructTypeInfo, Type} from "../types/Type.tsx";
 import { Value } from "../types/Value.tsx";
 import { ObjectEntryInformation } from "../types/ObjectEntryInformation.tsx";
 import { ObjectEntryEvent } from "../types/events/ObjectEntryEvent.tsx";
@@ -32,7 +31,7 @@ function checkInput(val: string, type: Type, setError: (error: boolean) => void,
   if (val === "" || type.id == "enum") {
     setError(false)
     return;
-  } else if (type.id == "int") {
+  } else if (isInt(type.id)) {
     let regExp = /^-?\d*[.]?\d+$/;
     let num = parseInt(val)
     if (!regExp.test(val)) setErrorMsg(NOT_A_NUMBER)
@@ -42,7 +41,7 @@ function checkInput(val: string, type: Type, setError: (error: boolean) => void,
       setError(false)
       return;
     }
-  } else if (type.id = "uint") {
+  } else if (isUInt(type.id)) {
     let regExp = /^-?\d*[.]?\d+$/;
     let num = parseInt(val)
     if (!regExp.test(val)) setErrorMsg(NOT_A_NUMBER)
@@ -53,7 +52,7 @@ function checkInput(val: string, type: Type, setError: (error: boolean) => void,
       setError(false)
       return;
     }
-  } else if (type.id = "real") {
+  } else if (isReal(type.id)) {
     let regExp = /^-?\d*[.]?\d+$/;
     let num = parseFloat(val)
     if (!regExp.test(val)) setErrorMsg(NOT_A_NUMBER)
@@ -70,7 +69,6 @@ function invokeBackend(node: string, objectEntry: string, val: Value, setGlobalE
   (value: SetStateAction<boolean>): void;
   (arg0: boolean): void;
 }) {
-  setGlobalError(false)
   invoke("set_object_entry_value", {
     nodeName: node,
     objectEntryName: objectEntry,
@@ -78,41 +76,41 @@ function invokeBackend(node: string, objectEntry: string, val: Value, setGlobalE
   }).catch((_) => setGlobalError(true));
 }
 
-function convertMutableObjectEntryValue(value: MutableObjectEntryValue, ty: Type): Value {
-  if (ty.id == "struct") {
-    let structInfo = ty.info as StructTypeInfo;
-    // FIXME use structInfo instread of the type directly
-    value = value as MutableObjectEntryComposite
-    return {
-      name: value.name, value: value.value.map((value: { name: string, value: MutableObjectEntryValue }, index) => {
-        return ({ name: value.name, value: convertMutableObjectEntryValue(value.value, ty.attributes[index].type) })
-      })
-    }
-  } else if (ty.id == "int" || ty.id == "uint" || ty.id == "real") {
+function convertMutableObjectEntryValue(value: MutableValue, ty: Type): Value {
+  if (isStruct(ty.id)) {
+    value = value as {[name : string] : MutableValue}
+    let updated: {[name : string] : Value} = {}
+
+    Object.entries(value).forEach(function ([name, curVal]) {
+      updated[name] = convertMutableObjectEntryValue(curVal, (ty.info as StructTypeInfo).attributes[name])
+    })
+    return updated
+
+  } else if (isInt(ty.id) || isUInt(ty.id) || isReal(ty.id)) {
     return (value as MutableRefObject<number>).current
   } else {
     return (value as MutableRefObject<string>).current
   }
 }
 
-function updateMutableObjectEntryValue(newValue: MutableObjectEntryValue, value: Value, ty: Type): Value {
-  if (ty.id == "struct") {
-    let structInfo = ty.info as StructTypeInfo;
-    // FIXME
-    newValue = newValue as MutableObjectEntryComposite
-    return {
-      name: newValue.name, value: newValue.value.map((current: { name: string, value: MutableObjectEntryValue }, index) => {
-        return ({ name: current.name, value: updateMutableObjectEntryValue(current.value, (value as ObjectEntryComposite).value[index].value, ty.attributes[index].type) })
-      })
-    }
-  } else if (ty.id == "int" || ty.id == "uint" || ty.id == "real") {
+function updateMutableObjectEntryValue(newValue: MutableValue, value: Value, ty: Type): Value {
+  if (isStruct(ty.id)) {
+    newValue = newValue as {[name : string] : MutableValue}
+    let updated: {[name : string] : Value} = {}
+
+    Object.entries(newValue).forEach(function ([name, mutValue]) {
+      updated[name] = updateMutableObjectEntryValue(mutValue, (value as {[name : string] : Value})[name], (ty.info as StructTypeInfo).attributes[name])
+    })
+    return updated
+
+  } else if (isInt(ty.id) || isUInt(ty.id) || isReal(ty.id)) {
     return isNaN((newValue as MutableRefObject<number>).current) ? value : (newValue as MutableRefObject<number>).current
   } else {
     return (newValue as MutableRefObject<string>).current === "" ? value : (newValue as MutableRefObject<string>).current
   }
 }
 
-function sendInput(node: string, objectEntry: string, type: Type, value: ObjectEntryEvent | null, newValue: MutableObjectEntryValue, setGlobalError: {
+function sendInput(node: string, objectEntry: string, type: Type, value: ObjectEntryEvent | null, newValue: MutableValue, setGlobalError: {
   (value: SetStateAction<boolean>): void;
   (arg0: boolean): void;
 }) {
@@ -127,40 +125,41 @@ interface DisplayTextFieldsProps {
   ty: Type,
   unit?: string,
   value: Value | undefined,
-  newValue: MutableObjectEntryValue,
+  newValue: MutableValue,
   name?: string,
   localErrors: boolean[],
   setLocalErrors: (localError: boolean[]) => void,
+  setGlobalError: (globalError: boolean) => void,
 }
 
-function DisplayTextFields({ ty, unit, value, newValue, name, localErrors, setLocalErrors }: Readonly<DisplayTextFieldsProps>) {
+function DisplayTextFields({ ty, unit, value, newValue, name, localErrors, setLocalErrors, setGlobalError }: Readonly<DisplayTextFieldsProps>) : JSX.Element |JSX.Element[] {
   let [errorMsg, setErrorMsg] = useState<string | null>(null)
   let [error, setError] = useState<boolean>(false)
 
   let endAdornment = unit ? <InputAdornment position="end">{unit}</InputAdornment> : undefined;
-  let startAdornment = name ? <InputAdornment position="start">{name}</InputAdornment> : undefined;
+  let startAdornment = name ? <InputAdornment position="start">{name + ": "}</InputAdornment> : undefined;
 
-  if (ty.id == "enum") {
+  if (isEnum(ty.id)) {
     return (
       <FormControl sx={{ width: '25ch' }} variant="outlined">
         <FormHelperText id="outlined-weight-helper-text1">
-          {'Set Value:'}
+          {' '}
         </FormHelperText>
         <TextField
           id="outlined-select-value"
           select
           label="Select:"
-          placeholder={value ? `${String(value)}` : undefined}
+          placeholder={value ? `${String(value)}` : undefined} // TODO default value
           onAnimationStart={() => setError(false)}
           onChange={(event) => {
             (newValue as MutableRefObject<string>).current = event.target.value
+            setGlobalError(false)
           }}
           InputProps={{
             startAdornment: <InputAdornment position="start">{name}</InputAdornment>,
           }}
         >
-          {ty.map((option) => (
-            //FIXME
+          {(ty.info as EnumTypeInfo).variants.map((option) => (
             <MenuItem key={option} value={option}>
               {option}
             </MenuItem>
@@ -168,23 +167,24 @@ function DisplayTextFields({ ty, unit, value, newValue, name, localErrors, setLo
         </TextField>
       </FormControl>
     )
-  } else if (ty.id == "struct") {
-    let structInfo = ty.info as StructTypeInfo;
-    // FIXME
-    (newValue as MutableObjectEntryComposite).value.forEach(function(newVal, index) {
+  } else if (isStruct(ty.id)) {
+
+    return (
+        Object.entries((newValue as {[name : string] : MutableValue})).map(([newName, newValue]) => {
       if (value) {
-        return <DisplayTextFields ty={ty.attributes[index].type} unit={unit} value={(value as ObjectEntryComposite).value[index].value} newValue={newVal.value} name={ty.name} localErrors={localErrors} setLocalErrors={setLocalErrors} />
+        return <DisplayTextFields ty={(ty.info as StructTypeInfo).attributes[newName]} unit={unit} value={(value as {[name : string] : Value})[newName]} newValue={newValue} name={newName} localErrors={localErrors} setLocalErrors={setLocalErrors} setGlobalError={setGlobalError} />
       } else {
-        return <DisplayTextFields ty={ty.attributes[index].type} unit={unit} value={value} newValue={newVal.value} name={ty.name} localErrors={localErrors} setLocalErrors={setLocalErrors} />
+        return <DisplayTextFields ty={(ty.info as StructTypeInfo).attributes[newName]} unit={unit} value={value} newValue={newValue} name={newName} localErrors={localErrors} setLocalErrors={setLocalErrors} setGlobalError={setGlobalError} />
       }
     })
+    )
 
 
   } else {
     localErrors.push(error)
     setLocalErrors(localErrors)
     return (
-      <FormControl sx={{ width: '25ch' }} variant="outlined">
+      <FormControl sx={{ width: name ? '45ch' : '25ch' }} variant="outlined">
         <FormHelperText id="outlined-weight-helper-text1">
           {error ? errorMsg : 'Set Value:'}
         </FormHelperText>
@@ -200,6 +200,7 @@ function DisplayTextFields({ ty, unit, value, newValue, name, localErrors, setLo
           onChange={(event) => {
             checkInput(event.target.value, ty, setError, setErrorMsg);
             (newValue as MutableRefObject<number>).current = parseInt(event.target.value)
+            setGlobalError(false)
           }}
           startAdornment={startAdornment}
           error={error}
@@ -230,36 +231,32 @@ interface EditDialogProps {
   objectEntryInfo: ObjectEntryInformation,
 }
 
-type MutableObjectEntryValue = MutableRefObject<number> | MutableRefObject<string> | MutableObjectEntryComposite;
-interface MutableObjectEntryComposite {
-  name: string; // redundant!
-  value: { name: string, value: MutableObjectEntryValue }[],
-}
+type MutableValue = MutableRefObject<number> | MutableRefObject<string> | {[name : string] : MutableValue};
 
-function createInitial(ty: Type): MutableObjectEntryValue {
-  if (ty.id == "struct") {
+function createInitial(ty: Type): MutableValue {
+  if (isStruct(ty.id)) {
     let structInfo = ty.info as StructTypeInfo;
-    return {
-      name: structInfo.name,
-      // FIXME Karl fucked up the interface Sorry =^).
-      value: structInfo.attributes.map((value: { name: string, type: Type }) => {
-        return ({ name: value.name, value: createInitial(value.type) })
-      })
-    }
-  } else if (ty.id == "int" || ty.id == "uint" || ty.id == "real") {
+    let value: {[name : string] : MutableValue} = {}
+
+    Object.entries(structInfo.attributes).forEach(function ([name, type]) {
+      value[name] = createInitial(type)
+    })
+    return value
+
+  } else if (isInt(ty.id) || isUInt(ty.id) || isReal(ty.id)) {
     return useRef<number>(NaN)
   } else {
     return useRef<string>("")
   }
 }
 
-function isInitial(ty: Type, newValue: MutableObjectEntryValue): boolean {
-  if (ty.id == "int" || ty.id == "uint" || ty.id == "real") {
+function isInitial(ty: Type, newValue: MutableValue): boolean {
+  if (isInt(ty.id) || isUInt(ty.id) || isReal(ty.id)) {
     return isNaN((newValue as MutableRefObject<number>).current)
-  } else if (ty.id == "enum") {
+  } else if (isEnum(ty.id)) {
     return (newValue as MutableRefObject<string>).current === ""
   } else {
-    return !(newValue as MutableObjectEntryComposite).value.map((value, index) => isInitial(ty.attributes[index].type, value.value)).includes(false)
+    return !Object.entries((newValue as {[name : string] : MutableValue})).map(([name, value]) => isInitial((ty.info as StructTypeInfo).attributes[name], value)).includes(false)
   }
 }
 
@@ -267,7 +264,7 @@ function EditDialog({ onClose, open, nodeName, objectEntryName, objectEntryInfo 
   let [value, setValue] = useState<ObjectEntryEvent | null>(null);
   let [globalError, setGlobalError] = useState<boolean>(false);
   let [localErrors, setLocalErrors] = useState<boolean[]>([])
-  let newValue: MutableObjectEntryValue = createInitial(objectEntryInfo.ty)
+  let newValue: MutableValue = createInitial(objectEntryInfo.ty)
 
   async function registerListener() {
     let { event_name, latest } = await invoke<ObjectEntryListenLatestResponse>("listen_to_latest_object_entry_value",
@@ -314,7 +311,7 @@ function EditDialog({ onClose, open, nodeName, objectEntryName, objectEntryInfo 
           </Typography>
         </Stack>
         <DisplayTextFields ty={objectEntryInfo.ty} unit={objectEntryInfo.unit} value={value?.value}
-          newValue={newValue} localErrors={localErrors} setLocalErrors={setLocalErrors} />
+          newValue={newValue} localErrors={localErrors} setLocalErrors={setLocalErrors} setGlobalError={setGlobalError} />
         <Box component="form"
           sx={{
             display: "flex",
