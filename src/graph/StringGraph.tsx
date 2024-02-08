@@ -1,14 +1,15 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GraphDatum } from "./GraphDatum";
 import { GraphInterpolation } from "./GraphInterpolation";
 import * as d3 from "d3";
+import { Paper } from "@mui/material";
 
 
 
 interface StringGraphProps<T> {
   datum: GraphDatum<T, string>,
   domain: string[],
-  width: number,
+  width?: number,
   height: number,
   margin?: { top: number, bottom: number, left: number, right: number },
   interpolation?: GraphInterpolation,
@@ -21,8 +22,8 @@ interface StringGraphProps<T> {
 function StringGraph<T>({
   datum,
   domain,
-  width = 400,
-  height = 200,
+  width,
+  height,
   margin = { top: 0, bottom: 0, left: 0, right: 0 },
   interpolation = GraphInterpolation.Step,
   unit,
@@ -32,6 +33,7 @@ function StringGraph<T>({
 }: StringGraphProps<T>) {
   margin.left += 120;
   margin.bottom += 20;
+  margin.top += 20;
   let yDomain = domain.slice();
   yDomain.push("UNDEFINED");
   yDomain.push("");
@@ -39,16 +41,34 @@ function StringGraph<T>({
   yDomain.push("  ");
 
 
-  const svgRef = useRef<SVGSVGElement>(null);
+  const svgRef = useRef(null) as any;
+  const [autoWidth, setWidth] = useState(200);
 
   useEffect(() => {
 
-    const innerWidth = width - margin.left - margin.right;
+    const innerWidth = autoWidth - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
+    let resizeObserver: ResizeObserver | undefined = undefined;
+    let current = svgRef.current;
+    if (!width) {
+      resizeObserver = new ResizeObserver(
+        entries => {
+          if (!Array.isArray(entries)) return;
+          if (!entries.length) return;
+          const entry = entries[0];
+          if (autoWidth != entry.contentRect.width) {
+            setWidth(entry.contentRect.width);
+          }
+        }
+      );
+      resizeObserver.observe(current);
+    }
+
     const xScale = d3.scaleLinear().range([0, innerWidth]);
-    const yScaleAxis = d3.scalePoint([innerHeight,0]).domain(yDomain);
+    const yScaleAxis = d3.scalePoint([innerHeight, 0]).domain(yDomain);
     const yScale = d3.scalePoint().domain(yDomain).range([innerHeight, 0]);
+
 
 
     const line = d3.line();
@@ -101,7 +121,7 @@ function StringGraph<T>({
 
 
     const svg = d3.select(svgRef.current)
-      .attr("width", width)
+      .attr("width", "100%")
       .attr("height", height)
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`)
@@ -195,12 +215,15 @@ function StringGraph<T>({
 
     return () => {
       // Cleanup!
+      resizeObserver?.unobserve(current);
       running = false;
       svg.remove();
     }
-  }, [width, height]);
+  }, [autoWidth, height]);
 
-  return <svg ref={svgRef}></svg>;
+  return <Paper sx={{ width: "100%", backgroundColor: "#f2f2f2" }}>
+    <svg ref={svgRef}></svg>
+  </Paper>;
 }
 
 export default StringGraph;

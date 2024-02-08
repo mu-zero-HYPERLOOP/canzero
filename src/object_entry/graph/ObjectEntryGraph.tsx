@@ -1,7 +1,7 @@
-import { ReactElement, useEffect, useState } from "react";
+import { LegacyRef, ReactElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ObjectEntryInformation } from "../types/ObjectEntryInformation";
 import { invoke } from "@tauri-apps/api";
-import { Skeleton } from "@mui/material";
+import { Box, Container, Skeleton, Stack } from "@mui/material";
 import { listen } from "@tauri-apps/api/event";
 import { ObjectEntryHistoryEvent } from "../types/events/ObjectEntryHistoryEvent";
 import { ObjectEntryEvent } from "../types/events/ObjectEntryEvent";
@@ -17,26 +17,48 @@ interface ObjectEntryGraph {
   objectEntryName: string,
   useScrolling?: boolean,
   updateIntervalMillis?: number,
-  smoothMode? : boolean,
+  timeDomain: number,
+  smoothMode?: boolean,
+  buffering: boolean,
+  interpolation : GraphInterpolation,
 }
 
-const DEFAULT_TIMEDOMAIN: number = 5000;
 
 function ObjectEntryGraph({
   nodeName,
   objectEntryName,
   useScrolling = false,
-  updateIntervalMillis = 20,
+  updateIntervalMillis,
+  timeDomain = 5000,
+  buffering = true,
   smoothMode,
+  interpolation = GraphInterpolation.Step,
 }: ObjectEntryGraph) {
-  smoothMode ??= updateIntervalMillis < 50;
-
-  const [timeDomain, setTimeDomain] = useState(DEFAULT_TIMEDOMAIN);
+  if (!updateIntervalMillis) {
+    if (!buffering) {
+      updateIntervalMillis = 10;
+    } else {
+      if (timeDomain < 5000) {
+        updateIntervalMillis = timeDomain / 100;
+      } else if (timeDomain < 10000) {
+        updateIntervalMillis = timeDomain / 50;
+      } else {
+        updateIntervalMillis = timeDomain / 10;
+      } 
+    }
+  }
+  updateIntervalMillis ??= buffering ? timeDomain / 25 : 10;
+  smoothMode ??= updateIntervalMillis < 100;
+  smoothMode = false;
 
   const [graphList, setGraphList] = useState<ReactElement[]>([]);
 
+  // creates a mutable history object, which is modified in the useEffect.
+  const history = useMemo<ObjectEntryEvent[]>(() => [], [nodeName, objectEntryName]);
+
 
   useEffect(() => {
+
     async function asyncSetup() {
       // fetch information!
       let information = await invoke<ObjectEntryInformation>("object_entry_information",
@@ -48,23 +70,40 @@ function ObjectEntryGraph({
       let response = await invoke<ObjectEntryListenHistoryResponse>("listen_to_history_of_object_entry",
         { nodeName, objectEntryName, frameSize: timeDomain, minInterval: updateIntervalMillis });
       // initalize history
-      let history = response.history;
+      history.splice(0, history.length);
+      history.push(...response.history);
+
+      let acc: number = 0;
+      let refreshRate: number;
+      if (buffering) {
+        if (updateIntervalMillis! < 5000) {
+          refreshRate = 50;
+        } else if (updateIntervalMillis! < 10000) {
+          refreshRate = updateIntervalMillis! / 10;
+        } else {
+          refreshRate = updateIntervalMillis!;
+        } 
+      } else {
+        refreshRate = 10;
+      }
+
 
       // this function creates a list of Graphs
       // for struct types it is called recursively.
       function buildGraphList(ty: Type, property: (event: ObjectEntryEvent) => Value, unit?: string) {
+        acc += 1;
         if (ty.id == "int" || ty.id == "uint" || ty.id == "real") {
           graphList.push(<NumberGraph<ObjectEntryEvent>
+            id={objectEntryName + acc}
             datum={{
               values: history,
               xValue: (event) => event.timestamp,
               yValue: (event) => property(event) as number,
             }}
-            width={400}
             height={200}
             unit={unit}
-            interpolation={GraphInterpolation.Step}
-            refreshRate={50}
+            interpolation={interpolation}
+            refreshRate={refreshRate}
             timeDomainMs={timeDomain}
             timeShiftMs={smoothMode ? updateIntervalMillis : 0}
           />);
@@ -77,11 +116,10 @@ function ObjectEntryGraph({
               yValue: (event) => property(event) as string,
             }}
             domain={enumInfo.variants}
-            width={400}
             height={200}
             unit={unit}
-            interpolation={GraphInterpolation.Step}
-            refreshRate={50}
+            interpolation={interpolation}
+            refreshRate={refreshRate}
             timeDomainMs={timeDomain}
             timeShiftMs={smoothMode ? updateIntervalMillis : 0}
           />);
@@ -102,7 +140,7 @@ function ObjectEntryGraph({
       setGraphList(graphList);
 
       // register js listener
-      let unlistenJs = await listen<ObjectEntryHistoryEvent>(response.event_name, (event) => {
+      let unlistenJs = listen<ObjectEntryHistoryEvent>(response.event_name, (event) => {
         // update history
         history.splice(0, event.payload.deprecated_count);
         history.push(...event.payload.new_values);
@@ -110,7 +148,7 @@ function ObjectEntryGraph({
 
       return () => {
         // unregister js listener
-        unlistenJs()
+        unlistenJs.then(f => f()).catch(console.error);
         // async unregister tauri listener
         invoke("unlisten_from_history_of_object_entry",
           { nodeName, objectEntryName, eventName: response.event_name }).catch(console.error);
@@ -123,18 +161,17 @@ function ObjectEntryGraph({
 
     return () => {
       // reset component!
-      setTimeDomain(DEFAULT_TIMEDOMAIN);
+      // setTimeDomain(DEFAULT_TIMEDOMAIN);
       // async cleanup of listeners
       asyncCleanup.then(f => f()).catch(console.error);
     };
-  }, [nodeName, objectEntryName, timeDomain]);
-
+  }, [nodeName, objectEntryName, updateIntervalMillis, timeDomain, buffering, smoothMode, interpolation]);
 
 
   if (graphList.length != 0) {
-    return <>{graphList}</>;
+    return <Stack sx={{ width: "calc(100% - 16px)" }}>{graphList}</Stack>;
   } else {
-    return <Skeleton variant="rounded" height={"300px"} />
+    return <Skeleton variant="rounded" height={"200px"} />;
   }
 }
 

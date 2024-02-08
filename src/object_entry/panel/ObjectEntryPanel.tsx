@@ -12,15 +12,19 @@ import ObjectEntryGraph from "../graph/ObjectEntryGraph.tsx";
 import ExportButton from "./ExportButton.tsx";
 import SetValueButton from "./SetValueButton.tsx";
 import InterpolationModeButton from "./InterpolationModeButton.tsx";
+import { GraphInterpolation } from "../../graph/GraphInterpolation.tsx";
+import GraphBufferingButton from "./GraphBufferingButton.tsx";
 
 interface ObjectEntryPanelProps {
   node: NodeInformation,
   name: string,
-  useGraphScrolling?: boolean,
 }
 
-function ObjectEntryPanel({ node, name, useGraphScrolling = true }: Readonly<ObjectEntryPanelProps>) {
+function ObjectEntryPanel({ node, name }: Readonly<ObjectEntryPanelProps>) {
   const [information, setInformation] = useState<ObjectEntryInformation | null>(null);
+
+  const [interpolationMode, setInterpolationMode] = useState<GraphInterpolation>(GraphInterpolation.Step);
+  const [buffering, setBuffering] = useState<boolean>(true);
 
   useEffect(() => {
     async function fetchInformation() {
@@ -79,8 +83,38 @@ function ObjectEntryPanel({ node, name, useGraphScrolling = true }: Readonly<Obj
             top: "7px",
             left: "calc(100% - 170px)",
           }}
+          mode={interpolationMode}
+          onClick={() => {
+            setInterpolationMode(mode => {
+              switch (mode) {
+                case GraphInterpolation.Step:
+                  return GraphInterpolation.Linear;
+                case GraphInterpolation.Linear:
+                  return GraphInterpolation.MonotoneSpline;
+                default:
+                  return GraphInterpolation.Step;
+              }
+            });
+          }}
         />
-        <ObjectEntryGraph nodeName={node.name} objectEntryName={information.name} />
+        <GraphBufferingButton
+          sx={{
+            position: "absolute",
+            top: "7px",
+            left: "calc(100% - 210px)",
+          }}
+          buffer={buffering}
+          onClick={() => {
+            setBuffering(buffering => !buffering);
+          }}
+        />
+        <ObjectEntryGraph
+          nodeName={node.name}
+          objectEntryName={information.name}
+          timeDomain={1000} 
+          interpolation={interpolationMode}
+          buffering={buffering}
+        />
       </>
     } else {
       return <Skeleton variant="rounded" height={"300px"} />

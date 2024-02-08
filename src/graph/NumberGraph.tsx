@@ -1,44 +1,68 @@
 import * as d3 from "d3";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GraphInterpolation } from "./GraphInterpolation";
 import { GraphDatum } from "./GraphDatum";
+import { Paper } from "@mui/material";
 
 
 interface NumberGraphProps<T> {
   datum: GraphDatum<T, number>
-  width?: number,
-  height?: number,
+  id: string,
+  width?: number
+  height: number,
   margin?: { top: number, bottom: number, left: number, right: number },
   interpolation?: GraphInterpolation,
   unit?: string,
   timeDomainMs?: number
-  refreshRate? : number
-  bounds? : {max : number, min : number},
-  timeShiftMs? : number
+  refreshRate?: number
+  bounds?: { max: number, min: number },
+  timeShiftMs?: number
 }
 
 
 function NumberGraph<T>({
+  id,
   datum,
-  width = 400,
-  height = 200,
+  width,
+  height,
   margin = { top: 0, bottom: 0, left: 0, right: 0 },
-  interpolation = GraphInterpolation.Step, 
+  interpolation = GraphInterpolation.Step,
   unit,
   timeDomainMs = 5000,
   refreshRate = 500,
   bounds,
   timeShiftMs = 0,
 }: NumberGraphProps<T>) {
-  margin.left += 40;
+  margin.left += 60;
   margin.bottom += 20;
+  margin.top += 20;
 
-  const svgRef = useRef<SVGSVGElement>(null);
+  const svgRef = useRef(null) as any;
+
+  const [autoWidth, setWidth] = useState(200);
+
 
   useEffect(() => {
+    let trueWidth = autoWidth;
 
-    const innerWidth = width - margin.left - margin.right;
+    const innerWidth = trueWidth - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
+
+    let resizeObserver: ResizeObserver | undefined = undefined;
+    let current = svgRef.current;
+    if (!width) {
+      resizeObserver = new ResizeObserver(
+        entries => {
+          if (!Array.isArray(entries)) return;
+          if (!entries.length) return;
+          const entry = entries[0];
+          if (trueWidth != entry.contentRect.width) {
+            setWidth(entry.contentRect.width);
+          }
+        }
+      );
+      resizeObserver.observe(current);
+    }
 
     const xScale = d3.scaleLinear().range([0, innerWidth]);
     const yScale = d3.scaleLinear().range([innerHeight, 0]);
@@ -88,7 +112,7 @@ function NumberGraph<T>({
 
 
     const svg = d3.select(svgRef.current)
-      .attr("width", width)
+      .attr("width", "100%")
       .attr("height", height)
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`)
@@ -180,6 +204,7 @@ function NumberGraph<T>({
       b.call(yAxis);
       c.call(yAxisGrid);
 
+
       if (running) {
         //restart animation
         d3.active(group.node())
@@ -188,22 +213,31 @@ function NumberGraph<T>({
           .attr("transform", `translate(${xScale(timestamp - timeDomainMs - refreshRate)},0)`);
       }
     }
-    
+
     group.transition()
       .on("start", updateSvg)
       .ease(d3.easeLinear)
       .duration(refreshRate);
 
-    
+
 
     return () => {
       // Cleanup!
+      resizeObserver?.unobserve(current);
       running = false;
       svg.remove();
     }
-  }, [width, height]);
+  }, [
+    id,
+    refreshRate,
+    interpolation,
+    autoWidth,
+    height]);
 
-  return <svg ref={svgRef}></svg>;
+
+  return <Paper sx={{ width: "100%", backgroundColor: "#f2f2f2" }}>
+    <svg ref={svgRef}></svg>
+  </Paper>;
 }
 
 export default NumberGraph;

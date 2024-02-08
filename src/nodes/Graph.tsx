@@ -102,6 +102,7 @@ function D3ObjectEntryGraph({
         const entry = entries[0];
         if (width != entry.contentRect.width) {
           setWidth(entry.contentRect.width);
+          console.log(entry.contentRect.width);
           setResponsiveHeight(Math.max(Math.min(entry.contentRect.width / 3, maxHeight), minHeight));
         }
       }
