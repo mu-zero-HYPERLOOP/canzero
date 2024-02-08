@@ -232,7 +232,8 @@ function NumberGraph<T>({
     refreshRate,
     interpolation,
     autoWidth,
-    height]);
+    height,
+    timeDomainMs]);
 
 
   return <Paper sx={{ width: "100%", backgroundColor: "#f2f2f2" }}>

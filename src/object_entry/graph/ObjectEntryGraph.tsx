@@ -16,11 +16,10 @@ interface ObjectEntryGraph {
   nodeName: string,
   objectEntryName: string,
   useScrolling?: boolean,
-  updateIntervalMillis?: number,
   timeDomain: number,
   smoothMode?: boolean,
   buffering: boolean,
-  interpolation : GraphInterpolation,
+  interpolation: GraphInterpolation,
 }
 
 
@@ -28,38 +27,41 @@ function ObjectEntryGraph({
   nodeName,
   objectEntryName,
   useScrolling = false,
-  updateIntervalMillis,
   timeDomain = 5000,
   buffering = true,
   smoothMode,
   interpolation = GraphInterpolation.Step,
 }: ObjectEntryGraph) {
-  if (!updateIntervalMillis) {
-    if (!buffering) {
-      updateIntervalMillis = 10;
-    } else {
-      if (timeDomain < 5000) {
-        updateIntervalMillis = timeDomain / 100;
-      } else if (timeDomain < 10000) {
-        updateIntervalMillis = timeDomain / 50;
-      } else {
-        updateIntervalMillis = timeDomain / 10;
-      } 
-    }
-  }
-  updateIntervalMillis ??= buffering ? timeDomain / 25 : 10;
-  smoothMode ??= updateIntervalMillis < 100;
-  smoothMode = false;
 
   const [graphList, setGraphList] = useState<ReactElement[]>([]);
 
   // creates a mutable history object, which is modified in the useEffect.
   const history = useMemo<ObjectEntryEvent[]>(() => [], [nodeName, objectEntryName]);
 
+  const [timeDomainState, setTimeDomainState] = useState<number>(timeDomain);
+
 
   useEffect(() => {
 
     async function asyncSetup() {
+
+      let updateIntervalMillis: number;
+      if (!buffering) {
+        updateIntervalMillis = 10;
+      } else {
+        if (timeDomainState < 5000) {
+          updateIntervalMillis = timeDomainState / 100;
+        } else if (timeDomain < 10000) {
+          updateIntervalMillis = timeDomainState / 50;
+        } else {
+          updateIntervalMillis = timeDomainState / 10;
+        }
+      }
+      updateIntervalMillis ??= buffering ? timeDomainState / 25 : 10;
+      updateIntervalMillis = Math.floor(updateIntervalMillis);
+      smoothMode ??= updateIntervalMillis < 100;
+
+      console.log(updateIntervalMillis);
       // fetch information!
       let information = await invoke<ObjectEntryInformation>("object_entry_information",
         { nodeName, objectEntryName });
@@ -68,7 +70,7 @@ function ObjectEntryGraph({
 
       // register tauri listener!
       let response = await invoke<ObjectEntryListenHistoryResponse>("listen_to_history_of_object_entry",
-        { nodeName, objectEntryName, frameSize: timeDomain, minInterval: updateIntervalMillis });
+        { nodeName, objectEntryName, frameSize: timeDomainState, minInterval: updateIntervalMillis });
       // initalize history
       history.splice(0, history.length);
       history.push(...response.history);
@@ -82,11 +84,10 @@ function ObjectEntryGraph({
           refreshRate = updateIntervalMillis! / 10;
         } else {
           refreshRate = updateIntervalMillis!;
-        } 
+        }
       } else {
         refreshRate = 10;
       }
-
 
       // this function creates a list of Graphs
       // for struct types it is called recursively.
@@ -104,7 +105,7 @@ function ObjectEntryGraph({
             unit={unit}
             interpolation={interpolation}
             refreshRate={refreshRate}
-            timeDomainMs={timeDomain}
+            timeDomainMs={timeDomainState}
             timeShiftMs={smoothMode ? updateIntervalMillis : 0}
           />);
         } else if (ty.id == "enum") {
@@ -120,7 +121,7 @@ function ObjectEntryGraph({
             unit={unit}
             interpolation={interpolation}
             refreshRate={refreshRate}
-            timeDomainMs={timeDomain}
+            timeDomainMs={timeDomainState}
             timeShiftMs={smoothMode ? updateIntervalMillis : 0}
           />);
         } else if (ty.id == "struct") {
@@ -165,11 +166,39 @@ function ObjectEntryGraph({
       // async cleanup of listeners
       asyncCleanup.then(f => f()).catch(console.error);
     };
-  }, [nodeName, objectEntryName, updateIntervalMillis, timeDomain, buffering, smoothMode, interpolation]);
+  }, [nodeName, objectEntryName, buffering, smoothMode, interpolation, timeDomainState]);
 
+
+  function clampTimeDomain(domain: number) {
+    if (domain <= 1000){
+      return 1000;
+    }
+    if (domain >= 60000*3) {
+      return 60000 * 3;
+    } 
+    return domain;
+  }
+
+  function handleScrollWheel(event: any) {
+    setTimeDomainState(oldDomain => {
+      let factor: number;
+      if (event.altKey) {
+        factor = 1;
+      } else if (event.shiftKey) {
+        factor = 100;
+      } else {
+        factor = 10;
+      }
+      let newDomain = oldDomain + (event.deltaY + event.deltaX) * factor;
+      newDomain = clampTimeDomain(newDomain);
+      return Math.floor(newDomain);
+    });
+  }
 
   if (graphList.length != 0) {
-    return <Stack sx={{ width: "calc(100% - 16px)" }}>{graphList}</Stack>;
+    return <div onWheel={handleScrollWheel}>
+      <Stack sx={{ width: "calc(100% - 16px)" }}>{graphList}</Stack>
+    </div>;
   } else {
     return <Skeleton variant="rounded" height={"200px"} />;
   }
