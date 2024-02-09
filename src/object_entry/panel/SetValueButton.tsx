@@ -21,13 +21,12 @@ function SetValueButton({ nodeName, objectEntryInfo, sx }: Readonly<SetValueButt
     >
       <EditIcon fontSize="small" />
     </IconButton>
-    <EditDialog
+    {showDialog ? <EditDialog
       open={showDialog}
       onClose={() => setShowDialog(false)}
       nodeName={nodeName}
-      objectEntryName={objectEntryInfo.name}
       objectEntryInfo={objectEntryInfo}
-    />
+    /> : undefined}
   </>
 
 }

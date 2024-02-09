@@ -38,7 +38,7 @@ function ObjectEntryPanel({ node, name }: Readonly<ObjectEntryPanelProps>) {
     return () => {
       setInformation(null);
     };
-  }, [node.name, name]);
+  }, [node, name]);
 
   return <Paper sx={{
     marginTop: "30px",
@@ -129,7 +129,7 @@ function ObjectEntryPanel({ node, name }: Readonly<ObjectEntryPanelProps>) {
         />
         <ObjectEntryGraph
           nodeName={node.name}
-          objectEntryName={information.name}
+          objectEntryName={name}
           timeDomain={1000}
           interpolation={interpolationMode}
           buffering={buffering}
@@ -139,6 +139,7 @@ function ObjectEntryPanel({ node, name }: Readonly<ObjectEntryPanelProps>) {
 
   </Paper>
 }
+
 
 export default ObjectEntryPanel;
 

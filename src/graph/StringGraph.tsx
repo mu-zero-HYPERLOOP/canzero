@@ -183,7 +183,7 @@ function StringGraph<T>({
     }
 
     function updateTextValue() {
-      value.text(datum.yValue(datum.values[datum.values.length - 1]));
+      value.text(datum.values.length === 0 ? "" : datum.yValue(datum.values[datum.values.length - 1]));
     }
 
     function updateSvg() {

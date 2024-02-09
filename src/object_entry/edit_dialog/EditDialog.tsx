@@ -1,215 +1,91 @@
-
-import { MutableRefObject, SetStateAction, useEffect, useRef, useState } from "react";
-import {
-  Box,
-  Button,
-  FormControl,
-  FormHelperText,
-  InputAdornment,
-  MenuItem,
-  Modal,
-  OutlinedInput,
-  Paper,
-  Stack,
-  Typography
-} from "@mui/material";
+import { Box, Button, Modal, Paper, Stack, Typography } from "@mui/material";
+import { ObjectEntryInformation } from "../types/ObjectEntryInformation";
+import { useEffect, useState } from "react";
+import { EnumTypeInfo, IntTypeInfo, RealTypeInfo, StructTypeInfo, Type, UIntTypeInfo } from "../types/Type";
+import UnsignedPropertyInputField from "./UnsignedPropertyInputField";
+import SignedPropertyInputField from "./SignedPropertyInputField";
+import RealPropertyInputField from "./RealPropertyInputField";
+import EnumPropertyInputField from "./EnumPropertyInputField";
 import { invoke } from "@tauri-apps/api";
+import { Value } from "../types/Value";
+import { ObjectEntryListenLatestResponse } from "../types/events/ObjectEntryListenLatestResponse";
 import { listen } from "@tauri-apps/api/event";
-import TextField from "@mui/material/TextField";
-import {EnumTypeInfo, isEnum, isInt, isReal, isStruct, isUInt, StructTypeInfo, Type} from "../types/Type.tsx";
-import { Value } from "../types/Value.tsx";
-import { ObjectEntryInformation } from "../types/ObjectEntryInformation.tsx";
-import { ObjectEntryEvent } from "../types/events/ObjectEntryEvent.tsx";
-import { ObjectEntryListenLatestResponse } from "../types/events/ObjectEntryListenLatestResponse.tsx";
+import { ObjectEntryEvent } from "../types/events/ObjectEntryEvent";
 
-const NEGATIVE: string = "Value must be positive"
-const NON_INTEGER: string = "Value must be an integer"
-const NOT_A_NUMBER: string = "Value is not a number"
-//const OUT_OF_RANGE: string = "Value out of range"
 
-function checkInput(val: string, type: Type, setError: (error: boolean) => void, setErrorMsg: (errorMsg: string | null) => void) {
-  if (val === "" || type.id == "enum") {
-    setError(false)
-    return;
-  } else if (isInt(type.id)) {
-    let regExp = /^-?\d*[.]?\d+$/;
-    let num = parseInt(val)
-    if (!regExp.test(val)) setErrorMsg(NOT_A_NUMBER)
-    else if (isNaN(num)) setErrorMsg(NOT_A_NUMBER)
-    else if (val.includes(".")) setErrorMsg(NON_INTEGER)
-    else {
-      setError(false)
-      return;
-    }
-  } else if (isUInt(type.id)) {
-    let regExp = /^-?\d*[.]?\d+$/;
-    let num = parseInt(val)
-    if (!regExp.test(val)) setErrorMsg(NOT_A_NUMBER)
-    else if (isNaN(num)) setErrorMsg(NOT_A_NUMBER)
-    else if (val.includes(".")) setErrorMsg(NON_INTEGER)
-    else if (num < 0) setErrorMsg(NEGATIVE)
-    else {
-      setError(false)
-      return;
-    }
-  } else if (isReal(type.id)) {
-    let regExp = /^-?\d*[.]?\d+$/;
-    let num = parseFloat(val)
-    if (!regExp.test(val)) setErrorMsg(NOT_A_NUMBER)
-    else if (isNaN(num)) setErrorMsg(NOT_A_NUMBER)
-    else {
-      setError(false)
-      return;
-    }
-  }
-  setError(true)
-}
+type OptionalValue = number | string | { [name: string]: OptionalValue } | null | undefined;
 
-function invokeBackend(node: string, objectEntry: string, val: Value, setGlobalError: {
-  (value: SetStateAction<boolean>): void;
-  (arg0: boolean): void;
-}) {
-  invoke("set_object_entry_value", {
-    nodeName: node,
-    objectEntryName: objectEntry,
-    newValueJson: JSON.stringify(val),
-  }).catch((_) => setGlobalError(true));
-}
+type SetterLambda = (setter: ((old: OptionalValue) => OptionalValue)) => void;
 
-function convertMutableObjectEntryValue(value: MutableValue, ty: Type): Value {
-  if (isStruct(ty.id)) {
-    value = value as {[name : string] : MutableValue}
-    let updated: {[name : string] : Value} = {}
-
-    Object.entries(value).forEach(function ([name, curVal]) {
-      updated[name] = convertMutableObjectEntryValue(curVal, (ty.info as StructTypeInfo).attributes[name])
-    })
-    return updated
-
-  } else if (isInt(ty.id) || isUInt(ty.id) || isReal(ty.id)) {
-    return (value as MutableRefObject<number>).current
-  } else {
-    return (value as MutableRefObject<string>).current
-  }
-}
-
-function updateMutableObjectEntryValue(newValue: MutableValue, value: Value, ty: Type): Value {
-  if (isStruct(ty.id)) {
-    newValue = newValue as {[name : string] : MutableValue}
-    let updated: {[name : string] : Value} = {}
-
-    Object.entries(newValue).forEach(function ([name, mutValue]) {
-      updated[name] = updateMutableObjectEntryValue(mutValue, (value as {[name : string] : Value})[name], (ty.info as StructTypeInfo).attributes[name])
-    })
-    return updated
-
-  } else if (isInt(ty.id) || isUInt(ty.id) || isReal(ty.id)) {
-    return isNaN((newValue as MutableRefObject<number>).current) ? value : (newValue as MutableRefObject<number>).current
-  } else {
-    return (newValue as MutableRefObject<string>).current === "" ? value : (newValue as MutableRefObject<string>).current
-  }
-}
-
-function sendInput(node: string, objectEntry: string, type: Type, value: ObjectEntryEvent | null, newValue: MutableValue, setGlobalError: {
-  (value: SetStateAction<boolean>): void;
-  (arg0: boolean): void;
-}) {
-  if (!value) {
-    invokeBackend(node, objectEntry, convertMutableObjectEntryValue(newValue, type), setGlobalError)
-  } else {
-    invokeBackend(node, objectEntry, updateMutableObjectEntryValue(newValue, value.value, type), setGlobalError)
-  }
-}
-
-interface DisplayTextFieldsProps {
-  ty: Type,
-  unit?: string,
-  value: Value | undefined,
-  newValue: MutableValue,
-  name?: string,
-  localErrors: boolean[],
-  setLocalErrors: (localError: boolean[]) => void,
-  setGlobalError: (globalError: boolean) => void,
-}
-
-function DisplayTextFields({ ty, unit, value, newValue, name, localErrors, setLocalErrors, setGlobalError }: Readonly<DisplayTextFieldsProps>) : JSX.Element |JSX.Element[] {
-  let [errorMsg, setErrorMsg] = useState<string | null>(null)
-  let [error, setError] = useState<boolean>(false)
-
-  let endAdornment = unit ? <InputAdornment position="end">{unit}</InputAdornment> : undefined;
-  let startAdornment = name ? <InputAdornment position="start">{name + ": "}</InputAdornment> : undefined;
-
-  if (isEnum(ty.id)) {
-    return (
-      <FormControl sx={{ width: '25ch' }} variant="outlined">
-        <FormHelperText id="outlined-weight-helper-text1">
-          {' '}
-        </FormHelperText>
-        <TextField
-          id="outlined-select-value"
-          select
-          label="Select:"
-          placeholder={value ? `${String(value)}` : undefined} // TODO default value
-          onAnimationStart={() => setError(false)}
-          onChange={(event) => {
-            (newValue as MutableRefObject<string>).current = event.target.value
-            setGlobalError(false)
-          }}
-          InputProps={{
-            startAdornment: <InputAdornment position="start">{name}</InputAdornment>,
-          }}
-        >
-          {(ty.info as EnumTypeInfo).variants.map((option) => (
-            <MenuItem key={option} value={option}>
-              {option}
-            </MenuItem>
-          ))}
-        </TextField>
-      </FormControl>
-    )
-  } else if (isStruct(ty.id)) {
-
-    return (
-        Object.entries((newValue as {[name : string] : MutableValue})).map(([newName, newValue]) => {
-      if (value) {
-        return <DisplayTextFields ty={(ty.info as StructTypeInfo).attributes[newName]} unit={unit} value={(value as {[name : string] : Value})[newName]} newValue={newValue} name={newName} localErrors={localErrors} setLocalErrors={setLocalErrors} setGlobalError={setGlobalError} />
-      } else {
-        return <DisplayTextFields ty={(ty.info as StructTypeInfo).attributes[newName]} unit={unit} value={value} newValue={newValue} name={newName} localErrors={localErrors} setLocalErrors={setLocalErrors} setGlobalError={setGlobalError} />
+function isValidValue(ty: Type, value: OptionalValue): boolean {
+  switch (ty.id) {
+    case "uint": case "int": case "real": case "enum":
+      return value !== null;
+    case "struct":
+      if (value === null) return false;
+      if (value == undefined) return true;
+      const structInfo = ty.info as StructTypeInfo;
+      const valueAsStruct = value as { [name: string]: OptionalValue };
+      for (const [attrib_name, attrib_type] of Object.entries(structInfo.attributes)) {
+        if (!isValidValue(attrib_type, valueAsStruct[attrib_name])) {
+          return false;
+        }
       }
-    })
-    )
+      return true;
+  }
+}
+
+function sendSetRequest(nodeName: string, objectEntryName: string, value: OptionalValue, currentValue: Value | undefined, ty: Type) {
+
+  // NOTE: construct a new value, where all undefined attributes 
+  // are replaced with the currentValue to 
+  function autocompleteRec(value: OptionalValue, currentValue: Value | undefined, ty: Type): Value | null {
+    if (value == null)return null;
+    switch (ty.id) {
+      case "uint": case "int": case "real": case "enum":
+        return (value ?? currentValue) as Value ?? null;
+      case "struct":
+        if (value === undefined) {
+          return currentValue ?? null;
+        } else {
+          const structInfo = ty.info as StructTypeInfo;
+          const valueAsStruct = value as { [name: string]: OptionalValue };
+          const currentValueAsStruct = value as { [name: string]: Value };
+          const autocompletedStruct: { [name: string]: Value } | null = {};
+          for (const [attrib_name, attrib_type] of Object.entries(structInfo.attributes)) {
+            const auto =
+              autocompleteRec(valueAsStruct[attrib_name], currentValueAsStruct[attrib_name], attrib_type);
+            if (!auto) {
+              return null;
+            }
+            autocompletedStruct[attrib_name] = auto;
+          }
+          return autocompletedStruct;
+        }
 
 
-  } else {
-    localErrors.push(error)
-    setLocalErrors(localErrors)
-    return (
-      <FormControl sx={{ width: name ? '45ch' : '25ch' }} variant="outlined">
-        <FormHelperText id="outlined-weight-helper-text1">
-          {error ? errorMsg : 'Set Value:'}
-        </FormHelperText>
-        <OutlinedInput
-          placeholder={value ? `${Number(value)}` : undefined}
-          id="outlined-adornment-weight1"
-          endAdornment={endAdornment}
-          aria-describedby="outlined-weight-helper-text1"
-          inputProps={{
-            'aria-label': 'weight',
-          }}
-          onAnimationStart={() => setError(false)}
-          onChange={(event) => {
-            checkInput(event.target.value, ty, setError, setErrorMsg);
-            (newValue as MutableRefObject<number>).current = parseInt(event.target.value)
-            setGlobalError(false)
-          }}
-          startAdornment={startAdornment}
-          error={error}
-        />
-      </FormControl>
-    )
+    }
   }
 
+  let autocompletedValue: Value | null = autocompleteRec(value, currentValue, ty);
+  if (!autocompletedValue) {
+    // TODO error notification here please!
+    // there doesn't exist a current value and not all values where specified, 
+    // therefor the set request was aborted
+    return;
+  }
+  console.log("sending set_request to backend:", autocompletedValue);
+
+  invoke("set_object_entry_value", {
+    nodeName,
+    objectEntryName,
+    newValueJson: JSON.stringify(autocompletedValue),
+  }).catch((_) => {
+    // TODO: send a error notification!
+    console.error("TODO make be a notification");
+  });
 }
+
 
 const dialogStyle = {
   position: 'absolute' as const,
@@ -223,80 +99,164 @@ const dialogStyle = {
   pb: 3,
 };
 
+
 interface EditDialogProps {
   open: boolean,
   onClose: () => void,
   nodeName: string,
-  objectEntryName: string
   objectEntryInfo: ObjectEntryInformation,
 }
 
-type MutableValue = MutableRefObject<number> | MutableRefObject<string> | {[name : string] : MutableValue};
 
-function createInitial(ty: Type): MutableValue {
-  if (isStruct(ty.id)) {
-    let structInfo = ty.info as StructTypeInfo;
-    let value: {[name : string] : MutableValue} = {}
+function EditDialog({ open, onClose, nodeName, objectEntryInfo }: EditDialogProps) {
 
-    Object.entries(structInfo.attributes).forEach(function ([name, type]) {
-      value[name] = createInitial(type)
-    })
-    return value
-
-  } else if (isInt(ty.id) || isUInt(ty.id) || isReal(ty.id)) {
-    return useRef<number>(NaN)
-  } else {
-    return useRef<string>("")
-  }
-}
-
-function isInitial(ty: Type, newValue: MutableValue): boolean {
-  if (isInt(ty.id) || isUInt(ty.id) || isReal(ty.id)) {
-    return isNaN((newValue as MutableRefObject<number>).current)
-  } else if (isEnum(ty.id)) {
-    return (newValue as MutableRefObject<string>).current === ""
-  } else {
-    return !Object.entries((newValue as {[name : string] : MutableValue})).map(([name, value]) => isInitial((ty.info as StructTypeInfo).attributes[name], value)).includes(false)
-  }
-}
-
-function EditDialog({ onClose, open, nodeName, objectEntryName, objectEntryInfo }: Readonly<EditDialogProps>) {
-  let [value, setValue] = useState<ObjectEntryEvent | null>(null);
-  let [globalError, setGlobalError] = useState<boolean>(false);
-  let [localErrors, setLocalErrors] = useState<boolean[]>([])
-  let newValue: MutableValue = createInitial(objectEntryInfo.ty)
-
-  useEffect(()=>{
-    console.log("init");
-  }, []);
-
-  async function registerListener() {
-    let { event_name, latest } = await invoke<ObjectEntryListenLatestResponse>("listen_to_latest_object_entry_value",
-      { nodeName, objectEntryName });
-    setValue(latest);
-
-    let unlistenBackend = () => invoke("unlisten_from_latest_object_entry_value", {
-      nodeName,
-      objectEntryName
-    }).catch(console.error);
-
-    let unlistenReact = await listen<ObjectEntryEvent>(event_name, event => setValue(event.payload));
-
-    return () => {
-      unlistenBackend();
-      unlistenReact();
-    }
-  }
+  // NOTE: listeners to current values
+  const [currentValue, setCurrentValue] = useState<Value | undefined>();
 
   useEffect(() => {
-    if (open) {
-      let cleanup = registerListener();
+    async function registerLatestListeners() {
+      const response = await invoke<ObjectEntryListenLatestResponse>("listen_to_latest_object_entry_value",
+        { nodeName, objectEntryName: objectEntryInfo.name });
+      setCurrentValue(response.latest?.value);
+      let unlistenJs = await listen<ObjectEntryEvent>(response.event_name, event => {
+        setCurrentValue(event.payload.value);
+      });
       return () => {
-        cleanup.then(f => f()).catch(console.error);
-        setValue(null);
+        unlistenJs();
+        invoke("unlisten_from_latest_object_entry_value",
+          { nodeName, objectEntryName: objectEntryInfo.name }).catch(console.error);
+      };
+    }
+    const unlisten = registerLatestListeners();
+    return () => {
+      unlisten.then(f => f()).catch(console.error);
+    };
+  }, [nodeName, objectEntryInfo]);
+
+  const [value, setValue] = useState<OptionalValue>(undefined);
+
+  const [propertyInputFields, setPropertyInputFields] = useState<JSX.Element[]>([]);
+  useEffect(() => {
+    const inputFields: JSX.Element[] = [];
+
+    function recBuildInputFields(ty: Type, onUpdate: SetterLambda, value?: Value) {
+      switch (ty.id) {
+        case "uint": {
+          const typeInfo = ty.info as UIntTypeInfo;
+          const bitSize = typeInfo.bit_size;
+          const max = Math.pow(2, bitSize) - 1; // NOTE might have some minor rounding errors.
+          inputFields.push(<UnsignedPropertyInputField
+            min={0}
+            max={max}
+            currentValue={value as number}
+            // assert that onUpdate will by of type (number | string | null) => void.
+            onUpdate={(value) => {
+              onUpdate(_ => {
+                return value
+              });
+            }} />);
+          break;
+        }
+        case "int": {
+          const typeInfo = ty.info as IntTypeInfo;
+          const bitSize = typeInfo.bit_size;
+          const max = Math.pow(2, bitSize - 1) - 1; // NOTE might have some minor rounding errors.
+          const min = -Math.pow(2, bitSize - 1); // NOTE might have some minor rounding errors.
+          inputFields.push(<SignedPropertyInputField
+            min={min}
+            max={max}
+            currentValue={value as number}
+            // assert that onUpdate will by of type (number | string | null) => void.
+            onUpdate={value => {
+              onUpdate(_ => {
+                return value;
+              });
+            }} />);
+          break;
+        }
+        case "real": {
+          const typeInfo = ty.info as RealTypeInfo;
+          inputFields.push(<RealPropertyInputField
+            min={typeInfo.min}
+            max={typeInfo.max}
+            currentValue={value as number}
+            // assert that onUpdate will by of type (number | string | null) => void.
+            onUpdate={value => {
+              onUpdate(_ => {
+                return value;
+              });
+            }}
+          />);
+          break;
+        }
+        case "enum": {
+          const typeInfo = ty.info as EnumTypeInfo;
+          inputFields.push(<EnumPropertyInputField
+            variants={typeInfo.variants}
+            // assert that onUpdate will by of type (number | string | null) => void.
+            currentValue={value as string}
+            onUpdate={value => {
+              onUpdate(_ => {
+                return value;
+              });
+            }} />);
+          break;
+        }
+        case "struct": {
+          const typeInfo = ty.info as StructTypeInfo;
+          for (const [attrib_name, attrib_type] of Object.entries(typeInfo.attributes)) {
+            // NOTE: pretty cool functional stuff.
+            // creates a lambda, which will provide a setter for the attribute
+            // returning the value returned from the setter will be writen to the attribute
+            // (for recursion the first parameter of the setter is the previous value)
+            // same thing as setState(prev => {...prev}) in React.
+            const attribOnUpdate: SetterLambda = (setter) => {
+              onUpdate(old => {
+                const asStruct = (old ?? {}) as { [name: string]: OptionalValue };
+                asStruct[attrib_name] = setter(asStruct[attrib_name]);
+                // check if all attributes of the new value are undefined
+                let allUndefined = true;
+                for (const x of Object.values(asStruct)) {
+                  if (x !== undefined) {
+                    allUndefined = false;
+                  }
+                }
+                return allUndefined ? undefined : asStruct;
+              });
+            }
+            if (currentValue === undefined) {
+              recBuildInputFields(attrib_type, attribOnUpdate, undefined);
+            } else {
+              const currentValueAsStruct = currentValue as { [name: string]: Value };
+              recBuildInputFields(attrib_type, attribOnUpdate, currentValueAsStruct[attrib_name]);
+            }
+          }
+          break;
+        }
       }
     }
-  }, [nodeName, objectEntryName, open]);
+    const rootSetter: SetterLambda = (setter) => {
+      setValue(old => {
+        let copy: OptionalValue;
+        if (objectEntryInfo.ty.id == "struct") {
+          const asStruct = (old ?? {}) as { [name: string]: OptionalValue };
+          copy = { ...asStruct }; // copy struct
+        } else {
+          copy = old; // primitive can just be copied.
+        }
+        const newValue = setter(copy);
+        return newValue;
+      });
+    }
+    recBuildInputFields(objectEntryInfo.ty, rootSetter, currentValue);
+    setPropertyInputFields(inputFields);
+  }, [nodeName, objectEntryInfo.name, currentValue]);
+
+  useEffect(() => {
+    setValue(undefined);
+  }, [open]);
+
+  const enableUpload = isValidValue(objectEntryInfo.ty, value);
 
   return <Modal
     open={open}
@@ -314,8 +274,7 @@ function EditDialog({ onClose, open, nodeName, objectEntryName, objectEntryInfo 
             {`${objectEntryInfo.name} of ${nodeName}`}
           </Typography>
         </Stack>
-        <DisplayTextFields ty={objectEntryInfo.ty} unit={objectEntryInfo.unit} value={value?.value}
-          newValue={newValue} localErrors={localErrors} setLocalErrors={setLocalErrors} setGlobalError={setGlobalError} />
+        {propertyInputFields}
         <Box component="form"
           sx={{
             display: "flex",
@@ -328,10 +287,11 @@ function EditDialog({ onClose, open, nodeName, objectEntryName, objectEntryInfo 
               marginLeft: "auto",
             }}
             // TODO: proper error message maybe red box
-            color={globalError ? "error" : "primary"}
-            disabled={isInitial(objectEntryInfo.ty, newValue) || localErrors.includes(true)}
+            color={enableUpload ? "primary" : "error"}
+            disabled={!enableUpload}
             onClick={() => {
-              sendInput(nodeName, objectEntryName, objectEntryInfo.ty, value, newValue, setGlobalError)
+              // NOTE: assert that the value is valid! (otherwise the button is not enabled!)
+              sendSetRequest(nodeName, objectEntryInfo.name, value, currentValue, objectEntryInfo.ty);
             }}
           >
             Upload
@@ -340,6 +300,7 @@ function EditDialog({ onClose, open, nodeName, objectEntryName, objectEntryInfo 
       </Stack>
     </Paper>
   </Modal>
+
 }
 
 export default EditDialog;

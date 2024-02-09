@@ -1,7 +1,7 @@
-import { LegacyRef, ReactElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ReactElement, useEffect, useMemo, useState } from "react";
 import { ObjectEntryInformation } from "../types/ObjectEntryInformation";
 import { invoke } from "@tauri-apps/api";
-import { Box, Container, Skeleton, Stack } from "@mui/material";
+import { Skeleton, Stack } from "@mui/material";
 import { listen } from "@tauri-apps/api/event";
 import { ObjectEntryHistoryEvent } from "../types/events/ObjectEntryHistoryEvent";
 import { ObjectEntryEvent } from "../types/events/ObjectEntryEvent";
@@ -26,17 +26,12 @@ interface ObjectEntryGraph {
 function ObjectEntryGraph({
   nodeName,
   objectEntryName,
-  useScrolling = false,
+  useScrolling = true,
   timeDomain = 5000,
   buffering = true,
   smoothMode,
   interpolation = GraphInterpolation.Step,
 }: ObjectEntryGraph) {
-
-  // TODO remove me
-  useEffect(()=> {
-    console.log("init");
-  }, []);
 
   const [graphList, setGraphList] = useState<ReactElement[]>([]);
 
@@ -66,7 +61,6 @@ function ObjectEntryGraph({
       updateIntervalMillis = Math.floor(updateIntervalMillis);
       smoothMode ??= updateIntervalMillis < 100;
 
-      console.log(updateIntervalMillis);
       // fetch information!
       let information = await invoke<ObjectEntryInformation>("object_entry_information",
         { nodeName, objectEntryName });
@@ -201,7 +195,7 @@ function ObjectEntryGraph({
   }
 
   if (graphList.length != 0) {
-    return <div onWheel={handleScrollWheel}>
+    return <div onWheel={useScrolling ? handleScrollWheel : undefined}>
       <Stack spacing={2} sx={{ width: "calc(100% - 16px)" }}>{graphList}</Stack>
     </div>;
   } else {

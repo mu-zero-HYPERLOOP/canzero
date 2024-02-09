@@ -159,13 +159,13 @@ function NumberGraph<T>({
 
     let running = true;
 
-    // UPDATE METHODS
-
     // initalize timestamp
-    let timestamp = datum.xValue(datum.values[datum.values.length - 1]);
+    let timestamp = datum.values.length !== 0 ?
+      datum.xValue(datum.values[datum.values.length - 1])
+      : 0;
 
-    let maxY = bounds?.max ?? Math.max(...datum.values.map(datum.yValue));
-    let minY = bounds?.min ?? Math.min(...datum.values.map(datum.yValue));
+    let maxY = bounds?.max ?? datum.values.length == 0 ? 100 : Math.max(...datum.values.map(datum.yValue));
+    let minY = bounds?.min ?? datum.values.length == 0 ? 0 : Math.min(...datum.values.map(datum.yValue));
 
     function updateXScale() {
       xScale.domain([timestamp - timeDomainMs, timestamp - timeShiftMs])
@@ -184,7 +184,7 @@ function NumberGraph<T>({
     }
 
     function updateTextValue() {
-      value.text(`${Math.round(
+      value.text(datum.values.length === 0 ? "" : `${Math.round(
         datum.yValue(datum.values[datum.values.length - 1]) * 100.0)
         / 100.0}${unit ?? ""}`);
     }
