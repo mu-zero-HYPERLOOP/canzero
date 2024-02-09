@@ -21,6 +21,7 @@ interface ObjectEntryPanelProps {
 }
 
 function ObjectEntryPanel({ node, name }: Readonly<ObjectEntryPanelProps>) {
+
   const [information, setInformation] = useState<ObjectEntryInformation | null>(null);
 
   const [interpolationMode, setInterpolationMode] = useState<GraphInterpolation>(GraphInterpolation.Step);
@@ -39,9 +40,27 @@ function ObjectEntryPanel({ node, name }: Readonly<ObjectEntryPanelProps>) {
     };
   }, [node.name, name]);
 
-  function Content() {
-    if (information) {
-      return <>
+  return <Paper sx={{
+    marginTop: "30px",
+    marginLeft: "8px",
+    marginRight: "10px",
+    paddingLeft: "12px",
+    paddingRight: "12px",
+    paddingTop: "45px",
+    paddingBottom: "20px",
+    width: "calc(100% - 16px)",
+    position: "relative"
+  }}>
+    <Typography sx={{
+      position: "absolute",
+      top: "-12px",
+      left: "12px",
+      padding: "1px",
+
+    }} variant="h5">{node.name}::{name}
+    </Typography>
+    {!information ? <Skeleton variant="rounded" height={"300px"} /> :
+      <>
         {information.description ? <Typography sx={{
           position: "absolute",
           top: "18px",
@@ -111,37 +130,12 @@ function ObjectEntryPanel({ node, name }: Readonly<ObjectEntryPanelProps>) {
         <ObjectEntryGraph
           nodeName={node.name}
           objectEntryName={information.name}
-          timeDomain={1000} 
+          timeDomain={1000}
           interpolation={interpolationMode}
           buffering={buffering}
         />
       </>
-    } else {
-      return <Skeleton variant="rounded" height={"300px"} />
     }
-
-  }
-
-  return <Paper sx={{
-    marginTop: "30px",
-    marginLeft: "8px",
-    marginRight: "10px",
-    paddingLeft: "12px",
-    paddingRight: "12px",
-    paddingTop: "45px",
-    paddingBottom: "20px",
-    width: "calc(100% - 16px)",
-    position: "relative"
-  }}>
-    <Typography sx={{
-      position: "absolute",
-      top: "-12px",
-      left: "12px",
-      padding: "1px",
-
-    }} variant="h5">{node.name}::{name}
-    </Typography>
-    <Content />
 
   </Paper>
 }

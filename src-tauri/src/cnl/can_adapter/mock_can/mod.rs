@@ -34,8 +34,8 @@ impl CanAdapterInterface for MockCanAdapter {
             .rng
             .lock()
             .expect("failed to acquire mock can lock")
-            .gen_range(1..10);
-        tokio::time::sleep(Duration::from_millis(timeout)).await;
+            .gen_range(10..20);
+        tokio::time::sleep(Duration::from_micros(timeout)).await;
 
 
         let mut rng = self.rng.lock().expect("failed to acquire mock can lock");

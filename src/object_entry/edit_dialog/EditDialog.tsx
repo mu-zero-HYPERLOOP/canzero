@@ -266,6 +266,10 @@ function EditDialog({ onClose, open, nodeName, objectEntryName, objectEntryInfo 
   let [localErrors, setLocalErrors] = useState<boolean[]>([])
   let newValue: MutableValue = createInitial(objectEntryInfo.ty)
 
+  useEffect(()=>{
+    console.log("init");
+  }, []);
+
   async function registerListener() {
     let { event_name, latest } = await invoke<ObjectEntryListenLatestResponse>("listen_to_latest_object_entry_value",
       { nodeName, objectEntryName });

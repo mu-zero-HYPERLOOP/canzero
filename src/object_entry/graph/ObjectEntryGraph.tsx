@@ -33,6 +33,11 @@ function ObjectEntryGraph({
   interpolation = GraphInterpolation.Step,
 }: ObjectEntryGraph) {
 
+  // TODO remove me
+  useEffect(()=> {
+    console.log("init");
+  }, []);
+
   const [graphList, setGraphList] = useState<ReactElement[]>([]);
 
   // creates a mutable history object, which is modified in the useEffect.
@@ -197,7 +202,7 @@ function ObjectEntryGraph({
 
   if (graphList.length != 0) {
     return <div onWheel={handleScrollWheel}>
-      <Stack sx={{ width: "calc(100% - 16px)" }}>{graphList}</Stack>
+      <Stack spacing={2} sx={{ width: "calc(100% - 16px)" }}>{graphList}</Stack>
     </div>;
   } else {
     return <Skeleton variant="rounded" height={"200px"} />;
