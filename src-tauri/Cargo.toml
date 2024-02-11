@@ -39,3 +39,4 @@ custom-protocol = ["tauri/custom-protocol"]
 # Custom features!
 mock-can = []
 socket-can = ["dep:libc", "dep:nix"]
+tcp-can = []

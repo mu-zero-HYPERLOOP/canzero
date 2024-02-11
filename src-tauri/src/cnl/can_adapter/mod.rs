@@ -44,6 +44,22 @@ impl CanAdapter {
     }
 }
 
+// tcp-can
+#[cfg(feature="tcp-can")]
+mod tcp;
+#[cfg(feature="tcp-can")]
+pub struct CanAdapter(self::tcp::TcpCanAdapter, BusRef);
+#[cfg(feature="tcp-can")]
+impl CanAdapter {
+    pub fn create(bus : &BusRef, network: &NetworkRef) -> CanAdapter {
+        CanAdapter(
+            self::tcp::TcpCanAdapter::create(bus),
+            bus.clone()
+        )
+    }
+}
+
+
 trait CanAdapterInterface {
     async fn receive(&self) -> Result<Timestamped<CanFrame>, Timestamped<CanError>>;
 
