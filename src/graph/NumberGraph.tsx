@@ -7,7 +7,6 @@ import { Paper } from "@mui/material";
 
 interface NumberGraphProps<T> {
   datum: GraphDatum<T, number>
-  id: string,
   width?: number
   height: number,
   margin?: { top: number, bottom: number, left: number, right: number },
@@ -21,7 +20,6 @@ interface NumberGraphProps<T> {
 
 
 function NumberGraph<T>({
-  id,
   datum,
   width,
   height,
@@ -228,7 +226,6 @@ function NumberGraph<T>({
       svg.remove();
     }
   }, [
-    id,
     refreshRate,
     interpolation,
     autoWidth,

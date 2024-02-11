@@ -219,7 +219,12 @@ function StringGraph<T>({
       running = false;
       svg.remove();
     }
-  }, [autoWidth, height]);
+  }, [
+    refreshRate,
+    interpolation,
+    autoWidth,
+    height,
+    timeDomainMs]);
 
   return <Paper sx={{ width: "100%", backgroundColor: "#f2f2f2" }}>
     <svg ref={svgRef}></svg>

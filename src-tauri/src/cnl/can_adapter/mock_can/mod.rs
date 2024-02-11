@@ -34,16 +34,15 @@ impl CanAdapterInterface for MockCanAdapter {
             .rng
             .lock()
             .expect("failed to acquire mock can lock")
-            .gen_range(10..20);
+            .gen_range(10..100);
         tokio::time::sleep(Duration::from_micros(timeout)).await;
 
 
         let mut rng = self.rng.lock().expect("failed to acquire mock can lock");
-        let t: u32 = rng.gen_range(0..=1);
+        let t: bool = rng.gen_bool(0.5);
         match t {
-            0 => Ok(Timestamped::now(random_get_resp(&mut rng, &self.network_ref))),
-            1 => Ok(Timestamped::now(random_stream_frame(&mut rng, &self.network_ref))),
-            _ => panic!(),
+            false => Ok(Timestamped::now(random_get_resp(&mut rng, &self.network_ref))),
+            true => Ok(Timestamped::now(random_stream_frame(&mut rng, &self.network_ref))),
         }
     }
     async fn receive_err(&self) -> TCanError {

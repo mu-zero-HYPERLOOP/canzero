@@ -94,7 +94,6 @@ function ObjectEntryGraph({
         acc += 1;
         if (ty.id == "int" || ty.id == "uint" || ty.id == "real") {
           graphList.push(<NumberGraph<ObjectEntryEvent>
-            id={objectEntryName + acc}
             datum={{
               values: history,
               xValue: (event) => event.timestamp,
@@ -190,6 +189,7 @@ function ObjectEntryGraph({
       }
       let newDomain = oldDomain + (event.deltaY + event.deltaX) * factor;
       newDomain = clampTimeDomain(newDomain);
+      console.log("timedomain", newDomain);
       return Math.floor(newDomain);
     });
   }
