@@ -102,6 +102,7 @@ function D3ObjectEntryGraph({
         const entry = entries[0];
         if (width != entry.contentRect.width) {
           setWidth(entry.contentRect.width);
+          console.log(entry.contentRect.width);
           setResponsiveHeight(Math.max(Math.min(entry.contentRect.width / 3, maxHeight), minHeight));
         }
       }
@@ -148,7 +149,9 @@ function D3ObjectEntryGraph({
       .ticks(5);
 
     let yAxis = d3.axisLeft(y).tickFormat(x => `${x}${unit ?? ""}`).ticks(5);
-    const yAxisGrid = d3.axisLeft(y).tickSize(-innerWidth).tickFormat("" as any).ticks(5);
+    const yAxisGrid = d3.axisLeft(y)
+      .tickSize(-innerWidth)
+      .tickFormat("" as any).ticks(5);
 
     let history: ObjectEntryEvent[] = [];
     let latestValue: ObjectEntryEvent;

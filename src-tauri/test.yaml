@@ -2,55 +2,645 @@
 buses:
   can0:
     baudrate: 1000000
+  can1:
+    baudrate: 1000000
 
 enum_types:
   global_state_t:
-    init: 0
-    setup: 1
-    idle : 2
-    prepare: 3
-    ready: 4
-    start_levitation: 5
-    levitation: 6
-    start_propulsion: 7
-    curusing: 8
-    braking: 9
-    stop_levitation: 10
-    end_of_run : 11
-    safe_to_approach: 12
-    emergency: 13
+    INIT: 0
+    IDLE: 1
+    UNPLUG_MOVITRANS : 2
+    PRECHARGE : 3
+    READY: 4
+    START_LEVITATION : 5
+    LEVITATION_STABLE: 6
+    START_GUIDANCE : 7
+    GUIDANCE_STABLE : 8
+    ACCELERATION : 9
+    CRUISING : 10
+    DECELERATION : 11
+  mlu_state_t:
+    INIT: 0
+    IDLE: 1
+    PRECHARGE: 2
+    READY: 3
+    START : 4
+    CONTROL : 5
+    STOP : 6
+  mgu_state_t:
+    INIT: 0
+    IDLE: 1
+    PRECHARGE: 2
+    READY: 3
+    START : 4
+    CONTROL : 5
+    STOP : 6
+  motor_state_t:
+    INIT: 0
+    IDLE: 1
+    PRECHARGE: 2
+    READY: 3
+    START : 4
+    CONTROL : 5
+    STOP : 6
 
+struct_types:
+  mlu_control_config:
+    p_value : d8<-100..100>
+    i_value : d8<-100..100>
+    d_value : d8<-100..100>
+  mgu_control_config:
+    p_value : d8<-100..100>
+    i_value : d8<-100..100>
+    d_value : d8<-100..100>
+  motor_control_config:
+    p_value : d8<-100..100>
+    i_value : d8<-100..100>
+    d_value : d8<-100..100>
 
 nodes: 
-  secu: 
-    description: Sensor Electronics Control Unit
+  master:
+    description: Raspberry pi
     object_dictionary:
-      position:
-        type : d32<-1..100>
-        access : global
-        description: estimated position of the pod
-        unit : m
-      velocity:
-        type : d32<-1..100>
-        access : global
-        description: estimated velocity of the pod
-        unit: m/s
       global_state:
         type: global_state_t
-        access : global
-        description: state of the pod
-      test:
-        type: u8
-        access : global
-        description : test oe
-
+        description: global state of the system
+  mlu1:
+    description: Modular Levitation Unit 1
+    object_dictionary:
+      state:
+        type: mlu_state_t
+        description: state of the mlu
+      control_config:
+        type: mlu_control_config
+        description: control config of the mlu
+      air_gap:
+        type: d32<0..20>
+        description: air gap of the mlu
+      target_force:
+        type: d16<0..100>
+        description: control target force
+      dc_current:
+        type: d16<-10..50>
+        description: dc current of the mlu
+      magnet_temperature:
+        type: d8<-1..150>
+        description: temperature of the magnet
     tx_streams:
-      position_and_velocity:
-        description : Position and velocity values of the pod
+      mlu_state:
+        description : estimated position and velocity values of the pod
         interval : 100ms
         mapping:
-          - position
-          - velocity
+          - state
+          - magnet_temperature
+      control_data:
+        description: control data of the mlu
+        interval: 100ms
+        mapping:
+          - air_gap
+          - target_force
+          - dc_current
+  mlu2:
+    description: Modular Levitation Unit 1
+    object_dictionary:
+      state:
+        type: mlu_state_t
+        description: state of the mlu
+      control_config:
+        type: mlu_control_config
+        description: control config of the mlu
+      air_gap:
+        type: d32<0..20>
+        description: air gap of the mlu
+      target_force:
+        type: d16<0..100>
+        description: control target force
+      dc_current:
+        type: d16<-10..50>
+        description: dc current of the mlu
+      magnet_temperature:
+        type: d8<-1..150>
+        description: temperature of the magnet
+    tx_streams:
+      mlu_state:
+        description : estimated position and velocity values of the pod
+        interval : 100ms
+        mapping:
+          - state
+          - magnet_temperature
+      control_data:
+        description: control data of the mlu
+        interval: 100ms
+        mapping:
+          - air_gap
+          - target_force
+          - dc_current
+
+  mlu3:
+    description: Modular Levitation Unit 1
+    object_dictionary:
+      state:
+        type: mlu_state_t
+        description: state of the mlu
+      control_config:
+        type: mlu_control_config
+        description: control config of the mlu
+      air_gap:
+        type: d32<0..20>
+        description: air gap of the mlu
+      target_force:
+        type: d16<0..100>
+        description: control target force
+      dc_current:
+        type: d16<-10..50>
+        description: dc current of the mlu
+      magnet_temperature:
+        type: d8<-1..150>
+        description: temperature of the magnet
+    tx_streams:
+      mlu_state:
+        description : estimated position and velocity values of the pod
+        interval : 100ms
+        mapping:
+          - state
+          - magnet_temperature
+      control_data:
+        description: control data of the mlu
+        interval: 100ms
+        mapping:
+          - air_gap
+          - target_force
+          - dc_current
+
+  mlu4:
+    description: Modular Levitation Unit 1
+    object_dictionary:
+      state:
+        type: mlu_state_t
+        description: state of the mlu
+      control_config:
+        type: mlu_control_config
+        description: control config of the mlu
+      air_gap:
+        type: d32<0..20>
+        description: air gap of the mlu
+      target_force:
+        type: d16<0..100>
+        description: control target force
+      dc_current:
+        type: d16<-10..50>
+        description: dc current of the mlu
+      magnet_temperature:
+        type: d8<-1..150>
+        description: temperature of the magnet
+    tx_streams:
+      mlu_state:
+        description : estimated position and velocity values of the pod
+        interval : 100ms
+        mapping:
+          - state
+          - magnet_temperature
+      control_data:
+        description: control data of the mlu
+        interval: 100ms
+        mapping:
+          - air_gap
+          - target_force
+          - dc_current
+
+  mlu5:
+    description: Modular Levitation Unit 1
+    object_dictionary:
+      state:
+        type: mlu_state_t
+        description: state of the mlu
+      control_config:
+        type: mlu_control_config
+        description: control config of the mlu
+      air_gap:
+        type: d32<0..20>
+        description: air gap of the mlu
+      target_force:
+        type: d16<0..100>
+        description: control target force
+      dc_current:
+        type: d16<-10..50>
+        description: dc current of the mlu
+      magnet_temperature:
+        type: d8<-1..150>
+        description: temperature of the magnet
+    tx_streams:
+      mlu_state:
+        description : estimated position and velocity values of the pod
+        interval : 100ms
+        mapping:
+          - state
+          - magnet_temperature
+      control_data:
+        description: control data of the mlu
+        interval: 100ms
+        mapping:
+          - air_gap
+          - target_force
+          - dc_current
+
+  mlu6:
+    description: Modular Levitation Unit 1
+    object_dictionary:
+      state:
+        type: mlu_state_t
+        description: state of the mlu
+      control_config:
+        type: mlu_control_config
+        description: control config of the mlu
+      air_gap:
+        type: d32<0..20>
+        description: air gap of the mlu
+      target_force:
+        type: d16<0..100>
+        description: control target force
+      dc_current:
+        type: d16<-10..50>
+        description: dc current of the mlu
+      magnet_temperature:
+        type: d8<-1..150>
+        description: temperature of the magnet
+    tx_streams:
+      mlu_state:
+        description : estimated position and velocity values of the pod
+        interval : 100ms
+        mapping:
+          - state
+          - magnet_temperature
+      control_data:
+        description: control data of the mlu
+        interval: 100ms
+        mapping:
+          - air_gap
+          - target_force
+          - dc_current
+
+  mgu1: 
+    description: Modular Guidance Unit 1
+    object_dictionary:
+      state:
+        type: mgu_state_t
+        description: state of the mgu
+      control_config:
+        type: mgu_control_config
+        description: control config of the mgu
+      air_gap_left:
+        type: d32<0..20>
+        description: air gap of the mgu
+      air_gap_right:
+        type: d32<0..20>
+        description: air gap of the mgu
+      target_force_left:
+        type: d16<0..100>
+        description: control target force
+      target_force_right:
+        type: d16<0..100>
+        description: control target force
+      dc_current_left:
+        type: d16<-10..50>
+        description: dc current of the mgu
+      dc_current_right:
+        type: d16<-10..50>
+        description: dc current of the mgu
+      magnet_temperature_left:
+        type: d8<-1..150>
+        description: temperature of the magnet
+      magnet_temperature_right:
+        type: d8<-1..150>
+        description: temperature of the magnet
+    tx_streams:
+      mlu_state:
+        description : estimated position and velocity values of the pod
+        interval : 100ms
+        mapping:
+          - state
+          - magnet_temperature_left
+          - magnet_temperature_right
+      control_data_left:
+        description: control data of the mgu (left)
+        interval: 100ms
+        mapping:
+          - air_gap_left
+          - target_force_left
+          - dc_current_left
+      control_data_right:
+        description: control data of the mgu (right)
+        interval: 100ms
+        mapping:
+          - air_gap_right
+          - target_force_right
+          - dc_current_right
+
+  mgu2: 
+    description: Modular Guidance Unit 2
+    object_dictionary:
+      state:
+        type: mgu_state_t
+        description: state of the mgu
+      control_config:
+        type: mgu_control_config
+        description: control config of the mgu
+      air_gap_left:
+        type: d32<0..20>
+        description: air gap of the mgu
+      air_gap_right:
+        type: d32<0..20>
+        description: air gap of the mgu
+      target_force_left:
+        type: d16<0..100>
+        description: control target force
+      target_force_right:
+        type: d16<0..100>
+        description: control target force
+      dc_current_left:
+        type: d16<-10..50>
+        description: dc current of the mgu
+      dc_current_right:
+        type: d16<-10..50>
+        description: dc current of the mgu
+      magnet_temperature_left:
+        type: d8<-1..150>
+        description: temperature of the magnet
+      magnet_temperature_right:
+        type: d8<-1..150>
+        description: temperature of the magnet
+    tx_streams:
+      mlu_state:
+        description : estimated position and velocity values of the pod
+        interval : 100ms
+        mapping:
+          - state
+          - magnet_temperature_left
+          - magnet_temperature_right
+      control_data_left:
+        description: control data of the mgu (left)
+        interval: 100ms
+        mapping:
+          - air_gap_left
+          - target_force_left
+          - dc_current_left
+      control_data_right:
+        description: control data of the mgu (right)
+        interval: 100ms
+        mapping:
+          - air_gap_right
+          - target_force_right
+          - dc_current_right
+
+  motor_driver: 
+    description: Motor driver board for the DSLIM
+    object_dictionary:
+      state:
+        type: motor_state_t
+        description: state of the motor
+      control_config:
+        type: motor_control_config
+        description: control config of the mgu
+      motor_temperature_left:
+        type: d8<-1..150>
+        description: temperature of the motor
+      motor_temperature_right:
+        type: d8<-1..150>
+        description: temperature of the motor
+      acceleration: 
+        type: d16<-10..10>
+        description: current estimated acceleration by the motor
+      dc_current:
+        type: d16<-100..100>
+        description: dc current through the motor
+
+    tx_streams:
+      motor_state:
+        description : state of the motor
+        interval : 100ms
+        mapping:
+          - state
+      motor_temperatures:
+        description: temperature of the motor
+        interval: 1000ms
+        mapping:
+          - motor_temperature_left
+          - motor_temperature_right
+      acceleration_and_dc_current:
+        description: acceleration and dc current of the motor
+        interval: 100ms
+        mapping:
+          - acceleration
+          - dc_current
+
+  pdu24:
+    description: power distribution unit 24V
+    object_dictionary:
+      lp_channel1_current:
+        type: d8<0..3>
+        unit: °A
+      lp_channel2_current:
+        type: d8<0..3>
+        unit: °A
+      lp_channel3_current:
+        type: d8<0..3>
+        unit: °A
+      lp_channel4_current:
+        type: d8<0..3>
+        unit: °A
+      lp_channel5_current:
+        type: d8<0..3>
+        unit: °A
+      lp_channel6_current:
+        type: d8<0..3>
+        unit: °A
+      lp_channel7_current:
+        type: d8<0..3>
+        unit: °A
+      lp_channel8_current:
+        type: d8<0..3>
+        unit: °A
+      lp_channel9_current:
+        type: d8<0..3>
+        unit: °A
+      lp_channel10_current:
+        type: d8<0..3>
+        unit: °A
+      lp_channel11_current:
+        type: d8<0..3>
+        unit: °A
+      lp_channel12_current:
+        type: d8<0..3>
+        unit: °A
+      hp_channel1_current:
+        type: d8<0..10>
+        unit: °A
+      hp_channel2_current:
+        type: d8<0..10>
+        unit: °A
+      hp_channel3_current:
+        type: d8<0..10>
+        unit: °A
+      hp_channel4_current:
+        type: d8<0..10>
+        unit: °A
+      error_lp_channel_short:
+        type: u12
+        description: bitflag for short circuits
+      error_hp_channel_short:
+        type: u4
+        description: bitflag for short circuits
       
 
+  pdu12:
+    description: power distribution unit 12V
+    object_dictionary:
+      lp_channel1_current:
+        type: d8<0..3>
+        unit: °A
+      lp_channel2_current:
+        type: d8<0..3>
+        unit: °A
+      lp_channel3_current:
+        type: d8<0..3>
+        unit: °A
+      lp_channel4_current:
+        type: d8<0..3>
+        unit: °A
+      lp_channel5_current:
+        type: d8<0..3>
+        unit: °A
+      lp_channel6_current:
+        type: d8<0..3>
+        unit: °A
+      lp_channel7_current:
+        type: d8<0..3>
+        unit: °A
+      lp_channel8_current:
+        type: d8<0..3>
+        unit: °A
+      lp_channel9_current:
+        type: d8<0..3>
+        unit: °A
+      lp_channel10_current:
+        type: d8<0..3>
+        unit: °A
+      lp_channel11_current:
+        type: d8<0..3>
+        unit: °A
+      lp_channel12_current:
+        type: d8<0..3>
+        unit: °A
+      hp_channel1_current:
+        type: d8<0..10>
+        unit: °A
+      hp_channel2_current:
+        type: d8<0..10>
+        unit: °A
+      hp_channel3_current:
+        type: d8<0..10>
+        unit: °A
+      hp_channel4_current:
+        type: d8<0..10>
+        unit: °A
+      error_lp_channel_short:
+        type: u12
+        description: bitflag for short circuits
+      error_hp_channel_short:
+        type: u4
+        description: bitflag for short circuits
+      
+
+    tx_streams:
+      lp_channel1_to_8_current:
+        description : estimated position and velocity values of the pod
+        interval : 100ms
+        mapping:
+          - lp_channel1_current
+          - lp_channel2_current
+          - lp_channel3_current
+          - lp_channel4_current
+          - lp_channel5_current
+          - lp_channel6_current
+          - lp_channel7_current
+          - lp_channel8_current
+      lp_channel9_to_12_current:
+        description : estimated position and velocity values of the pod
+        interval : 100ms
+        mapping:
+          - lp_channel9_current
+          - lp_channel10_current
+          - lp_channel11_current
+          - lp_channel12_current
+
+      hp_channel1_to_4_current:
+        description : estimated position and velocity values of the pod
+        interval : 100ms
+        mapping:
+          - hp_channel1_current
+          - hp_channel2_current
+          - hp_channel3_current
+          - hp_channel4_current
+
+  input_board: 
+    description: input board (teency 4.1)
+    object_dictionary:
+      position_estimation:
+        type : d32<-100..100>
+        description: estimated position of the pod
+        unit : m
+      velocity_estimation:
+        type : d32<-100..100>
+        description: estimated velocity of the pod
+        unit: m/s
+      acceleration_estimation:
+        type : d32<-10...10>
+        unit: m/s²
+        description: estimated acceleration of the pod
+      on_board_temperature:
+        type: d8<-1..150>
+        unit: °C
+        description: temperature of the input board
+      cooling_cycle_temperature:
+        type: d8<-1..150>
+        unit: °C
+        description: temperature of the cooling cycle
+      battery_24V_temperature:
+        type: d8<-1..150>
+        unit: °C
+        description: 24V battery temperature
+      error_invalid_position_estimation:
+        type: u1
+        description: position estimation failed
+      error_battery_overtemperature:
+        type: u1
+        description: 24V battery temperature to high
+      error_heartbeat_miss:
+        type: u16
+        description: detected a heartbeat miss 
+    tx_streams:
+      position_and_velocity:
+        description : estimated position and velocity values of the pod
+        interval : 100ms
+        mapping:
+          - estimated_position
+          - estimated_velocity
+      acceleration:
+        description: estimated acceleration of the pod
+        interval : 100ms
+        mapping:
+          - estimated_acceleration
+      temperatures:
+        description: temperature of various subsystems
+        interval: 1000ms
+        mapping:
+          - on_board_temperature
+          - cooling_cycle_temperature
+      errors:
+        description: error flags
+        mapping:
+          - error_heartbeat_miss
+          - error_battery_overtemperature
+          - error_invalid_position_estimation
+    
 

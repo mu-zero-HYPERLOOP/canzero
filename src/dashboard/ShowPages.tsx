@@ -7,10 +7,10 @@ import {invoke} from "@tauri-apps/api";
 import {NetworkInformation} from "../nodes/types/NetworkInformation.ts";
 import NodePanel from "../nodes/NodePanel.tsx";
 import {NodeInformation} from "../nodes/types/NodeInformation.ts";
-import ObjectEntryPanel from "../nodes/ObjectEntryPanel.tsx";
 import LevitationControl from "../divisions/LevitationControl.tsx";
 import GuidanceControl from "../divisions/GuidanceControl.tsx";
 import MotorControl from "../divisions/MotorControl.tsx";
+import ObjectEntryPanel from "../object_entry/panel/ObjectEntryPanel.tsx";
 
 function Content() {
     const location = useLocation();

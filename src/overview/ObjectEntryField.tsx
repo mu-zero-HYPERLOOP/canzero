@@ -1,21 +1,15 @@
 import {useEffect, useState} from "react";
-import {
-    isInt,
-    isObjectEntryCompositeType,
-    isReal,
-    isStringArray,
-    isUint,
-    ObjectEntryInformation,
-    ObjectEntryType
-} from "../nodes/types/ObjectEntryInformation.ts";
-import ObjectEntryEvent, {ObjectEntryComposite, ObjectEntryValue} from "../nodes/types/ObjectEntryEvent.ts";
+import {ObjectEntryInformation} from "../object_entry/types/ObjectEntryInformation.ts";
+import {ObjectEntryEvent} from "../object_entry/types/events/ObjectEntryEvent.ts";
 import {invoke} from "@tauri-apps/api";
-import ObjectEntryListenLatestResponse from "../nodes/types/ObjectEntryListenLatestResponse.ts";
+import {ObjectEntryListenLatestResponse} from "../object_entry/types/events/ObjectEntryListenLatestResponse.ts";
 import {listen} from "@tauri-apps/api/event";
 import {Skeleton} from "@mui/material";
 import TextField from "@mui/material/TextField";
 import interpolate from "color-interpolate";
 import {ObjectEntryGridInformation} from "./types/ObjectEntryGridInformation.tsx";
+import {isEnum, isInt, isReal, isStruct, isUInt, StructTypeInfo, Type} from "../object_entry/types/Type.tsx";
+import {Value} from "../object_entry/types/Value.tsx";
 
 function getColorDiscrete(value: number | string, warning: number[] | string[],
                           ok: number[] | string[], tooGood: number[] | string[]) {
@@ -36,9 +30,9 @@ function getColorInterpolate(value: number, min: number, max: number) {
     return colormap(percent)
 }
 
-function displayEntryDiscrete(ty: ObjectEntryType, value: ObjectEntryValue, name: string,
+function displayEntryDiscrete(ty: Type, value: Value, name: string,
                               warning: number[] | string[], ok: number[] | string[], tooGood: number[] | string[]) {
-    if (isStringArray(ty)) {
+    if (isEnum(ty.id)) {
         return <TextField InputProps={{readOnly: true}} value={value} label={name} sx={{
             '& .MuiOutlinedInput-root': {
                 '& fieldset': {
@@ -55,7 +49,7 @@ function displayEntryDiscrete(ty: ObjectEntryType, value: ObjectEntryValue, name
                 },
             },
         }}/>
-    } else if (isInt(ty) || isUint(ty) || isReal(ty)) {
+    } else if (isInt(ty.id) || isUInt(ty.id) || isReal(ty.id)) {
         return <TextField InputProps={{readOnly: true}} value={Number(value).toFixed(1)} label={name} sx={{
             '& .MuiOutlinedInput-root': {
                 '& fieldset': {
@@ -72,18 +66,18 @@ function displayEntryDiscrete(ty: ObjectEntryType, value: ObjectEntryValue, name
                 },
             },
         }}/>
-    } else if (isObjectEntryCompositeType(ty)) {
+    } else if (isStruct(ty.id)) {
         // TODO: Check if an and how this works
-        let oec: ObjectEntryComposite = value as ObjectEntryComposite
-        oec.value.forEach(function (value, index) {
-            displayEntryDiscrete(ty.attributes[index].type, value.value, value.name, warning, ok, tooGood)
+        let oec: {[name : string] : Value} = value as {[name : string] : Value}
+        Object.entries(oec).forEach(function ([name, value]) {
+            displayEntryDiscrete((ty.info as StructTypeInfo).attributes[name], value, name, warning, ok, tooGood)
         })
     }
 }
 
 
-function displayEntryInterpolate(ty: ObjectEntryType, value: ObjectEntryValue, name: string, min: number, max: number) {
-    if (isStringArray(ty)) {
+function displayEntryInterpolate(ty: Type, value: Value, name: string, min: number, max: number) {
+    if (isEnum(ty.id)) {
         return <TextField InputProps={{readOnly: true}} value={value} label={name} sx={{
             '& .MuiOutlinedInput-root': {
                 '&:hover fieldset': {
@@ -91,7 +85,7 @@ function displayEntryInterpolate(ty: ObjectEntryType, value: ObjectEntryValue, n
                 },
             },
         }}/>
-    } else if (isInt(ty) || isUint(ty) || isReal(ty)) {
+    } else if (isInt(ty.id) || isUInt(ty.id) || isReal(ty.id)) {
         return <TextField InputProps={{readOnly: true}} value={Number(value).toFixed(1)} label={name} sx={{
             '& .MuiOutlinedInput-root': {
                 '& fieldset': {
@@ -108,16 +102,16 @@ function displayEntryInterpolate(ty: ObjectEntryType, value: ObjectEntryValue, n
                 },
             },
         }}/>
-    } else if (isObjectEntryCompositeType(ty)) {
-        let oec: ObjectEntryComposite = value as ObjectEntryComposite
-        oec.value.forEach(function (value, index) {
-            displayEntryInterpolate(ty.attributes[index].type, value.value, value.name, min, max)
+    } else if (isStruct(ty.id)) {
+        let oec: {[name : string] : Value} = value as {[name : string] : Value}
+        Object.entries(oec).forEach(function ([name, value]) {
+            displayEntryInterpolate((ty.info as StructTypeInfo).attributes[name], value, name, min, max)
         })
     }
 }
 
-function displayEntry(ty: ObjectEntryType, value: ObjectEntryValue, name: string) {
-    if (isStringArray(ty)) {
+function displayEntry(ty: Type, value: Value, name: string) {
+    if (isEnum(ty.id)) {
         return <TextField InputProps={{readOnly: true}} value={value} label={name} sx={{
             '& .MuiOutlinedInput-root': {
                 '&:hover fieldset': {
@@ -125,7 +119,7 @@ function displayEntry(ty: ObjectEntryType, value: ObjectEntryValue, name: string
                 },
             },
         }}/>
-    } else if (isInt(ty) || isUint(ty) || isReal(ty)) {
+    } else if (isInt(ty.id) || isUInt(ty.id) || isReal(ty.id)) {
         return <TextField InputProps={{readOnly: true}} value={Number(value).toFixed(1)} label={name} sx={{
             '& .MuiOutlinedInput-root': {
                 '&:hover fieldset': {
@@ -133,10 +127,10 @@ function displayEntry(ty: ObjectEntryType, value: ObjectEntryValue, name: string
                 },
             },
         }}/>
-    } else if (isObjectEntryCompositeType(ty)) {
-        let oec: ObjectEntryComposite = value as ObjectEntryComposite
-        oec.value.forEach(function (value, index) {
-            displayEntry(ty.attributes[index].type, value.value, value.name)
+    } else if (isStruct(ty.id)) {
+        let oec: {[name : string] : Value} = value as {[name : string] : Value}
+        Object.entries(oec).forEach(function ([name, value]) {
+            displayEntry((ty.info as StructTypeInfo).attributes[name], value, name)
         })
     }
 }
@@ -192,7 +186,7 @@ function ObjectEntryField({node, entry, interpolate, min, max, warning, ok, tooG
 
 
     if (information && value) {
-        if (interpolate && min && max && !isStringArray(information.ty)) {
+        if (interpolate && min && max && !isEnum(information.ty.id)) {
             return displayEntryInterpolate(information.ty, value.value, information.name, min, max)
         } else if (!interpolate && warning && ok && tooGood) {
             return displayEntryDiscrete(information.ty, value.value, information.name, warning, ok, tooGood)

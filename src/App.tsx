@@ -47,6 +47,7 @@ const theme = createTheme({
         },
         // Primary for buttons and highlighting
     },
+    // shadows: Array(25).fill("none") as Shadows,
 });
 function App() {
 

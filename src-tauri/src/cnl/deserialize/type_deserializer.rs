@@ -1,6 +1,6 @@
 use std::io::Read;
 
-use bitvec::{slice::BitSlice, vec::BitVec};
+use bitvec::slice::BitSlice;
 use can_config_rs::config::{SignalType, Type};
 
 use crate::cnl::frame::{Attribute, Value};
@@ -70,6 +70,10 @@ impl TypeDeserializer {
             TypeDeserilaizeInfo::PrimitiveInfo(ty) => {
                 // NOTE get unsigned value from bitslice.
                 let mut bitvec = bitslice[0..self.bit_size].to_bitvec();
+                let byte_padding = 8 * ((bitvec.len() + 7) / 8) - bitvec.len();
+                for _ in 0..byte_padding {
+                    bitvec.push(false);
+                }
                 let mut u8_vector = vec![];
                 bitvec.read_to_end(&mut u8_vector).expect("failed to read from bitvector");
                 // append / remove most significant bits!
@@ -91,12 +95,17 @@ impl TypeDeserializer {
             TypeDeserilaizeInfo::EnumInfo { entries } => {
                 // NOTE get unsigned value from bitslice.
                 let mut bitvec = bitslice[0..self.bit_size].to_bitvec();
+                // NOTE pad bits for alignment
+                let byte_padding = 8 * ((bitvec.len() + 7) / 8) - bitvec.len();
+                for _ in 0..byte_padding {
+                    bitvec.push(false);
+                }
                 let mut u8_vector = vec![];
                 bitvec.read_to_end(&mut u8_vector).expect("failed to read from bitvector");
-                // append / remove most significant bits!
+                // align for convertion to u64
                 u8_vector.resize(8usize, 0u8);
                 // NOTE cursed bullshit! C is so easy!
-                let unsigned_value = u64::from_ne_bytes(u8_vector.try_into().unwrap());
+                let unsigned_value = u64::from_le_bytes(u8_vector.try_into().unwrap());
                 Value::EnumValue(
                     entries
                         .iter()

@@ -1,12 +1,13 @@
 import {NodeInformation} from "../nodes/types/NodeInformation.ts";
 import {useEffect, useState} from "react";
-import {isInt, isReal, isUint, ObjectEntryInformation} from "../nodes/types/ObjectEntryInformation.ts";
+import {ObjectEntryInformation} from "../object_entry/types/ObjectEntryInformation.ts";
 import {invoke} from "@tauri-apps/api";
-import ObjectEntryEvent from "../nodes/types/ObjectEntryEvent.ts";
-import ObjectEntryListenLatestResponse from "../nodes/types/ObjectEntryListenLatestResponse.ts";
+import {ObjectEntryEvent} from "../object_entry/types/events/ObjectEntryEvent.ts";
+import {ObjectEntryListenLatestResponse} from "../object_entry/types/events/ObjectEntryListenLatestResponse.ts";
 import {listen} from "@tauri-apps/api/event";
 import interpolate from "color-interpolate";
 import {Skeleton, TableCell} from "@mui/material";
+import {isInt, isReal, isUInt} from "../object_entry/types/Type.tsx";
 
 function getColor(value: number, min: number, max: number) {
     let colormap = interpolate(['#2E9B33', '#FFD500', '#E32E13']);
@@ -69,7 +70,7 @@ function CustomTableCell({node, name, min, max}: Readonly<TableCellProps>) {
         }
     }, [node, name]);
 
-    if (information && value && (isInt(information.ty) || isUint(information.ty) || isReal(information.ty))) {
+    if (information && value && (isInt(information.ty.id) || isUInt(information.ty.id) || isReal(information.ty.id))) {
         return <TableCell align="center"
                           style={{backgroundColor: getColor(Number(value.value), min, max)}}
                           padding="none"
