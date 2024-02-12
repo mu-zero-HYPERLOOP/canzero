@@ -68,8 +68,14 @@ function ObjectEntryGraph({
       let graphList: ReactElement[] = [];
 
       // register tauri listener!
+      let extraTime : number;
+      if (timeDomainState < 3000) {
+        extraTime = Math.floor(timeDomainState * 2);
+      }else {
+        extraTime = Math.floor(timeDomainState * 0.2);
+      }
       let response = await invoke<ObjectEntryListenHistoryResponse>("listen_to_history_of_object_entry",
-        { nodeName, objectEntryName, frameSize: timeDomainState, minInterval: updateIntervalMillis });
+        { nodeName, objectEntryName, frameSize: timeDomainState + extraTime, minInterval: updateIntervalMillis });
       // initalize history
       history.splice(0, history.length);
       history.push(...response.history);
@@ -143,6 +149,7 @@ function ObjectEntryGraph({
         // update history
         history.splice(0, event.payload.deprecated_count);
         history.push(...event.payload.new_values);
+        console.log("recv event");
       });
 
       return () => {
@@ -189,7 +196,6 @@ function ObjectEntryGraph({
       }
       let newDomain = oldDomain + (event.deltaY + event.deltaX) * factor;
       newDomain = clampTimeDomain(newDomain);
-      console.log("timedomain", newDomain);
       return Math.floor(newDomain);
     });
   }

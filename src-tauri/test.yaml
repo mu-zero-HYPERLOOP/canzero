@@ -46,17 +46,17 @@ enum_types:
 
 struct_types:
   mlu_control_config:
-    p_value : d32<-100..100>
-    i_value : d32<-100..100>
-    d_value : d32<-100..100>
+    p_value : d8<-100..100>
+    i_value : d8<-100..100>
+    d_value : d8<-100..100>
   mgu_control_config:
-    p_value : d32<-100..100>
-    i_value : d32<-100..100>
-    d_value : d32<-100..100>
+    p_value : d8<-100..100>
+    i_value : d8<-100..100>
+    d_value : d8<-100..100>
   motor_control_config:
-    p_value : d32<-100..100>
-    i_value : d32<-100..100>
-    d_value : d32<-100..100>
+    p_value : d8<-100..100>
+    i_value : d8<-100..100>
+    d_value : d8<-100..100>
 
 nodes: 
   master:

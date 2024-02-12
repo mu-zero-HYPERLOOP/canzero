@@ -1,31 +1,31 @@
-import { MenuItem, TextField } from "@mui/material";
+import { InputAdornment, MenuItem, TextField } from "@mui/material";
 import { useState } from "react";
 
 
 interface EnumPropertyInputFieldProps {
   variants: string[],
-  currentValue : string,
+  currentValue: string,
   onUpdate: (value: string) => void,
+  name: string,
 }
 
 
-function EnumPropertyInputField({ variants, onUpdate , currentValue}: EnumPropertyInputFieldProps) {
-  const [labelType, setLabelType] = useState<boolean>(true);
+function EnumPropertyInputField({ variants, onUpdate, currentValue, name }: EnumPropertyInputFieldProps) {
+  const [value, setValue] = useState<string | undefined>(undefined);
   return (
     <TextField
-      sx={{width : "25ch"}}
+      sx={{ width: "50ch", boxShadow: 0 }}
       id="outlined-select-value"
+      variant="filled"
       select={true}
       defaultValue=""
-      label={labelType ? currentValue : "Select:"}
+      label={`Current : ${currentValue}`}
       onChange={(event) => {
         onUpdate(event.target.value);
+        setValue(event.target.value);
       }}
-      onFocus={() => {
-        setLabelType(false);
-      }}
-      onBlur={() => {
-        setLabelType(true);
+      InputProps={{
+        startAdornment: <InputAdornment position="start">{value ? `${name} <=`: name}</InputAdornment>,
       }}
     >
       {variants.map((option) => (

@@ -1,4 +1,4 @@
-import { FormControl, FormHelperText, OutlinedInput } from "@mui/material";
+import { InputAdornment, TextField } from "@mui/material";
 import { useState } from "react";
 
 
@@ -28,57 +28,80 @@ function checkInputForErrors(min: number, max : number, input : string) : string
 interface UnsignedPropertyInputFieldProps {
   min: number,
   max: number,
+  bitSize : number
   currentValue? : number,
   onUpdate: (value: number | null | undefined) => void,
+  name : string,
+  unit? : string,
 }
 
-function UnsignedPropertyInputField({ min, max, onUpdate, currentValue }: UnsignedPropertyInputFieldProps) {
+function UnsignedPropertyInputField({ min, max, onUpdate, currentValue, name, unit, bitSize }: UnsignedPropertyInputFieldProps) {
   const [input, setInput] = useState<string>("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [hasValue, setHasValue] = useState<boolean>(false);
 
-  return <FormControl sx={{ width: '25ch' }} variant="outlined">
-    <FormHelperText id="outlined-weight-helper-text1">
-      {errorMsg ?? 'Set Value:'}
-    </FormHelperText>
-    <OutlinedInput
-      placeholder={currentValue?.toString()} 
-      id="outlined-adornment-weight1"
-      // endAdornment={endAdornment} TODO units
-      aria-describedby="outlined-weight-helper-text1"
-      inputProps={{
-        'aria-label': 'weight',
-      }}
-      onAnimationStart={() => setErrorMsg(null)}
-      onChange={(event) => {
-        const input = event.target.value;
-        // NOTE special case for the empty string
-        if (input.length === 0) {
-          setInput(input);
-          onUpdate(undefined);
-          return;
-        }
+  let unitAdornment : string;
+  if (unit) {
+    unitAdornment = `[${unit}]`;
+  }else {
+    unitAdornment = "";
+  }
+  let adornment : string;
+  if (hasValue) {
+    adornment = `${name} ${unitAdornment} <=`;
+  }else {
+    adornment = `${name} ${unitAdornment}   `;
+  }
 
-        const number = parseInputToNumber(input);
-        if (number !== null) {
-          // NOTE input is a number!
-          const error = checkInputForErrors(min, max, input);
-          if (error) {
-            setErrorMsg(error);
-            onUpdate(null); // notify parent abount invalid value!
-          }else {
-            setErrorMsg(null);
-            onUpdate(number); // notify parent about new value!
-          }
-          setInput(input);
-        }else{ 
-          // NOTE input is not a number, dont update the text!
+  return <TextField
+    sx={{ width: "75ch", boxShadow: 0, borderRadius: 0 }}
+    id={`${name}-set-request-input-field`}
+    variant="filled"
+    label={errorMsg ?? `u${bitSize}<${min}..${max}>`}
+    value={input}
+    color={errorMsg ? "error" : "info"}
+    placeholder={`<= ${currentValue}`}
+    inputProps={{
+      style: {boxShadow:"none"}
+    }}
+    onChange={(event) => {
+      const input = event.target.value;
+      // NOTE special case for the empty string
+      if (input.length === 0) {
+        setInput(input);
+        onUpdate(undefined);
+        setHasValue(false);
+        return;
+      }
+      if (input == "-") {
+        setInput(input);
+        setHasValue(true);
+        setErrorMsg("Not a valid number");
+        return;
+      }
+
+      const number = parseInputToNumber(input);
+      if (number !== null) {
+        // NOTE input is a number!
+        const error = checkInputForErrors(min, max, input);
+        if (error) {
+          setErrorMsg(error);
+          onUpdate(null); // notify parent abount invalid value!
+        } else {
+          setErrorMsg(null);
+          onUpdate(number); // notify parent about new value!
         }
-      }}
-      value={input}
-      // startAdornment={startAdornment} TODO name
-      error={errorMsg != null}
-    />
-  </FormControl>
+        setHasValue(true);
+        setInput(input);
+      } else {
+        // NOTE input is not a number, dont update the text!
+      }
+    }}
+    InputProps={{
+      startAdornment: <InputAdornment position="start">{adornment}</InputAdornment>,
+    }}
+  >
+  </TextField>;
 }
 
 export default UnsignedPropertyInputField;

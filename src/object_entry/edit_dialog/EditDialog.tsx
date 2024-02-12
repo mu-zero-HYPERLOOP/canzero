@@ -40,7 +40,7 @@ function sendSetRequest(nodeName: string, objectEntryName: string, value: Option
   // NOTE: construct a new value, where all undefined attributes 
   // are replaced with the currentValue to 
   function autocompleteRec(value: OptionalValue, currentValue: Value | undefined, ty: Type): Value | null {
-    if (value == null)return null;
+    if (value == null) return null;
     switch (ty.id) {
       case "uint": case "int": case "real": case "enum":
         return (value ?? currentValue) as Value ?? null;
@@ -74,7 +74,6 @@ function sendSetRequest(nodeName: string, objectEntryName: string, value: Option
     // therefor the set request was aborted
     return;
   }
-  console.log("sending set_request to backend:", autocompletedValue);
 
   invoke("set_object_entry_value", {
     nodeName,
@@ -139,7 +138,8 @@ function EditDialog({ open, onClose, nodeName, objectEntryInfo }: EditDialogProp
   useEffect(() => {
     const inputFields: JSX.Element[] = [];
 
-    function recBuildInputFields(ty: Type, onUpdate: SetterLambda, value?: Value) {
+    function recBuildInputFields(ty: Type, onUpdate: SetterLambda, name: string, unit?: string, value?: Value) {
+      console.log("unit", unit);
       switch (ty.id) {
         case "uint": {
           const typeInfo = ty.info as UIntTypeInfo;
@@ -148,13 +148,17 @@ function EditDialog({ open, onClose, nodeName, objectEntryInfo }: EditDialogProp
           inputFields.push(<UnsignedPropertyInputField
             min={0}
             max={max}
+            bitSize={bitSize}
             currentValue={value as number}
             // assert that onUpdate will by of type (number | string | null) => void.
             onUpdate={(value) => {
               onUpdate(_ => {
                 return value
               });
-            }} />);
+            }}
+            name={name}
+            unit={unit}
+          />);
           break;
         }
         case "int": {
@@ -165,20 +169,7 @@ function EditDialog({ open, onClose, nodeName, objectEntryInfo }: EditDialogProp
           inputFields.push(<SignedPropertyInputField
             min={min}
             max={max}
-            currentValue={value as number}
-            // assert that onUpdate will by of type (number | string | null) => void.
-            onUpdate={value => {
-              onUpdate(_ => {
-                return value;
-              });
-            }} />);
-          break;
-        }
-        case "real": {
-          const typeInfo = ty.info as RealTypeInfo;
-          inputFields.push(<RealPropertyInputField
-            min={typeInfo.min}
-            max={typeInfo.max}
+            bitSize={bitSize}
             currentValue={value as number}
             // assert that onUpdate will by of type (number | string | null) => void.
             onUpdate={value => {
@@ -186,6 +177,25 @@ function EditDialog({ open, onClose, nodeName, objectEntryInfo }: EditDialogProp
                 return value;
               });
             }}
+            name={name}
+            unit={unit} />);
+          break;
+        }
+        case "real": {
+          const typeInfo = ty.info as RealTypeInfo;
+          inputFields.push(<RealPropertyInputField
+            min={typeInfo.min}
+            max={typeInfo.max}
+            bitSize={typeInfo.bit_size}
+            currentValue={value as number}
+            // assert that onUpdate will by of type (number | string | null) => void.
+            onUpdate={value => {
+              onUpdate(_ => {
+                return value;
+              });
+            }}
+            name={name}
+            unit={unit}
           />);
           break;
         }
@@ -199,7 +209,8 @@ function EditDialog({ open, onClose, nodeName, objectEntryInfo }: EditDialogProp
               onUpdate(_ => {
                 return value;
               });
-            }} />);
+            }}
+            name={name} />);
           break;
         }
         case "struct": {
@@ -224,11 +235,12 @@ function EditDialog({ open, onClose, nodeName, objectEntryInfo }: EditDialogProp
                 return allUndefined ? undefined : asStruct;
               });
             }
+            let full_name = `${name}.${attrib_name}`;
             if (currentValue === undefined) {
-              recBuildInputFields(attrib_type, attribOnUpdate, undefined);
+              recBuildInputFields(attrib_type, attribOnUpdate, full_name, unit, undefined);
             } else {
               const currentValueAsStruct = currentValue as { [name: string]: Value };
-              recBuildInputFields(attrib_type, attribOnUpdate, currentValueAsStruct[attrib_name]);
+              recBuildInputFields(attrib_type, attribOnUpdate, full_name, unit, currentValueAsStruct[attrib_name]);
             }
           }
           break;
@@ -248,7 +260,7 @@ function EditDialog({ open, onClose, nodeName, objectEntryInfo }: EditDialogProp
         return newValue;
       });
     }
-    recBuildInputFields(objectEntryInfo.ty, rootSetter, currentValue);
+    recBuildInputFields(objectEntryInfo.ty, rootSetter, objectEntryInfo.name, objectEntryInfo.unit, currentValue);
     setPropertyInputFields(inputFields);
   }, [nodeName, objectEntryInfo.name, currentValue]);
 
@@ -256,24 +268,16 @@ function EditDialog({ open, onClose, nodeName, objectEntryInfo }: EditDialogProp
     setValue(undefined);
   }, [open]);
 
-  const enableUpload = isValidValue(objectEntryInfo.ty, value);
+  const enableUpload = value != undefined && isValidValue(objectEntryInfo.ty, value);
 
   return <Modal
     open={open}
     onClose={onClose}>
     <Paper sx={{ ...dialogStyle }}>
       <Stack direction="column" spacing={2} ml={2} mr={2}>
-        <Stack direction="row" sx={{
-          position: "relative",
-          left: "-20px",
-        }}>
-          <Typography fontWeight={20} sx={{ marginRight: "8px" }}>
-            <strong>Edit:</strong>
-          </Typography>
-          <Typography>
-            {`${objectEntryInfo.name} of ${nodeName}`}
-          </Typography>
-        </Stack>
+        <Typography fontWeight={20} sx={{ marginRight: "8px" }} textAlign={"center"} width={"100%"}>
+          <strong>Upload: {nodeName}::{objectEntryInfo.name}</strong>
+        </Typography>
         {propertyInputFields}
         <Box component="form"
           sx={{
@@ -286,11 +290,9 @@ function EditDialog({ open, onClose, nodeName, objectEntryInfo }: EditDialogProp
             sx={{
               marginLeft: "auto",
             }}
-            // TODO: proper error message maybe red box
             color={enableUpload ? "primary" : "error"}
             disabled={!enableUpload}
             onClick={() => {
-              // NOTE: assert that the value is valid! (otherwise the button is not enabled!)
               sendSetRequest(nodeName, objectEntryInfo.name, value, currentValue, objectEntryInfo.ty);
             }}
           >
