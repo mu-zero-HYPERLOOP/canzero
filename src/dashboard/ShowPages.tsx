@@ -1,6 +1,5 @@
 import {Route, Routes, useLocation} from "react-router-dom";
 import OverviewPanel from "../overview/OverviewPanel.tsx";
-import TracePanel from "../trace/TracePanel.tsx";
 import {Typography} from "@mui/material";
 import {useEffect, useState} from "react";
 import {invoke} from "@tauri-apps/api";
@@ -47,11 +46,11 @@ function ShowPages({connectionSuccess}: Readonly<ConnectionProps>) {
 
     return (
         <Routes>
-            <Route index element={<OverviewPanel connectionSuccess={connectionSuccess} nodes={nodes}/>}/>
-            <Route path="TracePanel" element={<Trace/>}/>
-            <Route path="LevitationControl" element={<LevitationControl nodes={nodes}/>}/>
-            <Route path="GuidanceControl" element={<GuidanceControl nodes={nodes}/>}/>
-            <Route path="MotorControl" element={<MotorControl nodes={nodes}/>}/>
+            <Route key={"Overview"} index element={<OverviewPanel connectionSuccess={connectionSuccess} nodes={nodes}/>}/>
+            <Route key={"TracePanel"} path="TracePanel" element={<Trace/>}/>
+            <Route key={"LevitationControl"} path="LevitationControl" element={<LevitationControl nodes={nodes}/>}/>
+            <Route key={"GuidanceControl"} path="GuidanceControl" element={<GuidanceControl nodes={nodes}/>}/>
+            <Route key={"MotorControl"} path="MotorControl" element={<MotorControl nodes={nodes}/>}/>
             {nodes.map((node) => {
 
                 let routes = [<Route key={node.name} path={node.name} element={<NodePanel node={node}/>}/>];
@@ -66,7 +65,7 @@ function ShowPages({connectionSuccess}: Readonly<ConnectionProps>) {
 
                 return <>{routes}</>
             })}
-            <Route path="*" element={<Content/>}/>
+            <Route key={"*"} path="*" element={<Content/>}/>
         </Routes>
     );
 }

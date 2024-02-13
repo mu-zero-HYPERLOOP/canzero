@@ -150,7 +150,7 @@ function EditDialog({ open, onClose, nodeName, objectEntryInfo }: EditDialogProp
             max={max}
             bitSize={bitSize}
             currentValue={value as number}
-            // assert that onUpdate will by of type (number | string | null) => void.
+            // assert that onUpdate will be of type (number | string | null) => void.
             onUpdate={(value) => {
               onUpdate(_ => {
                 return value
@@ -171,7 +171,7 @@ function EditDialog({ open, onClose, nodeName, objectEntryInfo }: EditDialogProp
             max={max}
             bitSize={bitSize}
             currentValue={value as number}
-            // assert that onUpdate will by of type (number | string | null) => void.
+            // assert that onUpdate will be of type (number | string | null) => void.
             onUpdate={value => {
               onUpdate(_ => {
                 return value;
@@ -188,7 +188,7 @@ function EditDialog({ open, onClose, nodeName, objectEntryInfo }: EditDialogProp
             max={typeInfo.max}
             bitSize={typeInfo.bit_size}
             currentValue={value as number}
-            // assert that onUpdate will by of type (number | string | null) => void.
+            // assert that onUpdate will be of type (number | string | null) => void.
             onUpdate={value => {
               onUpdate(_ => {
                 return value;
@@ -203,7 +203,7 @@ function EditDialog({ open, onClose, nodeName, objectEntryInfo }: EditDialogProp
           const typeInfo = ty.info as EnumTypeInfo;
           inputFields.push(<EnumPropertyInputField
             variants={typeInfo.variants}
-            // assert that onUpdate will by of type (number | string | null) => void.
+            // assert that onUpdate will be of type (number | string | null) => void.
             currentValue={value as string}
             onUpdate={value => {
               onUpdate(_ => {
@@ -218,7 +218,7 @@ function EditDialog({ open, onClose, nodeName, objectEntryInfo }: EditDialogProp
           for (const [attrib_name, attrib_type] of Object.entries(typeInfo.attributes)) {
             // NOTE: pretty cool functional stuff.
             // creates a lambda, which will provide a setter for the attribute
-            // returning the value returned from the setter will be writen to the attribute
+            // returning the value returned from the setter will be written to the attribute
             // (for recursion the first parameter of the setter is the previous value)
             // same thing as setState(prev => {...prev}) in React.
             const attribOnUpdate: SetterLambda = (setter) => {
@@ -256,8 +256,7 @@ function EditDialog({ open, onClose, nodeName, objectEntryInfo }: EditDialogProp
         } else {
           copy = old; // primitive can just be copied.
         }
-        const newValue = setter(copy);
-        return newValue;
+        return setter(copy);
       });
     }
     recBuildInputFields(objectEntryInfo.ty, rootSetter, objectEntryInfo.name, objectEntryInfo.unit, currentValue);

@@ -2,8 +2,6 @@ import { InputAdornment, TextField } from "@mui/material";
 import { useState } from "react";
 
 
-
-
 function parseInputToNumber(input: string): number | null {
   let regex = /^-?\d*[.]?\d+$/;
   if (!regex.test(input)) {
@@ -88,7 +86,7 @@ function RealPropertyInputField({ min, max, onUpdate, currentValue, name, unit ,
         const error = checkInputForErrors(min, max, input);
         if (error) {
           setErrorMsg(error);
-          onUpdate(null); // notify parent abount invalid value!
+          onUpdate(null); // notify parent about invalid value!
         } else {
           setErrorMsg(null);
           onUpdate(number); // notify parent about new value!
@@ -96,7 +94,7 @@ function RealPropertyInputField({ min, max, onUpdate, currentValue, name, unit ,
         setHasValue(true);
         setInput(input);
       } else {
-        // NOTE input is not a number, dont update the text!
+        // NOTE input is not a number, don't update the text!
       }
     }}
     InputProps={{

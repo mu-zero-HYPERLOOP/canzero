@@ -40,7 +40,7 @@ function CustomTableCell({node, name, min, max}: Readonly<TableCellProps>) {
     async function registerListener() {
         let {event_name, latest} = await invoke<ObjectEntryListenLatestResponse>("listen_to_latest_object_entry_value",
             {nodeName: node.name, objectEntryName: name});
-        updateValue(latest);
+        if (latest !== undefined) updateValue(latest);
         let unlistenBackend = () => invoke("unlisten_from_latest_object_entry_value", {
             nodeName: node.name, objectEntryName: name
         }).catch(console.error);

@@ -18,8 +18,8 @@ function ObjectEntryGrid({entries, width}: Readonly<ObjectEntryGridProps>) {
             autoComplete="off"
         >
             {
-                entries.map((entry, index) => <ObjectEntryField
-                    key={index}
+                entries.map((entry) => <ObjectEntryField
+                    key={`${entry.node.name}/${entry.entry}`}
                     node={entry.node}
                     entry={entry.entry}
                     interpolate={entry.interpolate}

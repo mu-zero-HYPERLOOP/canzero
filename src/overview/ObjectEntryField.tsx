@@ -8,7 +8,7 @@ import {Skeleton} from "@mui/material";
 import TextField from "@mui/material/TextField";
 import interpolate from "color-interpolate";
 import {ObjectEntryGridInformation} from "./types/ObjectEntryGridInformation.tsx";
-import {isEnum, isInt, isReal, isStruct, isUInt, StructTypeInfo, Type} from "../object_entry/types/Type.tsx";
+import {isEnum, isInt, isReal, isUInt, StructTypeInfo, Type} from "../object_entry/types/Type.tsx";
 import {Value} from "../object_entry/types/Value.tsx";
 
 function getColorDiscrete(value: number | string, warning: number[] | string[],
@@ -31,7 +31,7 @@ function getColorInterpolate(value: number, min: number, max: number) {
 }
 
 function displayEntryDiscrete(ty: Type, value: Value, name: string,
-                              warning: number[] | string[], ok: number[] | string[], tooGood: number[] | string[]) {
+                              warning: number[] | string[], ok: number[] | string[], tooGood: number[] | string[]): JSX.Element {
     if (isEnum(ty.id)) {
         return <TextField InputProps={{readOnly: true}} value={value} label={name} sx={{
             '& .MuiOutlinedInput-root': {
@@ -66,17 +66,17 @@ function displayEntryDiscrete(ty: Type, value: Value, name: string,
                 },
             },
         }}/>
-    } else if (isStruct(ty.id)) {
-        // TODO: Check if an and how this works
+    } else {
         let oec: {[name : string] : Value} = value as {[name : string] : Value}
-        Object.entries(oec).forEach(function ([name, value]) {
-            displayEntryDiscrete((ty.info as StructTypeInfo).attributes[name], value, name, warning, ok, tooGood)
-        })
+        return (<>
+            {Object.entries(oec).map(([name, value]) => displayEntryDiscrete((ty.info as StructTypeInfo).attributes[name], value, name, warning, ok, tooGood))}
+        </>)
+
     }
 }
 
 
-function displayEntryInterpolate(ty: Type, value: Value, name: string, min: number, max: number) {
+function displayEntryInterpolate(ty: Type, value: Value, name: string, min: number, max: number): JSX.Element {
     if (isEnum(ty.id)) {
         return <TextField InputProps={{readOnly: true}} value={value} label={name} sx={{
             '& .MuiOutlinedInput-root': {
@@ -102,15 +102,15 @@ function displayEntryInterpolate(ty: Type, value: Value, name: string, min: numb
                 },
             },
         }}/>
-    } else if (isStruct(ty.id)) {
+    } else {
         let oec: {[name : string] : Value} = value as {[name : string] : Value}
-        Object.entries(oec).forEach(function ([name, value]) {
-            displayEntryInterpolate((ty.info as StructTypeInfo).attributes[name], value, name, min, max)
-        })
+        return (<>
+            {Object.entries(oec).map(([name, value]) => displayEntryInterpolate((ty.info as StructTypeInfo).attributes[name], value, name, min, max))}
+        </>)
     }
 }
 
-function displayEntry(ty: Type, value: Value, name: string) {
+function displayEntry(ty: Type, value: Value, name: string): JSX.Element {
     if (isEnum(ty.id)) {
         return <TextField InputProps={{readOnly: true}} value={value} label={name} sx={{
             '& .MuiOutlinedInput-root': {
@@ -127,11 +127,11 @@ function displayEntry(ty: Type, value: Value, name: string) {
                 },
             },
         }}/>
-    } else if (isStruct(ty.id)) {
+    } else {
         let oec: {[name : string] : Value} = value as {[name : string] : Value}
-        Object.entries(oec).forEach(function ([name, value]) {
-            displayEntry((ty.info as StructTypeInfo).attributes[name], value, name)
-        })
+        return (<>
+            {Object.entries(oec).map(([name, value]) => displayEntry((ty.info as StructTypeInfo).attributes[name], value, name))}
+        </>)
     }
 }
 
@@ -154,7 +154,7 @@ function ObjectEntryField({node, entry, interpolate, min, max, warning, ok, tooG
     async function registerListener() {
         let {event_name, latest} = await invoke<ObjectEntryListenLatestResponse>("listen_to_latest_object_entry_value",
             {nodeName: node.name, objectEntryName: entry});
-        updateValue(latest);
+        if (latest !== undefined) updateValue(latest);
         let unlistenBackend = () => invoke("unlisten_from_latest_object_entry_value", {
             nodeName: node.name, objectEntryName: entry
         }).catch(console.error);
@@ -186,7 +186,7 @@ function ObjectEntryField({node, entry, interpolate, min, max, warning, ok, tooG
 
 
     if (information && value) {
-        if (interpolate && min && max && !isEnum(information.ty.id)) {
+        if (interpolate && min !== undefined && max !== undefined && !isEnum(information.ty.id)) {
             return displayEntryInterpolate(information.ty, value.value, information.name, min, max)
         } else if (!interpolate && warning && ok && tooGood) {
             return displayEntryDiscrete(information.ty, value.value, information.name, warning, ok, tooGood)

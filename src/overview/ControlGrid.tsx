@@ -80,15 +80,11 @@ function Pod3DModel() {
 function createGridEntries(nodes: NodeInformation[]) {
     let entries: ObjectEntryGridInformation[] = [];
     nodes.map((node: NodeInformation) => {
-        if (node.name === "secu") {
-            entries.push({node:node, entry:"position", interpolate:true, min:20, max:47})
-            entries.push({node:node, entry:"cpu_temperature", interpolate:true, min:20, max:47})
-            entries.push({node:node, entry:"bcu_temperature", interpolate:true, min:20, max:47})
-            entries.push({node:node, entry:"global_state", interpolate:true, min:20, max:47})
-            entries.push({node:node, entry:"pressure_sensor_0", interpolate:true, min:20, max:47})
-            entries.push({node:node, entry:"pressure_sensor_1", interpolate:true, min:20, max:47})
-            entries.push({node:node, entry:"pressure_sensor_2", interpolate:true, min:20, max:47})
-            entries.push({node:node, entry:"pressure_sensor_3", interpolate:true, min:20, max:47})
+        if (node.name === "mlu1") {
+            entries.push({node:node, entry:"air_gap", interpolate:true, min:0, max:20})
+            entries.push({node:node, entry:"target_force", interpolate:true, min:0, max:100})
+            entries.push({node:node, entry:"magnet_temperature", interpolate:true, min:-1, max:150})
+            entries.push({node:node, entry:"control_config", interpolate:true, min:-1, max:150})
         }
     });
     return entries;
@@ -97,15 +93,10 @@ function createGridEntries(nodes: NodeInformation[]) {
 function createValueTableEntries(nodes: NodeInformation[]) {
     let entries: ValueTableCellInformation[] = [];
     nodes.map((node: NodeInformation) => {
-            if (node.name === "secu") {
-                entries.push({node:node, entry:"position", min:20, max:47})
-                entries.push({node:node, entry:"cpu_temperature", min:20, max:47})
-                entries.push({node:node, entry:"bcu_temperature", min:20, max:47})
-                entries.push({node:node, entry:"global_state", min:20, max:47})
-                entries.push({node:node, entry:"pressure_sensor_0", min:20, max:47})
-                entries.push({node:node, entry:"pressure_sensor_1", min:20, max:47})
-                entries.push({node:node, entry:"pressure_sensor_2", min:20, max:47})
-                entries.push({node:node, entry:"pressure_sensor_3", min:20, max:47})
+            if (node.name === "mlu1") {
+                entries.push({node:node, entry:"air_gap", min:0, max:20})
+                entries.push({node:node, entry:"target_force", min:0, max:100})
+                entries.push({node:node, entry:"magnet_temperature", min:-1, max:150})
             }
         });
     return entries;
@@ -162,7 +153,7 @@ function ControlGrid({connectionSuccess, nodes}: Readonly<ControlGridProps>) {
                     </Grid>
                     <Grid item xs={12} md={6}>
                         <Item sx={{width: "100%"}}>
-                            <ValueTable entries={createValueTableEntries(nodes)} title={"Current Pod Temperatures in °C"} width={700} height={200} rows={2} columns={4}/>
+                            <ValueTable entries={createValueTableEntries(nodes)} title={"Current Pod Temperatures in °C"} width={700} height={200} rows={1} columns={3}/>
                         </Item>
                     </Grid>
                 </>
