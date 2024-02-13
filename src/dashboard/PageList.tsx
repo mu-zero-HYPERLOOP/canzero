@@ -15,6 +15,7 @@ import { NetworkInformation } from '../nodes/types/NetworkInformation.ts';
 import { NodeInformation } from '../nodes/types/NodeInformation.ts';
 import React, { useEffect, useState } from "react";
 import { invoke } from '@tauri-apps/api';
+import Box from "@mui/material/Box";
 
 interface ListItemLinkProps {
   icon?: React.ReactElement;
@@ -182,7 +183,9 @@ export function ListEntries({ open }: Readonly<ListEntriesProps>) {
     return <>
       {RouterList}
       <Divider sx={{ my: 1 }} />
+      <Box component="form" sx={{height: "22%", overflow: 'auto' }}>
       <NodeList />
+      </Box>
     </>;
   } else {
     return RouterList;
