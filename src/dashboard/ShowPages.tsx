@@ -11,6 +11,7 @@ import LevitationControl from "../divisions/LevitationControl.tsx";
 import GuidanceControl from "../divisions/GuidanceControl.tsx";
 import MotorControl from "../divisions/MotorControl.tsx";
 import ObjectEntryPanel from "../object_entry/panel/ObjectEntryPanel.tsx";
+import Trace from '../trace2/Trace.tsx';
 
 function Content() {
     const location = useLocation();
@@ -47,7 +48,7 @@ function ShowPages({connectionSuccess}: Readonly<ConnectionProps>) {
     return (
         <Routes>
             <Route index element={<OverviewPanel connectionSuccess={connectionSuccess} nodes={nodes}/>}/>
-            <Route path="TracePanel" element={<TracePanel/>}/>
+            <Route path="TracePanel" element={<Trace/>}/>
             <Route path="LevitationControl" element={<LevitationControl nodes={nodes}/>}/>
             <Route path="GuidanceControl" element={<GuidanceControl nodes={nodes}/>}/>
             <Route path="MotorControl" element={<MotorControl nodes={nodes}/>}/>

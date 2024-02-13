@@ -3,8 +3,7 @@ use tauri::Manager;
 
 use crate::{
     commands::{
-        network_information,
-        trace::{listen_to_trace, unlisten_to_trace}, object_entry_commands, connection_status,
+        network_information, object_entry_commands, connection_status,
     },
     state::cnl_state::CNLState,
 };
@@ -32,8 +31,10 @@ fn main() {
             commands::commands::launch_pod,
             commands::commands::land_pod,
             commands::commands::connect_pod,
-            listen_to_trace,
-            unlisten_to_trace,
+            commands::trace::listen_to_trace,
+            commands::trace::unlisten_from_trace,
+            commands::trace::sort_trace_by,
+            commands::trace::filter_trace_by,
             network_information::network_information,
             network_information::node_information,
             network_information::object_entry_information,
