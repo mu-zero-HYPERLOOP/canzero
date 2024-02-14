@@ -7,6 +7,7 @@ use std::{
 };
 
 use can_config_rs::config;
+use chrono;
 use tokio::sync::Mutex;
 
 use crate::{
@@ -218,6 +219,7 @@ impl ObjectEntryObject {
                     self.id(),
                     self.node_id()
                 ),
+                chrono::Local::now(),
             );
             return;
         };
@@ -232,10 +234,11 @@ impl ObjectEntryObject {
                         self.id(),
                         self.node_id()
                     ),
+                    chrono::Local::now(),
                 );
             }
             Err(err) => {
-                notify_error(&self.app_handle, err.reason(), err.description());
+                notify_error(&self.app_handle, err.reason(), err.description(), chrono::Local::now());
             }
         }
     }
@@ -249,6 +252,7 @@ impl ObjectEntryObject {
                 "other set request still open -- ignoring",
                 "An older set request for the same object entry is still in progress.
                  Thus this set request is ignored",
+                 chrono::Local::now(),
             );
             return;
         }
@@ -284,6 +288,7 @@ impl ObjectEntryObject {
                         self.id(),
                         self.node_id()
                     ),
+                    chrono::Local::now(),
                 );
             }
         }

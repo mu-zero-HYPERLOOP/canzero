@@ -63,7 +63,7 @@ impl CanReceiver {
             let app_handle = receiver_data.app_handle.clone();
             match receive_msg(frame, receiver_data, bus_name, bus_id).await {
                 Ok(_) => (),
-                Err(err) => notify_error(&app_handle, err.reason(), err.description()),
+                Err(err) => notify_error(&app_handle, err.reason(), err.description(), chrono::Local::now()),
             }
         }
 

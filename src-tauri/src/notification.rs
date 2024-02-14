@@ -41,8 +41,8 @@ impl Notification {
     pub fn new(level: NotificationLevel, title: &str, msg: &str, time_stamp: DateTime<Local>) -> Notification {
         Notification {
             level,
-            title: time_stamp.format(fmt) title.to_owned(),
-            message: msg.to_owned(),
+            title: title.to_owned(),
+            message: time_stamp.format("%H:%M -- ").to_string() + msg,
         }
     }
 }
