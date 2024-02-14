@@ -1,4 +1,5 @@
 use tauri::Manager;
+use chrono::{DateTime, Local};
 
 // TODO remove allow dead_code before release!
 #[derive(Clone)]
@@ -37,39 +38,39 @@ pub struct Notification {
 }
 
 impl Notification {
-    pub fn new(level: NotificationLevel, title: &str, msg: &str) -> Notification {
+    pub fn new(level: NotificationLevel, title: &str, msg: &str, time_stamp: DateTime<Local>) -> Notification {
         Notification {
             level,
-            title: title.to_owned(),
+            title: time_stamp.format(fmt) title.to_owned(),
             message: msg.to_owned(),
         }
     }
 }
 
 
-pub fn notify_error(app_handle : &tauri::AppHandle, reason: &str, description: &str) {
+pub fn notify_error(app_handle : &tauri::AppHandle, reason: &str, description: &str, time_stamp: DateTime<Local>) {
     app_handle
         .emit_all(
             "notification",
-            Notification::new(NotificationLevel::Error, reason, description),
+            Notification::new(NotificationLevel::Error, reason, description, time_stamp),
         )
         .expect("failed to emit notification");
 }
 
-pub fn notify_warning(app_handle : &tauri::AppHandle, reason: &str, description: &str) {
+pub fn notify_warning(app_handle : &tauri::AppHandle, reason: &str, description: &str, time_stamp: DateTime<Local>) {
     app_handle
         .emit_all(
             "notification",
-            Notification::new(NotificationLevel::Warning, reason, description),
+            Notification::new(NotificationLevel::Warning, reason, description, time_stamp),
         )
         .expect("failed to emit notification");
 }
 
-pub fn notify_info(app_handle : &tauri::AppHandle, reason: &str, description: &str) {
+pub fn notify_info(app_handle : &tauri::AppHandle, reason: &str, description: &str, time_stamp: DateTime<Local>) {
     app_handle
         .emit_all(
             "notification",
-            Notification::new(NotificationLevel::Info, reason, description),
+            Notification::new(NotificationLevel::Info, reason, description, time_stamp),
         )
         .expect("failed to emit notification");
 }
