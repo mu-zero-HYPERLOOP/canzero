@@ -6,9 +6,13 @@ buses:
     baudrate: 1000000
 
 enum_types:
-  pdu_channel_state:
+  pdu_channel_control:
     OFF : 0
     ON : 1
+  pdu_channel_status:
+    OFF : 0
+    ON : 1
+    SHORT_CIRCUIT : 2
   global_state_t:
     INIT: 0
     IDLE: 1
@@ -439,92 +443,133 @@ nodes:
   pdu24:
     description: power distribution unit 24V
     object_dictionary:
-      lp_channel1_state:
-        type: pdu_channel_state
-      lp_channel2_state:
-        type: pdu_channel_state
-      lp_channel3_state:
-        type: pdu_channel_state
-      lp_channel4_state:
-        type: pdu_channel_state
-      lp_channel5_state:
-        type: pdu_channel_state
-      lp_channel6_state:
-        type: pdu_channel_state
-      lp_channel7_state:
-        type: pdu_channel_state
-      lp_channel8_state:
-        type: pdu_channel_state
-      lp_channel9_state:
-        type: pdu_channel_state
-      lp_channel10_state:
-        type: pdu_channel_state
-      lp_channel11_state:
-        type: pdu_channel_state
-      lp_channel12_state:
-        type: pdu_channel_state
-      hp_channel1_state:
-        type: pdu_channel_state
-      hp_channel2_state:
-        type: pdu_channel_state
-      hp_channel3_state:
-        type: pdu_channel_state
-      hp_channel4_state:
-        type: pdu_channel_state
+      lp_channel1_control:
+        type: pdu_channel_control
+      lp_channel1_status:
+        type: pdu_channel_status
       lp_channel1_current:
         type: d8<0..3>
         unit: °A
+
+      lp_channel2_control:
+        type: pdu_channel_control
+      lp_channel2_status:
+        type: pdu_channel_status
       lp_channel2_current:
         type: d8<0..3>
         unit: °A
+
+      lp_channel3_control:
+        type: pdu_channel_control
+      lp_channel3_status:
+        type: pdu_channel_status
       lp_channel3_current:
         type: d8<0..3>
         unit: °A
+
+      lp_channel4_control:
+        type: pdu_channel_control
+      lp_channel4_status:
+        type: pdu_channel_status
       lp_channel4_current:
         type: d8<0..3>
         unit: °A
+
+      lp_channel5_control:
+        type: pdu_channel_control
+      lp_channel5_status:
+        type: pdu_channel_status
       lp_channel5_current:
         type: d8<0..3>
         unit: °A
+
+      lp_channel6_control:
+        type: pdu_channel_control
+      lp_channel6_status:
+        type: pdu_channel_status
       lp_channel6_current:
         type: d8<0..3>
         unit: °A
+
+      lp_channel7_control:
+        type: pdu_channel_control
+      lp_channel7_status:
+        type: pdu_channel_status
       lp_channel7_current:
         type: d8<0..3>
         unit: °A
+
+      lp_channel8_control:
+        type: pdu_channel_control
+      lp_channel8_status:
+        type: pdu_channel_status
       lp_channel8_current:
         type: d8<0..3>
         unit: °A
+
+      lp_channel9_control:
+        type: pdu_channel_control
+      lp_channel9_status:
+        type: pdu_channel_status
       lp_channel9_current:
         type: d8<0..3>
         unit: °A
+
+      lp_channel10_control:
+        type: pdu_channel_control
+      lp_channel10_status:
+        type: pdu_channel_status
       lp_channel10_current:
         type: d8<0..3>
         unit: °A
+
+      lp_channel11_control:
+        type: pdu_channel_control
+      lp_channel11_status:
+        type: pdu_channel_status
       lp_channel11_current:
         type: d8<0..3>
         unit: °A
+
+      lp_channel12_control:
+        type: pdu_channel_control
+      lp_channel11_status:
+        type: pdu_channel_status
       lp_channel12_current:
         type: d8<0..3>
         unit: °A
+
+      hp_channel1_control:
+        type: pdu_channel_control
+      hp_channel1_status:
+        type: pdu_channel_status
       hp_channel1_current:
         type: d8<0..10>
         unit: °A
+
+      hp_channel2_control:
+        type: pdu_channel_control
+      hp_channel2_status:
+        type: pdu_channel_status
       hp_channel2_current:
         type: d8<0..10>
         unit: °A
+
+      hp_channel3_control:
+        type: pdu_channel_control
+      hp_channel3_status:
+        type: pdu_channel_status
       hp_channel3_current:
         type: d8<0..10>
         unit: °A
+
+      hp_channel4_control:
+        type: pdu_channel_control
+      hp_channel4_status:
+        type: pdu_channel_status
       hp_channel4_current:
         type: d8<0..10>
         unit: °A
-      error_lp_channel_short:
-        type: u12
-        description: bitflag for short circuits
-      error_hp_channel_short:
-        type: u4
-        description: bitflag for short circuits
 
     tx_streams:
       lp_channel1_to_8_current:
@@ -556,98 +601,157 @@ nodes:
           - hp_channel2_current
           - hp_channel3_current
           - hp_channel4_current
-      
+      channel_status:
+        description: status of all channels
+        interval : 1000ms
+        mapping:
+          - lp_channel1_status
+          - lp_channel2_status
+          - lp_channel3_status
+          - lp_channel4_status
+          - lp_channel5_status
+          - lp_channel6_status
+          - lp_channel7_status
+          - lp_channel8_status
+          - lp_channel9_status
+          - lp_channel10_status
+          - lp_channel11_status
+          - lp_channel12_status
+          - hp_channel1_status
+          - hp_channel2_status
+          - hp_channel3_status
+          - hp_channel4_status
 
   pdu12:
     description: power distribution unit 12V
     object_dictionary:
-      lp_channel1_state:
-        type: pdu_channel_state
-      lp_channel2_state:
-        type: pdu_channel_state
-      lp_channel3_state:
-        type: pdu_channel_state
-      lp_channel4_state:
-        type: pdu_channel_state
-      lp_channel5_state:
-        type: pdu_channel_state
-      lp_channel6_state:
-        type: pdu_channel_state
-      lp_channel7_state:
-        type: pdu_channel_state
-      lp_channel8_state:
-        type: pdu_channel_state
-      lp_channel9_state:
-        type: pdu_channel_state
-      lp_channel10_state:
-        type: pdu_channel_state
-      lp_channel11_state:
-        type: pdu_channel_state
-      lp_channel12_state:
-        type: pdu_channel_state
-      hp_channel1_state:
-        type: pdu_channel_state
-      hp_channel2_state:
-        type: pdu_channel_state
-      hp_channel3_state:
-        type: pdu_channel_state
-      hp_channel4_state:
-        type: pdu_channel_state
+      lp_channel1_control:
+        type: pdu_channel_control
+      lp_channel1_status:
+        type: pdu_channel_status
       lp_channel1_current:
         type: d8<0..3>
         unit: °A
+
+      lp_channel2_control:
+        type: pdu_channel_control
+      lp_channel2_status:
+        type: pdu_channel_status
       lp_channel2_current:
         type: d8<0..3>
         unit: °A
+
+      lp_channel3_control:
+        type: pdu_channel_control
+      lp_channel3_status:
+        type: pdu_channel_status
       lp_channel3_current:
         type: d8<0..3>
         unit: °A
+
+      lp_channel4_control:
+        type: pdu_channel_control
+      lp_channel4_status:
+        type: pdu_channel_status
       lp_channel4_current:
         type: d8<0..3>
         unit: °A
+
+      lp_channel5_control:
+        type: pdu_channel_control
+      lp_channel5_status:
+        type: pdu_channel_status
       lp_channel5_current:
         type: d8<0..3>
         unit: °A
+
+      lp_channel6_control:
+        type: pdu_channel_control
+      lp_channel6_status:
+        type: pdu_channel_status
       lp_channel6_current:
         type: d8<0..3>
         unit: °A
+
+      lp_channel7_control:
+        type: pdu_channel_control
+      lp_channel7_status:
+        type: pdu_channel_status
       lp_channel7_current:
         type: d8<0..3>
         unit: °A
+
+      lp_channel8_control:
+        type: pdu_channel_control
+      lp_channel8_status:
+        type: pdu_channel_status
       lp_channel8_current:
         type: d8<0..3>
         unit: °A
+
+      lp_channel9_control:
+        type: pdu_channel_control
+      lp_channel9_status:
+        type: pdu_channel_status
       lp_channel9_current:
         type: d8<0..3>
         unit: °A
+
+      lp_channel10_control:
+        type: pdu_channel_control
+      lp_channel10_status:
+        type: pdu_channel_status
       lp_channel10_current:
         type: d8<0..3>
         unit: °A
+
+      lp_channel11_control:
+        type: pdu_channel_control
+      lp_channel11_status:
+        type: pdu_channel_status
       lp_channel11_current:
         type: d8<0..3>
         unit: °A
+
+      lp_channel12_control:
+        type: pdu_channel_control
+      lp_channel11_status:
+        type: pdu_channel_status
       lp_channel12_current:
         type: d8<0..3>
         unit: °A
+
+      hp_channel1_control:
+        type: pdu_channel_control
+      hp_channel1_status:
+        type: pdu_channel_status
       hp_channel1_current:
         type: d8<0..10>
         unit: °A
+
+      hp_channel2_control:
+        type: pdu_channel_control
+      hp_channel2_status:
+        type: pdu_channel_status
       hp_channel2_current:
         type: d8<0..10>
         unit: °A
+
+      hp_channel3_control:
+        type: pdu_channel_control
+      hp_channel3_status:
+        type: pdu_channel_status
       hp_channel3_current:
         type: d8<0..10>
         unit: °A
+
+      hp_channel4_control:
+        type: pdu_channel_control
+      hp_channel4_status:
+        type: pdu_channel_status
       hp_channel4_current:
         type: d8<0..10>
         unit: °A
-      error_lp_channel_short:
-        type: u12
-        description: bitflag for short circuits
-      error_hp_channel_short:
-        type: u4
-        description: bitflag for short circuits
-      
 
     tx_streams:
       lp_channel1_to_8_current:
@@ -679,6 +783,26 @@ nodes:
           - hp_channel2_current
           - hp_channel3_current
           - hp_channel4_current
+      channel_status:
+        description: status of all channels
+        interval : 1000ms
+        mapping:
+          - lp_channel1_status
+          - lp_channel2_status
+          - lp_channel3_status
+          - lp_channel4_status
+          - lp_channel5_status
+          - lp_channel6_status
+          - lp_channel7_status
+          - lp_channel8_status
+          - lp_channel9_status
+          - lp_channel10_status
+          - lp_channel11_status
+          - lp_channel12_status
+          - hp_channel1_status
+          - hp_channel2_status
+          - hp_channel3_status
+          - hp_channel4_status
 
   input_board: 
     description: input board (teency 4.1)

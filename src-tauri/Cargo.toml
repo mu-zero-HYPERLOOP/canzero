@@ -34,7 +34,7 @@ chrono = { version = "0.4.34", features = [ "serde" ] }
 gamepads = "0.1.6"
 
 [features]
-default = ["mock-can"]
+default = ["socket-can"]
 # this feature is used for production builds or when `devPath` points to the filesystem
 # DO NOT REMOVE!!
 custom-protocol = ["tauri/custom-protocol"]
