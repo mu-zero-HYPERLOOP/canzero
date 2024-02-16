@@ -5,7 +5,7 @@
     "devPath": "http://localhost:1420",
     "distDir": "../dist",
     "withGlobalTauri": false,
-    "features" : ["mock-can"]
+    "features" : ["default"]
   },
   "package": {
     "productName": "control_panel",

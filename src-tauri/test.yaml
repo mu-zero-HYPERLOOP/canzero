@@ -6,6 +6,9 @@ buses:
     baudrate: 1000000
 
 enum_types:
+  pdu_channel_state:
+    OFF : 0
+    ON : 1
   global_state_t:
     INIT: 0
     IDLE: 1
@@ -495,6 +498,54 @@ nodes:
   pdu12:
     description: power distribution unit 12V
     object_dictionary:
+      lp_channel1_state:
+        type: pdu_channel_state
+        unit: °A
+      lp_channel2_state:
+        type: pdu_channel_state
+        unit: °A
+      lp_channel3_state:
+        type: pdu_channel_state
+        unit: °A
+      lp_channel4_state:
+        type: pdu_channel_state
+        unit: °A
+      lp_channel5_state:
+        type: pdu_channel_state
+        unit: °A
+      lp_channel6_state:
+        type: pdu_channel_state
+        unit: °A
+      lp_channel7_state:
+        type: pdu_channel_state
+        unit: °A
+      lp_channel8_state:
+        type: pdu_channel_state
+        unit: °A
+      lp_channel9_state:
+        type: pdu_channel_state
+        unit: °A
+      lp_channel10_state:
+        type: pdu_channel_state
+        unit: °A
+      lp_channel11_state:
+        type: pdu_channel_state
+        unit: °A
+      lp_channel12_state:
+        type: pdu_channel_state
+        unit: °A
+      hp_channel1_state:
+        type: pdu_channel_state
+        unit: °A
+      hp_channel2_state:
+        type: pdu_channel_state
+        unit: °A
+      hp_channel3_state:
+        type: pdu_channel_state
+        unit: °A
+      hp_channel4_state:
+        type: pdu_channel_state
+        unit: °A
       lp_channel1_current:
         type: d8<0..3>
         unit: °A

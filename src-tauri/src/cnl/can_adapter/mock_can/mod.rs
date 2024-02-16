@@ -4,20 +4,20 @@ use std::{
 };
 
 use can_config_rs::config::{self};
-use rand::{rngs::ThreadRng, Rng};
+use rand::{rngs::{ThreadRng, StdRng}, Rng, SeedableRng};
 
 use super::{can_frame::CanFrame, timestamped::Timestamped, TCanError, TCanFrame, can_error::CanError, CanAdapterInterface};
 
 pub struct MockCanAdapter {
     network_ref: config::NetworkRef,
-    rng: Mutex<ThreadRng>,
+    rng: Mutex<StdRng>,
 }
 
 impl MockCanAdapter {
     pub fn create(_bus_config : &config::bus::BusRef, network_ref: &config::NetworkRef) -> Self {
         Self {
             network_ref: network_ref.clone(),
-            rng: Mutex::new(rand::thread_rng()),
+            rng: Mutex::new(StdRng::seed_from_u64(rand::thread_rng().gen())),
         }
     }
 }
@@ -60,7 +60,7 @@ impl CanAdapterInterface for MockCanAdapter {
     }
 }
 
-fn random_get_resp(rng: &mut ThreadRng, network_config: &config::NetworkRef) -> CanFrame {
+fn random_get_resp(rng: &mut StdRng, network_config: &config::NetworkRef) -> CanFrame {
     let object_entries: Vec<&Arc<config::ObjectEntry>> = network_config
         .nodes()
         .iter()
@@ -130,7 +130,7 @@ fn random_get_resp(rng: &mut ThreadRng, network_config: &config::NetworkRef) -> 
     CanFrame::new(id, ide, false, msg.dlc(), value)
 }
 
-fn random_stream_frame(rng: &mut ThreadRng, network_config: &config::NetworkRef) -> CanFrame {
+fn random_stream_frame(rng: &mut StdRng, network_config: &config::NetworkRef) -> CanFrame {
     let streams: Vec<&Arc<config::stream::Stream>> = network_config
         .nodes()
         .iter()
@@ -156,5 +156,3 @@ fn random_stream_frame(rng: &mut ThreadRng, network_config: &config::NetworkRef)
 // are allowed! 
 // NOTE: unsafe is required because NetworkRef doesn't 
 // implement send and sync, even tho it's immutable DUH!
-unsafe impl Send for MockCanAdapter {}
-unsafe impl Sync for MockCanAdapter {}
