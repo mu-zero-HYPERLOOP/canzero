@@ -1,31 +1,25 @@
-use gamepads::{Gamepad, Gamepads, GamepadId, Button};
-use std::time::Duration;
-use std::thread;
+use gamepads::{Gamepads, Button};
 
-pub struct Controller {
+pub struct ControllerInput {
     gamepads: Gamepads,
 }
 
-impl Controller {
+impl ControllerInput {
     pub fn new() -> Self {
-        let gamepads = Gamepads::new(); // Assuming this does not fail
-        Controller { gamepads }
+        Self { gamepads: Gamepads::new() }
     }
 
-    pub fn read_input(&mut self) {
-        loop {
-            self.gamepads.poll();
+    // Polls the gamepad for new events and processes them.
+    pub fn poll(&mut self) -> Vec<(usize, Button)> {
+        self.gamepads.poll();
+        let mut events = Vec::new();
 
-            for gamepad in self.gamepads.all() { 
-                println!("Gamepad id: {:?}", gamepad.id());
-                for button in gamepad.all_currently_pressed() {
-                    println!("Pressed button: {:?}", button);
-                }
-                println!("Left thumbstick: {:?}", gamepad.left_stick());
-                println!("Right thumbstick: {:?}", gamepad.right_stick());
+        for gamepad in self.gamepads.all() {
+            for button in gamepad.all_currently_pressed() {
+                events.push((gamepad.id().value() as usize, button));
             }
-
-            thread::sleep(Duration::from_millis(500)); 
         }
+
+        events
     }
 }
