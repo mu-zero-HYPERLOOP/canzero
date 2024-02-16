@@ -169,7 +169,9 @@ function StringGraph<T>({
     // UPDATE METHODS
 
     // initalize timestamp
-    let timestamp = datum.xValue(datum.values[datum.values.length - 1]);
+    let timestamp = datum.values.length !== 0 ?
+      datum.xValue(datum.values[datum.values.length - 1])
+      : 0;
 
     function updateXScale() {
       xScale.domain([timestamp - timeDomainMs, timestamp - timeShiftMs])

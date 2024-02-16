@@ -13,6 +13,7 @@ function RefreshButton({nodeName, objectEntryName, sx}: Readonly<RefreshButtonPr
     const [getReqInProgess, setGetReqInProgess] = useState(false);
 
     function handleRefreshClick() {
+        console.log("sending get request");
         setGetReqInProgess(true);
         invoke("request_object_entry_value",
             {nodeName, objectEntryName}).then(() => {
