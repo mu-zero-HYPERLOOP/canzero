@@ -31,6 +31,7 @@ sorted-vec = "0.8.3"
 fix-path-env = { git = "https://github.com/tauri-apps/fix-path-env-rs.git"}
 bitvec = "1.0.1"
 chrono = { version = "0.4.34", features = [ "serde" ] }
+gamepads = "0.1.6"
 
 [features]
 default = ["mock-can"]

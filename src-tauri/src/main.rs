@@ -12,6 +12,7 @@ mod cnl;
 mod commands;
 mod state;
 mod notification;
+mod input_controller;
 
 fn main() {
     let _ = fix_path_env::fix();
