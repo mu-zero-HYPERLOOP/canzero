@@ -13,7 +13,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ShowPages from './ShowPages.tsx';
 import {ListEntries} from './PageList.tsx';
-import ControlBar, {abort, connect, emergency, launch, levitate, prepare} from "./ControlBar.tsx";
+import ControlBar, {stop, connect, emergency, launch, levitate, prepare} from "./ControlBar.tsx";
 import {yellow} from "@mui/material/colors";
 import EstablishConnection from "./EstablishConnection.tsx";
 import interpolate from "color-interpolate";
@@ -190,7 +190,7 @@ export default function Dashboard() {
                 launch(setState)
             } else if (event.key === "F5") {
                 event.preventDefault()
-                abort(state, setState)
+                stop(state, setState)
             }
         };
 

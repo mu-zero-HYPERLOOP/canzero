@@ -40,7 +40,7 @@ export function launch(setState: (state: States) => void) {
     invoke('launch');
 }
 
-export function abort(state: States, setState: (state: States) => void) {
+export function stop(state: States, setState: (state: States) => void) {
     if (state === States.StartLevitation) {
         setState(States.StopLevitation)
         invoke('abort_levitation');
@@ -130,9 +130,9 @@ function ControlBar({
             <Button variant="contained" size="large"
                     style={{maxWidth: '170px', maxHeight: '57px', minWidth: '170px', minHeight: '57px'}}
                     onClick={() => {
-                        abort(state, setState)
+                        stop(state, setState)
                     }}
-            >Abort [F5]</Button>
+            >Stop [F5]</Button>
         </Stack>
     );
 }
