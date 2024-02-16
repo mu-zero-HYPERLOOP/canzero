@@ -1,6 +1,6 @@
 use std::{sync::Arc, time::Duration};
 
-use can_config_rs::config;
+use can_config_rs::config::{self, signal::Signal, SignalRef};
 use tokio::time;
 
 use crate::cnl::can_adapter::can_frame::CanFrame;
@@ -86,10 +86,14 @@ impl TxCom {
     }
 
     pub async fn send_get_req(&self, server_id: u8, object_entry_id: u16) {
-        let mut data : u64= 0;
-        data |= object_entry_id as u64;
-        data |= (self.network_ref.nodes().len() as u64) << 13;
-        data |= (server_id as u64) << 22;
+        let signals : Vec<&SignalRef> = self.network_ref.get_req_message().signals().iter().collect();
+        println!("{signals:?}");
+
+        println!("get req server id = {server_id}");
+        let mut data : u64 = 0;
+        data |= object_entry_id as u64 & 0x1FFFu64;
+        data |= (self.network_ref.nodes().len() as u64 & 0xFFu64) << 13;
+        data |= (server_id as u64 & 0xFFu64) << 21;
 
         self.get_req_can_adapter.send(CanFrame::new(
             self.network_ref.get_req_message().id().as_u32(),

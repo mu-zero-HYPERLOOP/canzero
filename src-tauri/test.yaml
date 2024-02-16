@@ -439,6 +439,38 @@ nodes:
   pdu24:
     description: power distribution unit 24V
     object_dictionary:
+      lp_channel1_state:
+        type: pdu_channel_state
+      lp_channel2_state:
+        type: pdu_channel_state
+      lp_channel3_state:
+        type: pdu_channel_state
+      lp_channel4_state:
+        type: pdu_channel_state
+      lp_channel5_state:
+        type: pdu_channel_state
+      lp_channel6_state:
+        type: pdu_channel_state
+      lp_channel7_state:
+        type: pdu_channel_state
+      lp_channel8_state:
+        type: pdu_channel_state
+      lp_channel9_state:
+        type: pdu_channel_state
+      lp_channel10_state:
+        type: pdu_channel_state
+      lp_channel11_state:
+        type: pdu_channel_state
+      lp_channel12_state:
+        type: pdu_channel_state
+      hp_channel1_state:
+        type: pdu_channel_state
+      hp_channel2_state:
+        type: pdu_channel_state
+      hp_channel3_state:
+        type: pdu_channel_state
+      hp_channel4_state:
+        type: pdu_channel_state
       lp_channel1_current:
         type: d8<0..3>
         unit: °A
@@ -500,52 +532,36 @@ nodes:
     object_dictionary:
       lp_channel1_state:
         type: pdu_channel_state
-        unit: °A
       lp_channel2_state:
         type: pdu_channel_state
-        unit: °A
       lp_channel3_state:
         type: pdu_channel_state
-        unit: °A
       lp_channel4_state:
         type: pdu_channel_state
-        unit: °A
       lp_channel5_state:
         type: pdu_channel_state
-        unit: °A
       lp_channel6_state:
         type: pdu_channel_state
-        unit: °A
       lp_channel7_state:
         type: pdu_channel_state
-        unit: °A
       lp_channel8_state:
         type: pdu_channel_state
-        unit: °A
       lp_channel9_state:
         type: pdu_channel_state
-        unit: °A
       lp_channel10_state:
         type: pdu_channel_state
-        unit: °A
       lp_channel11_state:
         type: pdu_channel_state
-        unit: °A
       lp_channel12_state:
         type: pdu_channel_state
-        unit: °A
       hp_channel1_state:
         type: pdu_channel_state
-        unit: °A
       hp_channel2_state:
         type: pdu_channel_state
-        unit: °A
       hp_channel3_state:
         type: pdu_channel_state
-        unit: °A
       hp_channel4_state:
         type: pdu_channel_state
-        unit: °A
       lp_channel1_current:
         type: d8<0..3>
         unit: °A
