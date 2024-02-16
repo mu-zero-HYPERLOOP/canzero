@@ -525,6 +525,37 @@ nodes:
       error_hp_channel_short:
         type: u4
         description: bitflag for short circuits
+
+    tx_streams:
+      lp_channel1_to_8_current:
+        description : estimated position and velocity values of the pod
+        interval : 100ms
+        mapping:
+          - lp_channel1_current
+          - lp_channel2_current
+          - lp_channel3_current
+          - lp_channel4_current
+          - lp_channel5_current
+          - lp_channel6_current
+          - lp_channel7_current
+          - lp_channel8_current
+      lp_channel9_to_12_current:
+        description : estimated position and velocity values of the pod
+        interval : 100ms
+        mapping:
+          - lp_channel9_current
+          - lp_channel10_current
+          - lp_channel11_current
+          - lp_channel12_current
+
+      hp_channel1_to_4_current:
+        description : estimated position and velocity values of the pod
+        interval : 100ms
+        mapping:
+          - hp_channel1_current
+          - hp_channel2_current
+          - hp_channel3_current
+          - hp_channel4_current
       
 
   pdu12:
