@@ -1906,131 +1906,131 @@ nodes:
           mcu_over_temperature: error_pdu24_mcu_over_temperature
         power_estimation:
           power_estimation: pdu24_power_estimation
-    # Receive from Motor Driver
-    motor_driver:
-      errors:
-        error_45V_over_voltage: error_motor_driver_45V_over_voltage
-        error_45V_under_voltage: error_motor_driver_45V_under_voltage
-        error_dslim_over_temperature: error_dslim_over_temperature
-        error_mosfet_over_temperature: error_motor_driver_mosfet_over_temperature
-        error_control_failure : error_motor_control_failure
-      power_estimation:
-        power_estimation: motor_power_estimation
-      state:
-        state: motor_state
-      sdc_status:
-        sdc_status: motor_sdc_state
-    # Receive from MGUs
-    mgu1:
-      errors:
-        error_45V_over_voltage: error_mgu1_45V_over_voltage
-        error_45V_under_voltage: error_mgu1_45V_under_voltage
-        error_control_error: error_mgu1_control_error
-        error_magnet_over_temperature_starboard: error_mgu1_magnet_over_temperature_starboard
-        error_magnet_over_temperature_port: error_mgu1_magnet_over_temperature_port
-        error_mosfet_over_temperature: error_mgu1_mosfet_over_temperature
-      state:
-        state: mgu1_state
-      power_estimation:
-        power_estimation: mgu1_power_estimation
-      sdc_state:
-        sdc_state: mgu2_sdc_state
-    mgu2:
-      errors:
-        error_45V_over_voltage: error_mgu2_45V_over_voltage
-        error_45V_under_voltage: error_mgu2_45V_under_voltage
-        error_control_error: error_mgu2_control_error
-        error_magnet_over_temperature_starboard: error_mgu2_magnet_over_temperature_starboard
-        error_magnet_over_temperature_port: error_mgu2_magnet_over_temperature_port
-        error_mosfet_over_temperature: error_mgu2_mosfet_over_temperature
-      state:
-        state: mgu2_state
-      power_estimation:
-        power_estimation: mgu2_power_estimation
-      sdc_state:
-        sdc_state: mgu2_sdc_state
-    # Receive from MLUs
-    mlu1:
-      errors:
-        error_45V_over_voltage: error_mlu1_45V_over_voltage
-        error_45V_under_voltage: error_mlu1_45V_under_voltage
-        error_magnet_over_temperature: error_mlu1_magnet_over_temperature
-        error_mcu_over_temperature: error_mlu1_mcu_over_temperature
-        error_mosfet_over_temperature: error_mlu1_mosfet_over_temperature
-        error_control_failure: error_mlu1_control_failure
-      state:
-        state: mlu1_state
-      power_estimation:
-        power_estimation: mlu1_power_estimation
-      sdc_state:
-        sdc_state: mlu1_sdc_state
-    mlu2:
-      errors:
-        error_45V_over_voltage: error_mlu2_45V_over_voltage
-        error_45V_under_voltage: error_mlu2_45V_under_voltage
-        error_magnet_over_temperature: error_mlu2_magnet_over_temperature
-        error_mcu_over_temperature: error_mlu2_mcu_over_temperature
-        error_mosfet_over_temperature: error_mlu2_mosfet_over_temperature
-        error_control_failure: error_mlu2_control_failure
-      state:
-        state: mlu2_state
-      power_estimation:
-        power_estimation: mlu2_power_estimation
-      sdc_state:
-        sdc_state: mlu2_sdc_state
-    mlu3:
-      errors:
-        error_45V_over_voltage: error_mlu3_45V_over_voltage
-        error_45V_under_voltage: error_mlu3_45V_under_voltage
-        error_magnet_over_temperature: error_mlu3_magnet_over_temperature
-        error_mcu_over_temperature: error_mlu3_mcu_over_temperature
-        error_mosfet_over_temperature: error_mlu3_mosfet_over_temperature
-        error_control_failure: error_mlu3_control_failure
-      state:
-        state: mlu3_state
-      power_estimation:
-        power_estimation: mlu3_power_estimation
-      sdc_state:
-        sdc_state: mlu3_sdc_state
-    mlu4:
-      errors:
-        error_45V_over_voltage: error_mlu4_45V_over_voltage
-        error_45V_under_voltage: error_mlu4_45V_under_voltage
-        error_magnet_over_temperature: error_mlu4_magnet_over_temperature
-        error_mcu_over_temperature: error_mlu4_mcu_over_temperature
-        error_mosfet_over_temperature: error_mlu4_mosfet_over_temperature
-        error_control_failure: error_mlu4_control_failure
-      state:
-        state: mlu4_state
-      power_estimation:
-        power_estimation: mlu4_power_estimation
-      sdc_state:
-        sdc_state: mlu4_sdc_state
-    mlu5:
-      errors:
-        error_45V_over_voltage: error_mlu5_45V_over_voltage
-        error_45V_under_voltage: error_mlu5_45V_under_voltage
-        error_magnet_over_temperature: error_mlu5_magnet_over_temperature
-        error_mcu_over_temperature: error_mlu5_mcu_over_temperature
-        error_mosfet_over_temperature: error_mlu5_mosfet_over_temperature
-        error_control_failure: error_mlu5_control_failure
-      state:
-        state: mlu5_state
-      power_estimation:
-        power_estimation: mlu5_power_estimation
-      sdc_state:
-        sdc_state: mlu5_sdc_state
-    mlu6:
-      errors:
-        error_45V_over_voltage: error_mlu6_45V_over_voltage
-        error_45V_under_voltage: error_mlu6_45V_under_voltage
-        error_magnet_over_temperature: error_mlu6_magnet_over_temperature
-        error_mcu_over_temperature: error_mlu6_mcu_over_temperature
-        error_mosfet_over_temperature: error_mlu6_mosfet_over_temperature
-        error_control_failure: error_mlu6_control_failure
-      state:
-        state: mlu6_state
-      power_estimation:
-        power_estimation: mlu6_power_estimation
-      sdc_state:
-        sdc_state: mlu6_sdc_state
+      # Receive from Motor Driver
+      motor_driver:
+        errors:
+          error_45V_over_voltage: error_motor_driver_45V_over_voltage
+          error_45V_under_voltage: error_motor_driver_45V_under_voltage
+          error_dslim_over_temperature: error_dslim_over_temperature
+          error_mosfet_over_temperature: error_motor_driver_mosfet_over_temperature
+          error_control_failure : error_motor_control_failure
+        power_estimation:
+          power_estimation: motor_power_estimation
+        state:
+          state: motor_state
+        sdc_status:
+          sdc_status: motor_sdc_state
+      # Receive from MGUs
+      mgu1:
+        errors:
+          error_45V_over_voltage: error_mgu1_45V_over_voltage
+          error_45V_under_voltage: error_mgu1_45V_under_voltage
+          error_control_error: error_mgu1_control_error
+          error_magnet_over_temperature_starboard: error_mgu1_magnet_over_temperature_starboard
+          error_magnet_over_temperature_port: error_mgu1_magnet_over_temperature_port
+          error_mosfet_over_temperature: error_mgu1_mosfet_over_temperature
+        state:
+          state: mgu1_state
+        power_estimation:
+          power_estimation: mgu1_power_estimation
+        sdc_state:
+          sdc_state: mgu2_sdc_state
+      mgu2:
+        errors:
+          error_45V_over_voltage: error_mgu2_45V_over_voltage
+          error_45V_under_voltage: error_mgu2_45V_under_voltage
+          error_control_error: error_mgu2_control_error
+          error_magnet_over_temperature_starboard: error_mgu2_magnet_over_temperature_starboard
+          error_magnet_over_temperature_port: error_mgu2_magnet_over_temperature_port
+          error_mosfet_over_temperature: error_mgu2_mosfet_over_temperature
+        state:
+          state: mgu2_state
+        power_estimation:
+          power_estimation: mgu2_power_estimation
+        sdc_state:
+          sdc_state: mgu2_sdc_state
+      # Receive from MLUs
+      mlu1:
+        errors:
+          error_45V_over_voltage: error_mlu1_45V_over_voltage
+          error_45V_under_voltage: error_mlu1_45V_under_voltage
+          error_magnet_over_temperature: error_mlu1_magnet_over_temperature
+          error_mcu_over_temperature: error_mlu1_mcu_over_temperature
+          error_mosfet_over_temperature: error_mlu1_mosfet_over_temperature
+          error_control_failure: error_mlu1_control_failure
+        state:
+          state: mlu1_state
+        power_estimation:
+          power_estimation: mlu1_power_estimation
+        sdc_state:
+          sdc_state: mlu1_sdc_state
+      mlu2:
+        errors:
+          error_45V_over_voltage: error_mlu2_45V_over_voltage
+          error_45V_under_voltage: error_mlu2_45V_under_voltage
+          error_magnet_over_temperature: error_mlu2_magnet_over_temperature
+          error_mcu_over_temperature: error_mlu2_mcu_over_temperature
+          error_mosfet_over_temperature: error_mlu2_mosfet_over_temperature
+          error_control_failure: error_mlu2_control_failure
+        state:
+          state: mlu2_state
+        power_estimation:
+          power_estimation: mlu2_power_estimation
+        sdc_state:
+          sdc_state: mlu2_sdc_state
+      mlu3:
+        errors:
+          error_45V_over_voltage: error_mlu3_45V_over_voltage
+          error_45V_under_voltage: error_mlu3_45V_under_voltage
+          error_magnet_over_temperature: error_mlu3_magnet_over_temperature
+          error_mcu_over_temperature: error_mlu3_mcu_over_temperature
+          error_mosfet_over_temperature: error_mlu3_mosfet_over_temperature
+          error_control_failure: error_mlu3_control_failure
+        state:
+          state: mlu3_state
+        power_estimation:
+          power_estimation: mlu3_power_estimation
+        sdc_state:
+          sdc_state: mlu3_sdc_state
+      mlu4:
+        errors:
+          error_45V_over_voltage: error_mlu4_45V_over_voltage
+          error_45V_under_voltage: error_mlu4_45V_under_voltage
+          error_magnet_over_temperature: error_mlu4_magnet_over_temperature
+          error_mcu_over_temperature: error_mlu4_mcu_over_temperature
+          error_mosfet_over_temperature: error_mlu4_mosfet_over_temperature
+          error_control_failure: error_mlu4_control_failure
+        state:
+          state: mlu4_state
+        power_estimation:
+          power_estimation: mlu4_power_estimation
+        sdc_state:
+          sdc_state: mlu4_sdc_state
+      mlu5:
+        errors:
+          error_45V_over_voltage: error_mlu5_45V_over_voltage
+          error_45V_under_voltage: error_mlu5_45V_under_voltage
+          error_magnet_over_temperature: error_mlu5_magnet_over_temperature
+          error_mcu_over_temperature: error_mlu5_mcu_over_temperature
+          error_mosfet_over_temperature: error_mlu5_mosfet_over_temperature
+          error_control_failure: error_mlu5_control_failure
+        state:
+          state: mlu5_state
+        power_estimation:
+          power_estimation: mlu5_power_estimation
+        sdc_state:
+          sdc_state: mlu5_sdc_state
+      mlu6:
+        errors:
+          error_45V_over_voltage: error_mlu6_45V_over_voltage
+          error_45V_under_voltage: error_mlu6_45V_under_voltage
+          error_magnet_over_temperature: error_mlu6_magnet_over_temperature
+          error_mcu_over_temperature: error_mlu6_mcu_over_temperature
+          error_mosfet_over_temperature: error_mlu6_mosfet_over_temperature
+          error_control_failure: error_mlu6_control_failure
+        state:
+          state: mlu6_state
+        power_estimation:
+          power_estimation: mlu6_power_estimation
+        sdc_state:
+          sdc_state: mlu6_sdc_state
