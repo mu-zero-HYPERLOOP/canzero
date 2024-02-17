@@ -293,7 +293,6 @@ impl TraceObjectObservable {
         rx: Arc<tokio::sync::Mutex<mpsc::Receiver<TraceObjectObservableMsg>>>,
         store: TraceStore,
     ) {
-        println!("start notify task for {event_name}");
         let mut rx = rx.lock().await;
         let mut next_batch_time = tokio::time::Instant::now();
         let mut timeout = tokio::time::Instant::now() + Duration::from_secs(0xFFFF);
@@ -318,7 +317,6 @@ impl TraceObjectObservable {
                             // only send batch if the last interval is min_interval in the past!
 
                             if next_batch_time <= tokio::time::Instant::now() {
-                                // println!("emit {event_name} = {value:?}");
                                 let store_lock = store.lock().await;
                                 // FIXME consider using get instead of index [] for hashmaps to
                                 // avoid task crashes!!
@@ -352,7 +350,6 @@ impl TraceObjectObservable {
                 }
             }
         }
-        println!("stop notify task for {event_name}");
     }
 }
 

@@ -246,7 +246,7 @@ dependencies = [
 [[package]]
 name = "can-config-rs"
 version = "0.1.0"
-source = "git+https://github.com/mu-zero-HYPERLOOP/can-config-rs.git#82d283556316ae50c76091cc1e4ccd51852b05ce"
+source = "git+https://github.com/mu-zero-HYPERLOOP/can-config-rs.git#6610a9232f0f0783e2c5ab3c4bba156447881af6"
 dependencies = [
  "bit_reverse",
  "can-dbc",

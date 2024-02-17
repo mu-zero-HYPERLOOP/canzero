@@ -1,5 +1,5 @@
 
-import { Box, Collapse, IconButton, Table, TableBody, TableCell, TableHead, TableRow, Typography, styled } from "@mui/material";
+import { Collapse, IconButton, Table, TableBody, TableCell, TableRow, styled } from "@mui/material";
 import { TraceEvent, TraceFrameAttribute } from "./types/TraceEvent";
 
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';

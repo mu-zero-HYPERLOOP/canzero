@@ -61,7 +61,6 @@ impl ObjectEntryObject {
             object_entry_config.node().name(),
             object_entry_config.name()
         );
-        println!("latest_name = {latest_event_name}");
         Self {
             object_entry_ref: object_entry_config.clone(),
             store: Arc::new(Mutex::new(ObjectEntryDatabase::new())),

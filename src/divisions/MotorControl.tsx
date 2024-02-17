@@ -2,10 +2,9 @@ import {NodeInformation} from "../nodes/types/NodeInformation.ts";
 
 interface NodesProps {
     nodes: NodeInformation[],
-    useGraphScrolling?: boolean,
 }
 
-function MotorControl({nodes, useGraphScrolling = false}: NodesProps) {
+function MotorControl({nodes}: NodesProps) {
 
     return (
         <>

@@ -90,7 +90,6 @@ impl ObjectEntryLatestObservable {
         rx: Arc<Mutex<mpsc::Receiver<ObserverCommand>>>,
         store: Arc<Mutex<ObjectEntryDatabase>>,
     ) {
-        println!("start notify task for {event_name}");
         let mut rx = rx.lock().await;
         let mut next_batch_time = tokio::time::Instant::now();
         let mut timeout = tokio::time::Instant::now() + Duration::from_secs(0xFFFF);
@@ -101,7 +100,6 @@ impl ObjectEntryLatestObservable {
                         Some(ObserverCommand::Poison) => {
                             match store.lock().await.latest_value() {
                                 Some(latest) => {
-                                    // println!("emit {event_name} = {latest:?}");
                                     app_handle
                                         .emit_all(
                                             &event_name,
@@ -116,7 +114,6 @@ impl ObjectEntryLatestObservable {
                         Some(ObserverCommand::Value) => {
                             // only send batch if the last interval is min_interval in the past!
                             if next_batch_time <= tokio::time::Instant::now() {
-                                // println!("emit {event_name} = {:?}", store.lock().await.latest_value());
                                 app_handle
                                     .emit_all(
                                         &event_name,
@@ -143,7 +140,6 @@ impl ObjectEntryLatestObservable {
                 Err(_elapsed) => {
                     match store.lock().await.latest_value() {
                         Some(latest) => {
-                            // println!("emit {event_name} = {latest:?}");
                             app_handle.emit_all(&event_name, ObjectEntryEvent::new(latest)).unwrap();
                             next_batch_time = tokio::time::Instant::now() + min_interval;
                         }
@@ -153,6 +149,5 @@ impl ObjectEntryLatestObservable {
                 }
             }
         }
-        println!("stop notify task for {event_name}");
     }
 }

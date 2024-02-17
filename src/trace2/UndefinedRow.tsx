@@ -1,8 +1,5 @@
-import { Box, Collapse, IconButton, Table, TableBody, TableCell, TableRow, styled } from "@mui/material";
+import { TableCell, TableRow, styled } from "@mui/material";
 import { TraceEvent } from "./types/TraceEvent";
-
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 
 
 const StyledTableRow = styled(TableRow)(() => ({
@@ -13,13 +10,11 @@ const StyledTableRow = styled(TableRow)(() => ({
 
 
 interface UndefinedRowProps {
-  open: { [key: number]: boolean },
-  setOpen: React.Dispatch<React.SetStateAction<{ [key: number]: boolean }>>
   event: TraceEvent,
   useAbsoluteTime: boolean,
 }
 
-function UndefinedRow({ useAbsoluteTime, open, setOpen, event }: UndefinedRowProps) {
+function UndefinedRow({ useAbsoluteTime, event }: UndefinedRowProps) {
   return (<>
     <StyledTableRow>
       <TableCell sx={{ padding: 0, textAlign: "center", lineHeight: "100%" }}>

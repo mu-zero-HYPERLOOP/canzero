@@ -1436,10 +1436,10 @@ nodes:
           pdu24_lp_channel10_control : lp_channel10_control
           pdu24_lp_channel11_control : lp_channel11_control
           pdu24_lp_channel12_control : lp_channel12_control
-          pdu24_hp_channel1_control : lp_channel1_control
-          pdu24_hp_channel2_control : lp_channel2_control
-          pdu24_hp_channel3_control : lp_channel3_control
-          pdu24_hp_channel4_control : lp_channel4_control
+          pdu24_hp_channel1_control : hp_channel1_control
+          pdu24_hp_channel2_control : hp_channel2_control
+          pdu24_hp_channel3_control : hp_channel3_control
+          pdu24_hp_channel4_control : hp_channel4_control
 
   pdu12:
     description: power distribution unit 12V
@@ -1709,10 +1709,10 @@ nodes:
           pdu12_lp_channel10_control : lp_channel10_control
           pdu12_lp_channel11_control : lp_channel11_control
           pdu12_lp_channel12_control : lp_channel12_control
-          pdu12_hp_channel1_control : lp_channel1_control
-          pdu12_hp_channel2_control : lp_channel2_control
-          pdu12_hp_channel3_control : lp_channel3_control
-          pdu12_hp_channel4_control : lp_channel4_control
+          pdu12_hp_channel1_control : hp_channel1_control
+          pdu12_hp_channel2_control : hp_channel2_control
+          pdu12_hp_channel3_control : hp_channel3_control
+          pdu12_hp_channel4_control : hp_channel4_control
 
 
   input_board: 
@@ -2029,8 +2029,8 @@ nodes:
         errors:
           error_mcu_over_temperature: error_input_board_mcu_over_temperature
           error_invalid_position_estimation : error_invalid_position_estimation
-          error_invalid_position :  error_invalid_position_estimation
-          error_invalid_velocity_profile : error_invalid_velocity_estimation
+          error_invalid_position :  error_invalid_position
+          error_invalid_velocity_profile : error_invalid_velocity_profile
           error_invalid_acceleration_profile : error_invalid_acceleration_profile
           error_battery_over_temperature : error_battery_over_voltage
           error_cooling_cycle_over_pressure : error_cooling_cycle_over_pressure

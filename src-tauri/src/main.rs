@@ -14,8 +14,10 @@ mod state;
 mod notification;
 mod input_controller;
 
-fn main() {
+#[tokio::main(flavor = "multi_thread", worker_threads = 4)]
+async fn main() {
     let _ = fix_path_env::fix();
+    tauri::async_runtime::set(tokio::runtime::Handle::current());
     println!("Hello, World!");
     // setup tauri
     tauri::Builder::default()

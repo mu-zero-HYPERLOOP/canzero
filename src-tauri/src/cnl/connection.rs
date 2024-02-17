@@ -67,7 +67,6 @@ impl ConnectionObject {
             .clone()
     }
     fn emit_event(app_handle: &tauri::AppHandle, status: &ConnectionStatus) {
-        println!("emit {CONNECTION_STATUS_EVENT_NAME} with payload {status:?}");
         app_handle
             .emit_all(CONNECTION_STATUS_EVENT_NAME, status)
             .expect("failed to transmit connection status to frontend");

@@ -89,7 +89,6 @@ impl ObjectEntryHistroyObservable {
         start_index: usize,
         start_time: std::time::Instant,
     ) {
-        println!("start notify task for {event_name}");
         let mut start_index = start_index;
         let mut latest_index = latest_index;
         let mut rx = rx.lock().await;
@@ -114,7 +113,6 @@ impl ObjectEntryHistroyObservable {
                                 }
 
                                 let payload = &store_lock.history()[latest_index..];
-                                // println!("emit {event_name} = [{:?}]", payload.len());
                                 app_handle
                                     .emit_all(
                                         &event_name,
@@ -131,7 +129,6 @@ impl ObjectEntryHistroyObservable {
                                 let store_lock = store.lock().await;
                                 // should never be false because the store should be updated before
                                 // the notify (otherwise notify should not be called)
-                                // println!("trying to emit event {event_name}, latest = {latest_index}, history_len = {}", store_lock.history.len());
                                 if store_lock.history().len() > latest_index {
                                     // go up from start_index and count how many messages are
                                     // deprecated afterwards update start_index
@@ -150,7 +147,6 @@ impl ObjectEntryHistroyObservable {
 
                                     let payload = &store_lock.history()[latest_index..];
                                     latest_index = store_lock.history().len();
-                                    // println!("emit {event_name} = [{:?}]", payload.len());
                                     app_handle
                                         .emit_all(
                                             &event_name,
@@ -185,7 +181,6 @@ impl ObjectEntryHistroyObservable {
                         start_index += deprecated_count;
 
                         let payload = &store_lock.history()[latest_index..];
-                        // println!("emit {event_name} = [{:?}]", payload.len());
                         latest_index = store_lock.history().len();
                         app_handle
                             .emit_all(
@@ -199,7 +194,6 @@ impl ObjectEntryHistroyObservable {
                 }
             }
         }
-        println!("stop notify task for {event_name}");
     }
 
     pub fn event_name(&self) -> &str {

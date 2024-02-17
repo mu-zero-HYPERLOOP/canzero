@@ -2,10 +2,10 @@ import {NodeInformation} from "../nodes/types/NodeInformation.ts";
 
 interface NodesProps {
     nodes: NodeInformation[],
-    useGraphScrolling?: boolean,
+    // useGraphScrolling?: boolean,
 }
 
-function GuidanceControl({nodes, useGraphScrolling = false}: NodesProps) {
+function GuidanceControl({nodes}: NodesProps) {
 
     return (
         <>

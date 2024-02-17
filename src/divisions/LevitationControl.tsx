@@ -2,10 +2,9 @@ import {NodeInformation} from "../nodes/types/NodeInformation.ts";
 
 interface NodesProps {
     nodes: NodeInformation[],
-    useGraphScrolling?: boolean,
 }
 
-function LevitationControl({nodes, useGraphScrolling = false}: NodesProps) {
+function LevitationControl({nodes}: NodesProps) {
 
     return (
         <>

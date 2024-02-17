@@ -44,7 +44,6 @@ impl TraceDatabaseData {
         match &self.filter_string {
             Some(filter_string) => {
                 for i in 0..self.trace.len() {
-                    println!("frame-name = {}", self.trace[i].name());
                     if self.trace[i].name().to_lowercase().contains(&filter_string.to_lowercase())
                         | self.trace_id_strings[i].starts_with(filter_string)
                     {

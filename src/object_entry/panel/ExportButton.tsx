@@ -8,7 +8,7 @@ interface ExportButtonProps {
     sx? : SxProps<Theme>
 }
 
-function ExportButton({nodeName, objectEntryName, sx}: Readonly<ExportButtonProps>) {
+function ExportButton({sx}: Readonly<ExportButtonProps>) {
 
     return <IconButton
         size="small"

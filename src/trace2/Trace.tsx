@@ -261,7 +261,7 @@ function Trace() {
           if (event.frame.ty == "normal") {
             return <NormalRow open={open} setOpen={setOpen} event={event} useAbsoluteTime={useAbsoluteTime} />
           }else if (event.frame.ty == "undefined") {
-            return <UndefinedRow open={open} setOpen={setOpen} event={event} useAbsoluteTime={useAbsoluteTime} />
+            return <UndefinedRow event={event} useAbsoluteTime={useAbsoluteTime} />
           } else if (event.frame.ty == "error") {
             return <ErrorRow open={open} setOpen={setOpen} event={event} useAbsoluteTime={useAbsoluteTime} />
           }
