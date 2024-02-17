@@ -99,7 +99,7 @@ impl GetResp {
         if frame.eof {
             let value = self.type_deserializer
                 .deserialize(&self.buffer.as_slice().as_bits());
-            self.object_entry.push_value(value, timestamp).await;
+            self.object_entry.push_get_response(value, timestamp).await;
             self.state = GetRespState::Ready;
             self.buffer.clear();
         }else {

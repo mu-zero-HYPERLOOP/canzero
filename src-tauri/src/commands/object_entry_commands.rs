@@ -291,6 +291,7 @@ pub async fn request_object_entry_value(
     };
 
     object_entry.request_current_value().await;
+    println!("get request for {object_entry_name} of node {node_name} invoked");
 
     Ok(())
 }
