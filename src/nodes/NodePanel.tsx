@@ -1,4 +1,4 @@
-import { Paper, Skeleton, Table, TableBody, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { Paper, Skeleton, Table, TableBody, TableContainer, TableHead, TableRow, Typography, styled } from "@mui/material";
 import { NodeInformation } from "./types/NodeInformation.ts";
 import { useEffect, useState } from "react";
 import { ObjectEntryEvent } from "../object_entry/types/events/ObjectEntryEvent.tsx";
@@ -19,15 +19,21 @@ interface RowData {
   value: ObjectEntryEvent | null,
 }
 
+
+const StyledTableRow = styled(TableRow)(() => ({
+  backgroundColor: "#f0f1f5",
+  // hide last border
+}));
+
 const VirtuosoTableComponents: TableComponents<RowData> = {
   Scroller: React.forwardRef<HTMLDivElement>((props, ref) => (
     <TableContainer component={Paper} {...props} ref={ref} />
   )),
   Table: (props) => (
-    <Table {...props} sx={{ borderCollapse: 'separate', tableLayout: 'fixed' }} />
+    <Table {...props} size="small" sx={{ borderCollapse: 'separate', tableLayout: 'fixed' }} />
   ),
   TableHead,
-  TableRow: ({ item: _item, ...props }) => <TableRow {...props} />,
+  TableRow: ({ item: _item, ...props }) => <StyledTableRow {...props} />,
   TableBody: React.forwardRef<HTMLTableSectionElement>((props, ref) => (
     <TableBody {...props} ref={ref} />
   )),
@@ -99,7 +105,8 @@ function NodePanel({ node }: NodePanelProps) {
       }} variant="subtitle2">{node.description}</Typography>
         : <></>}
       {rowData.length == 0 ? <Skeleton
-        variant="rectangular"
+        
+        variant="rounded"
         animation="wave"
         sx={{
           padding: 0,

@@ -41,8 +41,8 @@ function ObjectEntryRow({ nodeName, objectEntryName, value }: ObjectEntryRowProp
     return (<>
       <TableRow >
         <TableCell sx={{
-          width: "20%",
-          maxWidth: "300px",
+          width: "25vw",
+          maxWidth: "25vw",
           overflow: "clip",
         }}>
           {objectEntryName}
@@ -73,10 +73,10 @@ function ObjectEntryRow({ nodeName, objectEntryName, value }: ObjectEntryRowProp
     </>);
   } else {
     return (
-      <TableRow >
+      <TableRow>
         <TableCell
           sx={{
-            width: "25vw",
+            minWidth: "25vw",
             maxWidth: "25vw",
             overflow: "clip",
           }}

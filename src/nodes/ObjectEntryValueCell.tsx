@@ -26,13 +26,12 @@ function ObjectEntryValueCell({ nodeName, objectEntryName , value}: ObjectEntryV
 
   return (
     <TableCell sx={{
-      width: "200px",
-      maxWidth: "200px",
+      width: "100%",
     }}>
       <Typography style={{
         textAlign : "right"
       }} variant="body2">
-      {value != undefined ? `${value}${unit}` : "-"}
+      {value != undefined ? `${value} ${unit}` : "-"}
       </Typography>
     </TableCell>
   );
