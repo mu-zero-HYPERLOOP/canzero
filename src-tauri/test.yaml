@@ -127,266 +127,10 @@ nodes:
       control_config:
         type: mlu_pid_values
         description: control config of the mlu
-      # Control Debug
-      air_gap:
-        type: d32<0..20>
-        unit: mm
-        description: air gap of the mlu
-      target_force:
-        type: d16<0..100>
-        unit: N
-        description: control target force
-      # Power estimation
-      dc_current:
-        type: d16<-10..50>
-        unit: A
-        description: DC-Current through the magnets.
-      power_estimation:
-        type: d16<0..1000>
-        unit: W
-        description: Power consumed by the MLU.#
-      # Temperatures
-      magnet_temperature:
-        type: d8<-1..150>
-        unit: °C
-        description: Temperature of the magnet
-      mcu_temperature:
-        type: d8<-1..150>
-        unit: °C
-        description: Temperature of the MCU.
-      mosfet_temperature:
-        type: d8<-1..150>
-        unit: °C
-        description: Temperature of the Mosfets
-      # Errors
-      error_45V_over_voltage:
-        type: error_flag
-        description: Error flag for a 45V over voltage.
-      error_45V_under_voltage:
-        type: error_flag
-        description: Error flag for a 45V under voltage.
-      error_magnet_over_temperature:
-        type: error_flag
-        description: Error flag for a over temperature of the magnets.
-      error_mcu_over_temperature:
-        type: error_flag
-        description: Error flag for a mcu over temperature.
-      error_mosfet_over_temperature:
-        type: error_flag
-        description: Error flag for a over temperature of the MOSFETs.
-      error_control_failure:
-        type: error_flag
-        description: Error flag for a levitation control failure.
-
-  mlu2:
-    description: Modular Levitation Unit 2
-    object_dictionary:
-      # State machine & Control
-      state:
-        type: mlu_state
-        description: state of the mlu
-      command:
-        type: mlu_command
-        description: Command that gets forwarded to the MLU. state machine.
-      # Control-Configuration
-      control_config:
-        type: mlu_pid_values
-        description: control config of the mlu
-      # Control Debug
-      air_gap:
-        type: d32<0..20>
-        unit: mm
-        description: air gap of the mlu
-      target_force:
-        type: d16<0..100>
-        unit: N
-        description: control target force
-      # Power estimation
-      dc_current:
-        type: d16<-10..50>
-        unit: A
-        description: DC-Current through the magnets.
-      power_estimation:
-        type: d16<0..1000>
-        unit: W
-        description: Power consumed by the MLU.#
-      # Temperatures
-      magnet_temperature:
-        type: d8<-1..150>
-        unit: °C
-        description: Temperature of the magnet
-      mcu_temperature:
-        type: d8<-1..150>
-        unit: °C
-        description: Temperature of the MCU.
-      mosfet_temperature:
-        type: d8<-1..150>
-        unit: °C
-        description: Temperature of the Mosfets
-      # Errors
-      error_45V_over_voltage:
-        type: error_flag
-        description: Error flag for a 45V over voltage.
-      error_45V_under_voltage:
-        type: error_flag
-        description: Error flag for a 45V under voltage.
-      error_magnet_over_temperature:
-        type: error_flag
-        description: Error flag for a over temperature of the magnets.
-      error_mcu_over_temperature:
-        type: error_flag
-        description: Error flag for a mcu over temperature.
-      error_mosfet_over_temperature:
-        type: error_flag
-        description: Error flag for a over temperature of the MOSFETs.
-      error_control_failure:
-        type: error_flag
-        description: Error flag for a levitation control failure.
-
-  mlu3:
-    description: Modular Levitation Unit 1
-    object_dictionary:
-      # State machine & Control
-      state:
-        type: mlu_state
-        description: state of the mlu
-      command:
-        type: mlu_command
-        description: Command that gets forwarded to the MLU. state machine.
-      # Control-Configuration
-      control_config:
-        type: mlu_pid_values
-        description: control config of the mlu
-      # Control Debug
-      air_gap:
-        type: d32<0..20>
-        unit: mm
-        description: air gap of the mlu
-      target_force:
-        type: d16<0..100>
-        unit: N
-        description: control target force
-      # Power estimation
-      dc_current:
-        type: d16<-10..50>
-        unit: A
-        description: DC-Current through the magnets.
-      power_estimation:
-        type: d16<0..1000>
-        unit: W
-        description: Power consumed by the MLU.#
-      # Temperatures
-      magnet_temperature:
-        type: d8<-1..150>
-        unit: °C
-        description: Temperature of the magnet
-      mcu_temperature:
-        type: d8<-1..150>
-        unit: °C
-        description: Temperature of the MCU.
-      mosfet_temperature:
-        type: d8<-1..150>
-        unit: °C
-        description: Temperature of the Mosfets
-      # Errors
-      error_45V_over_voltage:
-        type: error_flag
-        description: Error flag for a 45V over voltage.
-      error_45V_under_voltage:
-        type: error_flag
-        description: Error flag for a 45V under voltage.
-      error_magnet_over_temperature:
-        type: error_flag
-        description: Error flag for a over temperature of the magnets.
-      error_mcu_over_temperature:
-        type: error_flag
-        description: Error flag for a mcu over temperature.
-      error_mosfet_over_temperature:
-        type: error_flag
-        description: Error flag for a over temperature of the MOSFETs.
-      error_control_failure:
-        type: error_flag
-        description: Error flag for a levitation control failure.
-
-  mlu4:
-    description: Modular Levitation Unit 1
-    object_dictionary:
-      # State machine & Control
-      state:
-        type: mlu_state
-        description: state of the mlu
-      command:
-        type: mlu_command
-        description: Command that gets forwarded to the MLU. state machine.
-      # Control-Configuration
-      control_config:
-        type: mlu_pid_values
-        description: control config of the mlu
-      # Control Debug
-      air_gap:
-        type: d32<0..20>
-        unit: mm
-        description: air gap of the mlu
-      target_force:
-        type: d16<0..100>
-        unit: N
-        description: control target force
-      # Power estimation
-      dc_current:
-        type: d16<-10..50>
-        unit: A
-        description: DC-Current through the magnets.
-      power_estimation:
-        type: d16<0..1000>
-        unit: W
-        description: Power consumed by the MLU.#
-      # Temperatures
-      magnet_temperature:
-        type: d8<-1..150>
-        unit: °C
-        description: Temperature of the magnet
-      mcu_temperature:
-        type: d8<-1..150>
-        unit: °C
-        description: Temperature of the MCU.
-      mosfet_temperature:
-        type: d8<-1..150>
-        unit: °C
-        description: Temperature of the Mosfets
-      # Errors
-      error_45V_over_voltage:
-        type: error_flag
-        description: Error flag for a 45V over voltage.
-      error_45V_under_voltage:
-        type: error_flag
-        description: Error flag for a 45V under voltage.
-      error_magnet_over_temperature:
-        type: error_flag
-        description: Error flag for a over temperature of the magnets.
-      error_mcu_over_temperature:
-        type: error_flag
-        description: Error flag for a mcu over temperature.
-      error_mosfet_over_temperature:
-        type: error_flag
-        description: Error flag for a over temperature of the MOSFETs.
-      error_control_failure:
-        type: error_flag
-        description: Error flag for a levitation control failure.
-
-  mlu5:
-    description: Modular Levitation Unit 1
-    object_dictionary:
-      # State machine & Control
-      state:
-        type: mlu_state
-        description: state of the mlu
-      command:
-        type: mlu_command
-        description: Command that gets forwarded to the MLU. state machine.
-      # Control-Configuration
-      control_config:
-        type: mlu_pid_values
-        description: control config of the mlu
+      # SDC-Switch
+      sdc_status:
+        type: sdc_status
+        description: State of the SDC switch.
       # Control Debug
       air_gap:
         type: d32<0..20>
@@ -439,30 +183,478 @@ nodes:
         description: Error flag for a levitation control failure.
     tx_streams:
       state:
-        description : Current state of the MLU.
-        interval : 100ms
+        description: State of the MLU
+        interval: 100ms
         mapping:
           - state
           - command
       control_info:
-        description: control data of the mlu
+        description: Control Information of the MLU.
         interval: 100ms
-        mapping:
+        mapping: 
           - air_gap
           - target_force
       power_estimation:
         description: Power estimation of the MLU.
-        mapping:
+        interval: 1000ms
+        mapping: 
           - dc_current
           - power_estimation
       temperatures:
         description: Temperatures measured by the MLU.
-        mapping:
+        interval: 2500ms
+        mapping: 
           - magnet_temperature
           - mcu_temperature
-          - mosfet_temperature
+          - mofset_temperature
+      sdc_status:
+        description: State of the SDC-Switch
+        interval: 1000ms
+        mapping:
+          - sdc_status
       errors:
         description: Error flags of the MLU.
+        interval: 1000ms
+        mapping:
+          - error_45V_over_voltage
+          - error_45V_under_voltage
+          - error_magnet_over_temperature
+          - error_mcu_over_temperature
+          - error_mosfet_over_temperature
+          - error_control_failure
+
+  mlu2:
+    description: Modular Levitation Unit 2
+    object_dictionary:
+      # State machine & Control
+      state:
+        type: mlu_state
+        description: state of the mlu
+      command:
+        type: mlu_command
+        description: Command that gets forwarded to the MLU. state machine.
+      # Control-Configuration
+      control_config:
+        type: mlu_pid_values
+        description: control config of the mlu
+      # SDC-Switch
+      sdc_status:
+        type: sdc_status
+        description: State of the SDC switch.
+      # Control Debug
+      air_gap:
+        type: d32<0..20>
+        unit: mm
+        description: air gap of the mlu
+      target_force:
+        type: d16<0..100>
+        unit: N
+        description: control target force
+      # Power estimation
+      dc_current:
+        type: d16<-10..50>
+        unit: A
+        description: DC-Current through the magnets.
+      power_estimation:
+        type: d16<0..1000>
+        unit: W
+        description: Power consumed by the MLU.#
+      # Temperatures
+      magnet_temperature:
+        type: d8<-1..150>
+        unit: °C
+        description: Temperature of the magnet
+      mcu_temperature:
+        type: d8<-1..150>
+        unit: °C
+        description: Temperature of the MCU.
+      mosfet_temperature:
+        type: d8<-1..150>
+        unit: °C
+        description: Temperature of the Mosfets
+      # Errors
+      error_45V_over_voltage:
+        type: error_flag
+        description: Error flag for a 45V over voltage.
+      error_45V_under_voltage:
+        type: error_flag
+        description: Error flag for a 45V under voltage.
+      error_magnet_over_temperature:
+        type: error_flag
+        description: Error flag for a over temperature of the magnets.
+      error_mcu_over_temperature:
+        type: error_flag
+        description: Error flag for a mcu over temperature.
+      error_mosfet_over_temperature:
+        type: error_flag
+        description: Error flag for a over temperature of the MOSFETs.
+      error_control_failure:
+        type: error_flag
+        description: Error flag for a levitation control failure.
+    tx_streams:
+      state:
+        description: State of the MLU
+        interval: 100ms
+        mapping:
+          - state
+          - command
+      control_info:
+        description: Control Information of the MLU.
+        interval: 100ms
+        mapping: 
+          - air_gap
+          - target_force
+      power_estimation:
+        description: Power estimation of the MLU.
+        interval: 1000ms
+        mapping: 
+          - dc_current
+          - power_estimation
+      temperatures:
+        description: Temperatures measured by the MLU.
+        interval: 2500ms
+        mapping: 
+          - magnet_temperature
+          - mcu_temperature
+          - mofset_temperature
+      sdc_status:
+        description: State of the SDC-Switch
+        interval: 1000ms
+        mapping:
+          - sdc_status
+      errors:
+        description: Error flags of the MLU.
+        interval: 1000ms
+        mapping:
+          - error_45V_over_voltage
+          - error_45V_under_voltage
+          - error_magnet_over_temperature
+          - error_mcu_over_temperature
+          - error_mosfet_over_temperature
+          - error_control_failure
+
+  mlu3:
+    description: Modular Levitation Unit 1
+    object_dictionary:
+      # State machine & Control
+      state:
+        type: mlu_state
+        description: state of the mlu
+      command:
+        type: mlu_command
+        description: Command that gets forwarded to the MLU. state machine.
+      # Control-Configuration
+      control_config:
+        type: mlu_pid_values
+        description: control config of the mlu
+      # SDC-Switch
+      sdc_status:
+        type: sdc_status
+        description: State of the SDC switch.
+      # Control Debug
+      air_gap:
+        type: d32<0..20>
+        unit: mm
+        description: air gap of the mlu
+      target_force:
+        type: d16<0..100>
+        unit: N
+        description: control target force
+      # Power estimation
+      dc_current:
+        type: d16<-10..50>
+        unit: A
+        description: DC-Current through the magnets.
+      power_estimation:
+        type: d16<0..1000>
+        unit: W
+        description: Power consumed by the MLU.#
+      # Temperatures
+      magnet_temperature:
+        type: d8<-1..150>
+        unit: °C
+        description: Temperature of the magnet
+      mcu_temperature:
+        type: d8<-1..150>
+        unit: °C
+        description: Temperature of the MCU.
+      mosfet_temperature:
+        type: d8<-1..150>
+        unit: °C
+        description: Temperature of the Mosfets
+      # Errors
+      error_45V_over_voltage:
+        type: error_flag
+        description: Error flag for a 45V over voltage.
+      error_45V_under_voltage:
+        type: error_flag
+        description: Error flag for a 45V under voltage.
+      error_magnet_over_temperature:
+        type: error_flag
+        description: Error flag for a over temperature of the magnets.
+      error_mcu_over_temperature:
+        type: error_flag
+        description: Error flag for a mcu over temperature.
+      error_mosfet_over_temperature:
+        type: error_flag
+        description: Error flag for a over temperature of the MOSFETs.
+      error_control_failure:
+        type: error_flag
+        description: Error flag for a levitation control failure.
+    tx_streams:
+      state:
+        description: State of the MLU
+        interval: 100ms
+        mapping:
+          - state
+          - command
+      control_info:
+        description: Control Information of the MLU.
+        interval: 100ms
+        mapping: 
+          - air_gap
+          - target_force
+      power_estimation:
+        description: Power estimation of the MLU.
+        interval: 1000ms
+        mapping: 
+          - dc_current
+          - power_estimation
+      temperatures:
+        description: Temperatures measured by the MLU.
+        interval: 2500ms
+        mapping: 
+          - magnet_temperature
+          - mcu_temperature
+          - mofset_temperature
+      sdc_status:
+        description: State of the SDC-Switch
+        interval: 1000ms
+        mapping:
+          - sdc_status
+      errors:
+        description: Error flags of the MLU.
+        interval: 1000ms
+        mapping:
+          - error_45V_over_voltage
+          - error_45V_under_voltage
+          - error_magnet_over_temperature
+          - error_mcu_over_temperature
+          - error_mosfet_over_temperature
+          - error_control_failure
+
+  mlu4:
+    description: Modular Levitation Unit 1
+    object_dictionary:
+      # State machine & Control
+      state:
+        type: mlu_state
+        description: state of the mlu
+      command:
+        type: mlu_command
+        description: Command that gets forwarded to the MLU. state machine.
+      # Control-Configuration
+      control_config:
+        type: mlu_pid_values
+        description: control config of the mlu
+      # SDC-Switch
+      sdc_status:
+        type: sdc_status
+        description: State of the SDC switch.
+      # Control Debug
+      air_gap:
+        type: d32<0..20>
+        unit: mm
+        description: air gap of the mlu
+      target_force:
+        type: d16<0..100>
+        unit: N
+        description: control target force
+      # Power estimation
+      dc_current:
+        type: d16<-10..50>
+        unit: A
+        description: DC-Current through the magnets.
+      power_estimation:
+        type: d16<0..1000>
+        unit: W
+        description: Power consumed by the MLU.#
+      # Temperatures
+      magnet_temperature:
+        type: d8<-1..150>
+        unit: °C
+        description: Temperature of the magnet
+      mcu_temperature:
+        type: d8<-1..150>
+        unit: °C
+        description: Temperature of the MCU.
+      mosfet_temperature:
+        type: d8<-1..150>
+        unit: °C
+        description: Temperature of the Mosfets
+      # Errors
+      error_45V_over_voltage:
+        type: error_flag
+        description: Error flag for a 45V over voltage.
+      error_45V_under_voltage:
+        type: error_flag
+        description: Error flag for a 45V under voltage.
+      error_magnet_over_temperature:
+        type: error_flag
+        description: Error flag for a over temperature of the magnets.
+      error_mcu_over_temperature:
+        type: error_flag
+        description: Error flag for a mcu over temperature.
+      error_mosfet_over_temperature:
+        type: error_flag
+        description: Error flag for a over temperature of the MOSFETs.
+      error_control_failure:
+        type: error_flag
+        description: Error flag for a levitation control failure.
+    tx_streams:
+      state:
+        description: State of the MLU
+        interval: 100ms
+        mapping:
+          - state
+          - command
+      control_info:
+        description: Control Information of the MLU.
+        interval: 100ms
+        mapping: 
+          - air_gap
+          - target_force
+      power_estimation:
+        description: Power estimation of the MLU.
+        interval: 1000ms
+        mapping: 
+          - dc_current
+          - power_estimation
+      temperatures:
+        description: Temperatures measured by the MLU.
+        interval: 2500ms
+        mapping: 
+          - magnet_temperature
+          - mcu_temperature
+          - mofset_temperature
+      sdc_status:
+        description: State of the SDC-Switch
+        interval: 1000ms
+        mapping:
+          - sdc_status
+      errors:
+        description: Error flags of the MLU.
+        interval: 1000ms
+        mapping:
+          - error_45V_over_voltage
+          - error_45V_under_voltage
+          - error_magnet_over_temperature
+          - error_mcu_over_temperature
+          - error_mosfet_over_temperature
+          - error_control_failure
+
+  mlu5:
+    description: Modular Levitation Unit 1
+    object_dictionary:
+      # State machine & Control
+      state:
+        type: mlu_state
+        description: state of the mlu
+      command:
+        type: mlu_command
+        description: Command that gets forwarded to the MLU. state machine.
+      # Control-Configuration
+      control_config:
+        type: mlu_pid_values
+        description: control config of the mlu
+      # SDC-Switch
+      sdc_status:
+        type: sdc_status
+        description: State of the SDC switch.
+      # Control Debug
+      air_gap:
+        type: d32<0..20>
+        unit: mm
+        description: air gap of the mlu
+      target_force:
+        type: d16<0..100>
+        unit: N
+        description: control target force
+      # Power estimation
+      dc_current:
+        type: d16<-10..50>
+        unit: A
+        description: DC-Current through the magnets.
+      power_estimation:
+        type: d16<0..1000>
+        unit: W
+        description: Power consumed by the MLU.#
+      # Temperatures
+      magnet_temperature:
+        type: d8<-1..150>
+        unit: °C
+        description: Temperature of the magnet
+      mcu_temperature:
+        type: d8<-1..150>
+        unit: °C
+        description: Temperature of the MCU.
+      mosfet_temperature:
+        type: d8<-1..150>
+        unit: °C
+        description: Temperature of the Mosfets
+      # Errors
+      error_45V_over_voltage:
+        type: error_flag
+        description: Error flag for a 45V over voltage.
+      error_45V_under_voltage:
+        type: error_flag
+        description: Error flag for a 45V under voltage.
+      error_magnet_over_temperature:
+        type: error_flag
+        description: Error flag for a over temperature of the magnets.
+      error_mcu_over_temperature:
+        type: error_flag
+        description: Error flag for a mcu over temperature.
+      error_mosfet_over_temperature:
+        type: error_flag
+        description: Error flag for a over temperature of the MOSFETs.
+      error_control_failure:
+        type: error_flag
+        description: Error flag for a levitation control failure.
+    tx_streams:
+      state:
+        description: State of the MLU
+        interval: 100ms
+        mapping:
+          - state
+          - command
+      control_info:
+        description: Control Information of the MLU.
+        interval: 100ms
+        mapping: 
+          - air_gap
+          - target_force
+      power_estimation:
+        description: Power estimation of the MLU.
+        interval: 1000ms
+        mapping: 
+          - dc_current
+          - power_estimation
+      temperatures:
+        description: Temperatures measured by the MLU.
+        interval: 2500ms
+        mapping: 
+          - magnet_temperature
+          - mcu_temperature
+          - mofset_temperature
+      sdc_status:
+        description: State of the SDC-Switch
+        interval: 1000ms
+        mapping:
+          - sdc_status
+      errors:
+        description: Error flags of the MLU.
+        interval: 1000ms
         mapping:
           - error_45V_over_voltage
           - error_45V_under_voltage
@@ -485,6 +677,10 @@ nodes:
       control_config:
         type: mlu_pid_values
         description: control config of the mlu
+      # SDC-Switch
+      sdc_status:
+        type: sdc_status
+        description: State of the SDC switch.
       # Control Debug
       air_gap:
         type: d32<0..20>
@@ -568,6 +764,46 @@ nodes:
           - error_mcu_over_temperature
           - error_mosfet_over_temperature
           - error_control_failure
+    tx_streams:
+      state:
+        description: State of the MLU
+        interval: 100ms
+        mapping:
+          - state
+          - command
+      control_info:
+        interval: 100ms
+        mapping: 
+          - air_gap
+          - target_force
+      power_estimation:
+        description: Power estimation of the MLU.
+        interval: 1000ms
+        mapping: 
+          - dc_current
+          - power_estimation
+      temperatures:
+        description: Temperatures measured by the MLU.
+        interval: 2500ms
+        mapping: 
+          - magnet_temperature
+          - mcu_temperature
+          - mofset_temperature
+      sdc_status:
+        description: State of the SDC-Switch
+        interval: 1000ms
+        mapping:
+          - sdc_status
+      errors:
+        description: Error flags of the MLU.
+        interval: 1000ms
+        mapping:
+          - error_45V_over_voltage
+          - error_45V_under_voltage
+          - error_magnet_over_temperature
+          - error_mcu_over_temperature
+          - error_mosfet_over_temperature
+          - error_control_failure
 
   mgu1: 
     description: Modular Guidance Unit 1 (Front)
@@ -583,6 +819,10 @@ nodes:
       control_config:
         type: mgu_pid_values
         description: control config of the mgu
+      # SDC-Switch
+      sdc_status:
+        type: sdc_status
+        description: State of the SDC switch.
       # Airgaps
       air_gap_starboard:
         type: d16<0..20>
@@ -652,6 +892,7 @@ nodes:
         interval : 100ms
         mapping:
           - state
+          - command
       air_gaps:
         description: Air gaps starboard and port. (also includes target forces)
         interval: 100ms
@@ -669,13 +910,20 @@ nodes:
           - power_estimation
       temperatures:
         description: Temperatures measured by the MGU.
+        interval: 2500ms
         mapping:
           - magnet_temperature_starboard
           - magnet_temperature_port
           - mcu_temperature
           - mosfet_temperature
+      sdc_status:
+        description: State of the SDC-Switch
+        interval: 1000ms
+        mapping:
+          - sdc_status
       errors:
         description: Error flags of the MGU.
+        interval: 1000ms
         mapping:
           - error_45V_over_voltage
           - error_45V_under_voltage
@@ -698,6 +946,10 @@ nodes:
       control_config:
         type: mgu_pid_values
         description: control config of the mgu
+      # SDC-Switch
+      sdc_status:
+        type: sdc_status
+        description: State of the SDC switch.
       # Airgaps
       air_gap_starboard:
         type: d16<0..20>
@@ -784,13 +1036,20 @@ nodes:
           - power_estimation
       temperatures:
         description: Temperatures measured by the MGU.
+        interval: 2500ms
         mapping:
           - magnet_temperature_starboard
           - magnet_temperature_port
           - mcu_temperature
           - mosfet_temperature
+      sdc_status:
+        description: State of the SDC-Switch
+        interval: 1000ms
+        mapping:
+          - sdc_status
       errors:
         description: Error flags of the MGU.
+        interval : 1000ms
         mapping:
           - error_45V_over_voltage
           - error_45V_under_voltage
@@ -818,6 +1077,10 @@ nodes:
       control_config:
         type: motor_pid_values
         description: control config of the mgu
+      # SDC-Switch
+      sdc_status:
+        type: sdc_status
+        description: State of the SDC-switch of the motor driver
       # Temperatures
       motor_temperature_starboard:
         type: d8<-1..150>
@@ -889,6 +1152,11 @@ nodes:
         mapping:
           - dc_current
           - power_estimation
+      sdc_status:
+        description: Status of the SDC.
+        interval: 1000ms
+        mapping:
+          - sdc_status
       # All error flags
       errors:
         description: All error flags from the Motor driver board.
@@ -1549,6 +1817,23 @@ nodes:
       cpu_temperature:
         type: d8<-1..150>
         description: Temperature of the CPU.
+      # SDC Status
+      sdc_status:
+        type: sdc_status
+        description: Combination of all sdc_state variables closed iff. all sdc switches are closed.
+      # Power estimation
+      power_estimation:
+        type: d32<0..5000>
+        unit: W
+        description: Total power consumption of the System.
+      power_estimation24:
+        type: d32<0..5000>
+        unit: W
+        description: Total power consumption of the 24V-System.
+      power_estimation48:
+        type: d32<0..5000>
+        unit: W
+        description: Total power consumption of the 45V-System.
     tx_streams:
       global_state:
         description: Broadcast of the global state.
@@ -1633,6 +1918,8 @@ nodes:
         power_estimation: motor_power_estimation
       state:
         state: motor_state
+      sdc_status:
+        sdc_status: motor_sdc_state
     # Receive from MGUs
     mgu1:
       errors:
@@ -1646,6 +1933,8 @@ nodes:
         state: mgu1_state
       power_estimation:
         power_estimation: mgu1_power_estimation
+      sdc_state:
+        sdc_state: mgu2_sdc_state
     mgu2:
       errors:
         error_45V_over_voltage: error_mgu2_45V_over_voltage
@@ -1658,6 +1947,8 @@ nodes:
         state: mgu2_state
       power_estimation:
         power_estimation: mgu2_power_estimation
+      sdc_state:
+        sdc_state: mgu2_sdc_state
     # Receive from MLUs
     mlu1:
       errors:
@@ -1671,6 +1962,8 @@ nodes:
         state: mlu1_state
       power_estimation:
         power_estimation: mlu1_power_estimation
+      sdc_state:
+        sdc_state: mlu1_sdc_state
     mlu2:
       errors:
         error_45V_over_voltage: error_mlu2_45V_over_voltage
@@ -1683,6 +1976,8 @@ nodes:
         state: mlu2_state
       power_estimation:
         power_estimation: mlu2_power_estimation
+      sdc_state:
+        sdc_state: mlu2_sdc_state
     mlu3:
       errors:
         error_45V_over_voltage: error_mlu3_45V_over_voltage
@@ -1695,6 +1990,8 @@ nodes:
         state: mlu3_state
       power_estimation:
         power_estimation: mlu3_power_estimation
+      sdc_state:
+        sdc_state: mlu3_sdc_state
     mlu4:
       errors:
         error_45V_over_voltage: error_mlu4_45V_over_voltage
@@ -1707,6 +2004,8 @@ nodes:
         state: mlu4_state
       power_estimation:
         power_estimation: mlu4_power_estimation
+      sdc_state:
+        sdc_state: mlu4_sdc_state
     mlu5:
       errors:
         error_45V_over_voltage: error_mlu5_45V_over_voltage
@@ -1719,6 +2018,8 @@ nodes:
         state: mlu5_state
       power_estimation:
         power_estimation: mlu5_power_estimation
+      sdc_state:
+        sdc_state: mlu5_sdc_state
     mlu6:
       errors:
         error_45V_over_voltage: error_mlu6_45V_over_voltage
@@ -1731,3 +2032,5 @@ nodes:
         state: mlu6_state
       power_estimation:
         power_estimation: mlu6_power_estimation
+      sdc_state:
+        sdc_state: mlu6_sdc_state
