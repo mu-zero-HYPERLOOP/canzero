@@ -1,6 +1,6 @@
-import { Paper, Skeleton, Table, TableBody, TableContainer, TableHead, TableRow, Typography, styled } from "@mui/material";
+import { InputAdornment, Paper, Skeleton, Table, TableBody, TableContainer, TableHead, TableRow, TextField, Typography, styled } from "@mui/material";
 import { NodeInformation } from "./types/NodeInformation.ts";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ObjectEntryEvent } from "../object_entry/types/events/ObjectEntryEvent.tsx";
 import { invoke } from "@tauri-apps/api";
 import { listen } from "@tauri-apps/api/event";
@@ -8,6 +8,8 @@ import { NodeEvent } from "./types/NodeEvent.ts";
 import ObjectEntryRow from "./ObjectEntryRow.tsx";
 import { TableComponents, TableVirtuoso } from "react-virtuoso";
 import React from "react";
+import SearchIcon from '@mui/icons-material/Search';
+import useFocusOnCtrlShortcut from "../trace2/FocusOnKey.tsx";
 
 
 interface NodePanelProps {
@@ -42,7 +44,10 @@ const VirtuosoTableComponents: TableComponents<RowData> = {
 
 function NodePanel({ node }: NodePanelProps) {
 
-  let [rowData, setRowData] = useState<(RowData)[]>([]);
+  const [rowData, setRowData] = useState<(RowData)[]>([]);
+  const [filter, setFilter] = useState<number[]>(node.object_entries.map((_,i) => i));
+  const [searchString, setSearchString] = useState<string>("");
+
 
   // register listener
   useEffect(() => {
@@ -63,7 +68,10 @@ function NodePanel({ node }: NodePanelProps) {
         invoke("unlisten_from_node_latest", { nodeName: node.name }).catch(console.error);
       };
     }
+    // init!
     setRowData([]);
+    setFilter(node.object_entries.map((_,i) => i));
+    setSearchString("");
     let asyncCleanup = asyncSetup();
     return () => {
       asyncCleanup.then(f => f()).catch(console.error);
@@ -72,6 +80,20 @@ function NodePanel({ node }: NodePanelProps) {
 
   function rowContent(_index: number, row: RowData) {
     return <ObjectEntryRow nodeName={node.name} objectEntryName={row?.objectEntryName} value={row.value?.value} />
+  }
+
+  const searchFieldRef = useRef() as any;
+
+  useFocusOnCtrlShortcut("f", searchFieldRef)
+
+  function updateFilter(filter_string : string) {
+    const filter = [];
+    for (let oe_index = 0; oe_index < node.object_entries.length; oe_index++) {
+      if (node.object_entries[oe_index].startsWith(filter_string)) {
+          filter.push(oe_index);
+      }
+    }
+    setFilter(filter);
   }
 
   return (
@@ -104,8 +126,34 @@ function NodePanel({ node }: NodePanelProps) {
 
       }} variant="subtitle2">{node.description}</Typography>
         : <></>}
+
+      <TextField
+        inputRef={searchFieldRef}
+        value={searchString}
+        sx={{
+          position: "absolute",
+          top: "5px",
+          right : "20px",
+          width: "50%",
+          maxWidth: "400px",
+        }}
+        variant="standard"
+        inputProps={{
+          style: {
+            boxShadow: "none"
+          }
+        }}
+        onChange={event => {
+          setSearchString(event.target.value);
+          updateFilter(event.target.value);
+        }}
+        InputProps={{
+          startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" /></InputAdornment>,
+        }}
+      >
+      </TextField>
       {rowData.length == 0 ? <Skeleton
-        
+
         variant="rounded"
         animation="wave"
         sx={{
@@ -116,11 +164,11 @@ function NodePanel({ node }: NodePanelProps) {
       />
         :
         <TableVirtuoso
-          style = {{
-            height : "100%",
+          style={{
+            height: "100%",
             width: "100%",
           }}
-          data={rowData}
+          data={filter.map(i => rowData[i])}
           components={VirtuosoTableComponents}
           itemContent={rowContent}
         >
