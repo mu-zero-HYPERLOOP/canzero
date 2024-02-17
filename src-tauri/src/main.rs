@@ -2,17 +2,15 @@
 use tauri::Manager;
 
 use crate::{
-    commands::{
-        network_information, object_entry_commands, connection_status,
-    },
+    commands::{connection_status, network_information, object_entry_commands},
     state::cnl_state::CNLState,
 };
 
 mod cnl;
 mod commands;
-mod state;
-mod notification;
 mod input_controller;
+mod notification;
+mod state;
 
 #[tokio::main(flavor = "multi_thread", worker_threads = 4)]
 async fn main() {
@@ -49,6 +47,8 @@ async fn main() {
             object_entry_commands::request_object_entry_value,
             object_entry_commands::set_object_entry_value,
             connection_status::get_connection_status,
+            commands::node_commands::listen_to_node_latest,
+            commands::node_commands::unlisten_from_node_latest,
         ])
         .run(tauri::generate_context!())
         .expect("Error while running tauri application");
