@@ -1421,6 +1421,25 @@ nodes:
           - hp_channel4_status
           - sdc_status
           - mcu_over_temperature
+    rx_streams:
+      master:
+        pdu24_control:
+          pdu24_lp_channel1_control : lp_channel1_control
+          pdu24_lp_channel2_control : lp_channel2_control
+          pdu24_lp_channel3_control : lp_channel3_control
+          pdu24_lp_channel4_control : lp_channel4_control
+          pdu24_lp_channel5_control : lp_channel5_control
+          pdu24_lp_channel6_control : lp_channel6_control
+          pdu24_lp_channel7_control : lp_channel7_control
+          pdu24_lp_channel8_control : lp_channel8_control
+          pdu24_lp_channel9_control : lp_channel9_control
+          pdu24_lp_channel10_control : lp_channel10_control
+          pdu24_lp_channel11_control : lp_channel11_control
+          pdu24_lp_channel12_control : lp_channel12_control
+          pdu24_hp_channel1_control : lp_channel1_control
+          pdu24_hp_channel2_control : lp_channel2_control
+          pdu24_hp_channel3_control : lp_channel3_control
+          pdu24_hp_channel4_control : lp_channel4_control
 
   pdu12:
     description: power distribution unit 12V
@@ -1675,6 +1694,26 @@ nodes:
           - hp_channel4_status
           - sdc_status
           - mcu_over_temperature
+    rx_streams:
+      master:
+        pdu12_control:
+          pdu12_lp_channel1_control : lp_channel1_control
+          pdu12_lp_channel2_control : lp_channel2_control
+          pdu12_lp_channel3_control : lp_channel3_control
+          pdu12_lp_channel4_control : lp_channel4_control
+          pdu12_lp_channel5_control : lp_channel5_control
+          pdu12_lp_channel6_control : lp_channel6_control
+          pdu12_lp_channel7_control : lp_channel7_control
+          pdu12_lp_channel8_control : lp_channel8_control
+          pdu12_lp_channel9_control : lp_channel9_control
+          pdu12_lp_channel10_control : lp_channel10_control
+          pdu12_lp_channel11_control : lp_channel11_control
+          pdu12_lp_channel12_control : lp_channel12_control
+          pdu12_hp_channel1_control : lp_channel1_control
+          pdu12_hp_channel2_control : lp_channel2_control
+          pdu12_hp_channel3_control : lp_channel3_control
+          pdu12_hp_channel4_control : lp_channel4_control
+
 
   input_board: 
     description: input board (teency 4.1)
@@ -1770,7 +1809,7 @@ nodes:
           - battery_24V_temperature
           - ebox_temperature
           - cooling_cycle_pressure
-      sdc:
+      sdc_status:
         description: Status of the SDC switch
         interval: 1000ms
         mapping:
@@ -1834,6 +1873,105 @@ nodes:
         type: d32<0..5000>
         unit: W
         description: Total power consumption of the 45V-System.
+      # 12V-PDU Control
+      pdu12_lp_channel1_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu12_lp_channel2_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu12_lp_channel3_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu12_lp_channel4_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu12_lp_channel5_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu12_lp_channel6_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu12_lp_channel7_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu12_lp_channel8_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu12_lp_channel9_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu12_lp_channel10_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu12_lp_channel11_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu12_lp_channel12_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu12_hp_channel1_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu12_hp_channel2_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu12_hp_channel3_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu12_hp_channel4_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      # 24V-PDU Control
+      pdu24_lp_channel1_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu24_lp_channel2_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu24_lp_channel3_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu24_lp_channel4_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu24_lp_channel5_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu24_lp_channel6_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu24_lp_channel7_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu24_lp_channel8_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu24_lp_channel9_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu24_lp_channel10_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu24_lp_channel11_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu24_lp_channel12_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu24_hp_channel1_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu24_hp_channel2_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu24_hp_channel3_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+      pdu24_hp_channel4_control:
+        type: pdu_channel_control
+        description : Controlls the PDU Channel.
+
     tx_streams:
       global_state:
         description: Broadcast of the global state.
@@ -1841,6 +1979,46 @@ nodes:
         mapping:
           - global_state
           - command
+      pdu12_control:
+        description: Control stream for the 12V-PDU
+        interval: 500ms
+        mapping:
+          - pdu12_lp_channel1_control
+          - pdu12_lp_channel2_control
+          - pdu12_lp_channel3_control
+          - pdu12_lp_channel4_control
+          - pdu12_lp_channel5_control
+          - pdu12_lp_channel6_control
+          - pdu12_lp_channel7_control
+          - pdu12_lp_channel8_control
+          - pdu12_lp_channel9_control
+          - pdu12_lp_channel10_control
+          - pdu12_lp_channel11_control
+          - pdu12_lp_channel12_control
+          - pdu12_hp_channel1_control
+          - pdu12_hp_channel2_control
+          - pdu12_hp_channel3_control
+          - pdu12_hp_channel4_control
+      pdu24_control:
+        description: Control stream for the 24V-PDU
+        interval: 500ms
+        mapping:
+          - pdu24_lp_channel1_control
+          - pdu24_lp_channel2_control
+          - pdu24_lp_channel3_control
+          - pdu24_lp_channel4_control
+          - pdu24_lp_channel5_control
+          - pdu24_lp_channel6_control
+          - pdu24_lp_channel7_control
+          - pdu24_lp_channel8_control
+          - pdu24_lp_channel9_control
+          - pdu24_lp_channel10_control
+          - pdu24_lp_channel11_control
+          - pdu24_lp_channel12_control
+          - pdu24_hp_channel1_control
+          - pdu24_hp_channel2_control
+          - pdu24_hp_channel3_control
+          - pdu24_hp_channel4_control
     rx_streams:
       # Receive from Input Board
       input_board:
@@ -1859,7 +2037,7 @@ nodes:
           error_cooling_cycle_low_pressure : error_cooling_cycle_low_pressure
           error_ebox_over_temperature : error_ebox_over_temperature
           error_cooling_cycle_over_temperature : error_cooling_cycle_over_temperature
-        sdc:
+        sdc_status:
           sdc_status: input_board_sdc_status
       # Receive from PDUs
       pdu12:
@@ -1917,9 +2095,9 @@ nodes:
         power_estimation:
           power_estimation: motor_power_estimation
         state:
-          state: motor_state
+          state: motor_status
         sdc_status:
-          sdc_status: motor_sdc_state
+          sdc_status: motor_sdc_status
       # Receive from MGUs
       mgu1:
         errors:
@@ -1933,8 +2111,8 @@ nodes:
           state: mgu1_state
         power_estimation:
           power_estimation: mgu1_power_estimation
-        sdc_state:
-          sdc_state: mgu2_sdc_state
+        sdc_status:
+          sdc_status: mgu2_sdc_status
       mgu2:
         errors:
           error_45V_over_voltage: error_mgu2_45V_over_voltage
@@ -1947,8 +2125,8 @@ nodes:
           state: mgu2_state
         power_estimation:
           power_estimation: mgu2_power_estimation
-        sdc_state:
-          sdc_state: mgu2_sdc_state
+        sdc_status:
+          sdc_status: mgu2_sdc_status
       # Receive from MLUs
       mlu1:
         errors:
@@ -1962,8 +2140,8 @@ nodes:
           state: mlu1_state
         power_estimation:
           power_estimation: mlu1_power_estimation
-        sdc_state:
-          sdc_state: mlu1_sdc_state
+        sdc_status:
+          sdc_status: mlu1_sdc_status
       mlu2:
         errors:
           error_45V_over_voltage: error_mlu2_45V_over_voltage
@@ -1976,8 +2154,8 @@ nodes:
           state: mlu2_state
         power_estimation:
           power_estimation: mlu2_power_estimation
-        sdc_state:
-          sdc_state: mlu2_sdc_state
+        sdc_status:
+          sdc_status: mlu2_sdc_status
       mlu3:
         errors:
           error_45V_over_voltage: error_mlu3_45V_over_voltage
@@ -1990,8 +2168,8 @@ nodes:
           state: mlu3_state
         power_estimation:
           power_estimation: mlu3_power_estimation
-        sdc_state:
-          sdc_state: mlu3_sdc_state
+        sdc_status:
+          sdc_status: mlu3_sdc_status
       mlu4:
         errors:
           error_45V_over_voltage: error_mlu4_45V_over_voltage
@@ -2004,8 +2182,8 @@ nodes:
           state: mlu4_state
         power_estimation:
           power_estimation: mlu4_power_estimation
-        sdc_state:
-          sdc_state: mlu4_sdc_state
+        sdc_status:
+          sdc_status: mlu4_sdc_status
       mlu5:
         errors:
           error_45V_over_voltage: error_mlu5_45V_over_voltage
@@ -2018,8 +2196,8 @@ nodes:
           state: mlu5_state
         power_estimation:
           power_estimation: mlu5_power_estimation
-        sdc_state:
-          sdc_state: mlu5_sdc_state
+        sdc_status:
+          sdc_status: mlu5_sdc_status
       mlu6:
         errors:
           error_45V_over_voltage: error_mlu6_45V_over_voltage
@@ -2029,8 +2207,8 @@ nodes:
           error_mosfet_over_temperature: error_mlu6_mosfet_over_temperature
           error_control_failure: error_mlu6_control_failure
         state:
-          state: mlu6_state
+          state: mlu6_status
         power_estimation:
           power_estimation: mlu6_power_estimation
-        sdc_state:
-          sdc_state: mlu6_sdc_state
+        sdc_status:
+          sdc_status: mlu6_sdc_status
