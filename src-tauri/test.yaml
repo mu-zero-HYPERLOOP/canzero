@@ -226,6 +226,10 @@ nodes:
           - error_mcu_over_temperature
           - error_mosfet_over_temperature
           - error_control_failure
+    rx_streams:
+      master:
+        mlu_control:
+          mlu_command: command
 
   mlu2:
     description: Modular Levitation Unit 2
@@ -336,6 +340,11 @@ nodes:
           - error_mcu_over_temperature
           - error_mosfet_over_temperature
           - error_control_failure
+    rx_streams:
+      master:
+        mlu_control:
+          mlu_command: command
+
 
   mlu3:
     description: Modular Levitation Unit 1
@@ -446,6 +455,10 @@ nodes:
           - error_mcu_over_temperature
           - error_mosfet_over_temperature
           - error_control_failure
+    rx_streams:
+      master:
+        mlu_control:
+          mlu_command: command
 
   mlu4:
     description: Modular Levitation Unit 1
@@ -556,6 +569,10 @@ nodes:
           - error_mcu_over_temperature
           - error_mosfet_over_temperature
           - error_control_failure
+    rx_streams:
+      master:
+        mlu_control:
+          mlu_command: command
 
   mlu5:
     description: Modular Levitation Unit 1
@@ -666,6 +683,10 @@ nodes:
           - error_mcu_over_temperature
           - error_mosfet_over_temperature
           - error_control_failure
+    rx_streams:
+      master:
+        mlu_control:
+          mlu_command: command
 
   mlu6:
     description: Modular Levitation Unit 1.
@@ -808,6 +829,10 @@ nodes:
           - error_mcu_over_temperature
           - error_mosfet_over_temperature
           - error_control_failure
+    rx_streams:
+      master:
+        mlu_control:
+          mlu_command: command
 
   mgu1: 
     description: Modular Guidance Unit 1 (Front)
@@ -935,6 +960,10 @@ nodes:
           - error_magnet_over_temperature_starboard
           - error_magnet_over_temperature_port
           - error_mosfet_over_temperature
+    rx_streams:
+      master:
+        mgu_control:
+          mgu_command: command
 
   mgu2: 
     description: Modular Guidance Unit 2 (Back)
@@ -1061,6 +1090,10 @@ nodes:
           - error_magnet_over_temperature_starboard
           - error_magnet_over_temperature_port
           - error_mosfet_over_temperature
+    rx_streams:
+      master:
+        mgu_control:
+          mgu_command: command
 
 
 
