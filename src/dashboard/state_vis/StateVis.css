@@ -1,0 +1,46 @@
+#state_vis {
+  --mlu_state : #000000;
+  --mgu_state : #000000;
+  --dslim_state : #000000;
+  --global_state : #000000;
+}
+
+
+.mlu {
+  fill: var(--mlu_state);
+  stroke: #000000;
+  stroke-width: 0.4;
+  stroke-miterlimit: 10;
+}
+
+.mgu {
+  fill: var(--mgu_state);
+  stroke: #000000;
+  stroke-width: 0.4;
+  stroke-miterlimit: 10;
+}
+
+.dslim {
+  fill: var(--dslim_state);
+  stroke: #000000;
+  stroke-width: 0.4;
+  stroke-miterlimit: 10;
+}
+
+.global {
+  fill: var(--global_state);
+}
+
+.st0 {
+  fill: #C0C2C4;
+  stroke: #000000;
+  stroke-width: 0.4;
+  stroke-miterlimit: 10;
+}
+
+.st1 {
+  stroke: #000000;
+  fill: #000000;
+  stroke-width: 0.4;
+  stroke-miterlimit: 10;
+}

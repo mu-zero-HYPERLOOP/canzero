@@ -1,20 +1,20 @@
 #temperature_vis {
-  --mlu1_temperature: #FF0000;
-  --mlu2_temperature: #00FF00;
-  --mlu3_temperature: #0000FF;
-  --mlu4_temperature: #FF0000;
-  --mlu5_temperature: #C3C5CB;
-  --mlu6_temperature: #C3C5CB;
-  --mgu1_starboard_temperature: #C3C5CB;
-  --mgu1_port_temperature: #C3C5CB;
-  --mgu2_starboard_temperature: #C3C5CB;
-  --mgu2_port_temperature: #C3C5CB;
-  --ebox1_temperature: #C3C5CB;
-  --ebox2_temperature: #C3C5CB;
-  --dslim_starboard_temperature: #C3C5CB;
-  --dslim_port_temperature: #C3C5CB;
-  --motor_driver_temperature: #C3C5CB;
-  --cooling_reservoir_temperature: #C3C5CB;
+  --mlu1_temperature: #000000;
+  --mlu2_temperature: #000000;
+  --mlu3_temperature: #000000;
+  --mlu4_temperature: #000000;
+  --mlu5_temperature: #000000;
+  --mlu6_temperature: #000000;
+  --mgu1_starboard_temperature: #000000;
+  --mgu1_port_temperature: #000000;
+  --mgu2_starboard_temperature: #000000;
+  --mgu2_port_temperature: #000000;
+  --ebox1_temperature: #000000;
+  --ebox2_temperature: #000000;
+  --dslim_starboard_temperature: #000000;
+  --dslim_port_temperature: #000000;
+  --motor_driver_temperature: #000000;
+  --cooling_reservoir_temperature: #000000;
 }
 
 .mlu1 {

@@ -41,6 +41,7 @@ enum_types:
     CRUISING : ~
     DECELERATION : ~
   global_command:
+    NONE: ~
     PRECHARGE: ~
     DISCONNECT: ~
     START_LEVITATION: ~
@@ -60,6 +61,7 @@ enum_types:
     CONTROL : ~
     STOP : ~
   mlu_command:
+    NONE: ~
     PRECHARGE: ~
     START: ~
     STOP: ~
@@ -75,6 +77,7 @@ enum_types:
     CONTROL : ~
     STOP : ~
   mgu_command:
+    NONE: ~
     PRECHARGE: ~
     START: ~
     STOP: ~
@@ -91,6 +94,7 @@ enum_types:
     MANUAL : ~
     ERROR: ~
   motor_command:
+    NONE: ~
     PRECHARGE: ~
     ACCELERATE: ~
     DECELERATE: ~
@@ -2112,7 +2116,7 @@ nodes:
         power_estimation:
           power_estimation: mgu1_power_estimation
         sdc_status:
-          sdc_status: mgu2_sdc_status
+          sdc_status: mgu1_sdc_status
       mgu2:
         errors:
           error_45V_over_voltage: error_mgu2_45V_over_voltage

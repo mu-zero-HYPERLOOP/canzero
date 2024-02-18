@@ -89,7 +89,7 @@ function NodePanel({ node }: NodePanelProps) {
   function updateFilter(filter_string : string) {
     const filter = [];
     for (let oe_index = 0; oe_index < node.object_entries.length; oe_index++) {
-      if (node.object_entries[oe_index].startsWith(filter_string)) {
+      if (node.object_entries[oe_index].includes(filter_string)) {
           filter.push(oe_index);
       }
     }

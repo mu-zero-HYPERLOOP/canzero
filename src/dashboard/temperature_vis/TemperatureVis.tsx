@@ -1,5 +1,5 @@
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import "./TemperatureVis.css"
 import { invoke } from "@tauri-apps/api";
 import { ObjectEntryListenLatestResponse } from "../../object_entry/types/events/ObjectEntryListenLatestResponse";
@@ -7,7 +7,7 @@ import { ObjectEntryEvent } from "../../object_entry/types/events/ObjectEntryEve
 import { listen } from "@tauri-apps/api/event";
 import { ObjectEntryInformation } from "../../object_entry/types/ObjectEntryInformation";
 import { IntTypeInfo, RealTypeInfo, UIntTypeInfo } from "../../object_entry/types/Type";
-import { Paper } from "@mui/material";
+import { Paper, Stack, Typography } from "@mui/material";
 
 
 interface Color {
@@ -112,55 +112,49 @@ async function registerOe(oe: OeId, property: string, element: HTMLElement) {
 
 function TemperatureVis() {
 
-  const svgRef = useRef() as any;
-
   useEffect(() => {
 
-    async function asyncSetup() {
-      const svg = document.getElementById("temperature_vis")!;
+    const svg = document.getElementById("temperature_vis")!;
 
-      let cleanup: (Promise<() => void>)[] = [];
-      cleanup.push(registerOe(MLU1_OE, "--mlu1_temperature", svg));
-      cleanup.push(registerOe(MLU2_OE, "--mlu2_temperature", svg));
-      cleanup.push(registerOe(MLU3_OE, "--mlu3_temperature", svg));
-      cleanup.push(registerOe(MLU4_OE, "--mlu4_temperature", svg));
-      cleanup.push(registerOe(MLU5_OE, "--mlu5_temperature", svg));
-      cleanup.push(registerOe(MLU6_OE, "--mlu6_temperature", svg));
+    let cleanup: (Promise<() => void>)[] = [];
+    cleanup.push(registerOe(MLU1_OE, "--mlu1_temperature", svg));
+    cleanup.push(registerOe(MLU2_OE, "--mlu2_temperature", svg));
+    cleanup.push(registerOe(MLU3_OE, "--mlu3_temperature", svg));
+    cleanup.push(registerOe(MLU4_OE, "--mlu4_temperature", svg));
+    cleanup.push(registerOe(MLU5_OE, "--mlu5_temperature", svg));
+    cleanup.push(registerOe(MLU6_OE, "--mlu6_temperature", svg));
 
-      cleanup.push(registerOe(MGU1_STARBOARD_OE, "--mgu1_starboard_temperature", svg));
-      cleanup.push(registerOe(MGU1_PORT_OE, "--mgu1_port_temperature", svg));
-      cleanup.push(registerOe(MGU2_STARBOARD_OE, "--mgu2_starboard_temperature", svg));
-      cleanup.push(registerOe(MGU2_PORT_OE, "--mgu2_port_temperature", svg));
+    cleanup.push(registerOe(MGU1_STARBOARD_OE, "--mgu1_starboard_temperature", svg));
+    cleanup.push(registerOe(MGU1_PORT_OE, "--mgu1_port_temperature", svg));
+    cleanup.push(registerOe(MGU2_STARBOARD_OE, "--mgu2_starboard_temperature", svg));
+    cleanup.push(registerOe(MGU2_PORT_OE, "--mgu2_port_temperature", svg));
 
-      cleanup.push(registerOe(DSLIM_STARBOARD_OE, "--dslim_starboard_temperature", svg));
-      cleanup.push(registerOe(DSLIM_PORT_OE, "--dslim_port_temperature", svg));
+    cleanup.push(registerOe(DSLIM_STARBOARD_OE, "--dslim_starboard_temperature", svg));
+    cleanup.push(registerOe(DSLIM_PORT_OE, "--dslim_port_temperature", svg));
 
-      cleanup.push(registerOe(EBOX1_OE, "--ebox1_temperature", svg));
-      cleanup.push(registerOe(EBOX2_OE, "--ebox2_temperature", svg));
+    cleanup.push(registerOe(EBOX1_OE, "--ebox1_temperature", svg));
+    cleanup.push(registerOe(EBOX2_OE, "--ebox2_temperature", svg));
 
-      cleanup.push(registerOe(MOTOR_DRIVER_OR, "--motor_driver_temperature", svg)); // TODO
+    cleanup.push(registerOe(MOTOR_DRIVER_OR, "--motor_driver_temperature", svg)); // TODO
 
-      cleanup.push(registerOe(COOLING_RESERVOIR_OE, "--cooling_reservoir_temperature", svg));
+    cleanup.push(registerOe(COOLING_RESERVOIR_OE, "--cooling_reservoir_temperature", svg));
 
-      return () => {
-        cleanup.forEach(p => p.then(f => f()).catch(console.error));
-      };
-
-    }
-    const asyncCleanup = asyncSetup();
     return () => {
-      asyncCleanup.then(f => f()).catch(console.error);
-    }
+      cleanup.forEach(p => p.then(f => f()).catch(console.error));
+    };
   }, []);
 
   return (
     <Paper sx={{
-      width: "33%",
+      width: "100%",
       margin: 2,
       padding: 1
     }}>
+      <Stack>
+      <Typography style={{textAlign: "center"}}>
+        Temperatures
+      </Typography>
       <svg version="1.1"
-        ref={svgRef}
         id={"temperature_vis"}
         xmlns="http://www.w3.org/2000/svg"
         x="0px"
@@ -513,6 +507,7 @@ function TemperatureVis() {
           <circle className="st5" cx="764.05" cy="401.19" r="2.39" />
         </g>
       </svg>
+      </Stack>
     </Paper>
   );
 }
