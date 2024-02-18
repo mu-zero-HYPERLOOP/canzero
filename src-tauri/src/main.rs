@@ -8,7 +8,6 @@ use crate::{
 
 mod cnl;
 mod commands;
-mod input_controller;
 mod notification;
 mod state;
 

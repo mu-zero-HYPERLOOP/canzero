@@ -1171,6 +1171,10 @@ nodes:
           - error_dslim_over_temperature
           - error_mosfet_over_temperature
           - error_control_failure
+    rx_streams:
+      master:
+        motor_control:
+          motor_command: command
 
   pdu24:
     description: power distribution unit 24V
@@ -1843,6 +1847,15 @@ nodes:
       command:
         type: global_command
         description: Command forwarded to the global state machine.
+      mlu_command:
+        type: mlu_command
+        descriptin: Broadcasted to the MLUs
+      mgu_command:
+        type: mgu_command
+        description: Broadcasted to the MGUs
+      motor_command:
+        type: motor_command
+        description: Broadcasted to the motor driver board.
       # Control-Configuration
       sync_mlu_pid_values:
         type: bool
@@ -1983,6 +1996,21 @@ nodes:
         mapping:
           - global_state
           - command
+      mlu_control:
+        description: Broacast of the mlu commands
+        interval: 100ms
+        mapping:
+          - mlu_command
+      mgu_control:
+        description: Broadcast of the mgu commands
+        interval: 100ms
+        mapping:
+          - mgu_command
+      motor_control:
+        description: Broadcast of the motor commands
+        interval: 100ms
+        mapping:
+          - motor_command
       pdu12_control:
         description: Control stream for the 12V-PDU
         interval: 500ms
