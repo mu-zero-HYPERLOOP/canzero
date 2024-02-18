@@ -1,3 +1,5 @@
+import { Stack } from "@mui/material";
+import TemperatureVis from "../dashboard/temperature_vis/TemperatureVis.tsx";
 import {NodeInformation} from "../nodes/types/NodeInformation.ts";
 
 interface NodesProps {
@@ -8,15 +10,11 @@ interface NodesProps {
 function GuidanceControl({nodes}: NodesProps) {
 
     return (
-        <>
-            <h1>Guidance Control</h1>
-            {nodes.map((entry: NodeInformation) => {
-                if (entry.name === "secu")
-                    return (<>
-                        </>
-                    )
-            })}
-        </>
+    <Stack direction="row">
+      <TemperatureVis/>
+      <TemperatureVis/>
+      <TemperatureVis/>
+    </Stack>
     );
 }
 

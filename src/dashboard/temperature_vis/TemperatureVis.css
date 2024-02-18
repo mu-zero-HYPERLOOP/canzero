@@ -1,0 +1,150 @@
+#temperature_vis {
+  --mlu1_temperature: #FF0000;
+  --mlu2_temperature: #00FF00;
+  --mlu3_temperature: #0000FF;
+  --mlu4_temperature: #FF0000;
+  --mlu5_temperature: #C3C5CB;
+  --mlu6_temperature: #C3C5CB;
+  --mgu1_starboard_temperature: #C3C5CB;
+  --mgu1_port_temperature: #C3C5CB;
+  --mgu2_starboard_temperature: #C3C5CB;
+  --mgu2_port_temperature: #C3C5CB;
+  --ebox1_temperature: #C3C5CB;
+  --ebox2_temperature: #C3C5CB;
+  --dslim_starboard_temperature: #C3C5CB;
+  --dslim_port_temperature: #C3C5CB;
+  --motor_driver_temperature: #C3C5CB;
+  --cooling_reservoir_temperature: #C3C5CB;
+}
+
+.mlu1 {
+  fill: var(--mlu1_temperature);
+  stroke: #000000;
+  stroke-miterlimit: 10;
+}
+
+
+.mlu2 {
+  fill: var(--mlu2_temperature);
+  stroke: #000000;
+  stroke-miterlimit: 10;
+}
+
+.mlu3 {
+  fill: var(--mlu3_temperature);
+  stroke: #000000;
+  stroke-miterlimit: 10;
+}
+
+.mlu4 {
+  fill: var(--mlu4_temperature);
+  stroke: #000000;
+  stroke-miterlimit: 10;
+}
+
+.mlu5 {
+  fill: var(--mlu5_temperature);
+  stroke: #000000;
+  stroke-miterlimit: 10;
+}
+
+.mlu6 {
+  fill: var(--mlu6_temperature);
+  stroke: #000000;
+  stroke-miterlimit: 10;
+}
+
+.mgu1_starboard {
+  fill: var(--mgu1_starboard_temperature);
+  stroke: #000000;
+  stroke-miterlimit: 10;
+}
+
+.mgu1_port {
+  fill: var(--mgu1_port_temperature);
+  stroke: #000000;
+  stroke-miterlimit: 10;
+}
+
+.mgu2_starboard {
+  fill: var(--mgu2_starboard_temperature);
+  stroke: #000000;
+  stroke-miterlimit: 10;
+}
+
+.mgu2_port {
+  fill: var(--mgu2_port_temperature);
+  stroke: #000000;
+  stroke-miterlimit: 10;
+}
+
+.ebox1 {
+  fill: var(--ebox1_temperature);
+  stroke: #000000;
+  stroke-miterlimit: 10;
+}
+
+.ebox2 {
+  fill: var(--ebox2_temperature);
+  stroke: #000000;
+  stroke-miterlimit: 10;
+}
+
+.motor_driver_board {
+  fill: var(--motor_driver_temperature);
+  stroke: #000000;
+  stroke-miterlimit: 10;
+}
+
+.cooling_reservoir {
+  fill: var(--cooling_reservoir_temperature);
+  stroke: #000000;
+  stroke-miterlimit: 10;
+}
+
+.dslim_starboard {
+  fill: var(--dslim_starboard_temperature);
+  stroke: #000000;
+  stroke-miterlimit: 10;
+}
+
+.dslim_port {
+  fill: var(--dslim_port_temperature);
+  stroke: #000000;
+  stroke-miterlimit: 10;
+}
+
+.st0 {
+  fill: #C3C5CB;
+  stroke: #000000;
+  stroke-miterlimit: 10;
+}
+
+.st1 {
+  fill: #FFFFFF;
+  stroke: #000000;
+  stroke-miterlimit: 10;
+}
+
+.st2 {
+  fill: #FFFFFF;
+}
+
+.st3 {
+  fill: none;
+  stroke: #000000;
+  stroke-width: 0.25;
+  stroke-miterlimit: 10;
+}
+
+.st4 {
+  fill: none;
+  stroke: #000000;
+  stroke-miterlimit: 10;
+}
+
+.st5 {
+  stroke: #000000;
+  stroke-width: 0.25;
+  stroke-miterlimit: 10;
+}

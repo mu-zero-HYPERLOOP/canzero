@@ -23,7 +23,7 @@ function SetValueButton({ nodeName, objectEntryInfo, objectEntryName, sx }: Read
       async function fetchInfo() {
         const info = await invoke<ObjectEntryInformation>(
           "object_entry_information",
-          { nodeName, objectEntryName });
+          { nodeName, objectEntryName : objectEntryName ?? objectEntryInfo?.name });
         setObjectEntryInfo(info);
       }
       fetchInfo().catch(console.error);

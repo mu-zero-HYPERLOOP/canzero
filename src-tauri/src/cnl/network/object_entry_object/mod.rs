@@ -72,7 +72,7 @@ impl ObjectEntryObject {
             start_time: std::time::Instant::now(),
             latest_observable: ObjectEntryLatestObservable::new(
                 &latest_event_name,
-                Duration::from_millis(500),
+                Duration::from_millis(100),
                 &app_handle,
             ),
             latest_event_name,
