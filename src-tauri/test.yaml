@@ -2239,7 +2239,7 @@ nodes:
           error_mosfet_over_temperature: error_mlu6_mosfet_over_temperature
           error_control_failure: error_mlu6_control_failure
         state:
-          state: mlu6_statu
+          state: mlu6_state
         power_estimation:
           power_estimation: mlu6_power_estimation
         sdc_status:
