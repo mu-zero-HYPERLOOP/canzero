@@ -30,7 +30,7 @@ enum_types:
   global_state:
     INIT: ~
     IDLE: ~
-    UNPLUG_MOVITRANS : ~
+    DISCONNECTING : ~
     PRECHARGE : ~
     READY: ~
     START_LEVITATION : ~
@@ -40,6 +40,7 @@ enum_types:
     ACCELERATION : ~
     CRUISING : ~
     DECELERATION : ~
+    STOP_LEVITATION: ~
   global_command:
     NONE: ~
     PRECHARGE: ~
@@ -66,6 +67,7 @@ enum_types:
     START: ~
     STOP: ~
     ABORT: ~
+    DISCONNECT: ~
 
   # MGU State Machine types
   mgu_state:
@@ -82,6 +84,7 @@ enum_types:
     START: ~
     STOP: ~
     STOP: ~
+    DISCONNECT: ~
   # Motor State Machine types
   motor_state:
     INIT: ~
@@ -98,6 +101,7 @@ enum_types:
     PRECHARGE: ~
     ACCELERATE: ~
     DECELERATE: ~
+    STOP: ~
     DISCONNECT: ~
     MANUAL_CONTROL: ~
 
