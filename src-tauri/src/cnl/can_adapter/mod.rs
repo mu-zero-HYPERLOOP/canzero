@@ -45,20 +45,11 @@ impl CanAdapter {
 }
 
 // tcp-can
-#[cfg(feature="tcp-can")]
+#[cfg(feature = "tcp-can")]
 mod tcp;
-#[cfg(feature="tcp-can")]
+#[cfg(feature = "tcp-can")]
 pub struct CanAdapter(self::tcp::TcpCanAdapter, BusRef);
-#[cfg(feature="tcp-can")]
-impl CanAdapter {
-    pub fn create(bus : &BusRef, network: &NetworkRef) -> CanAdapter {
-        CanAdapter(
-            self::tcp::TcpCanAdapter::create(bus),
-            bus.clone()
-        )
-    }
-}
-
+#[cfg(feature = "tcp-can")]
 
 trait CanAdapterInterface {
     async fn receive(&self) -> Result<Timestamped<CanFrame>, Timestamped<CanError>>;
@@ -89,16 +80,63 @@ impl CanAdapter {
 }
 
 #[cfg(feature = "socket-can")]
-pub fn create_can_adapters(network: &NetworkRef) -> Vec<CanAdapter> {
-    network.buses().iter().map(|bus_ref| CanAdapter::create(bus_ref, network)).collect()
+pub async fn create_can_adapters(network: &NetworkRef) -> Vec<CanAdapter> {
+    network
+        .buses()
+        .iter()
+        .map(|bus_ref| CanAdapter::create(bus_ref, network))
+        .collect()
 }
 
 #[cfg(feature = "mock-can")]
-pub fn create_can_adapters(buses : &BusRef, network: &NetworkRef) -> CanAdapter{
-    network.buses().iter().map(|bus_ref| CanAdapter::create(bus_ref, network)).collect()
+pub async fn create_can_adapters(network: &NetworkRef) -> Vec<CanAdapter> {
+    network
+        .buses()
+        .iter()
+        .map(|bus_ref| CanAdapter::create(bus_ref, network))
+        .collect()
 }
 
-#[cfg(feature="tcp-can")]
-pub fn create_can_adapters(buses : &BusRef, network: &NetworkRef) -> CanAdapter{
-    
+#[cfg(feature = "tcp-can")]
+pub async fn create_can_adapters(network: &NetworkRef, tcp_address : &str) -> Vec<CanAdapter> {
+    let channels: Vec<(
+        (
+            tokio::sync::mpsc::Sender<TCanFrame>,
+            tokio::sync::mpsc::Receiver<TCanFrame>,
+        ),
+        (
+            tokio::sync::mpsc::Sender<TCanError>,
+            tokio::sync::mpsc::Receiver<TCanError>,
+        ),
+    )> = network
+        .buses()
+        .iter()
+        .map(|_| {
+            (
+                tokio::sync::mpsc::channel(16),
+                tokio::sync::mpsc::channel(16),
+            )
+        })
+        .collect();
+
+    let tx_channels: Vec<(
+        tokio::sync::mpsc::Sender<TCanFrame>,
+        tokio::sync::mpsc::Sender<TCanError>,
+    )> = channels
+        .iter()
+        .map(|((tx, _rx), (tx_err, _rx_err))| (tx.clone(), tx_err.clone()))
+        .collect();
+
+    let tcp_client = std::sync::Arc::new(
+        self::tcp::client::TcpClient::create(tcp_address, tx_channels).await,
+    );
+
+    std::iter::zip(network.buses().iter(), channels.into_iter())
+        .map(|(bus_ref, ((_tx, rx), (_tx_err, rx_err)))| {
+            CanAdapter(
+                self::tcp::TcpCanAdapter::create(tcp_client.clone(), bus_ref.id(), rx, rx_err),
+                bus_ref.clone(),
+            )
+        })
+        .collect()
 }

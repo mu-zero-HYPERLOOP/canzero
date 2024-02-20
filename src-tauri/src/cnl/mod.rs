@@ -1,4 +1,5 @@
 pub mod connection;
+mod deserialize;
 pub mod errors;
 pub mod frame;
 mod handler;
@@ -6,14 +7,13 @@ pub mod network;
 mod rx;
 pub mod trace;
 mod tx;
-mod deserialize;
 
 pub mod can_adapter;
 
 use std::sync::Arc;
 
 use self::{
-    can_adapter::CanAdapter,
+    can_adapter::{create_can_adapters, CanAdapter},
     connection::{ConnectionObject, ConnectionStatus},
     network::{node_object::NodeObject, NetworkObject},
     rx::RxCom,
@@ -27,7 +27,7 @@ use can_config_rs::config;
 pub struct CNL {
     trace: Arc<TraceObject>,
 
-    // NOTE RxCom is a zero sized struct just here for 
+    // NOTE RxCom is a zero sized struct just here for
     // easier understanding of the hierarchie of the CNL!
     #[allow(dead_code)]
     rx: RxCom,
@@ -40,14 +40,13 @@ pub struct CNL {
 }
 
 impl CNL {
-    pub fn create(network_config: &config::NetworkRef, app_handle: &tauri::AppHandle) -> Self {
+    pub async fn create(network_config: &config::NetworkRef, app_handle: &tauri::AppHandle, tcp_address : &str) -> Self {
         let connection_object =
             ConnectionObject::new(ConnectionStatus::CanDisconnected, app_handle);
 
-        let can_adapters = network_config
-            .buses()
-            .iter()
-            .map(|bus_config| Arc::new(CanAdapter::create(bus_config, network_config)))
+        let can_adapters = create_can_adapters(network_config, tcp_address).await
+            .into_iter()
+            .map(Arc::new)
             .collect();
 
         connection_object.set_status(ConnectionStatus::CanConnected);

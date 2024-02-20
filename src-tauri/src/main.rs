@@ -20,9 +20,23 @@ async fn main() {
     tauri::Builder::default()
         .setup(|app| {
             println!("Hello, Tauri!");
+            let address = match app.get_cli_matches() {
+                Ok(matches) => {
+                    let address = matches.args.get("address");
+                    println!("{address:?}");
+                    match address {
+                        Some(arg_data) => match &arg_data.value {
+                            serde_json::Value::String(address) => address.clone(),
+                            _ => "127.0.0.1:50000".to_owned(),
+                        },
+                        None => "127.0.0.1:50000".to_owned(),
+                    }
+                }
+                Err(_) => "127.0.0.1:50000".to_owned(),
+            };
             let app_handle = app.handle();
             tauri::async_runtime::spawn(async move {
-                app_handle.manage(CNLState::create("./test.yaml", &app_handle));
+                app_handle.manage(CNLState::create("./test.yaml", &app_handle, &address).await);
             });
             Ok(())
         })
