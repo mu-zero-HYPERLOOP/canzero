@@ -1,7 +1,8 @@
 import CustomAppBar from "./app_bar/CustomAppBar";
 import { useState } from "react";
 import SideMenu from "./side_menu/SideMenu";
-import { Box, CssBaseline, Toolbar, useTheme } from "@mui/material";
+import CssBaseline from "@mui/material/CssBaseline";
+import { Box, Toolbar, useTheme } from "@mui/material";
 import ShowPages from "./dashboard/ShowPages";
 
 
