@@ -3,6 +3,11 @@
   --mgu_state : #000000;
   --dslim_state : #000000;
   --global_state : #000000;
+  --air_gap : 0px;
+}
+
+#pod {
+  transform: translateY(calc(5px + var(--air_gap)));
 }
 
 

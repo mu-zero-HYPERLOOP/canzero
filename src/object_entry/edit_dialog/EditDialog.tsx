@@ -68,8 +68,8 @@ function sendSetRequest(nodeName: string, objectEntryName: string, value: Option
   }
 
   let autocompletedValue: Value | null = autocompleteRec(value, currentValue, ty);
-  if (!autocompletedValue) {
-    // TODO error notification here please!
+  if (autocompletedValue === null || autocompletedValue === undefined) {
+    // TODO error notification here plea=== null || autocompletedValue === undefined!
     // there doesn't exist a current value and not all values where specified, 
     // therefor the set request was aborted
     return;

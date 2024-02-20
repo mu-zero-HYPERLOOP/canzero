@@ -100,7 +100,7 @@ function Trace() {
       marginTop: "20px",
       marginLeft: "10px",
       width: "calc(100% - 20px)",
-      height: "calc(100vh - 95px)",
+      height: "calc(100%)",
     }}
   >
     <Table

@@ -87,3 +87,18 @@ impl CanAdapter {
         &self.1
     }
 }
+
+#[cfg(feature = "socket-can")]
+pub fn create_can_adapters(network: &NetworkRef) -> Vec<CanAdapter> {
+    network.buses().iter().map(|bus_ref| CanAdapter::create(bus_ref, network)).collect()
+}
+
+#[cfg(feature = "mock-can")]
+pub fn create_can_adapters(buses : &BusRef, network: &NetworkRef) -> CanAdapter{
+    network.buses().iter().map(|bus_ref| CanAdapter::create(bus_ref, network)).collect()
+}
+
+#[cfg(feature="tcp-can")]
+pub fn create_can_adapters(buses : &BusRef, network: &NetworkRef) -> CanAdapter{
+    
+}

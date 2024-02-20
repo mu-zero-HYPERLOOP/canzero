@@ -151,7 +151,10 @@ function TemperatureVis() {
       padding: 1
     }}>
       <Stack>
-      <Typography style={{textAlign: "center"}}>
+        <Typography 
+          style={{ textAlign: "center" }}
+          variant="h5"
+          >
         Temperatures
       </Typography>
       <svg version="1.1"

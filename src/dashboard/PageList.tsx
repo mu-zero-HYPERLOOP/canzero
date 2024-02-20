@@ -183,7 +183,9 @@ export function ListEntries({ open }: Readonly<ListEntriesProps>) {
     return <>
       {RouterList}
       <Divider sx={{ my: 1 }} />
-      <Box component="form" sx={{height: "calc(100vh - 344px)", overflow: 'auto' }}>
+      <Box component="div" sx={{
+          height: "calc(100vh - 353px)", 
+          overflow: 'auto' }}>
       <NodeList />
       </Box>
     </>;

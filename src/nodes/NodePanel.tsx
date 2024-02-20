@@ -104,7 +104,7 @@ function NodePanel({ node }: NodePanelProps) {
       paddingLeft: "12px",
       paddingRight: "12px",
       width: "calc(100% - 16px)",
-      height: "calc(100vh - 95px)",
+      height: "calc(100vh - 115px)",
       paddingTop: "45px",
       paddingBottom: "20px",
       position: "relative"
