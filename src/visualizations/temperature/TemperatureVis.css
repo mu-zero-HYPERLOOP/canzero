@@ -19,6 +19,7 @@
 
 .mlu1 {
   fill: var(--mlu1_temperature);
+  transition: fill 1s linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }
@@ -26,72 +27,84 @@
 
 .mlu2 {
   fill: var(--mlu2_temperature);
+  transition: fill 1s linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }
 
 .mlu3 {
   fill: var(--mlu3_temperature);
+  transition: fill 1s linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }
 
 .mlu4 {
   fill: var(--mlu4_temperature);
+  transition: fill 1s linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }
 
 .mlu5 {
   fill: var(--mlu5_temperature);
+  transition: fill 1s linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }
 
 .mlu6 {
   fill: var(--mlu6_temperature);
+  transition: fill 1s linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }
 
 .mgu1_starboard {
   fill: var(--mgu1_starboard_temperature);
+  transition: fill 1s linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }
 
 .mgu1_port {
   fill: var(--mgu1_port_temperature);
+  transition: fill 1s linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }
 
 .mgu2_starboard {
   fill: var(--mgu2_starboard_temperature);
+  transition: fill 1s linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }
 
 .mgu2_port {
   fill: var(--mgu2_port_temperature);
+  transition: fill 1s linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }
 
 .ebox1 {
   fill: var(--ebox1_temperature);
+  transition: fill 1s linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }
 
 .ebox2 {
   fill: var(--ebox2_temperature);
+  transition: fill 1s linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }
 
 .motor_driver_board {
   fill: var(--motor_driver_temperature);
+  transition: fill 1s linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }
@@ -99,17 +112,20 @@
 .cooling_reservoir {
   fill: var(--cooling_reservoir_temperature);
   stroke: #000000;
+  transition: fill 1s linear;
   stroke-miterlimit: 10;
 }
 
 .dslim_starboard {
   fill: var(--dslim_starboard_temperature);
+  transition: fill 1s linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }
 
 .dslim_port {
   fill: var(--dslim_port_temperature);
+  transition: fill 1s linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }

@@ -1,51 +1,82 @@
 #state_vis {
-  --mlu_state : #000000;
-  --mgu_state : #000000;
-  --dslim_state : #000000;
-  --global_state : #000000;
-  --air_gap : 0px;
+  --mlu_state: #000000;
+  --mgu_state: #000000;
+  --dslim_state: #000000;
+  --global_state: #000000;
+  --air_gap: 0px;
+  --state-ease : 100ms;
 }
 
 #pod {
-  transform: translateY(calc(5px + var(--air_gap)));
+  transform: translateY(var(--air_gap));
+  transition: transform 100ms linear;
 }
 
 
+.global_state {
+  fill: var(--global_state);
+  transition: fill var(--state-ease) linear;
+  stroke: #000000;
+  stroke-miterlimit: 10;
+}
+
 .mlu {
   fill: var(--mlu_state);
+  transition: fill var(--state-ease) linear;
   stroke: #000000;
-  stroke-width: 0.4;
+  stroke-miterlimit: 10;
+}
+
+.motor {
+  fill: var(--dslim_state);
+  transition: fill var(--state-ease) linear;
+  stroke: #000000;
   stroke-miterlimit: 10;
 }
 
 .mgu {
   fill: var(--mgu_state);
+  transition: fill var(--state-ease) linear;
   stroke: #000000;
-  stroke-width: 0.4;
   stroke-miterlimit: 10;
-}
-
-.dslim {
-  fill: var(--dslim_state);
-  stroke: #000000;
-  stroke-width: 0.4;
-  stroke-miterlimit: 10;
-}
-
-.global {
-  fill: var(--global_state);
 }
 
 .st0 {
-  fill: #C0C2C4;
+  fill: #C3C5CB;
   stroke: #000000;
-  stroke-width: 0.4;
   stroke-miterlimit: 10;
 }
 
 .st1 {
+  fill: #C3C5CB;
   stroke: #000000;
-  fill: #000000;
-  stroke-width: 0.4;
+  stroke-width: 7;
   stroke-miterlimit: 10;
+}
+
+.st2 {
+  fill: #C3C5CB;
+}
+
+.st3 {
+  fill: none;
+  stroke: #000000;
+  stroke-miterlimit: 10;
+}
+
+.st4 {
+  stroke: #000000;
+  stroke-miterlimit: 10;
+}
+
+.st5 {
+  fill: none;
+}
+
+.st6 {
+  font-family: 'OpenSans-BoldItalic';
+}
+
+.st7 {
+  font-size: 14px;
 }
