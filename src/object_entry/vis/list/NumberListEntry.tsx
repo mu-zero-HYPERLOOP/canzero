@@ -51,13 +51,13 @@ function NumberListEntry({ label, nodeName, objectEntryName }: Readonly<NumberLi
         <>
           <TableCell
             sx={{
-              width: "70%",
+              width: "60%",
             }}>
             {label ?? `${nodeName}::${objectEntryName}`}
           </TableCell>
           <TableCell
             sx={{
-              width: "30%",
+              width: "40%",
               minWidth: "100px",
               textAlign: "right",
             }}>
@@ -65,10 +65,10 @@ function NumberListEntry({ label, nodeName, objectEntryName }: Readonly<NumberLi
           </TableCell>
         </>
         : <>
-          <TableCell sx={{width: "70%"}}>
+          <TableCell sx={{width: "60%"}}>
             {label ?? `${nodeName}::${objectEntryName}`}
           </TableCell>
-          <TableCell sx={{width: "30%", minWidth: "100px"}}>
+          <TableCell sx={{width: "40%", minWidth: "100px"}}>
             <Skeleton />
           </TableCell>
         </>}

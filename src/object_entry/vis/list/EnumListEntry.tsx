@@ -45,13 +45,13 @@ function EnumListEntry({ label, nodeName, objectEntryName }: Readonly<EnumListEn
     }}>
       <TableCell
         sx={{
-          width: "70%",
+          width: "40%",
         }}>
         {label ?? `${nodeName}::${objectEntryName}`}
       </TableCell>
       <TableCell
         sx={{
-          width: "30%",
+          width: "60%",
           minWidth: "100px",
           textAlign: "right",
         }}>

@@ -79,7 +79,7 @@ impl CanAdapter {
 }
 
 #[cfg(feature = "socket-can")]
-pub async fn create_can_adapters(network: &NetworkRef) -> Vec<CanAdapter> {
+pub async fn create_can_adapters(network: &NetworkRef, _tcp_address : &str) -> Vec<CanAdapter> {
     network
         .buses()
         .iter()
@@ -88,7 +88,7 @@ pub async fn create_can_adapters(network: &NetworkRef) -> Vec<CanAdapter> {
 }
 
 #[cfg(feature = "mock-can")]
-pub async fn create_can_adapters(network: &NetworkRef) -> Vec<CanAdapter> {
+pub async fn create_can_adapters(network: &NetworkRef, _tcp_address : &str) -> Vec<CanAdapter> {
     network
         .buses()
         .iter()

@@ -7,7 +7,7 @@ import { listen } from "@tauri-apps/api/event";
 import { ObjectEntryEvent } from "../../types/events/ObjectEntryEvent";
 
 
-const OE = {nodeName : "master", "objectEntryName": "sdc_status"};
+const OE = {nodeName : "master", objectEntryName: "sdc_status"};
 
 function ElectricIconDisplay() {
 

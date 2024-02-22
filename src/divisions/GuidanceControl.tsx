@@ -49,9 +49,9 @@ function GuidanceControl({ }: NodesProps) {
       <Stack direction="row" sx={{
         justifyContent: "space-around",
         width: "100%",
-      }}>
+      }} spacing={0}>
         <ObjectEntryList
-          sx={{ width: "100%" }}
+          sx={{ width: "300px" }}
           label="MLU-State"
         >
           <EnumListEntry label="command" nodeName="master" objectEntryName="mlu_command" />
@@ -65,7 +65,7 @@ function GuidanceControl({ }: NodesProps) {
 
 
         <ObjectEntryList
-          sx={{ width: "100%" }}
+          sx={{ width: "300px" }}
           label="MGU-State"
         >
           <EnumListEntry label="command" nodeName="master" objectEntryName="mgu_command" />
@@ -74,7 +74,7 @@ function GuidanceControl({ }: NodesProps) {
         </ObjectEntryList>
 
         <ObjectEntryList
-          sx={{ width: "100%" }}
+          sx={{ width: "300px" }}
           label="Motor-State"
         >
           <EnumListEntry label="command" nodeName="master" objectEntryName="motor_command" />
@@ -82,7 +82,7 @@ function GuidanceControl({ }: NodesProps) {
         </ObjectEntryList>
 
         <ObjectEntryList
-          sx={{ width: "100%" }}
+          sx={{ width: "300px" }}
           label="MLU-Airgaps"
         >
           <NumberListEntry label="mlu1-airgap" nodeName="mlu1" objectEntryName="air_gap" />
@@ -94,7 +94,7 @@ function GuidanceControl({ }: NodesProps) {
         </ObjectEntryList>
 
         <ObjectEntryList
-          sx={{ width: "100%" }}
+          sx={{ width: "300px" }}
           label="MGU-Airgaps"
         >
           <NumberListEntry label="mgu1-airgap-star" nodeName="mgu1" objectEntryName="TODO" />
@@ -103,7 +103,7 @@ function GuidanceControl({ }: NodesProps) {
           <NumberListEntry label="mgu2-airgap-port" nodeName="mgu2" objectEntryName="TODO" />
         </ObjectEntryList>
         <ObjectEntryList
-          sx={{ width: "100%" }}
+          sx={{ width: "300px" }}
           label="Position Estimation"
         >
           <NumberListEntry label="acceleration" nodeName="motor_driver" objectEntryName="local_acceleration" />
