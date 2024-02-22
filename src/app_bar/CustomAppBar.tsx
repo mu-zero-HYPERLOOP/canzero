@@ -10,6 +10,10 @@ import { listen } from "@tauri-apps/api/event";
 import { ObjectEntryEvent } from "../object_entry/types/events/ObjectEntryEvent";
 import StateIndiciatorBar from "./StateIndiciatorBar";
 import { sendAbortCommand, sendDisconnectCommand, sendEmergencyCommand, sendManualControlCommand, sendPrechargeCommand, sendStartLevitationCommand, sendStartPropulsionCommand, sendStopLevitationCommand, sendStopPropulsionCommand } from "./commands";
+import WarningIconDisplay from "../object_entry/vis/icons/WarningIconDisplay";
+import BatteryIconDisplay from "../object_entry/vis/icons/BatteryIconDisplay";
+import TemperatureIconDisplay from "../object_entry/vis/icons/TemperatureIconDisplay";
+import ElectricIconDisplay from "../object_entry/vis/icons/ElectricIconDisplay";
 
 interface AppBarProps extends MuiAppBarProps {
   open?: boolean;
@@ -67,14 +71,14 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
   const theme = useTheme();
   const [state, setState] = useState<string>("COM_DISCONNECTED");
   const [commandList, setCommandList] = useState<CommandList>({
-    startCommandLabel : <p>Setting up</p>,
-    disableStart : true,
-    startCommand : () => {},
-    stopCommandLabel : <p>Setting up</p>,
-    disableStop :true,
-    stopCommand : () => {},
-    disableAbort : true,
-    disableManual : true,
+    startCommandLabel: <p>Setting up</p>,
+    disableStart: true,
+    startCommand: () => { },
+    stopCommandLabel: <p>Setting up</p>,
+    disableStop: true,
+    stopCommand: () => { },
+    disableAbort: true,
+    disableManual: true,
   });
 
   function updateState(state: string) {
@@ -317,32 +321,57 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
         }
         <Stack
           direction="row"
-          justifyContent="flex-end"
+          sx={{
+            width: "100%",
+            margin: 0,
+            padding: 0,
+          }}
+          justifyContent="space-between"
           alignItems="center"
-          spacing={3}
         >
-          <StateDisplay state={state} />
-          {/* Buttons */}
-          <AppBarButton variant="contained" color="stateError" onClick={sendEmergencyCommand} >
-            <p>Emergency [Space bar]</p>
-          </AppBarButton>
+          <Stack
+            direction="row"
+            justifyContent="flex-end"
+            alignItems="center"
+            spacing={3}
+          >
+            <StateDisplay state={state} />
+            {/* Buttons */}
+            <AppBarButton variant="contained" color="stateError" onClick={sendEmergencyCommand} >
+              <p>Emergency [Space bar]</p>
+            </AppBarButton>
 
-          <AppBarButton color="stateIdle" disabled={commandList.disableStart} onClick={commandList.startCommand} >
-            {commandList.startCommandLabel}
-          </AppBarButton>
+            <AppBarButton color="stateIdle" disabled={commandList.disableStart} onClick={commandList.startCommand} >
+              {commandList.startCommandLabel}
+            </AppBarButton>
 
-          <AppBarButton color="stateError" disabled={commandList.disableStop} onClick={commandList?.stopCommand} >
-            {commandList.stopCommandLabel}
-          </AppBarButton>
+            <AppBarButton color="stateError" disabled={commandList.disableStop} onClick={commandList?.stopCommand} >
+              {commandList.stopCommandLabel}
+            </AppBarButton>
 
-          <AppBarButton color="stateError" disabled={commandList.disableAbort} onClick={sendAbortCommand} >
-            <p>Abort [F3]</p>
-          </AppBarButton>
+            <AppBarButton color="stateError" disabled={commandList.disableAbort} onClick={sendAbortCommand} >
+              <p>Abort [F3]</p>
+            </AppBarButton>
 
-          <AppBarButton color="success" disabled={commandList.disableManual} onClick={sendManualControlCommand} >
-            <p>Manual [F4]</p>
-          </AppBarButton>
+            <AppBarButton color="success" disabled={commandList.disableManual} onClick={sendManualControlCommand} >
+              <p>Manual [F4]</p>
+            </AppBarButton>
 
+          </Stack>
+          <Stack
+            direction="row"
+            justifyContent="flex-end"
+            alignItems="center"
+            spacing={3}
+            sx={{
+              marginRight: "25px",
+            }}
+            >
+            <WarningIconDisplay/>
+            <BatteryIconDisplay/>
+            <TemperatureIconDisplay/>
+            <ElectricIconDisplay/>
+          </Stack>
         </Stack>
       </Toolbar>
       <StateIndiciatorBar state={state} />
