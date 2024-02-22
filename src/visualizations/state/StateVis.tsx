@@ -134,13 +134,15 @@ function StateVis() {
 
   return (
     <Paper sx={{
-      width: "80%",
+      width: "50%",
       margin: 2,
-      padding: 0,
+      padding: 1,
     }}>
       <Stack>
         <Typography
-          style={{ textAlign: "center" }}
+          style={{
+            textAlign: "center",
+          }}
           variant="h5"
         >
           State

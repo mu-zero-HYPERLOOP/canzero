@@ -17,34 +17,29 @@ function GuidanceControl({ }: NodesProps) {
   return (
     <Stack>
       <Stack direction="row" sx={{
-        marginTop: "20px",
-        marginLeft: 2,
-        marginRight: 2,
-        height: "50px",
-        alignItems : "center",
-        justifyContent: "space-between",
-      }}>
-        <Stack direction="row">
-        Hello World!
-        </Stack>
-        <Paper sx={{
-          width: "50%",
-        }}>
-          <SdcVis />
-        </Paper>
-      </Stack>
-      <Stack direction="row" sx={{
         justifyContent: "space-around",
       }}>
         <TemperatureVis />
         <StateVis />
-        <Paper sx={{
-          margin: 2,
-          padding: 1,
+        <Stack direction="column" justifyContent="space-between" sx={{
           width: "100%",
+          marginRight : 2,
+        }}>
+        <Paper sx={{
+          marginTop: 2,
+          width: "100%",
+        }}>
+          <SdcVis/>
+        </Paper>
+        <Paper sx={{
+          marginTop: 2,
+          marginBottom: 2,
+          width: "100%",
+          height: "100%",
         }}>
           Work in progress
         </Paper>
+        </Stack>
       </Stack>
       <Stack direction="row" sx={{
         justifyContent: "space-around",

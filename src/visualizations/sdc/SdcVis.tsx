@@ -75,7 +75,7 @@ function SdcVis() {
       xmlns="http://www.w3.org/2000/svg" 
       x="0px" 
       y="0px" 
-      viewBox="100 -10 4200 260.34"
+      viewBox="100 -10 4150 260.34"
       >
       <line className="pdu24" x1="355.69" y1="187.71" x2="492.4" y2="187.71" />
       <g>

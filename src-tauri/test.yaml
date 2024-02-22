@@ -2033,6 +2033,7 @@ nodes:
         mapping:
           - global_state
           - command
+          - sdc_status
       mlu_control:
         description: Broacast of the mlu commands
         interval: 100ms
