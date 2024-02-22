@@ -40,10 +40,8 @@ pub struct ObjectEntryObject {
     history_event_name_prefix: String,
     app_handle: tauri::AppHandle,
     tx_com: Arc<TxCom>,
-    open_set_request: AtomicBool,
-    open_get_request: AtomicBool,
-    set_request_num: AtomicU64,
-    get_request_num: AtomicU64,
+    open_set_request: Arc<Mutex<u64>>,
+    open_get_request: Arc<Mutex<u64>>,
     set_request_timeout: Duration,
     get_request_timeout: Duration,
 }
@@ -81,10 +79,8 @@ impl ObjectEntryObject {
             history_event_name_prefix: history_event_name,
             app_handle: app_handle.clone(),
             tx_com,
-            open_set_request: AtomicBool::new(false),
-            open_get_request: AtomicBool::new(false),
-            set_request_num: AtomicU64::new(0),
-            get_request_num: AtomicU64::new(0),
+            open_set_request: Arc::new(Mutex::new(0)),
+            open_get_request: Arc::new(Mutex::new(0)),
             set_request_timeout: Duration::from_millis(100),
             get_request_timeout: Duration::from_millis(100 + get_req_num_frames * 50),
         }
@@ -103,99 +99,119 @@ impl ObjectEntryObject {
     }
 
     pub async fn request_current_value(&self) {
-        if self
-            .open_get_request
-            .fetch_or(true, std::sync::atomic::Ordering::SeqCst)
-        {
-            notify_warning(
-                &self.app_handle,
-                "other get request still open -- ignoring",
-                "An older set request is still in progess. Ignoring current request.",
-                chrono::Local::now(),
-            );
-        }
-        let my_get_req_num = self
-            .get_request_num
-            .fetch_add(1, std::sync::atomic::Ordering::SeqCst)
-            + 1;
+        let mut get_req_num = match self.open_get_request.try_lock() {
+            Ok(n) => {
+                if *n % 2 == 0 {
+                    n
+                } else {
+                    notify_warning(
+                        &self.app_handle,
+                        "other get request still in progress -- ignoring",
+                        "An older set request is still waiting for a response. Ignoring current request.",
+                        chrono::Local::now(),
+                    );
+                    return;
+                }
+            }
+            Err(_) => {
+                notify_warning(
+                    &self.app_handle,
+                    "other get request still open -- ignoring",
+                    "An older set request is still in progess. Ignoring current request.",
+                    chrono::Local::now(),
+                );
+                return;
+            }
+        };
+        *get_req_num += 1;
+        let my_req_num = *get_req_num;
+        drop(get_req_num);
         self.tx_com
             .send_get_req(self.node_id(), self.id() as u16)
             .await;
-        tokio::time::sleep(self.get_request_timeout).await;
-        if self
-            .open_get_request
-            .load(std::sync::atomic::Ordering::SeqCst)
-        {
-            if my_get_req_num
-                == self
-                    .get_request_num
-                    .load(std::sync::atomic::Ordering::SeqCst)
-            {
-                self.open_get_request
-                    .store(false, std::sync::atomic::Ordering::SeqCst);
-                notify_error(
-                    &self.app_handle,
-                    "get request timed out",
-                    &format!(
-                        "Get request for object entry with id {} of node {} timed out",
-                        self.id(),
-                        self.node_id()
-                    ),
-                    chrono::Local::now(),
-                );
+        tokio::spawn({
+            let timeout = self.get_request_timeout.clone();
+            let id = self.id();
+            let node_id = self.node_id();
+            let get_requests = self.open_get_request.clone();
+            let app_handle = self.app_handle.clone();
+
+            async move {
+                tokio::time::sleep(timeout).await;
+                let mut new_req_num = get_requests.lock().await;
+                if *new_req_num == my_req_num {
+                    *new_req_num += 1;
+                    notify_error(
+                        &app_handle,
+                        "get request timed out",
+                        &format!(
+                            "Get request for object entry with id {id} of node {node_id} timed out",
+                        ),
+                        chrono::Local::now(),
+                    );
+                }
             }
-        }
+        });
     }
 
     pub async fn set_request(&self, value: Value) {
-        if self
-            .open_set_request
-            .fetch_or(true, std::sync::atomic::Ordering::SeqCst)
-        {
-            notify_warning(
-                &self.app_handle,
-                "other set request still open -- ignoring",
-                "An older set request for the same object entry is still in progress.
-                 Thus this set request is ignored",
-                chrono::Local::now(),
-            );
-            return;
-        }
-        let my_set_req_num = self
-            .set_request_num
-            .fetch_add(1, std::sync::atomic::Ordering::SeqCst)
-            + 1;
+        let mut set_req_num = match self.open_set_request.try_lock() {
+            Ok(n) => {
+                if *n % 2 == 0 {
+                    n
+                } else {
+                    notify_warning(
+                        &self.app_handle,
+                        "other set request still open -- ignoring",
+                        "Older set request is still waiting for a response -- ignoring",
+                        chrono::Local::now(),
+                    );
+                    return;
+                }
+            },
+            Err(_) => {
+                notify_warning(
+                    &self.app_handle,
+                    "other set request still open -- ignoring",
+                    "Older set request still in progress -- ignoring",
+                    chrono::Local::now(),
+                );
+                return;
+            }
+        };
+        *set_req_num += 1;
+        let my_req_num = *set_req_num;
+        drop(set_req_num);
+
         let (bit_value, last_fill) = value.get_as_bin(self.ty());
         let server_id = self.node_id();
         let oe_id = self.id();
-
         self.tx()
             .send_set_request(server_id, oe_id, bit_value, last_fill)
             .await;
-        tokio::time::sleep(self.set_request_timeout).await;
-        if self
-            .open_set_request
-            .load(std::sync::atomic::Ordering::SeqCst)
-        {
-            if self
-                .set_request_num
-                .load(std::sync::atomic::Ordering::SeqCst)
-                == my_set_req_num
-            {
-                self.open_set_request
-                    .store(false, std::sync::atomic::Ordering::SeqCst);
+
+        tokio::task::spawn({
+            let timeout = self.set_request_timeout.clone();
+            let id = self.id();
+            let node_id = self.node_id();
+            let app_handle = self.app_handle.clone();
+            let set_requests = self.open_set_request.clone();
+
+            async move {
+            tokio::time::sleep(timeout).await;
+            let mut new_req_num = set_requests.lock().await;
+            if *new_req_num == my_req_num {
+                *new_req_num += 1;
                 notify_error(
-                    &self.app_handle,
+                    &app_handle,
                     "set request timed out",
                     &format!(
-                        "Set request for object entry with id {} of node {} timed out",
-                        self.id(),
-                        self.node_id()
+                        "Set request for object entry with id {id} of node {node_id} timed out",
                     ),
                     chrono::Local::now(),
                 );
             }
-        }
+        }});
     }
 
     pub async fn push_value(&self, value: Value, arrive_instance: &std::time::Instant) {
@@ -217,19 +233,19 @@ impl ObjectEntryObject {
     }
 
     pub async fn push_get_response(&self, value: Value, arrive_instance: &std::time::Instant) {
-        if !self
-            .open_get_request
-            .swap(false, std::sync::atomic::Ordering::SeqCst)
-        {
+        let mut get_req_num = self.open_get_request.lock().await;
+        if *get_req_num % 2 == 0 {
             notify_warning(
                 &self.app_handle,
                 "get response came in after timeout",
-                "The response to a get request came in after the timeout -- ignoring",
+                "Response to get request came in after timeout -- ignoring",
                 chrono::Local::now(),
             );
             return;
         }
         self.push_value(value, arrive_instance).await;
+        *get_req_num += 1;
+        drop(get_req_num);
         notify_info(
             &self.app_handle,
             "get request returned successfully",
@@ -242,16 +258,14 @@ impl ObjectEntryObject {
         );
     }
 
-    pub fn push_set_response(&self, result: cnl::errors::Result<()>) {
-        if !self
-            .open_set_request
-            .swap(false, std::sync::atomic::Ordering::SeqCst)
-        {
+    pub async fn push_set_response(&self, result: cnl::errors::Result<()>) {
+        let mut set_req_num = self.open_set_request.lock().await;
+        if *set_req_num % 2 == 0 {
             notify_info(
                 &self.app_handle,
                 "set response came in after timeout",
                 &format!(
-                    "The set response for object entry with id {} of node {} came in too late",
+                    "Set response for object entry with id {} of node {} came in after timeout",
                     self.id(),
                     self.node_id()
                 ),
@@ -259,7 +273,8 @@ impl ObjectEntryObject {
             );
             return;
         };
-
+        *set_req_num += 1;
+        drop(set_req_num);
         match result {
             Ok(_) => {
                 notify_info(

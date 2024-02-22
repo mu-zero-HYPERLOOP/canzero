@@ -90,7 +90,7 @@ impl SetRespFrameHandler {
             oe_index: set_resp.oe_index,
         };
         if let Some(oe_object) = self.set_resp_lookup.get(&set_resp_id) {
-            oe_object.push_set_response(set_resp.result);
+            oe_object.push_set_response(set_resp.result).await;
         } else {
             return Err(Error::InvalidSetResponseServerOrObjectEntryNotFound);
         };
