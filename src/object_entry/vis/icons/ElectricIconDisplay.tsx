@@ -40,7 +40,7 @@ function ElectricIconDisplay() {
     <Box component="form" sx={{
       textAlign: "center",
     }}>
-      <Bolt id="electric-icon" sx={{ fontSize: "42px", color: state ? "red" : "grey"}} />
+      <Bolt id="electric-icon" sx={{ fontSize: "42px", color: state ? "yellow" : "grey"}} />
       <div style={{ marginBottom: "-6px" }} />
       <Typography color="black">
         Electric

@@ -6,6 +6,7 @@ import ObjectEntryList from "../object_entry/vis/list/ObjectEntryList.tsx";
 import EnumListEntry from "../object_entry/vis/list/EnumListEntry.tsx";
 import NumberListEntry from "../object_entry/vis/list/NumberListEntry.tsx";
 import SdcVis from "../visualizations/sdc/SdcVis.tsx";
+import PodSideView from "../visualizations/side/PodSideView.tsx";
 
 interface NodesProps {
   // we can probably remove this fetching data early is kind of unnecassary.
@@ -37,7 +38,7 @@ function GuidanceControl({ }: NodesProps) {
           width: "100%",
           height: "100%",
         }}>
-          Work in progress
+          <PodSideView/>
         </Paper>
         </Stack>
       </Stack>
