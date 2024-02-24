@@ -192,7 +192,7 @@ nodes:
     tx_streams:
       state:
         description: State of the MLU
-        interval: 100ms
+        interval: 0ms-500ms
         mapping:
           - state
           - command
@@ -217,12 +217,12 @@ nodes:
           - mofset_temperature
       sdc_status:
         description: State of the SDC-Switch
-        interval: 1000ms
+        interval: 0ms-1000ms
         mapping:
           - sdc_status
       errors:
         description: Error flags of the MLU.
-        interval: 1000ms
+        interval: 0ms-1000ms
         mapping:
           - error_45V_over_voltage
           - error_45V_under_voltage
@@ -306,7 +306,7 @@ nodes:
     tx_streams:
       state:
         description: State of the MLU
-        interval: 100ms
+        interval: 0ms-500ms
         mapping:
           - state
           - command
@@ -331,12 +331,12 @@ nodes:
           - mofset_temperature
       sdc_status:
         description: State of the SDC-Switch
-        interval: 1000ms
+        interval: 0ms-1000ms
         mapping:
           - sdc_status
       errors:
         description: Error flags of the MLU.
-        interval: 1000ms
+        interval: 0ms-1000ms
         mapping:
           - error_45V_over_voltage
           - error_45V_under_voltage
@@ -421,7 +421,7 @@ nodes:
     tx_streams:
       state:
         description: State of the MLU
-        interval: 100ms
+        interval: 0ms-500ms
         mapping:
           - state
           - command
@@ -446,12 +446,12 @@ nodes:
           - mofset_temperature
       sdc_status:
         description: State of the SDC-Switch
-        interval: 1000ms
+        interval: 0ms-1000ms
         mapping:
           - sdc_status
       errors:
         description: Error flags of the MLU.
-        interval: 1000ms
+        interval: 0ms-1000ms
         mapping:
           - error_45V_over_voltage
           - error_45V_under_voltage
@@ -535,7 +535,7 @@ nodes:
     tx_streams:
       state:
         description: State of the MLU
-        interval: 100ms
+        interval: 0ms-500ms
         mapping:
           - state
           - command
@@ -560,12 +560,12 @@ nodes:
           - mofset_temperature
       sdc_status:
         description: State of the SDC-Switch
-        interval: 1000ms
+        interval: 0ms-1000ms
         mapping:
           - sdc_status
       errors:
         description: Error flags of the MLU.
-        interval: 1000ms
+        interval: 0ms-1000ms
         mapping:
           - error_45V_over_voltage
           - error_45V_under_voltage
@@ -649,7 +649,7 @@ nodes:
     tx_streams:
       state:
         description: State of the MLU
-        interval: 100ms
+        interval: 0ms-500ms
         mapping:
           - state
           - command
@@ -674,12 +674,12 @@ nodes:
           - mofset_temperature
       sdc_status:
         description: State of the SDC-Switch
-        interval: 1000ms
+        interval: 0ms-1000ms
         mapping:
           - sdc_status
       errors:
         description: Error flags of the MLU.
-        interval: 1000ms
+        interval: 0ms-1000ms
         mapping:
           - error_45V_over_voltage
           - error_45V_under_voltage
@@ -762,41 +762,8 @@ nodes:
         description: Error flag for a levitation control failure.
     tx_streams:
       state:
-        description : Current state of the MLU.
-        interval : 100ms
-        mapping:
-          - state
-          - command
-      control_info:
-        description: control data of the mlu
-        interval: 100ms
-        mapping:
-          - air_gap
-          - target_force
-      power_estimation:
-        description: Power estimation of the MLU.
-        mapping:
-          - dc_current
-          - power_estimation
-      temperatures:
-        description: Temperatures measured by the MLU.
-        mapping:
-          - magnet_temperature
-          - mcu_temperature
-          - mosfet_temperature
-      errors:
-        description: Error flags of the MLU.
-        mapping:
-          - error_45V_over_voltage
-          - error_45V_under_voltage
-          - error_magnet_over_temperature
-          - error_mcu_over_temperature
-          - error_mosfet_over_temperature
-          - error_control_failure
-    tx_streams:
-      state:
         description: State of the MLU
-        interval: 100ms
+        interval: 0ms-500ms
         mapping:
           - state
           - command
@@ -820,12 +787,12 @@ nodes:
           - mofset_temperature
       sdc_status:
         description: State of the SDC-Switch
-        interval: 1000ms
+        interval: 0ms-1000ms
         mapping:
           - sdc_status
       errors:
         description: Error flags of the MLU.
-        interval: 1000ms
+        interval: 0ms-1000ms
         mapping:
           - error_45V_over_voltage
           - error_45V_under_voltage
@@ -922,7 +889,7 @@ nodes:
     tx_streams:
       state:
         description : Current state of the MGU.
-        interval : 100ms
+        interval : 0ms-500ms
         mapping:
           - state
           - command
@@ -951,12 +918,12 @@ nodes:
           - mosfet_temperature
       sdc_status:
         description: State of the SDC-Switch
-        interval: 1000ms
+        interval: 0ms-1000ms
         mapping:
           - sdc_status
       errors:
         description: Error flags of the MGU.
-        interval: 1000ms
+        interval: 0ms-1000ms
         mapping:
           - error_45V_over_voltage
           - error_45V_under_voltage
@@ -1053,7 +1020,7 @@ nodes:
     tx_streams:
       state:
         description : Current state of the MGU.
-        interval : 100ms
+        interval : 0ms-500ms
         mapping:
           - state
       air_gaps:
@@ -1081,12 +1048,12 @@ nodes:
           - mosfet_temperature
       sdc_status:
         description: State of the SDC-Switch
-        interval: 1000ms
+        interval: 0ms-1000ms
         mapping:
           - sdc_status
       errors:
         description: Error flags of the MGU.
-        interval : 1000ms
+        interval : 0ms-1000ms
         mapping:
           - error_45V_over_voltage
           - error_45V_under_voltage
@@ -1175,7 +1142,7 @@ nodes:
       # Current state 
       state:
         description : state of the motor (also includes the current acceleration estimation).
-        interval : 100ms
+        interval : 0ms-500ms
         mapping:
           - state
           - local_acceleration
@@ -1195,13 +1162,13 @@ nodes:
           - power_estimation
       sdc_status:
         description: Status of the SDC.
-        interval: 1000ms
+        interval: 0ms-1000ms
         mapping:
           - sdc_status
       # All error flags
       errors:
         description: All error flags from the Motor driver board.
-        interval: 3000ms # Should be [0... if interval ranges are implemented
+        interval: 0ms-1000ms # Should be [0... if interval ranges are implemented
         mapping:
           - error_45V_over_voltage
           - error_45V_under_voltage
@@ -1446,7 +1413,7 @@ nodes:
           - power_estimation
       channel_status:
         description: Status of all power channels (also includes the SDC status).
-        interval : 3000ms # Should be [0...] if interval ranges are implemented
+        interval : 0ms-3000ms 
         mapping:
           - lp_channel1_status
           - lp_channel2_status
@@ -1719,7 +1686,7 @@ nodes:
           - power_estimation
       channel_status:
         description: Status of all power channels (also includes the SDC status).
-        interval : 3000ms # Should be [0...] if interval ranges are implemented
+        interval : 0ms-3000ms # Should be [0...] if interval ranges are implemented
         mapping:
           - lp_channel1_status
           - lp_channel2_status
@@ -1856,12 +1823,12 @@ nodes:
           - cooling_cycle_pressure
       sdc_status:
         description: Status of the SDC switch
-        interval: 1000ms
+        interval: 0ms-1000ms
         mapping:
           - sdc_status
       errors:
         description: All error flags
-        interval: 1000ms
+        interval: 0ms-1000ms
         mapping:
           - error_mcu_over_temperature
           - error_invalid_position_estimation
@@ -2029,29 +1996,29 @@ nodes:
     tx_streams:
       global_state:
         description: Broadcast of the global state.
-        interval: 100ms
+        interval: 0ms-500ms
         mapping:
           - global_state
           - command
           - sdc_status
       mlu_control:
         description: Broacast of the mlu commands
-        interval: 100ms
+        interval: 0ms-500ms
         mapping:
           - mlu_command
       mgu_control:
         description: Broadcast of the mgu commands
-        interval: 100ms
+        interval: 0ms-500ms
         mapping:
           - mgu_command
       motor_control:
         description: Broadcast of the motor commands
-        interval: 100ms
+        interval: 0ms-500ms
         mapping:
           - motor_command
       pdu12_control:
         description: Control stream for the 12V-PDU
-        interval: 500ms
+        interval: 0ms-500ms
         mapping:
           - pdu12_lp_channel1_control
           - pdu12_lp_channel2_control
@@ -2071,7 +2038,7 @@ nodes:
           - pdu12_hp_channel4_control
       pdu24_control:
         description: Control stream for the 24V-PDU
-        interval: 500ms
+        interval: 0ms-500ms
         mapping:
           - pdu24_lp_channel1_control
           - pdu24_lp_channel2_control
