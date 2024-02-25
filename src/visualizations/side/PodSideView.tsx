@@ -1,5 +1,3 @@
-
-
 import { useEffect } from "react";
 import "./PodSideView.css"
 import { invoke } from "@tauri-apps/api";
@@ -888,23 +886,23 @@ function PodSideView() {
         <rect x="6173.54" y="413.9" className="st7" width="29.81" height="58.61" />
         <text transform="matrix(1 0 0 1 6173.5391 451.8685)" className="st11 st12">9</text>
         <rect x="6895.18" y="388.07" className="st7" width="29.81" height="96" />
-        <text transform="matrix(1 0 0 1 6895.1851 426.041)"><tspan x="0" y="0" className="st11 st12">1</tspan><tspan x="0" y="57.6" class="st11 st12">0</tspan></text>
+        <text transform="matrix(1 0 0 1 6895.1851 426.041)"><tspan x="0" y="0" className="st11 st12">1</tspan><tspan x="0" y="57.6" className="st11 st12">0</tspan></text>
         <rect x="7619.73" y="388.64" className="st7" width="29.81" height="96" />
-        <text transform="matrix(1 0 0 1 7619.7305 426.6054)"><tspan x="0" y="0" className="st11 st12">1</tspan><tspan x="0" y="57.6" class="st11 st12">1</tspan></text>
+        <text transform="matrix(1 0 0 1 7619.7305 426.6054)"><tspan x="0" y="0" className="st11 st12">1</tspan><tspan x="0" y="57.6" className="st11 st12">1</tspan></text>
         <rect x="8339.42" y="388.13" className="st7" width="29.81" height="96" />
-        <text transform="matrix(1 0 0 1 8339.416 426.1002)"><tspan x="0" y="0" className="st11 st12">1</tspan><tspan x="0" y="57.6" class="st11 st12">2</tspan></text>
+        <text transform="matrix(1 0 0 1 8339.416 426.1002)"><tspan x="0" y="0" className="st11 st12">1</tspan><tspan x="0" y="57.6" className="st11 st12">2</tspan></text>
         <rect x="9061.07" y="388.13" className="st7" width="29.81" height="96" />
-        <text transform="matrix(1 0 0 1 9061.0664 426.1002)"><tspan x="0" y="0" className="st11 st12">1</tspan><tspan x="0" y="57.6" class="st11 st12">3</tspan></text>
+        <text transform="matrix(1 0 0 1 9061.0664 426.1002)"><tspan x="0" y="0" className="st11 st12">1</tspan><tspan x="0" y="57.6" className="st11 st12">3</tspan></text>
         <rect x="9780.89" y="388.64" className="st7" width="29.81" height="96" />
-        <text transform="matrix(1 0 0 1 9780.8916 426.6054)"><tspan x="0" y="0" className="st11 st12">1</tspan><tspan x="0" y="57.6" class="st11 st12">4</tspan></text>
+        <text transform="matrix(1 0 0 1 9780.8916 426.6054)"><tspan x="0" y="0" className="st11 st12">1</tspan><tspan x="0" y="57.6" className="st11 st12">4</tspan></text>
         <rect x="10505.67" y="388.64" className="st7" width="29.81" height="96" />
-        <text transform="matrix(1 0 0 1 10505.6738 426.6054)"><tspan x="0" y="0" className="st11 st12">1</tspan><tspan x="0" y="57.6" class="st11 st12">5</tspan></text>
+        <text transform="matrix(1 0 0 1 10505.6738 426.6054)"><tspan x="0" y="0" className="st11 st12">1</tspan><tspan x="0" y="57.6" className="st11 st12">5</tspan></text>
         <rect x="11225.3" y="388.13" className="st7" width="29.81" height="96" />
-        <text transform="matrix(1 0 0 1 11225.2979 426.1002)"><tspan x="0" y="0" className="st11 st12">1</tspan><tspan x="0" y="57.6" class="st11 st12">6</tspan></text>
+        <text transform="matrix(1 0 0 1 11225.2979 426.1002)"><tspan x="0" y="0" className="st11 st12">1</tspan><tspan x="0" y="57.6" className="st11 st12">6</tspan></text>
         <rect x="11950.72" y="388.13" className="st7" width="29.81" height="96" />
-        <text transform="matrix(1 0 0 1 11950.7178 426.1002)"><tspan x="0" y="0" className="st11 st12">1</tspan><tspan x="0" y="57.6" class="st11 st12">7</tspan></text>
+        <text transform="matrix(1 0 0 1 11950.7178 426.1002)"><tspan x="0" y="0" className="st11 st12">1</tspan><tspan x="0" y="57.6" className="st11 st12">7</tspan></text>
         <rect x="12669.29" y="388.64" className="st7" width="29.81" height="96" />
-        <text transform="matrix(1 0 0 1 12669.2842 426.6054)"><tspan x="0" y="0" className="st11 st12">1</tspan><tspan x="0" y="57.6" class="st11 st12">8</tspan></text>
+        <text transform="matrix(1 0 0 1 12669.2842 426.6054)"><tspan x="0" y="0" className="st11 st12">1</tspan><tspan x="0" y="57.6" className="st11 st12">8</tspan></text>
       </g>
     </svg>
   );

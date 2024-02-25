@@ -1,4 +1,4 @@
-import { Box, Paper, Stack } from "@mui/material";
+import { Paper, Stack } from "@mui/material";
 import { NodeInformation } from "../nodes/types/NodeInformation.ts";
 import TemperatureVis from "../visualizations/temperature/TemperatureVis.tsx";
 import StateVis from "../visualizations/state/StateVis.tsx";

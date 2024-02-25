@@ -6,7 +6,6 @@ import { ObjectEntryListenLatestResponse } from "../../object_entry/types/events
 import "./SdcVis.css"
 import { ObjectEntryEvent } from "../../object_entry/types/events/ObjectEntryEvent";
 import { useEffect } from "react";
-import { Paper } from "@mui/material";
 
 
 interface OeId {
