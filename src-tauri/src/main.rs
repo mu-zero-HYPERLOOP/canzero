@@ -3,7 +3,7 @@ use tauri::Manager;
 
 use crate::{
     commands::{connection_status, network_information, object_entry_commands},
-    state::cnl_state::CNLState,
+    state::{cnl_state::CNLState, address_state::TcpAddressState},
 };
 
 mod cnl;
@@ -20,6 +20,7 @@ async fn main() {
     tauri::Builder::default()
         .setup(|app| {
             println!("Hello, Tauri!");
+            let app_handle = app.handle();
             let address = match app.get_cli_matches() {
                 Ok(matches) => {
                     let address = matches.args.get("address");
@@ -34,9 +35,8 @@ async fn main() {
                 }
                 Err(_) => "127.0.0.1:50000".to_owned(),
             };
-            let app_handle = app.handle();
             tauri::async_runtime::spawn(async move {
-                app_handle.manage(CNLState::create("./test.yaml", &app_handle, &address).await);
+                app_handle.manage(TcpAddressState::new(&address));
             });
             Ok(())
         })
@@ -62,6 +62,9 @@ async fn main() {
             connection_status::get_connection_status,
             commands::node_commands::listen_to_node_latest,
             commands::node_commands::unlisten_from_node_latest,
+            commands::export::export,
+            commands::splashscreen::close_splashscreen,
+            commands::splashscreen::open_splashscreen,
         ])
         .run(tauri::generate_context!())
         .expect("Error while running tauri application");

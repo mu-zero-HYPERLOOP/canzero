@@ -9,13 +9,14 @@ import Speed from '@mui/icons-material/Speed';
 import EditRoad from '@mui/icons-material/EditRoad';
 import clsx from 'clsx';
 import { Link as RouterLink, LinkProps as RouterLinkProps, useNavigate, } from 'react-router-dom';
-import {  Divider, ListItemButton, Typography } from '@mui/material';
+import { Divider, ListItemButton, Typography } from '@mui/material';
 import { TreeItem, TreeItemContentProps, TreeItemProps, TreeView, useTreeItem } from '@mui/x-tree-view';
 import { NetworkInformation } from '../nodes/types/NetworkInformation.ts';
 import { NodeInformation } from '../nodes/types/NodeInformation.ts';
 import React, { useEffect, useState } from "react";
 import { invoke } from '@tauri-apps/api';
 import Box from "@mui/material/Box";
+import SaveIcon from '@mui/icons-material/Save';
 
 interface ListItemLinkProps {
   icon?: React.ReactElement;
@@ -135,8 +136,8 @@ function NodeEntries({ nodeInfo }: Readonly<NodeEntriesProps>) {
 
   /*Page name has to equal the nodeId!*/
   return (<>
-    {nodeInfo.object_entries.map((entry) => 
-      <CustomTreeItem key={nodeInfo.name + "/" + entry} nodeId={nodeInfo.name + "/" + entry} label={entry}/>
+    {nodeInfo.object_entries.map((entry) =>
+      <CustomTreeItem key={nodeInfo.name + "/" + entry} nodeId={nodeInfo.name + "/" + entry} label={entry} />
     )}
   </>);
 
@@ -144,13 +145,13 @@ function NodeEntries({ nodeInfo }: Readonly<NodeEntriesProps>) {
 
 export function NodeList() {
   const [nodes, setNodes] = useState<NodeInformation[]>([]);
-  
+
   async function asyncFetchNetworkInfo() {
 
     let networkInfo = await invoke<NetworkInformation>("network_information");
     let nodes = [];
     for (let nodeName of networkInfo.node_names) {
-      let node_info = await invoke<NodeInformation>("node_information", {nodeName : nodeName});
+      let node_info = await invoke<NodeInformation>("node_information", { nodeName: nodeName });
       nodes.push(node_info);
     }
     setNodes(nodes);
@@ -160,17 +161,29 @@ export function NodeList() {
   });
 
   return (
-        <TreeView
-            aria-label="icon expansion"
-            defaultCollapseIcon={<ExpandMoreIcon/>}
-            defaultExpandIcon={<ChevronRightIcon/>}
-        >
-          {nodes.map((node) =>
-              <CustomTreeItem key={node.name} nodeId={node.name} label={node.name}>
-                <NodeEntries nodeInfo={node}/>
-              </CustomTreeItem>)}
+    <TreeView
+      aria-label="icon expansion"
+      defaultCollapseIcon={<ExpandMoreIcon />}
+      defaultExpandIcon={<ChevronRightIcon />}
+    >
+      {nodes.map((node) =>
+        <CustomTreeItem key={node.name} nodeId={node.name} label={node.name}>
+          <NodeEntries nodeInfo={node} />
+        </CustomTreeItem>)}
 
-        </TreeView>
+    </TreeView>
+  );
+}
+
+
+function ExportListButton() {
+  return (
+    <li>
+      <ListItemButton>
+        <ListItemIcon><SaveIcon /></ListItemIcon>
+        <ListItemText primary="Export" onClick={() => invoke("export").catch(console.error) }/>
+      </ListItemButton>
+    </li>
   );
 }
 
@@ -183,10 +196,13 @@ export function ListEntries({ open }: Readonly<ListEntriesProps>) {
     return <>
       {RouterList}
       <Divider sx={{ my: 1 }} />
+      <ExportListButton />
+      <Divider sx={{ my: 1 }} />
       <Box component="div" sx={{
-          height: "calc(100vh - 353px)", 
-          overflow: 'auto' }}>
-      <NodeList />
+        height: "calc(100vh - 353px)",
+        overflow: 'auto'
+      }}>
+        <NodeList />
       </Box>
     </>;
   } else {

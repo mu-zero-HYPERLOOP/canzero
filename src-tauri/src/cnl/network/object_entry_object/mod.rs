@@ -62,7 +62,6 @@ impl ObjectEntryObject {
             object_entry_config.node().name(),
             object_entry_config.name()
         );
-        println!("latest_name = {latest_event_name}");
         let get_req_num_frames = object_entry_config.ty().size().div_ceil(32) as u64;
         Self {
             object_entry_ref: object_entry_config.clone(),
@@ -368,6 +367,16 @@ impl ObjectEntryObject {
             .push(new_history_observable);
 
         (event_name, history_of)
+    }
+
+    pub async fn complete_history(&self) -> Vec<OwnedObjectEntryEvent> {
+        let store_lock = self.store.lock().await;
+        let history = store_lock.history();
+        history
+            .iter()
+            .map(ObjectEntryValue::clone)
+            .map(OwnedObjectEntryEvent::new)
+            .collect()
     }
 
     pub async fn unlisten_from_history(&self, event_name: &str) {

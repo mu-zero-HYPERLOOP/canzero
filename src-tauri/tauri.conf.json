@@ -44,7 +44,8 @@
         "icons/icon.ico"
       ],
       "resources": [
-        "test.yaml"
+        "test.yaml",
+        "splashscreen.jpg"
       ]
     },
     "security": {
@@ -56,7 +57,18 @@
         "resizable": true,
         "title": "Control Panel",
         "width": 800,
-        "height": 600
+        "height": 600,
+        "visible": false
+      },
+      {
+        "width": 700,
+        "height": 400,
+        "decorations": false,
+        "center": true,
+        "url": "splashscreen.html",
+        "label": "splashscreen",
+        "title": "FLOATING",
+        "visible": false
       }
     ]
   }

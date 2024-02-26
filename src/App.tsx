@@ -4,9 +4,10 @@ import { MemoryRouter } from "react-router-dom";
 import { ThemeProvider} from "@mui/material";
 import { SnackbarProvider } from "notistack";
 import NotificationSystem from "./dashboard/NotificationSystem.tsx";
-import React from "react";
+import React, { useEffect } from "react";
 import Content from "./Content.tsx";
 import theme from "./theme.ts"
+import { invoke } from "@tauri-apps/api";
 
 function Router(props: Readonly<{ children?: React.ReactNode }>) {
   const { children } = props;
@@ -35,6 +36,9 @@ declare module '@mui/material/styles' {
 
 
 function App() {
+  useEffect(() => {
+    invoke("close_splashscreen").catch(console.error);
+  }, []);
 
   return (
     <ThemeProvider theme={theme}>

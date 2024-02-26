@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use serde::{Serialize, ser::SerializeMap};
 
 use crate::cnl::network::object_entry_object::database::value::ObjectEntryValue;
@@ -41,6 +43,14 @@ pub struct OwnedObjectEntryEvent(ObjectEntryValue);
 impl OwnedObjectEntryEvent {
     pub fn new(value : ObjectEntryValue) -> Self {
         Self(value)
+    }
+}
+
+impl Deref for OwnedObjectEntryEvent {
+    type Target = ObjectEntryValue;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
