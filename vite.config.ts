@@ -4,6 +4,14 @@ import react from "@vitejs/plugin-react";
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
+  build :{
+    rollupOptions: {
+      input: {
+        main: "index.html",
+        splashscreen: "splashscreen.html"
+      }
+    }
+  },
   plugins: [react()],
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`

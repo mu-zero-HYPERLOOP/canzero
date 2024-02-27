@@ -37,7 +37,9 @@ declare module '@mui/material/styles' {
 
 function App() {
   useEffect(() => {
-    invoke("close_splashscreen").catch(console.error);
+    setTimeout(()=> {
+      invoke("close_splashscreen").catch(console.error);
+    }, 3000);
   }, []);
 
   return (
