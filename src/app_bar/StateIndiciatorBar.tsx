@@ -68,6 +68,7 @@ function StateIndicatorBar({ state, voffset = "0px" }: Readonly<StateIndicatorBa
         borderRadius: 0,
         width: "100%",
         height: "5px",
+        transition: "background-color 250ms lienar",
         bgcolor: color.main
       }}
     />

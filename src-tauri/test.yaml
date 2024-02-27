@@ -2249,3 +2249,21 @@ nodes:
           power_estimation: mlu6_power_estimation
         sdc_status:
           sdc_status: mlu6_sdc_status
+  gamepad:
+    description: Gamepad controller node (snapshot)
+    object_dictionary:
+      left_trigger:
+        type: d8<0..1>
+        description: left trigger
+      right_trigger:
+        type: d8<0..1>
+        description: right trigger
+    tx_streams:
+      input:
+        description: Controller Input
+        interval: 100ms
+        mapping:
+          - left_trigger
+          - right_trigger
+      
+
