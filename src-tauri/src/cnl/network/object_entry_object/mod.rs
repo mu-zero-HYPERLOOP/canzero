@@ -404,4 +404,8 @@ impl ObjectEntryObject {
             ObjectEntryType::new(self.object_entry_ref.ty()),
         )
     }
+
+    pub fn now(&self) -> Duration {
+        std::time::Instant::now().duration_since(self.start_time)
+    }
 }

@@ -207,6 +207,7 @@ pub async fn unlisten_from_latest_object_entry_value(
 pub struct ObjectEntryListenHistoryResponse {
     event_name: String,
     history: Vec<OwnedObjectEntryEvent>,
+    now: u64,
 }
 
 #[tauri::command]
@@ -242,6 +243,7 @@ pub async fn listen_to_history_of_object_entry(
     let x = ObjectEntryListenHistoryResponse {
         event_name,
         history,
+        now : object_entry_object.now().as_millis() as u64,
     };
 
     Ok(x)

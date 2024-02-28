@@ -96,7 +96,7 @@ function ObjectEntryGraph({
 
       // this function creates a list of Graphs
       // for struct types it is called recursively.
-      function buildGraphList(ty: Type, property: (event: ObjectEntryEvent) => Value, unit?: string) {
+      function buildGraphList(now : number, ty: Type, property: (event: ObjectEntryEvent) => Value, unit?: string) {
         acc += 1;
         if (ty.id == "int" || ty.id == "uint" || ty.id == "real") {
           graphList.push(<NumberGraph<ObjectEntryEvent>
@@ -105,12 +105,13 @@ function ObjectEntryGraph({
               xValue: (event) => event.timestamp,
               yValue: (event) => property(event) as number,
             }}
-            height={200}
+            height={400}
+            now={now}
             unit={unit}
             interpolation={interpolation}
             refreshRate={refreshRate}
             timeDomainMs={timeDomainState}
-            timeShiftMs={smoothMode ? updateIntervalMillis : 0}
+            timeShiftMs={0}
           />);
         } else if (ty.id == "enum") {
           let enumInfo = ty.info as EnumTypeInfo;
@@ -121,7 +122,8 @@ function ObjectEntryGraph({
               yValue: (event) => property(event) as string,
             }}
             domain={enumInfo.variants}
-            height={200}
+            height={400}
+            now={now}
             unit={unit}
             interpolation={interpolation}
             refreshRate={refreshRate}
@@ -131,7 +133,7 @@ function ObjectEntryGraph({
         } else if (ty.id == "struct") {
           let structInfo = ty.info as StructTypeInfo;
           for (const [attrib_name, attrib_type] of Object.entries(structInfo.attributes)) {
-            buildGraphList(attrib_type, (event) => {
+            buildGraphList(now,  attrib_type, (event) => {
               return (property(event) as { [name: string]: Value })[attrib_name];
             }, undefined);
           };
@@ -140,7 +142,7 @@ function ObjectEntryGraph({
         }
       }
 
-      buildGraphList(information.ty, (event) => event.value, information.unit);
+      buildGraphList(response.now, information.ty, (event) => event.value, information.unit);
 
       setGraphList(graphList);
 

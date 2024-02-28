@@ -10,6 +10,7 @@ interface StringGraphProps<T> {
   datum: GraphDatum<T, string>,
   domain: string[],
   width?: number,
+  now : number,
   height: number,
   margin?: { top: number, bottom: number, left: number, right: number },
   interpolation?: GraphInterpolation,
@@ -24,6 +25,7 @@ function StringGraph<T>({
   domain,
   width,
   height,
+  now,
   margin = { top: 0, bottom: 0, left: 0, right: 0 },
   interpolation = GraphInterpolation.Step,
   unit,
@@ -169,9 +171,7 @@ function StringGraph<T>({
     // UPDATE METHODS
 
     // initalize timestamp
-    let timestamp = datum.values.length !== 0 ?
-      datum.xValue(datum.values[datum.values.length - 1])
-      : 0;
+    let timestamp = now;
 
     function updateXScale() {
       xScale.domain([timestamp - timeDomainMs, timestamp - timeShiftMs])

@@ -7,7 +7,8 @@ import { Paper } from "@mui/material";
 
 interface NumberGraphProps<T> {
   datum: GraphDatum<T, number>
-  width?: number
+  now : number,
+  width?: number,
   height: number,
   margin?: { top: number, bottom: number, left: number, right: number },
   interpolation?: GraphInterpolation,
@@ -26,6 +27,7 @@ function NumberGraph<T>({
   margin = { top: 0, bottom: 0, left: 0, right: 0 },
   interpolation = GraphInterpolation.Step,
   unit,
+  now,
   timeDomainMs = 5000,
   refreshRate = 500,
   bounds,
@@ -158,9 +160,7 @@ function NumberGraph<T>({
     let running = true;
 
     // initalize timestamp
-    let timestamp = datum.values.length !== 0 ?
-      datum.xValue(datum.values[datum.values.length - 1])
-      : 0;
+    let timestamp = now;
 
     let maxY = bounds?.max ?? datum.values.length == 0 ? 100 : Math.max(...datum.values.map(datum.yValue));
     let minY = bounds?.min ?? datum.values.length == 0 ? 0 : Math.min(...datum.values.map(datum.yValue));
