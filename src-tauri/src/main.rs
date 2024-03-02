@@ -41,10 +41,6 @@ async fn main() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            commands::commands::emergency,
-            commands::commands::launch_pod,
-            commands::commands::land_pod,
-            commands::commands::connect_pod,
             commands::trace::listen_to_trace,
             commands::trace::unlisten_from_trace,
             commands::trace::sort_trace_by,

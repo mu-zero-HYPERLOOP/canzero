@@ -4,6 +4,8 @@ use crate::state::{cnl_state::CNLState, address_state::TcpAddressState};
 
 #[tauri::command]
 pub async fn close_splashscreen(window: Window) {
+    #[cfg(feature = "logging-invoke")]
+    println!("invoke: close_splashscreen()");
     // Close splashscreen
 
     let splashscreen = window.get_window("splashscreen");
@@ -21,6 +23,8 @@ pub async fn close_splashscreen(window: Window) {
 
 #[tauri::command]
 pub async fn open_splashscreen(window: Window, app_handle: tauri::AppHandle, address_state: tauri::State<'_, TcpAddressState>) -> Result<(),()>{
+    #[cfg(feature = "logging-invoke")]
+    println!("invoke: open_splashscreen()");
     // Open splashscreen
     let splashscreen = window
         .get_window("splashscreen")

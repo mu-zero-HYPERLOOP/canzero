@@ -18,9 +18,8 @@ pub async fn set_object_entry_value(
     object_entry_name: String,
     new_value_json: String,
 ) -> Result<(), ()> {
-    println!(
-        "view invoked set_object_entry_value({node_name}, {object_entry_name}, {new_value_json})"
-    );
+    #[cfg(feature = "logging-invoke")]
+    println!("invoke: set_object_entry_value({node_name}, {object_entry_name}, {new_value_json})");
     let cnl = state.lock().await;
 
     let Some(node) = cnl.nodes().iter().find(|no| no.name() == &node_name) else {
@@ -137,7 +136,6 @@ pub async fn set_object_entry_value(
         Err(_) => return Err(()),
     };
 
-    println!("set request parsed value: {value:?}");
     object_entry_object.set_request(value).await;
 
     Ok(())
@@ -155,7 +153,8 @@ pub async fn listen_to_latest_object_entry_value(
     node_name: String,
     object_entry_name: String,
 ) -> Result<ObjectEntryListenLatestResponse, ()> {
-    println!("view invoked listen_to_latest_object_entry_value({node_name}, {object_entry_name})");
+    #[cfg(feature = "logging-invoke")]
+    println!("invoke: listen_to_latest_object_entry_value({node_name}, {object_entry_name})");
     let cnl = state.lock().await;
 
     let Some(node) = cnl.nodes().iter().find(|no| no.name() == &node_name) else {
@@ -184,9 +183,8 @@ pub async fn unlisten_from_latest_object_entry_value(
     node_name: String,
     object_entry_name: String,
 ) -> Result<(), ()> {
-    println!(
-        "view invoked unlisten_from_latest_object_entry_value({node_name}, {object_entry_name})"
-    );
+    #[cfg(feature = "logging-invoke")]
+    println!("invoke: unlisten_from_latest_object_entry_value({node_name}, {object_entry_name})");
     let cnl = state.lock().await;
 
     let Some(node) = cnl.nodes().iter().find(|no| no.name() == &node_name) else {
@@ -218,14 +216,15 @@ pub async fn listen_to_history_of_object_entry(
     frame_size: u64,
     min_interval: u64,
 ) -> Result<ObjectEntryListenHistoryResponse, ()> {
-    println!("view invoked listen_to_history_of_object_entry({node_name}, {object_entry_name}, {frame_size})");
+    #[cfg(feature = "logging-invoke")]
+    println!("invoke: listen_to_history_of_object_entry({node_name}, {object_entry_name}, {frame_size})");
     let frame_size = Duration::from_millis(frame_size);
     let min_interval = Duration::from_millis(min_interval);
 
     let cnl = state.lock().await;
 
     let Some(node) = cnl.nodes().iter().find(|no| no.name() == &node_name) else {
-        println!("error during listen_to_history_of_object_entry");
+        eprintln!("error during listen_to_history_of_object_entry");
         return Err(());
     };
     let Some(object_entry_object) = node
@@ -233,7 +232,7 @@ pub async fn listen_to_history_of_object_entry(
         .iter()
         .find(|oe| oe.name() == &object_entry_name)
     else {
-        println!("error during listen_to_history_of_object_entry");
+        eprintln!("error during listen_to_history_of_object_entry");
         return Err(());
     };
     let (event_name, history) = object_entry_object
@@ -256,7 +255,8 @@ pub async fn unlisten_from_history_of_object_entry(
     object_entry_name: String,
     event_name: String,
 ) -> Result<(), ()> {
-    println!("view invoked unlisten_from_history_object_entry({node_name}, {object_entry_name})");
+    #[cfg(feature = "logging-invoke")]
+    println!("invoke: unlisten_from_history_object_entry({node_name}, {object_entry_name})");
     let cnl = state.lock().await;
 
     let Some(node) = cnl.nodes().iter().find(|no| no.name() == &node_name) else {
@@ -279,6 +279,8 @@ pub async fn request_object_entry_value(
     node_name: String,
     object_entry_name: String,
 ) -> Result<(), ()> {
+    #[cfg(feature = "logging-invoke")]
+    println!("invoke: (get-request) request_object_entry_value({node_name}, {object_entry_name})");
     let cnl = state.lock().await;
 
     let Some(node) = cnl.nodes().iter().find(|no| no.name() == &node_name) else {
@@ -293,7 +295,6 @@ pub async fn request_object_entry_value(
     };
 
     object_entry.request_current_value().await;
-    println!("get request for {object_entry_name} of node {node_name} invoked");
 
     Ok(())
 }

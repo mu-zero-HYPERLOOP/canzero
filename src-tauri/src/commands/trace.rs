@@ -5,11 +5,15 @@ use crate::{
 
 #[tauri::command]
 pub async fn listen_to_trace(state: tauri::State<'_, CNLState>) -> Result<String, ()> {
+    #[cfg(feature = "logging-invoke")]
+    println!("invoke: listen_to_trace()");
     Ok(state.lock().await.trace().listen().await.to_owned())
 }
 
 #[tauri::command]
 pub async fn unlisten_from_trace(state: tauri::State<'_, CNLState>) -> Result<(), ()> {
+    #[cfg(feature = "logging-invoke")]
+    println!("invoke: unlisten_from_trace()");
     state.lock().await.trace().unlisten().await;
     Ok(())
 }
@@ -45,6 +49,8 @@ pub async fn sort_trace_by(
     } else {
         SortOrder::Desc
     };
+    #[cfg(feature = "logging-invoke")]
+    println!("invoke: sort_trace_by({sort_by}, {order})");
     state.lock().await.trace().sort_by(sort_by, order).await;
     Ok(())
 }
@@ -54,6 +60,8 @@ pub async fn filter_trace_by(
     state: tauri::State<'_, CNLState>,
     filter_string: Option<String>,
 ) -> Result<(), ()> {
+    #[cfg(feature = "logging-invoke")]
+    println!("invoke: filter_trace_by({filter_string})");
     state.lock().await.trace().filter_by(filter_string).await;
     Ok(())
 }
