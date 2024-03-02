@@ -51,6 +51,8 @@ declare module "@mui/material/styles" {
     appBar?: string,
     main? : string,
     paper2?: string,
+    warn?: string,
+    error?: string,
   }
 }
 
@@ -96,6 +98,8 @@ let theme = createTheme({
       main: "#f7f7f7",
       paper: "#ededed",
       paper2: "#f5f5f5",
+      warn: "#f2e9ce",
+      error: "#f2d5d5",
     },
     stateInit: {
       main: "#e0d845",

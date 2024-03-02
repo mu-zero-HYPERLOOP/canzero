@@ -2,9 +2,8 @@ import { TableCell, TableRow, styled } from "@mui/material";
 import { TraceEvent } from "./types/TraceEvent";
 
 
-const StyledTableRow = styled(TableRow)(() => ({
-
-  backgroundColor: "#f2e9ce",
+const StyledTableRow = styled(TableRow)(({theme}) => ({
+  backgroundColor: theme.palette.background.warn,
   // hide last border
 }));
 

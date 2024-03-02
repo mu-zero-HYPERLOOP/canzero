@@ -337,8 +337,8 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
           >
             <StateDisplay state={state} />
             {/* Buttons */}
-            <AppBarButton variant="contained" color="stateError" onClick={sendEmergencyCommand} >
-              <p>Emergency [Space bar]</p>
+            <AppBarButton variant="contained" width="15em" color="stateError" onClick={sendEmergencyCommand} >
+              <p>Emergency <br/>[Space bar]</p>
             </AppBarButton>
 
             <AppBarButton color="stateIdle" disabled={commandList.disableStart} onClick={commandList.startCommand} >
@@ -362,9 +362,11 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
             direction="row"
             justifyContent="flex-end"
             alignItems="center"
-            spacing={3}
+            spacing={2}
             sx={{
-              marginRight: "25px",
+              position: "relative",
+              top: "0.2em",
+              marginRight: "1rem",
             }}
             >
             <WarningIconDisplay/>

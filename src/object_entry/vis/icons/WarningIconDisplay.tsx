@@ -41,7 +41,7 @@ function WarningIconDisplay() {
     <Box component="div" sx={{
       textAlign: "center",
     }}>
-      <FontAwesomeIcon id="warning-icon" color={state ? "red": "grey"} icon={faTriangleExclamation} fontSize="40px"/>
+      <FontAwesomeIcon id="warning-icon" color={state ? "red": "grey"} icon={faTriangleExclamation} fontSize="30px"/>
       <Typography color="black">
         Warning
       </Typography>

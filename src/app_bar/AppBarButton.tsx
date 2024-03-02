@@ -17,14 +17,14 @@ function AppBarButton({
   children,
   onClick,
   color,
-  width = "200px",
+  width = "12em",
   variant = "outlined",
   disabled = false,
 }: Readonly<AppBarButtonProps>) {
   return (
     <Button
       variant={variant}
-      size="large"
+      size="small"
       disabled={disabled}
       style={{
         maxWidth: width,

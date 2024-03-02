@@ -1,13 +1,13 @@
 
-import { Collapse, IconButton, Table, TableBody, TableCell, TableRow, styled } from "@mui/material";
+import { Collapse, IconButton, Table, TableBody, TableCell, TableRow, styled, useTheme } from "@mui/material";
 import { TraceEvent, TraceFrameAttribute } from "./types/TraceEvent";
 
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 
 
-const StyledTableRow = styled(TableRow)(() => ({
-  backgroundColor: "#f0f1f5",
+const StyledTableRow = styled(TableRow)(({theme}) => ({
+  backgroundColor: theme.palette.background.paper
   // hide last border
 }));
 
@@ -21,6 +21,8 @@ interface UndefinedRowProps {
 
 function NormalRow({ useAbsoluteTime, open, setOpen, event }: UndefinedRowProps) {
   let attributes = event.frame.detail as TraceFrameAttribute[];
+
+  const theme = useTheme();
   return (<>
     <StyledTableRow>
       <TableCell sx={{ padding: 0, textAlign: "center", lineHeight: "100%" }}>
@@ -66,7 +68,7 @@ function NormalRow({ useAbsoluteTime, open, setOpen, event }: UndefinedRowProps)
       </TableCell>
     </StyledTableRow>
     {attributes ?
-      <TableRow sx={{ backgroundColor: "#ffffff", padding: 0, margin: 0 }}>
+      <TableRow sx={{ backgroundColor: theme.palette.background.paper2, padding: 0, margin: 0 }}>
         <TableCell style={{ padding: 0 }} colSpan={6}>
           <Collapse in={open[event.key]} timeout="auto" unmountOnExit sx={{ margin: 0, padding: 0 }}>
             <Table
@@ -76,7 +78,7 @@ function NormalRow({ useAbsoluteTime, open, setOpen, event }: UndefinedRowProps)
                 margin: 1,
                 padding: 0,
                 maxWidth: "500px",
-                backgroundColor: "#f0f1f5"
+                backgroundColor: theme.palette.background.paper
               }}
             >
               <TableBody sx={{ maxWidth: "500px" }}>

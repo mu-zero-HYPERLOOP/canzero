@@ -74,6 +74,8 @@ function ObjectEntryRow({ nodeName, objectEntryName, value }: ObjectEntryRowProp
           <Stack direction="row" spacing={1}>
             <SetValueButton nodeName={nodeName} objectEntryName={objectEntryName} />
             <RefreshButton nodeName={nodeName} objectEntryName={objectEntryName} />
+            <ObjectEntryButtonLink nodeName={nodeName} objectEntryName={objectEntryName} />
+            <ExportButton nodeName={nodeName} objectEntryName={objectEntryName} />
           </Stack>
         </TableCell>
       </TableRow >

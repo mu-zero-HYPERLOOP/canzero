@@ -39,7 +39,7 @@ function BatteryIconDisplay() {
     <Box component="div" sx={{
       textAlign: "center",
     }}>
-      <FontAwesomeIcon color={state ? "red": "grey" } icon={faCarBattery} fontSize="40px" />
+      <FontAwesomeIcon color={state ? "red": "grey" } icon={faCarBattery} fontSize="30px" />
       <Typography color="black">
         Battery
       </Typography>

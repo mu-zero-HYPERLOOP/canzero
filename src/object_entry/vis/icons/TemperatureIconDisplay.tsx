@@ -40,7 +40,7 @@ function TemperatureIconDisplay() {
       <Box component="form" sx={{
         textAlign: "center",
       }}>
-        <Thermostat sx={{ fontSize: "42px", color: state ? "red" : "grey" }} />
+        <Thermostat sx={{ fontSize: "32px", color: state ? "red" : "grey" }} />
         <div style={{ marginBottom: "-6px" }} />
         <Typography color="black">
         OverTemp

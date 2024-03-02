@@ -11,11 +11,12 @@ import { TraceEvent } from './types/TraceEvent';
 import ErrorRow from './ErrorRow';
 import UndefinedRow from './UndefinedRow';
 import NormalRow from './NormalRow';
+import { useTheme } from '@emotion/react';
 
 
-const StyledTableHeader = styled(TableRow)(() => ({
+const StyledTableHeader = styled(TableRow)(({theme}) => ({
   "& th": {
-    backgroundColor: "#d1cfd1"
+    backgroundColor: theme.palette.background.appBar,
   },
 }));
 
@@ -53,6 +54,8 @@ function Trace() {
   const [sortAsc, setSortAsc] = useState<boolean>(false);
 
   const [open, setOpen] = useState<{ [key: number]: boolean }>({});
+
+  const theme = useTheme();
 
   function updateSorting(sorting: Sorting, toggleAsc: boolean) {
     setSorting(sorting);
