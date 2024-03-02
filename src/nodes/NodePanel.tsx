@@ -167,6 +167,7 @@ function NodePanel({ node }: NodePanelProps) {
           style={{
             height: "100%",
             width: "100%",
+            backgroundColor: "#f0f1f5",
           }}
           data={filter.map(i => rowData[i])}
           components={VirtuosoTableComponents}
@@ -178,13 +179,5 @@ function NodePanel({ node }: NodePanelProps) {
     </Paper >
   );
 }
-
-// <Table 
-//   size="small"
-// >
-//   <TableBody>
-//     {rows}
-//   </TableBody>
-// </Table>
 
 export default NodePanel

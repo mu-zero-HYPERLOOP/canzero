@@ -23,7 +23,7 @@ function SetValueButton({ nodeName, objectEntryInfo, objectEntryName, sx }: Read
       async function fetchInfo() {
         const info = await invoke<ObjectEntryInformation>(
           "object_entry_information",
-          { nodeName, objectEntryName : objectEntryName ?? objectEntryInfo?.name });
+          { nodeName, objectEntryName: objectEntryName ?? objectEntryInfo?.name });
         setObjectEntryInfo(info);
       }
       fetchInfo().catch(console.error);
@@ -31,21 +31,23 @@ function SetValueButton({ nodeName, objectEntryInfo, objectEntryName, sx }: Read
   }, [objectEntryInfo, objectEntryName]);
 
 
-  return <>
-    <IconButton
-      size="small"
-      onClick={() => setShowDialog(true)}
-      sx={sx}
-    >
-      <EditIcon fontSize="small" />
-    </IconButton>
-    {(showDialog && objectEntryInformation) ? <EditDialog
-      open={showDialog}
-      onClose={() => setShowDialog(false)}
-      nodeName={nodeName}
-      objectEntryInfo={objectEntryInformation}
-    /> : undefined}
-  </>
+  return (
+    <>
+      <IconButton
+        size="small"
+        onClick={() => setShowDialog(true)}
+        sx={sx}
+      >
+        <EditIcon fontSize="small" />
+      </IconButton>
+      {(showDialog && objectEntryInformation) ? <EditDialog
+        open={showDialog}
+        onClose={() => setShowDialog(false)}
+        nodeName={nodeName}
+        objectEntryInfo={objectEntryInformation}
+      /> : undefined}
+    </>
+  );
 
 }
 

@@ -3,6 +3,8 @@ import { Value } from "../object_entry/types/Value";
 import ObjectEntryValueCell from "./ObjectEntryValueCell";
 import SetValueButton from "../object_entry/panel/SetValueButton";
 import RefreshButton from "../object_entry/panel/RefreshButton";
+import ObjectEntryButtonLink from "../object_entry/links/ObjectEntryButtonLink";
+import ExportButton from "../object_entry/panel/ExportButton";
 
 
 interface ObjectEntryRowProps {
@@ -106,6 +108,8 @@ function ObjectEntryRow({ nodeName, objectEntryName, value }: ObjectEntryRowProp
           <Stack direction="row" spacing={1}>
             <SetValueButton nodeName={nodeName} objectEntryName={objectEntryName} />
             <RefreshButton nodeName={nodeName} objectEntryName={objectEntryName} />
+            <ObjectEntryButtonLink nodeName={nodeName} objectEntryName={objectEntryName} />
+            <ExportButton nodeName={nodeName} objectEntryName={objectEntryName} />
           </Stack>
         </TableCell>
       </TableRow>);
