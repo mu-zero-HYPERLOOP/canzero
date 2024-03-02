@@ -50,6 +50,7 @@ declare module "@mui/material/styles" {
     drawer?: string,
     appBar?: string,
     main? : string,
+    paper2?: string,
   }
 }
 
@@ -94,6 +95,7 @@ let theme = createTheme({
       default: "#f7f7f7",
       main: "#f7f7f7",
       paper: "#ededed",
+      paper2: "#f5f5f5",
     },
     stateInit: {
       main: "#e0d845",

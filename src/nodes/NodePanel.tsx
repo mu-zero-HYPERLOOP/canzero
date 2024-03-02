@@ -1,4 +1,4 @@
-import { InputAdornment, Paper, Skeleton, Table, TableBody, TableContainer, TableHead, TableRow, TextField, Typography, styled } from "@mui/material";
+import { InputAdornment, Paper, Skeleton, Table, TableBody, TableContainer, TableHead, TableRow, TextField, Typography, styled, useTheme } from "@mui/material";
 import { NodeInformation } from "./types/NodeInformation.ts";
 import { useEffect, useRef, useState } from "react";
 import { ObjectEntryEvent } from "../object_entry/types/events/ObjectEntryEvent.tsx";
@@ -22,8 +22,8 @@ interface RowData {
 }
 
 
-const StyledTableRow = styled(TableRow)(() => ({
-  backgroundColor: "#f0f1f5",
+const StyledTableRow = styled(TableRow)(({theme}) => ({
+  backgroundColor: theme.palette.background.paper2,
   // hide last border
 }));
 
@@ -96,6 +96,8 @@ function NodePanel({ node }: NodePanelProps) {
     setFilter(filter);
   }
 
+  const theme = useTheme();
+
   return (
     <Paper sx={{
       marginTop: "30px",
@@ -167,7 +169,7 @@ function NodePanel({ node }: NodePanelProps) {
           style={{
             height: "100%",
             width: "100%",
-            backgroundColor: "#f0f1f5",
+            backgroundColor: theme.palette.background.paper2,
           }}
           data={filter.map(i => rowData[i])}
           components={VirtuosoTableComponents}
@@ -175,7 +177,6 @@ function NodePanel({ node }: NodePanelProps) {
         >
         </TableVirtuoso>
       }
-
     </Paper >
   );
 }
