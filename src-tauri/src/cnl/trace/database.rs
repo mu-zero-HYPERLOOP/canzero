@@ -7,6 +7,7 @@ use super::{
     frame::{TraceFrame, TraceFrameKey},
 };
 
+#[derive(Debug)]
 pub enum SortCriteria {
     None,
     ByAbsoluteTime,
@@ -17,6 +18,7 @@ pub enum SortCriteria {
     ByDlc,
 }
 
+#[derive(Debug)]
 pub enum SortOrder {
     Asc,
     Desc,

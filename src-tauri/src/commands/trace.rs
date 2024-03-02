@@ -50,7 +50,7 @@ pub async fn sort_trace_by(
         SortOrder::Desc
     };
     #[cfg(feature = "logging-invoke")]
-    println!("invoke: sort_trace_by({sort_by}, {order})");
+    println!("invoke: sort_trace_by({sort_by:?}, {order:?})");
     state.lock().await.trace().sort_by(sort_by, order).await;
     Ok(())
 }
@@ -61,7 +61,7 @@ pub async fn filter_trace_by(
     filter_string: Option<String>,
 ) -> Result<(), ()> {
     #[cfg(feature = "logging-invoke")]
-    println!("invoke: filter_trace_by({filter_string})");
+    println!("invoke: filter_trace_by({filter_string:?})");
     state.lock().await.trace().filter_by(filter_string).await;
     Ok(())
 }

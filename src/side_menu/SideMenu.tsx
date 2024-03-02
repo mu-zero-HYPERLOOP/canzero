@@ -81,6 +81,10 @@ function SideMenu({ open, toggleOpen }: Readonly<SideMenuProps>) {
       PaperProps={{
         sx: {
           border: "none",
+          height: "100%",
+          overflowY: "hidden",
+          margin: 0,
+          padding: 0,
         }
       }}
     >

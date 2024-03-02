@@ -19,7 +19,7 @@ pub async fn set_object_entry_value(
     new_value_json: String,
 ) -> Result<(), ()> {
     #[cfg(feature = "logging-invoke")]
-    println!("invoke: set_object_entry_value({node_name}, {object_entry_name}, {new_value_json})");
+    println!("invoke: set_object_entry_value({node_name:?}, {object_entry_name:?}, {new_value_json:?})");
     let cnl = state.lock().await;
 
     let Some(node) = cnl.nodes().iter().find(|no| no.name() == &node_name) else {
@@ -154,7 +154,7 @@ pub async fn listen_to_latest_object_entry_value(
     object_entry_name: String,
 ) -> Result<ObjectEntryListenLatestResponse, ()> {
     #[cfg(feature = "logging-invoke")]
-    println!("invoke: listen_to_latest_object_entry_value({node_name}, {object_entry_name})");
+    println!("invoke: listen_to_latest_object_entry_value({node_name:?}, {object_entry_name:?})");
     let cnl = state.lock().await;
 
     let Some(node) = cnl.nodes().iter().find(|no| no.name() == &node_name) else {
@@ -217,7 +217,7 @@ pub async fn listen_to_history_of_object_entry(
     min_interval: u64,
 ) -> Result<ObjectEntryListenHistoryResponse, ()> {
     #[cfg(feature = "logging-invoke")]
-    println!("invoke: listen_to_history_of_object_entry({node_name}, {object_entry_name}, {frame_size})");
+    println!("invoke: listen_to_history_of_object_entry({node_name:?}, {object_entry_name:}, {frame_size})");
     let frame_size = Duration::from_millis(frame_size);
     let min_interval = Duration::from_millis(min_interval);
 

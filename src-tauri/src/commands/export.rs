@@ -10,7 +10,7 @@ pub async fn export(
     state: tauri::State<'_, CNLState>,
 ) -> Result<(), ()> {
     #[cfg(feature = "logging-invoke")]
-    println!("invoke: export");
+    println!("invoke: export()");
     let cnl = state.lock().await;
 
     // ensure that log directory exists.

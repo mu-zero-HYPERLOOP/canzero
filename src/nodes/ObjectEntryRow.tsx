@@ -1,4 +1,4 @@
-import { Stack, TableCell, TableRow } from "@mui/material";
+import { Stack, TableCell, TableRow, Typography } from "@mui/material";
 import { Value } from "../object_entry/types/Value";
 import ObjectEntryValueCell from "./ObjectEntryValueCell";
 import SetValueButton from "../object_entry/panel/SetValueButton";
@@ -25,12 +25,22 @@ function ObjectEntryAttribRow({ name, value }: ObjectEntryAttribRowProps) {
   } else {
     return (
       <TableRow>
-        <TableCell>
-          {name}
+        <TableCell sx={{
+          minWidth: "20vw",
+          maxWidth: "20vw",
+          overflow: "clip",
+        }}>
+
+          <Typography variant="body2" sx={{marginLeft: "5px"}}>
+          {`• ${name}`}
+          </Typography>
         </TableCell>
-        <TableCell>
+        <TableCell sx={{
+          width: "100%",
+        }}>
           {value}
         </TableCell>
+        <TableCell sx={{width: "20px"}}/>
       </TableRow>
     );
   }
@@ -41,7 +51,7 @@ function ObjectEntryRow({ nodeName, objectEntryName, value }: ObjectEntryRowProp
     return (<>
       <TableRow >
         <TableCell sx={{
-          width: "25vw",
+          minWidth: "25vw",
           maxWidth: "25vw",
           overflow: "clip",
         }}>
@@ -49,7 +59,7 @@ function ObjectEntryRow({ nodeName, objectEntryName, value }: ObjectEntryRowProp
         </TableCell>
         <TableCell
           sx={{
-            width: "20px",
+            width: "100%",
           }}
         >
           {value == undefined ? "-" : ""}

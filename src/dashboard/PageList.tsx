@@ -144,21 +144,23 @@ function NodeEntries({ nodeInfo }: Readonly<NodeEntriesProps>) {
 }
 
 export function NodeList() {
-  const [nodes, setNodes] = useState<NodeInformation[]>([]);
+  const [nodes, setNodes] = useState<NodeInformation[]>();
 
-  async function asyncFetchNetworkInfo() {
-
-    let networkInfo = await invoke<NetworkInformation>("network_information");
-    let nodes = [];
-    for (let nodeName of networkInfo.node_names) {
-      let node_info = await invoke<NodeInformation>("node_information", { nodeName: nodeName });
-      nodes.push(node_info);
-    }
-    setNodes(nodes);
-  }
   useEffect(() => {
-    asyncFetchNetworkInfo().catch(console.error);
-  });
+    async function asyncFetchNetworkInfo() {
+
+      let networkInfo = await invoke<NetworkInformation>("network_information");
+      let nodes = [];
+      for (let nodeName of networkInfo.node_names) {
+        let node_info = await invoke<NodeInformation>("node_information", { nodeName: nodeName });
+        nodes.push(node_info);
+      }
+      setNodes(nodes);
+    }
+    if (nodes === undefined) {
+      asyncFetchNetworkInfo().catch(console.error);
+    }
+  }, []);
 
   return (
     <TreeView
@@ -166,10 +168,13 @@ export function NodeList() {
       defaultCollapseIcon={<ExpandMoreIcon />}
       defaultExpandIcon={<ChevronRightIcon />}
     >
-      {nodes.map((node) =>
+      {nodes === undefined 
+      ? <></> 
+      : nodes.map((node) =>
         <CustomTreeItem key={node.name} nodeId={node.name} label={node.name}>
           <NodeEntries nodeInfo={node} />
-        </CustomTreeItem>)}
+        </CustomTreeItem>)
+      }
 
     </TreeView>
   );
@@ -181,7 +186,7 @@ function ExportListButton() {
     <li>
       <ListItemButton>
         <ListItemIcon><SaveIcon /></ListItemIcon>
-        <ListItemText primary="Export" onClick={() => invoke("export").catch(console.error) }/>
+        <ListItemText primary="Export" onClick={() => invoke("export").catch(console.error)} />
       </ListItemButton>
     </li>
   );

@@ -12,7 +12,7 @@ pub async fn network_information(
     state: tauri::State<'_, CNLState>,
 ) -> Result<NetworkInformation, ()> {
     #[cfg(feature = "logging-invoke")]
-    println!("invoke: (get) network_information");
+    println!("invoke: (get) network_information()");
     let cnl = state.lock().await;
     Ok(NetworkInformation {
         node_names: cnl.nodes().iter().map(|n| n.name().to_owned()).collect(),
@@ -35,7 +35,7 @@ pub async fn node_information(
     node_name: String,
 ) -> Result<NodeInformation, String> {
     #[cfg(feature = "logging-invoke")]
-    println!("invoke: (get) node_information");
+    println!("invoke: (get) node_information({node_name:?})");
     let cnl = state.lock().await;
     let node = cnl.nodes().iter().find(|n| n.name() == &node_name);
     match node {
@@ -67,7 +67,7 @@ pub async fn object_entry_information(
     object_entry_name: String,
 ) -> Result<ObjectEntryInformation, String> {
     #[cfg(feature = "logging-invoke")]
-    println!("invoke: (get) object_entry_information");
+    println!("invoke: (get) object_entry_information({node_name:?}, {object_entry_name:?})");
 
     let cnl = state.lock().await;
     let node = cnl.nodes().iter().find(|n| n.name() == &node_name);
@@ -102,7 +102,7 @@ pub async fn command_information(
     command_name: String,
 ) -> Result<CommandInformation, String> {
     #[cfg(feature = "logging-invoke")]
-    println!("invoke: (get) command_information");
+    println!("invoke: (get) command_information({node_name:?}, {command_name:?})");
 
     let cnl = state.lock().await;
     let node = cnl.nodes().iter().find(|n| n.name() == &node_name);
