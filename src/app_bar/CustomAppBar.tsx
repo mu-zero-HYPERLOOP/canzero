@@ -138,7 +138,7 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
         stopCommandLabel = STOP_45V_LABEL;
         disableStop = false;
         stopCommand = sendDisconnectCommand;
-        disableAbort = true;
+        disableAbort = false;
         break;
       case "START_LEVITATION":
         startCommandLabel = START_LEVI_LABEL;
