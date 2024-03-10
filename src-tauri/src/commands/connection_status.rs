@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use chrono;
 
 use crate::{cnl::connection::{ConnectionStatus, ConnectionObject}, state::cnl_state::CNLState};
 
@@ -11,4 +12,9 @@ pub async fn get_connection_status(state: tauri::State<'_, CNLState>) -> Result<
     let connection_object : &Arc<ConnectionObject> = cnl.connection_object();
     let connection_status = connection_object.get_status();
     Ok(connection_status)
+}
+
+#[tauri::command]
+pub async fn heartbeat() {
+    println!("Heartbeat: {:?}", chrono::offset::Local::now());
 }

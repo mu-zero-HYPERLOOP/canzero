@@ -8,6 +8,7 @@ import React, { useEffect } from "react";
 import Content from "./Content.tsx";
 import theme from "./theme.ts"
 import { invoke } from "@tauri-apps/api";
+import {Heartbeat} from "./heartbeat/Heartbeat.tsx";
 
 function Router(props: Readonly<{ children?: React.ReactNode }>) {
   const { children } = props;
@@ -45,6 +46,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <SnackbarProvider preventDuplicate maxSnack={7}>
+        <Heartbeat/>
         <NotificationSystem />
         <Router>
           <Content/>
