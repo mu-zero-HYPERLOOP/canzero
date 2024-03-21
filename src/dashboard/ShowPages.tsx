@@ -10,7 +10,7 @@ import LevitationControl from "../divisions/LevitationControl.tsx";
 import GuidanceControl from "../divisions/GuidanceControl.tsx";
 import MotorControl from "../divisions/MotorControl.tsx";
 import ObjectEntryPanel from "../object_entry/panel/ObjectEntryPanel.tsx";
-import Trace from '../trace2/Trace.tsx';
+import Trace from '../trace/Trace.tsx';
 
 function Content() {
     const location = useLocation();

@@ -9,7 +9,7 @@ import ObjectEntryRow from "./ObjectEntryRow.tsx";
 import { TableComponents, TableVirtuoso } from "react-virtuoso";
 import React from "react";
 import SearchIcon from '@mui/icons-material/Search';
-import useFocusOnCtrlShortcut from "../trace2/FocusOnKey.tsx";
+import useFocusOnCtrlShortcut from "../trace/FocusOnKey.tsx";
 
 
 interface NodePanelProps {
