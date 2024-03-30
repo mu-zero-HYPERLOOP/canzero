@@ -49,27 +49,6 @@
     },
     "security": {
       "csp": null
-    },
-    "windows": [
-      {
-        "fullscreen": false,
-        "resizable": true,
-        "title": "Control Panel",
-        "width": 800,
-        "height": 600,
-        "visible": false
-      },
-      {
-        "resizable": false,
-        "decorations": false,
-        "center": true,
-        "title": "FLOATING",
-        "label": "splashscreen",
-        "url": "splashscreen.html",
-        "width": 600,
-        "height": 350,
-        "visible": false
-      }
-    ]
+    }
   }
 }

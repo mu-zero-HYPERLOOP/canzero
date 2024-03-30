@@ -3,7 +3,7 @@ use std::sync::Arc;
 use can_config_rs::config;
 
 use crate::cnl::{
-    can_adapter::{timestamped::Timestamped, TCanFrame},
+    can_adapter::{can_frame::TCanFrame, timestamped::Timestamped},
     deserialize::FrameDeserializer,
     errors::Result,
     frame::TFrame,

@@ -6,8 +6,7 @@ use self::{
 };
 
 use super::{
-    can_adapter::{TCanError, TCanFrame},
-    frame::TFrame,
+    can_adapter::{can_error::TCanError, can_frame::TCanFrame}, frame::TFrame
 };
 
 pub mod database;

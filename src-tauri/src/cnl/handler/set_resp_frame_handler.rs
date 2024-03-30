@@ -4,7 +4,7 @@ use can_config_rs::config::MessageRef;
 
 use crate::cnl::{
     self,
-    can_adapter::{timestamped::Timestamped, TCanFrame},
+    can_adapter::{can_frame::TCanFrame, timestamped::Timestamped},
     deserialize::FrameDeserializer,
     errors::{Error, Result},
     frame::{Frame, TFrame, Value},

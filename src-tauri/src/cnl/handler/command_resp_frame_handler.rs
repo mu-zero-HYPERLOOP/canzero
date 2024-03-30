@@ -1,10 +1,7 @@
 use can_config_rs::config::MessageRef;
 
 use crate::cnl::{
-    can_adapter::{TCanFrame, timestamped::Timestamped},
-    errors::Result,
-    frame::TFrame,
-    deserialize::FrameDeserializer,
+    can_adapter::{can_frame::TCanFrame, timestamped::Timestamped}, deserialize::FrameDeserializer, errors::Result, frame::TFrame
 };
 
 pub struct CommandRespFrameHandler {

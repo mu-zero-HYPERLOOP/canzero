@@ -4,7 +4,7 @@ use can_config_rs::config::MessageRef;
 
 use crate::{
     cnl::{
-        can_adapter::{CanAdapter, TCanError, TCanFrame, self},
+        can_adapter::{can_error::TCanError, can_frame::TCanFrame, CanAdapter},
         network::NetworkObject,
         rx::handler_lookup::HandlerLookup,
         trace::TraceObject,

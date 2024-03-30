@@ -1,8 +1,9 @@
 use std::ops::Deref;
 
+use can_config_rs::config::NetworkRef;
 use tokio::sync::Mutex;
 
-use crate::cnl::CNL;
+use crate::cnl::{can_adapter::CanAdapter, CNL};
 
 pub struct CNLState {
     pub cnl: Mutex<CNL>,
@@ -17,13 +18,9 @@ impl Deref for CNLState {
 }
 
 impl CNLState {
-    pub async fn create(config_path: &str, app_handle: &tauri::AppHandle, tcp_address : &str) -> Self {
-        let test_config_path = app_handle.path_resolver().resolve_resource(config_path).expect("failed to resolve resource test.yaml");
-        let network_config = can_yaml_config_rs::parse_yaml_config_from_file(
-            test_config_path.to_str().expect("config path is not a valid unicode string")).unwrap();
-        let cnl = CNL::create(&network_config, app_handle, tcp_address).await;
+    pub async fn create(network_config: NetworkRef, app_handle: &tauri::AppHandle, can_adapters : Vec<CanAdapter>) -> Self {
         Self {
-            cnl: Mutex::new(cnl),
+            cnl: Mutex::new(CNL::create(&network_config, app_handle, can_adapters).await),
         }
     }
 }

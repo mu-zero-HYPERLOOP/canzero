@@ -4,7 +4,7 @@ use bitvec::view::AsBits;
 use can_config_rs::config;
 
 use crate::cnl::{
-    can_adapter::{timestamped::Timestamped, TCanFrame},
+    can_adapter::{can_frame::TCanFrame, timestamped::Timestamped},
     deserialize::{type_deserializer::TypeDeserializer, FrameDeserializer},
     errors::{Error, Result},
     frame::{Frame, TFrame, Value},

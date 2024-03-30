@@ -4,7 +4,7 @@ use self::{
     stream_frame_handler::StreamFrameHandler,
 };
 
-use super::can_adapter::TCanFrame;
+use super::can_adapter::can_frame::TCanFrame;
 use super::errors::Result;
 use super::frame::TFrame;
 

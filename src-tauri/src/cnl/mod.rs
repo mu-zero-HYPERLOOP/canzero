@@ -12,8 +12,10 @@ pub mod can_adapter;
 
 use std::sync::Arc;
 
+use crate::state::startup::NetworkConnectionCreateInfo;
+
 use self::{
-    can_adapter::{create_can_adapters, CanAdapter},
+    can_adapter::CanAdapter,
     connection::{ConnectionObject, ConnectionStatus},
     network::{node_object::NodeObject, NetworkObject},
     rx::RxCom,
@@ -40,13 +42,17 @@ pub struct CNL {
 }
 
 impl CNL {
-    pub async fn create(network_config: &config::NetworkRef, app_handle: &tauri::AppHandle, tcp_address : &str) -> Self {
+    pub async fn create(
+        network_config: &config::NetworkRef,
+        app_handle: &tauri::AppHandle,
+        can_adapters: Vec<CanAdapter>,
+    ) -> Self {
         let connection_object =
             ConnectionObject::new(ConnectionStatus::CanDisconnected, app_handle);
 
-        let can_adapters = create_can_adapters(network_config, tcp_address).await
+        let can_adapters: Vec<Arc<CanAdapter>> = can_adapters
             .into_iter()
-            .map(Arc::new)
+            .map(|adapter| Arc::new(adapter))
             .collect();
 
         connection_object.set_status(ConnectionStatus::CanConnected);

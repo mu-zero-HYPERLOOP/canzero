@@ -7,6 +7,11 @@ repository = "https://github.com/mu-zero-HYPERLOOP/control-panel.git"
 edition = "2021"
 rust-version = "1.75"
 
+[profile.dev]
+debug = true
+codegen-units = 8
+lto = false
+
 [profile.release]
 strip = "symbols"  # Automatically strip symbols from the binary.
 lto = "fat" # Enables link to optimizations
@@ -30,7 +35,7 @@ rand = {version = "0.8.5", features= ["std_rng"] }
 libc = {version = "0.2.149", optional = true}
 nix = {version = "0.28.0", features = ["net"], optional = true }
 can-config-rs = { git = "https://github.com/mu-zero-HYPERLOOP/can-config-rs.git" }
-can-yaml-config-rs = { git = "https://github.com/mu-zero-HYPERLOOP/can-yaml-config-rs.git" }
+can-live-config-rs = { git = "https://github.com/mu-zero-HYPERLOOP/can-live-config-rs.git"}
 sorted-vec = "0.8.3"
 fix-path-env = { git = "https://github.com/tauri-apps/fix-path-env-rs.git"}
 bitvec = "1.0.1"

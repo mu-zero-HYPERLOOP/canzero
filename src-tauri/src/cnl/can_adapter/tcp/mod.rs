@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use self::client::{TcpClient, TcpFrame};
 
-use super::{can_frame::CanFrame, CanAdapterInterface, TCanError, TCanFrame};
+use super::{can_error::TCanError, can_frame::{CanFrame, TCanFrame}};
 
 pub mod client;
 
@@ -27,10 +27,8 @@ impl TcpCanAdapter {
             rx_err: tokio::sync::Mutex::new(rx_err),
         }
     }
-}
 
-impl CanAdapterInterface for TcpCanAdapter {
-    async fn receive(&self) -> Result<TCanFrame, TCanError> {
+    pub async fn receive(&self) -> Result<TCanFrame, TCanError> {
         Ok(self
             .rx
             .lock()
@@ -40,7 +38,7 @@ impl CanAdapterInterface for TcpCanAdapter {
             .expect("TcpCanAdapter rx channel closed early"))
     }
 
-    async fn receive_err(&self) -> TCanError {
+    pub async fn receive_err(&self) -> TCanError {
         self.rx_err
             .lock()
             .await
@@ -49,7 +47,7 @@ impl CanAdapterInterface for TcpCanAdapter {
             .expect("TcpCanAdapter rx channel closed early")
     }
 
-    async fn send(&self, frame: CanFrame) {
+    pub async fn send(&self, frame: CanFrame) {
         self.tcp_client
             .send(TcpFrame {
                 can_frame: frame,

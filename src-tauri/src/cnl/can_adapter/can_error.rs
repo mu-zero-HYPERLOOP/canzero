@@ -2,6 +2,10 @@ use std::sync::Arc;
 
 use serde::{ser::SerializeMap, Serialize};
 
+use super::timestamped::Timestamped;
+
+pub type TCanError = Timestamped<CanError>;
+
 #[derive(Debug, Clone)]
 pub enum CanError {
     #[allow(unused)]

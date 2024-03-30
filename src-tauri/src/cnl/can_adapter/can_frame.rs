@@ -1,5 +1,10 @@
 use serde::{Serialize, ser::SerializeMap};
 
+use super::timestamped::Timestamped;
+
+
+pub type TCanFrame = Timestamped<CanFrame>;
+
 #[derive(Debug, Clone)]
 pub struct CanFrame {
     id: u32,

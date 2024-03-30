@@ -9,7 +9,10 @@ use tokio::{
 
 use self::socket::OwnedCanSocket;
 
-use super::{timestamped::Timestamped, can_frame::CanFrame, can_error::CanError, TCanError, TCanFrame};
+use super::{
+    can_error::CanError, can_error::TCanError, can_frame::CanFrame, can_frame::TCanError,
+    timestamped::Timestamped,
+};
 
 mod socket;
 
@@ -21,7 +24,7 @@ pub struct SocketCanAdapter {
 }
 
 impl SocketCanAdapter {
-    pub fn create(bus : &BusRef) -> Result<SocketCanAdapter, std::io::Error> {
+    pub fn create(bus: &BusRef) -> Result<SocketCanAdapter, std::io::Error> {
         let ifname = bus.name();
         let socket = OwnedCanSocket::open(ifname)?;
 
@@ -70,19 +73,14 @@ impl SocketCanAdapter {
         })
     }
 
-}
-
-
-impl CanAdapterInterface for SocketCanAdapter {
-
-    async fn send(&self, frame: CanFrame) {
+    pub async fn send(&self, frame: CanFrame) {
         self.tx
             .send(frame)
             .await
             .expect("failed to forward canframe to can module for transmission");
     }
 
-    async fn receive(&self) -> Result<Timestamped<CanFrame>, Timestamped<CanError>> {
+    pub async fn receive(&self) -> Result<TCanFrame, TCanError> {
         let frame = self.rx.lock().await.recv().await;
         match frame {
             Some(frame) => Ok(frame),
@@ -92,11 +90,13 @@ impl CanAdapterInterface for SocketCanAdapter {
         }
     }
 
-    async fn receive_err(&self) -> Timestamped<CanError> {
+    pub async fn receive_err(&self) -> TCanError {
         let error = self.err_rx.lock().await.recv().await;
         match error {
             Some(error) => error,
-            None => Timestamped::now(CanError::Disconnect(format!("can receive thread closed rx channel"))),
+            None => Timestamped::now(CanError::Disconnect(format!(
+                "can receive thread closed rx channel"
+            ))),
         }
     }
 }
