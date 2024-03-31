@@ -1,6 +1,8 @@
 use std::{net::SocketAddr, time::Duration};
 
+use can_config_rs::config::NetworkRef;
 use serde::Serialize;
+use tauri::Manager;
 
 use crate::state::startup::{NetworkConnectionCreateInfo, StartupState};
 
@@ -25,6 +27,7 @@ pub async fn download_network_configuration(
         Err(_) => Err("Failed to join blocking task".to_owned()),
     }
 }
+
 
 const UDP_DISCOVERY_SERVICE_NAME: &'static str = "CANzero";
 
@@ -55,6 +58,10 @@ pub struct ConnectionDescription {
 pub async fn discover_servers(
     state: tauri::State<'_, StartupState>,
 ) -> Result<Vec<ConnectionDescription>, String> {
+    let Some(network_configuration) : Option<NetworkRef> = state.network_configuration().await else {
+        return Err("Failed to discover networks. No network configuration avaiable.".to_owned());
+    };
+
     let Ok(socket) = tokio::net::UdpSocket::bind(&format!("0.0.0.0:0")).await else {
         return Err("Failed to bind UDP discovery socket".to_owned());
     };
@@ -92,7 +99,7 @@ pub async fn discover_servers(
                 if ty == 1u8 && server_service_name == UDP_DISCOVERY_SERVICE_NAME {
                     connections.push((server_addr.ip(), server_port));
                 }
-                break;
+                continue;
             }
             Err(_) => {
                 break;
@@ -101,44 +108,93 @@ pub async fn discover_servers(
         }
     }
 
-    let connections: Vec<NetworkConnectionCreateInfo> = connections
+    let mut connections: Vec<NetworkConnectionCreateInfo> = connections
         .into_iter()
         .map(|(ip_addr, port)| {
             return NetworkConnectionCreateInfo::Tcp(SocketAddr::new(ip_addr, port));
         })
         .collect();
-    // TODO add SOCKETCAN connection
+
+    #[cfg(feature = "socket-can")]
+    check_for_socketcan(&network_configuration, &mut connections);
 
     state.set_connections(connections.clone()).await;
-    let mut con: Vec<ConnectionDescription> = connections
+    Ok(connections
         .iter()
         .map(|con| match con {
             NetworkConnectionCreateInfo::Tcp(addr) => ConnectionDescription {
                 tag: ConnectionType::Tcp,
                 description: format!("{addr:?}"),
             },
+            #[cfg(feature = "socket-can")]
             NetworkConnectionCreateInfo::SocketCan => ConnectionDescription {
                 tag: ConnectionType::SocketCan,
-                description: format!("SocketCAN at ???"),
+                description: format!(
+                    "SocketCAN at {:?}",
+                    network_configuration
+                        .buses()
+                        .iter()
+                        .map(|bus| bus.name())
+                        .collect::<Vec<&str>>()
+                ),
             },
         })
-        .collect();
-    con.push(ConnectionDescription {
-        tag: ConnectionType::SocketCan,
-        description: format!("SOCKETCAN"),
-    });
-    Ok(con)
+        .collect())
+}
+
+#[cfg(feature = "socket-can")]
+pub fn check_for_socketcan(
+    network_ref: &NetworkRef,
+    connections: &mut Vec<NetworkConnectionCreateInfo>,
+) {
+    for bus in network_ref.buses() {
+        let Ok(_) = nix::net::if_::if_nametoindex(bus.name()) else {
+            return;
+        };
+    }
+    connections.push(NetworkConnectionCreateInfo::SocketCan);
 }
 
 #[tauri::command]
 pub async fn try_connect(
     state: tauri::State<'_, StartupState>,
+    app_handle: tauri::AppHandle,
     connection_index: usize,
 ) -> Result<(), String> {
-    state.try_connect(connection_index).await
+    state.try_connect(connection_index, &app_handle).await
 }
 
 #[tauri::command]
-pub async fn complete_setup(state: tauri::State<'_, StartupState>) -> Result<(), String> {
-    todo!("complete setup is not yet implemented!");
+pub async fn complete_setup(
+    app_handle: tauri::AppHandle,
+    startup_state: tauri::State<'_, StartupState>,
+) -> Result<(), String> {
+    // create cnl state
+    let cnl_state = startup_state.complete_setup(&app_handle).await?;
+    app_handle.manage(cnl_state);
+
+    // create new window
+    tauri::WindowBuilder::new(
+        &app_handle,
+        "main",
+        tauri::WindowUrl::App("index.html".into()),
+    )
+    .title("CANzero control-panel")
+    .inner_size(800f64, 600f64)
+    .resizable(true)
+    .visible(true)
+    .build()
+    .map_err(|err| format!("{err:?}"))?;
+
+    return Ok(());
+}
+
+#[tauri::command]
+pub fn close_startup(app_handle: tauri::AppHandle) {
+    let Some(startup_window) = app_handle.get_window("startup") else {
+        return;
+    };
+    startup_window
+        .close()
+        .expect("Failed to close startup window");
 }

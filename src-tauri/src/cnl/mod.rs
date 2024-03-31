@@ -45,15 +45,10 @@ impl CNL {
     pub async fn create(
         network_config: &config::NetworkRef,
         app_handle: &tauri::AppHandle,
-        can_adapters: Vec<CanAdapter>,
+        can_adapters: Vec<Arc<CanAdapter>>,
     ) -> Self {
         let connection_object =
             ConnectionObject::new(ConnectionStatus::CanDisconnected, app_handle);
-
-        let can_adapters: Vec<Arc<CanAdapter>> = can_adapters
-            .into_iter()
-            .map(|adapter| Arc::new(adapter))
-            .collect();
 
         connection_object.set_status(ConnectionStatus::CanConnected);
 

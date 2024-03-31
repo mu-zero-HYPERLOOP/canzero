@@ -16,5 +16,5 @@ pub async fn get_connection_status(state: tauri::State<'_, CNLState>) -> Result<
 
 #[tauri::command]
 pub async fn heartbeat() {
-    println!("Heartbeat: {:?}", chrono::offset::Local::now());
+    // println!("Heartbeat: {:?}", chrono::offset::Local::now());
 }

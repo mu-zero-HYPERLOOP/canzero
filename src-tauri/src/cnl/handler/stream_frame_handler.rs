@@ -3,7 +3,7 @@ use std::sync::Arc;
 use can_config_rs::config;
 
 use crate::cnl::{
-    can_adapter::{can_frame::TCanFrame, timestamped::Timestamped},
+    can_adapter::can_frame::TCanFrame,
     deserialize::FrameDeserializer,
     errors::Result,
     frame::TFrame,
@@ -32,7 +32,6 @@ impl StreamFrameHandler {
         for (attrib, oeo) in frame.attributes().iter().zip(&self.object_entries) {
             oeo.push_value(attrib.value().clone(), can_frame.timestamp()).await
         }
-
-        Ok(Timestamped::new(can_frame.timestamp().clone(), frame))
+        Ok(can_frame.new_value(frame))
     }
 }

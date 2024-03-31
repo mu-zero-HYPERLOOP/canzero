@@ -213,25 +213,24 @@ impl ObjectEntryObject {
         }});
     }
 
-    pub async fn push_value(&self, value: Value, arrive_instance: &std::time::Instant) {
+    pub async fn push_value(&self, value: Value, timestamp: &Duration) {
         let mut store = self.store.lock().await;
-        let timestamp = arrive_instance.duration_since(self.start_time);
         let delta_time = match store.latest_value() {
             Some(latest) => timestamp.saturating_sub(latest.timestamp), //Not sure if saturating
             //sub is correct here
-            None => timestamp,
+            None => timestamp.clone(),
         };
 
         // The value has to be stored before notify because the observables
         // use the values in the store directly to reduce clones
-        store.push_value(ObjectEntryValue::new(value, timestamp, delta_time));
+        store.push_value(ObjectEntryValue::new(value, timestamp.clone(), delta_time));
         self.latest_observable.notify().await;
         for history_observable in self.history_observables.lock().await.iter() {
             history_observable.notify().await;
         }
     }
 
-    pub async fn push_get_response(&self, value: Value, arrive_instance: &std::time::Instant) {
+    pub async fn push_get_response(&self, value: Value, timestamp: &Duration) {
         let mut get_req_num = self.open_get_request.lock().await;
         if *get_req_num % 2 == 0 {
             notify_warning(
@@ -242,7 +241,7 @@ impl ObjectEntryObject {
             );
             return;
         }
-        self.push_value(value, arrive_instance).await;
+        self.push_value(value, timestamp).await;
         *get_req_num += 1;
         drop(get_req_num);
         notify_info(

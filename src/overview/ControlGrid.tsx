@@ -134,7 +134,6 @@ function ControlGrid({ connectionSuccess, nodes }: Readonly<ControlGridProps>) {
           <Grid item xs={6} md={6}>
             <Item sx={{ width: "100%", height: "300px" }}>
               3D Pod Model
-              <Pod3DModel />
             </Item>
           </Grid>
           <Grid item xs={6} md={6}>

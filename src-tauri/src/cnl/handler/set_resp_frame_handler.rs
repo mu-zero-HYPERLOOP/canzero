@@ -95,6 +95,6 @@ impl SetRespFrameHandler {
             return Err(Error::InvalidSetResponseServerOrObjectEntryNotFound);
         };
 
-        Ok(Timestamped::new(can_frame.timestamp().clone(), frame))
+        Ok(can_frame.new_value(frame))
     }
 }

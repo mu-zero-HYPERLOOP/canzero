@@ -1,4 +1,4 @@
-use std::ops::Deref;
+use std::{ops::Deref, sync::Arc};
 
 use can_config_rs::config::NetworkRef;
 use tokio::sync::Mutex;
@@ -18,7 +18,7 @@ impl Deref for CNLState {
 }
 
 impl CNLState {
-    pub async fn create(network_config: NetworkRef, app_handle: &tauri::AppHandle, can_adapters : Vec<CanAdapter>) -> Self {
+    pub async fn create(network_config: NetworkRef, app_handle: &tauri::AppHandle, can_adapters : Vec<Arc<CanAdapter>>) -> Self {
         Self {
             cnl: Mutex::new(CNL::create(&network_config, app_handle, can_adapters).await),
         }

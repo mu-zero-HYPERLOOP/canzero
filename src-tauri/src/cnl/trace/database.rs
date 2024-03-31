@@ -1,4 +1,4 @@
-use std::{cmp::Reverse, collections::HashMap, time::Instant};
+use std::{cmp::Reverse, collections::HashMap, time::{Duration, Instant}};
 
 use tokio::sync::Mutex;
 
@@ -80,10 +80,10 @@ impl TraceDatabaseData {
         match self.sort_order {
             SortOrder::Asc => self
                 .sorted_filter
-                .sort_by_key(|i| Reverse(self.trace[*i].absolute_time().as_millis())),
+                .sort_by_key(|i| Reverse(self.trace[*i].timestamp().as_millis())),
             SortOrder::Desc => self
                 .sorted_filter
-                .sort_by_key(|i| self.trace[*i].absolute_time().as_millis()),
+                .sort_by_key(|i| self.trace[*i].timestamp().as_millis()),
         }
     }
 
@@ -137,14 +137,12 @@ impl TraceDatabaseData {
 }
 
 pub struct TraceDatabase {
-    start_time: Instant,
     data: Mutex<TraceDatabaseData>,
 }
 
 impl TraceDatabase {
     pub fn new() -> Self {
         Self {
-            start_time: Instant::now(),
             data: Mutex::new(TraceDatabaseData {
                 lookup: HashMap::new(),
                 trace: vec![],
@@ -157,7 +155,7 @@ impl TraceDatabase {
         }
     }
 
-    pub async fn update(&self, frame: TraceFrame, arrive: Instant, bus_name : &str, bus_id : u32) {
+    pub async fn update(&self, frame: TraceFrame, arrive: Duration, bus_name : &str, bus_id : u32) {
         let mut unlocked_data = self.data.lock().await;
         let trace_lookup_entry = unlocked_data.lookup.get(&frame.key()).cloned();
         match trace_lookup_entry {
@@ -167,10 +165,9 @@ impl TraceDatabase {
                     bus_name,
                     bus_id,
                     frame,
-                    self.start_time,
                     Some(
                         unlocked_data.trace[trace_lookup_index]
-                            .absolute_time()
+                            .timestamp()
                             .clone(),
                     ),
                     arrive,
@@ -197,7 +194,6 @@ impl TraceDatabase {
                     bus_name,
                     bus_id,
                     frame,
-                    self.start_time,
                     None,
                     arrive,
                 ));

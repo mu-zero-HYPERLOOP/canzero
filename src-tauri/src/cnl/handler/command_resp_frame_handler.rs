@@ -1,7 +1,7 @@
 use can_config_rs::config::MessageRef;
 
 use crate::cnl::{
-    can_adapter::{can_frame::TCanFrame, timestamped::Timestamped}, deserialize::FrameDeserializer, errors::Result, frame::TFrame
+    can_adapter::can_frame::TCanFrame, deserialize::FrameDeserializer, errors::Result, frame::TFrame
 };
 
 pub struct CommandRespFrameHandler {
@@ -17,6 +17,6 @@ impl CommandRespFrameHandler {
 
         // TODO implement handling
 
-        Ok(Timestamped::new(can_frame.timestamp().clone(), frame))
+        Ok(can_frame.new_value(frame))
     }
 }

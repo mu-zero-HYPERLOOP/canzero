@@ -12,8 +12,13 @@ enum ConnectionState {
   Searching,
   FoundServers,
   Connecting,
-  Success,
 };
+
+enum SetupState {
+  Progess,
+  Error,
+  Success,
+}
 
 enum ConnectionType {
   SocketCan = 0,
@@ -36,9 +41,11 @@ function StartupStepper() {
 
   const [connections, setConnections] = useState<ConnectionDescription[]>([]);
 
-  const [configError, setConfigError] = useState<ConfigError>();
-  const [connectionError, setConnectionError] = useState<ConnectionError>();
-  const [setupError, setSetupError] = useState<SetupError>();
+  const [configError, setConfigError] = useState<ConfigError>(null);
+  const [connectionError, setConnectionError] = useState<ConnectionError>(null);
+  const [setupError, setSetupError] = useState<SetupError>(null);
+
+  const [activeConnection, setActiveConnection] = useState<string>();
 
   const [connectionState, setConnectionState] = useState(ConnectionState.Init);
 
@@ -74,11 +81,28 @@ function StartupStepper() {
         }
         break;
       case 2: // Start Control Panel
+        invoke("complete_setup", {}).then(()=> {
+          setActiveStep(3);
+          setSetupError(null);
+        }).catch(err=>{
+          console.log("error");
+          setSetupError(err);
+        });
         break;
     }
     // register to listener in the backend 
   }, [activeStep, connectionState]);
   console.log("rerender");
+
+  function reset() {null
+    setActiveStep(0);
+    setConnectionState(ConnectionState.Init);
+    setConfigError(null);
+    setConnectionError(null);
+    setSetupError(null);
+    setConnections([]);
+    setActiveConnection(undefined);
+  }
 
   return (
     <Box component="div" sx={{ paddingTop: 2 }}>
@@ -90,7 +114,7 @@ function StartupStepper() {
             </StepLabel>
             <StepContent>
               {configError == null ? <LinearProgress /> : <Alert severity="warning" action={
-                <IconButton color="inherit" size="small">
+                <IconButton color="inherit" size="small" onClick={reset}>
                   <RefreshIcon />
                 </IconButton>
               } sx={{
@@ -102,7 +126,7 @@ function StartupStepper() {
           </Step>
           <Step key="connect-to-network">
             <StepLabel>
-              Connect to Network
+              {activeConnection == undefined ? "Connect to Network" : `Connected to ${activeConnection}`}
             </StepLabel>
             <StepContent>
               {(() => {
@@ -119,7 +143,7 @@ function StartupStepper() {
                   case ConnectionState.Error:
                     return (
                       <Alert severity={connections.length == 0 ? "warning" : "error"} action={
-                        <IconButton color="inherit" size="small" onClick={() => setConnectionState(ConnectionState.Init)}>
+                        <IconButton color="inherit" size="small" onClick={reset}>
                           <RefreshIcon />
                         </IconButton>
                       } sx={{
@@ -143,8 +167,11 @@ function StartupStepper() {
                             connections.map((connection, index) => {
                               return (
                                 <ListItem>
-                                  <ListItemButton key={index} onClick={x => {
-                                    invoke("try_connect", { connectionIndex: index }).catch(err => {
+                                  <ListItemButton key={index} onClick={() => {
+                                    invoke("try_connect", { connectionIndex: index }).then(()=> {
+                                      setActiveConnection(connections[index].description);
+                                      setActiveStep(2);
+                                    }).catch(err => {
                                       setConnectionError(err);
                                       setConnectionState(ConnectionState.Error);
                                     });
@@ -171,8 +198,6 @@ function StartupStepper() {
                         <LinearProgress />
                       </Box>
                     );
-                  case ConnectionState.Success:
-                    return <p>Success =^)</p>;
                   default:
                     return <></>;
                 }
@@ -185,7 +210,7 @@ function StartupStepper() {
             </StepLabel>
             <StepContent>
               {setupError == null ? <LinearProgress /> : <Alert severity="error" action={
-                <IconButton color="inherit" size="small">
+                <IconButton color="inherit" size="small" onClick={reset}>
                   <RefreshIcon />
                 </IconButton>
               } sx={{

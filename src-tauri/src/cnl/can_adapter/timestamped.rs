@@ -1,7 +1,7 @@
-use std::ops::Deref;
+use std::{ops::Deref, time::Duration};
 
 pub struct Timestamped<T> {
-    instant : std::time::Instant,
+    timestamp : Duration,
     value : T,
 }
 
@@ -14,25 +14,23 @@ impl<T> Deref for Timestamped<T> {
 }
 
 impl<T> Timestamped<T> {
-    pub fn new(timestamp : std::time::Instant, value : T) -> Self{
+    pub fn new(timestamp : Duration, value : T) -> Self{
         Self {
-            instant : timestamp,
+            timestamp,
             value
         }
     }
 
-    pub fn now(value : T) -> Self {
-        Self {
-            instant : std::time::Instant::now(),
-            value,
-        }
-    }
-    pub fn timestamp(&self) -> &std::time::Instant {
-        &self.instant
+    pub fn timestamp(&self) -> &Duration {
+        &self.timestamp
     }
 
-    pub fn destruct(self) -> (std::time::Instant, T) {
-        (self.instant, self.value)
+    pub fn destruct(self) -> (Duration, T) {
+        (self.timestamp, self.value)
+    }
+
+    pub fn new_value<R>(&self, value : R) -> Timestamped<R> {
+        Timestamped::new(*self.timestamp(), value)
     }
 }
 

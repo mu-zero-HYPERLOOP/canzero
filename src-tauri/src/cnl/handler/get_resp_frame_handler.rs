@@ -1,4 +1,4 @@
-use std::{collections::HashMap, sync::Arc};
+use std::{collections::HashMap, sync::Arc, time::Duration};
 
 use bitvec::view::AsBits;
 use can_config_rs::config;
@@ -75,7 +75,7 @@ struct GetResp {
 }
 
 impl GetResp {
-    async fn receive(&mut self, frame: GetRespFrame, timestamp : &std::time::Instant) -> Result<()> {
+    async fn receive(&mut self, frame: GetRespFrame, timestamp : &Duration) -> Result<()> {
         let (expected_sof, expected_toggle) = match &self.state {
             GetRespState::Ready => (true, false),
             GetRespState::FragmentationToggleLow => (false, false),
@@ -84,18 +84,12 @@ impl GetResp {
         let expected_eof = (self.buffer.len() + 1) as u32 == self.size.div_ceil(32);
 
         if expected_sof != frame.sof {
-            #[cfg(feature="mock-can")]
-            return Ok(());
             return Err(Error::InvalidGetResponseSofFlag);
         }
         if expected_toggle != frame.toggle {
-            #[cfg(feature="mock-can")]
-            return Ok(());
             return Err(Error::InvalidGetResponseToggleFlag);
         }
         if expected_eof != frame.eof {
-            #[cfg(feature="mock-can")]
-            return Ok(());
             return Err(Error::InvalidGetResponseEofFlag);
         }
 
@@ -177,6 +171,6 @@ impl GetRespFrameHandler {
 
         get_resp.lock().await.receive(get_resp_frame, can_frame.timestamp()).await?;
 
-        Ok(Timestamped::new(can_frame.timestamp().clone(), frame))
+        Ok(can_frame.new_value(frame))
     }
 }

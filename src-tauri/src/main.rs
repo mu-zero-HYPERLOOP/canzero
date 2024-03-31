@@ -12,36 +12,17 @@ mod state;
 async fn main() {
     let _ = fix_path_env::fix();
     tauri::async_runtime::set(tokio::runtime::Handle::current());
-    println!("Hello, World!");
     // setup tauri
     tauri::Builder::default()
         .setup(|app| {
-            // println!("Hello, Tauri!");
-            // let app_handle = app.handle();
-            // let address = match app.get_cli_matches() {
-            //     Ok(matches) => {
-            //         let address = matches.args.get("address");
-            //         println!("{address:?}");
-            //         match address {
-            //             Some(arg_data) => match &arg_data.value {
-            //                 serde_json::Value::String(address) => address.clone(),
-            //                 _ => "127.0.0.1:50000".to_owned(),
-            //             },
-            //             None => "127.0.0.1:50000".to_owned(),
-            //         }
-            //     }
-            //     Err(_) => "127.0.0.1:50000".to_owned(),
-            // };
-            // tauri::async_runtime::spawn(async move {
-            // });
-            // everything here should be pretty fast to get good startup times!
             app.app_handle().manage(StartupState::new());
-            let startup_window = tauri::WindowBuilder::new(
+            tauri::WindowBuilder::new(
                 app,
                 "startup",
                 tauri::WindowUrl::App("startup.html".into()),
             ).center()
             .title("CANzero-Startup")
+            .decorations(false)
             .resizable(false)
             .inner_size(960f64, 540f64)
             .build()?;
@@ -71,6 +52,7 @@ async fn main() {
             commands::startup::discover_servers,
             commands::startup::try_connect,
             commands::startup::complete_setup,
+            commands::startup::close_startup,
         ])
         .run(tauri::generate_context!())
         .expect("Error while running tauri application");

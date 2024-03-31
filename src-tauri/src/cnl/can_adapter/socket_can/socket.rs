@@ -1,4 +1,4 @@
-use std::{mem, sync::Arc};
+use std::{mem, time::Instant};
 
 use libc::{c_int, c_void, can_frame, read, sa_family_t, sockaddr_can, write};
 pub use libc::{
@@ -14,7 +14,7 @@ struct CanSocket {
 }
 
 impl CanSocket {
-    fn open(ifname: &str) -> Result<CanSocket, std::io::Error> {
+    fn open(ifname: &str, start_of_run : Instant) -> Result<CanSocket, std::io::Error> {
         let ifindex = nix::net::if_::if_nametoindex(ifname)?;
         let mut addr: sockaddr_can = unsafe { mem::zeroed() };
         addr.can_family = AF_CAN as sa_family_t;
@@ -42,7 +42,7 @@ impl CanSocket {
             libc::close(self.fd);
         }
     }
-    fn receive(&self) -> Result<CanFrame, CanError> {
+    fn receive(&self) -> std::io::Result<Result<CanFrame, CanError>> {
         let mut frame: can_frame = unsafe { mem::zeroed() };
         let n = mem::size_of::<can_frame>();
 
@@ -51,16 +51,16 @@ impl CanSocket {
         if rd as usize == n {
             // parse can_frame into CanFrame
             if frame.can_id & CAN_ERR_FLAG != 0 {
-                return Err(CanError::Can(unsafe { std::mem::transmute(frame.data) }));
+                Ok(Err(CanError(unsafe { std::mem::transmute(frame.data) })))
             } else {
-                Ok(frame_from_socket_can_frame(&frame))
+                Ok(Ok(frame_from_socket_can_frame(&frame)))
             }
         } else {
-            Err(CanError::Io(Arc::new(std::io::Error::last_os_error())))
+            Err(std::io::Error::last_os_error())
         }
     }
 
-    fn transmit(&self, frame: &CanFrame) -> Result<(), CanError> {
+    fn transmit(&self, frame: &CanFrame) -> std::io::Result<()> {
         let fd = self.fd;
         let canframe = frame_to_socket_can_frame(frame);
 
@@ -75,7 +75,7 @@ impl CanSocket {
         if ret as usize == mem::size_of::<can_frame>() {
             Ok(())
         } else {
-            Err(CanError::Io(Arc::new(std::io::Error::last_os_error())))
+            Err(std::io::Error::last_os_error())
         }
     }
 }
@@ -121,9 +121,9 @@ pub struct CanSocketRef {
 }
 
 impl OwnedCanSocket {
-    pub fn open(ifname: &str) -> Result<Self, std::io::Error> {
+    pub fn open(ifname: &str, start_of_run : Instant) -> Result<Self, std::io::Error> {
         Ok(OwnedCanSocket {
-            socket: CanSocket::open(ifname)?,
+            socket: CanSocket::open(ifname, start_of_run)?,
         })
     }
 
@@ -135,11 +135,11 @@ impl OwnedCanSocket {
 }
 
 impl CanSocketRef {
-    pub fn receive(&self) -> Result<CanFrame, CanError> {
+    pub fn receive(&self) -> std::io::Result<Result<CanFrame, CanError>> {
         self.socket.receive()
     }
 
-    pub fn transmit(&self, frame: &CanFrame) -> Result<(), CanError> {
+    pub fn transmit(&self, frame: &CanFrame) -> std::io::Result<()> {
         self.socket.transmit(frame)
     }
 }
