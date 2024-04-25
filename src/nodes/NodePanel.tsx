@@ -34,7 +34,7 @@ const VirtuosoTableComponents: TableComponents<RowData> = {
   Table: (props) => (
     <Table {...props} size="small" sx={{ borderCollapse: 'separate', tableLayout: 'fixed' }} />
   ),
-  TableHead,
+  TableHead : TableHead as any,
   TableRow: ({ item: _item, ...props }) => <StyledTableRow {...props} />,
   TableBody: React.forwardRef<HTMLTableSectionElement>((props, ref) => (
     <TableBody {...props} ref={ref} />

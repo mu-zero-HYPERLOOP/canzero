@@ -12,21 +12,30 @@ pub async fn download_network_configuration(
     state: tauri::State<'_, StartupState>,
 ) -> Result<(), String> {
     let network_config = tokio::task::spawn_blocking(|| {
-    let Ok(appdata) = AppData::read() else {
-        return Err("No config set use \n$ canzero config set-path <path-to-config>".to_owned());
-    };
-    let Some(config_path) = appdata.get_config_path() else {
-        return Err("No config set use \n$ canzero config set-path <path-to-config>".to_owned());
-    };
-    let Ok(network_config) = can_yaml_config_rs::parse_yaml_config_from_file(config_path.to_str().expect("FUCK YOU for using non utf8 filenames")) else {
-        return Err(format!("Failed to parse configuration at {config_path:?}"));
-    };
-    Ok(network_config)
-    }).await.expect("Failed to join blocking task (during download_network_configuration)")?;
+        let Ok(appdata) = AppData::read() else {
+            return Err(
+                "No config set use \n$ canzero config set-path <path-to-config>".to_owned(),
+            );
+        };
+        let Some(config_path) = appdata.get_config_path() else {
+            return Err(
+                "No config set use \n$ canzero config set-path <path-to-config>".to_owned(),
+            );
+        };
+        let Ok(network_config) = can_yaml_config_rs::parse_yaml_config_from_file(
+            config_path
+                .to_str()
+                .expect("FUCK YOU for using non utf8 filenames"),
+        ) else {
+            return Err(format!("Failed to parse configuration at {config_path:?}"));
+        };
+        Ok(network_config)
+    })
+    .await
+    .expect("Failed to join blocking task (during download_network_configuration)")?;
     state.set_network_config(network_config).await;
     Ok(())
 }
-
 
 const UDP_DISCOVERY_SERVICE_NAME: &'static str = "CANzero";
 
@@ -57,7 +66,8 @@ pub struct ConnectionDescription {
 pub async fn discover_servers(
     state: tauri::State<'_, StartupState>,
 ) -> Result<Vec<ConnectionDescription>, String> {
-    let Some(network_configuration) : Option<NetworkRef> = state.network_configuration().await else {
+    let Some(network_configuration): Option<NetworkRef> = state.network_configuration().await
+    else {
         return Err("Failed to discover networks. No network configuration avaiable.".to_owned());
     };
 
@@ -72,40 +82,47 @@ pub async fn discover_servers(
     let mut hello_msg = vec![0u8];
     hello_msg.extend_from_slice(UDP_DISCOVERY_SERVICE_NAME.as_bytes());
     // CANzero discovery broadcast are always broadcast on port 9002!
-    let Ok(bytes_send) = socket
+
+    let connections = match socket
         .send_to(&hello_msg, format!("255.255.255.255:9002"))
         .await
-    else {
-        return Err("Failed to send hello packet on UDP discovery socket".to_owned());
-    };
-    if bytes_send != hello_msg.len() {
-        return Err("Failed to send complete hello packet on UDP discovery socket".to_owned());
-    }
+    {
+        Ok(bytes_send) => {
+            if bytes_send != hello_msg.len() {
+                return Err(
+                    "Failed to send complete hello packet on UDP discovery socket".to_owned(),
+                );
+            }
 
-    let mut rx_buffer = [0u8; 1024];
-    let mut connections = vec![];
-    loop {
-        match tokio::time::timeout(
-            Duration::from_millis(1000),
-            socket.recv_from(&mut rx_buffer),
-        )
-        .await
-        {
-            Ok(Ok((packet_size, server_addr))) => {
-                let ty = rx_buffer[0];
-                let server_port = (rx_buffer[1] as u16) | ((rx_buffer[2] as u16) << 8);
-                let server_service_name = std::str::from_utf8(&rx_buffer[3..packet_size]).unwrap();
-                if ty == 1u8 && server_service_name == UDP_DISCOVERY_SERVICE_NAME {
-                    connections.push((server_addr.ip(), server_port));
+            let mut rx_buffer = [0u8; 1024];
+            let mut connections = vec![];
+            loop {
+                match tokio::time::timeout(
+                    Duration::from_millis(1000),
+                    socket.recv_from(&mut rx_buffer),
+                )
+                .await
+                {
+                    Ok(Ok((packet_size, server_addr))) => {
+                        let ty = rx_buffer[0];
+                        let server_port = (rx_buffer[1] as u16) | ((rx_buffer[2] as u16) << 8);
+                        let server_service_name =
+                            std::str::from_utf8(&rx_buffer[3..packet_size]).unwrap();
+                        if ty == 1u8 && server_service_name == UDP_DISCOVERY_SERVICE_NAME {
+                            connections.push((server_addr.ip(), server_port));
+                        }
+                        continue;
+                    }
+                    Err(_) => {
+                        break;
+                    }
+                    _ => continue,
                 }
-                continue;
             }
-            Err(_) => {
-                break;
-            }
-            _ => continue,
+            connections
         }
-    }
+        Err(_) => vec![],
+    };
 
     let mut connections: Vec<NetworkConnectionCreateInfo> = connections
         .into_iter()

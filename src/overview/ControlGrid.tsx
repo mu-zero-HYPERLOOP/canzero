@@ -1,8 +1,4 @@
 import { Grid, Paper, Skeleton, Stack, styled } from '@mui/material';
-import BMW from '../assets/bmw_m4.glb?url';
-import { PresentationControls, Stage, useGLTF } from '@react-three/drei';
-import { Canvas } from "@react-three/fiber";
-import { JSX } from 'react/jsx-runtime';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCarBattery, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
 import Thermostat from '@mui/icons-material/Thermostat';
@@ -60,22 +56,22 @@ function ControlLights() {
   )
 }
 
-function Model(props: JSX.IntrinsicAttributes & { [properties: string]: any; }) {
-  const { scene } = useGLTF(BMW);
-  return <primitive object={scene} scale={0.01} {...props} />;
-}
-
-function Pod3DModel() {
-  return (
-    <Canvas dpr={[1, 2]} shadows camera={{ fov: 45 }}>
-      <PresentationControls global speed={1.5} zoom={0.5} polar={[-Math.PI, Math.PI]}>
-        <Stage environment={null} shadows={true}>
-          <Model scale={0.01} />
-        </Stage>
-      </PresentationControls>
-    </Canvas>
-  );
-}
+// function Model(props: JSX.IntrinsicAttributes & { [properties: string]: any; }) {
+//   const { scene } = useGLTF(BMW);
+//   return <primitive object={scene} scale={0.01} {...props} />;
+// }
+//
+// function Pod3DModel() {
+//   return (
+//     <Canvas dpr={[1, 2]} shadows camera={{ fov: 45 }}>
+//       <PresentationControls global speed={1.5} zoom={0.5} polar={[-Math.PI, Math.PI]}>
+//         <Stage environment={null} shadows={true}>
+//           <Model scale={0.01} />
+//         </Stage>
+//       </PresentationControls>
+//     </Canvas>
+//   );
+// }
 
 function createGridEntries(nodes: NodeInformation[]) {
   let entries: ObjectEntryGridInformation[] = [];

@@ -14,11 +14,11 @@ enum ConnectionState {
   Connecting,
 };
 
-enum SetupState {
-  Progess,
-  Error,
-  Success,
-}
+// enum SetupState {
+//   Progess,
+//   Error,
+//   Success,
+// }
 
 enum ConnectionType {
   SocketCan = 0,
