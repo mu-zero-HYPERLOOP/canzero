@@ -1,5 +1,6 @@
 use std::{net::SocketAddr, time::Duration};
 
+use can_appdata::AppData;
 use can_config_rs::config::NetworkRef;
 use serde::Serialize;
 use tauri::Manager;
@@ -10,22 +11,20 @@ use crate::state::startup::{NetworkConnectionCreateInfo, StartupState};
 pub async fn download_network_configuration(
     state: tauri::State<'_, StartupState>,
 ) -> Result<(), String> {
-    let res = tokio::task::spawn_blocking(move || match can_live_config_rs::fetch_live_config() {
-        Ok(network_config) => {
-            let network_config = network_config.clone();
-            Ok(network_config)
-        }
-        Err(live_config_error) => Err(format!("{live_config_error:?}")),
-    })
-    .await;
-    match res {
-        Ok(Ok(network)) => {
-            state.set_network_config(network).await;
-            Ok(())
-        }
-        Ok(Err(err)) => Err(err),
-        Err(_) => Err("Failed to join blocking task".to_owned()),
-    }
+    let network_config = tokio::task::spawn_blocking(|| {
+    let Ok(appdata) = AppData::read() else {
+        return Err("No config set use \n$ canzero config set-path <path-to-config>".to_owned());
+    };
+    let Some(config_path) = appdata.get_config_path() else {
+        return Err("No config set use \n$ canzero config set-path <path-to-config>".to_owned());
+    };
+    let Ok(network_config) = can_yaml_config_rs::parse_yaml_config_from_file(config_path.to_str().expect("FUCK YOU for using non utf8 filenames")) else {
+        return Err(format!("Failed to parse configuration at {config_path:?}"));
+    };
+    Ok(network_config)
+    }).await.expect("Failed to join blocking task (during download_network_configuration)")?;
+    state.set_network_config(network_config).await;
+    Ok(())
 }
 
 

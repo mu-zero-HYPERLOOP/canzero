@@ -7,7 +7,7 @@ buses:
 
 enum_types:
   # General types:
-  bool:
+  bool_t:
     FALSE: 0
     TRUE: 1
   # Used for error flags
@@ -104,7 +104,12 @@ enum_types:
     STOP: ~
     DISCONNECT: ~
     MANUAL_CONTROL: ~
-
+  input_board_state:
+    INIT: ~
+    RUNNING : ~
+  pdu_state:
+    INIT: ~
+    RUNNING : ~
 
 struct_types:
   mlu_pid_values:
@@ -1183,6 +1188,9 @@ nodes:
   pdu24:
     description: power distribution unit 24V
     object_dictionary:
+      state:
+        type : pdu_state
+        description: Current state of the pdu.
       # Low Power Channel 1
       lp_channel1_control:
         type: pdu_channel_control
@@ -1456,6 +1464,9 @@ nodes:
   pdu12:
     description: power distribution unit 12V
     object_dictionary:
+      state:
+        type : pdu_state
+        description: Current state of the pdu
       # Low Power Channel 1
       lp_channel1_control:
         type: pdu_channel_control
@@ -1653,6 +1664,11 @@ nodes:
         type: error_flag
         description: Error flag for over temperature of the mcu.
     tx_streams:
+      state:
+        description: Current state of the pdu
+        interval: 0ms-500ms
+        mapping:
+          - state
       # Channel Currents
       channel_currents_1:
         description : Currents of the channel [lp1-lp8]
@@ -1728,8 +1744,11 @@ nodes:
 
 
   input_board: 
-    description: input board (teency 4.1)
+    description: input board (teensy 4.1)
     object_dictionary:
+      state:
+        type : input_board_state
+        description: Current state of the input board
       # State estimation
       position_estimation:
         type : d16<-100..100>
@@ -1862,13 +1881,13 @@ nodes:
         description: Broadcasted to the motor driver board.
       # Control-Configuration
       sync_mlu_pid_values:
-        type: bool
+        type: bool_t
         description: If true synchronizes control pid values of all MLUs from mlu_control_conifg.
       mlu_pid_values:
         type: mlu_pid_values
         description: Synchronized MLU PID values.
       sync_mgu_pid_values:
-        type: bool
+        type: bool_t
         description: If true synchronizes control pid values of all MGUs from mgu_control_config.
       mgu_pid_values:
         type: mgu_pid_values
@@ -1894,6 +1913,14 @@ nodes:
         type: d32<0..5000>
         unit: W
         description: Total power consumption of the 45V-System.
+      # PDU states
+      pdu12_state:
+        type: pdu_state
+      pdu24_state:
+        type: pdu_state
+      # Input board state
+      input_board_state:
+        type: input_board_state
       # 12V-PDU Control
       pdu12_lp_channel1_control:
         type: pdu_channel_control
@@ -2064,6 +2091,8 @@ nodes:
     rx_streams:
       # Receive from Input Board
       input_board:
+        state:
+          state: input_board_state
         state_estimation:
           position_estimation: position
           velocity_estimation: velocity
@@ -2083,6 +2112,8 @@ nodes:
           sdc_status: input_board_sdc_status
       # Receive from PDUs
       pdu12:
+        state:
+          state: pdu12_state
         channel_status:
           lp_channel1_status: pdu12_lp_channel1_status
           lp_channel2_status: pdu12_lp_channel2_status
@@ -2105,6 +2136,8 @@ nodes:
         power_estimation:
           power_estimation: pdu12_power_estimation
       pdu24:
+        state:
+          state : pdu24_state
         channel_status:
           lp_channel1_status: pdu24_lp_channel1_status
           lp_channel2_status: pdu24_lp_channel2_status
