@@ -1,11 +1,11 @@
 use std::{sync::Arc, time::Duration};
 
-use can_config_rs::config::{self, signal::Signal, SignalRef};
+use can_config_rs::config;
 use tokio::time;
 
-use crate::cnl::can_adapter::can_frame::CanFrame;
-
 use super::CanAdapter;
+
+use canzero_common::CanFrame;
 
 pub struct TxCom {
     network_ref: config::NetworkRef,
@@ -91,13 +91,15 @@ impl TxCom {
         data |= (self.network_ref.nodes().len() as u64) << 13;
         data |= (server_id as u64) << 21;
 
-        self.get_req_can_adapter.send(CanFrame::new(
+        if let Err(err) = self.get_req_can_adapter.send(CanFrame::new(
             self.network_ref.get_req_message().id().as_u32(),
             self.network_ref.get_req_message().id().ide(),
             false,
             self.network_ref.get_req_message().dlc(),
             data,
-        )).await;
+        )).await {
+            eprintln!("{err:?}");
+        };
     }
 }
 
@@ -106,6 +108,8 @@ async fn fragmented_can_send(frames: Vec<CanFrame>, can_adapter: Arc<CanAdapter>
     for frame in frames {
         // first tick completes instantaniously
         interval.tick().await;
-        can_adapter.send(frame).await;
+        if let Err(err) = can_adapter.send(frame).await {
+            eprintln!("{err:?}");
+        }
     }
 }

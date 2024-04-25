@@ -1,7 +1,8 @@
 use can_config_rs::config::{MessageId, MessageRef, SignalType, Type};
 use serde::{ser::SerializeMap, Serialize};
 
-use super::can_adapter::timestamped::Timestamped;
+use canzero_common::Timestamped;
+
 use bitvec::{
     prelude::{BitOrder, Lsb0},
     store::BitStore,

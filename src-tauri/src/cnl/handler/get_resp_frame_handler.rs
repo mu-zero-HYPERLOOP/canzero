@@ -4,12 +4,13 @@ use bitvec::view::AsBits;
 use can_config_rs::config;
 
 use crate::cnl::{
-    can_adapter::{can_frame::TCanFrame, timestamped::Timestamped},
     deserialize::{type_deserializer::TypeDeserializer, FrameDeserializer},
     errors::{Error, Result},
     frame::{Frame, TFrame, Value},
     network::{object_entry_object::ObjectEntryObject, NetworkObject},
 };
+
+use canzero_common::{TCanFrame, Timestamped};
 
 struct GetRespFrame {
     sof: bool,
@@ -27,13 +28,19 @@ impl GetRespFrame {
             panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame : header missing");
         };
         let Some(Value::UnsignedValue(sof)) = header.attribute("sof") else {
-            panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame : header.sof missing");
+            panic!(
+                "DETECTED INVALID CONFIG: invalid format of get_resp_frame : header.sof missing"
+            );
         };
         let Some(Value::UnsignedValue(eof)) = header.attribute("eof") else {
-            panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame : header.eof missing");
+            panic!(
+                "DETECTED INVALID CONFIG: invalid format of get_resp_frame : header.eof missing"
+            );
         };
         let Some(Value::UnsignedValue(toggle)) = header.attribute("toggle") else {
-            panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame : header.toggle missing");
+            panic!(
+                "DETECTED INVALID CONFIG: invalid format of get_resp_frame : header.toggle missing"
+            );
         };
         let Some(Value::UnsignedValue(object_entry_id)) = header.attribute("od_index") else {
             panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame : header.od_index missing");
@@ -45,7 +52,9 @@ impl GetRespFrame {
             panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame : header.server_id missing");
         };
         let Some(Value::UnsignedValue(data)) = frame.attribute("data") else {
-            panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame : header.data missing");
+            panic!(
+                "DETECTED INVALID CONFIG: invalid format of get_resp_frame : header.data missing"
+            );
         };
         Self {
             sof: *sof != 0,
@@ -54,7 +63,7 @@ impl GetRespFrame {
             client_id: *client_id as u8,
             server_id: *server_id as u8,
             object_entry_id: *object_entry_id as u16,
-            data : *data as u32,
+            data: *data as u32,
         }
     }
 }
@@ -75,7 +84,7 @@ struct GetResp {
 }
 
 impl GetResp {
-    async fn receive(&mut self, frame: GetRespFrame, timestamp : &Duration) -> Result<()> {
+    async fn receive(&mut self, frame: GetRespFrame, timestamp: &Duration) -> Result<()> {
         let (expected_sof, expected_toggle) = match &self.state {
             GetRespState::Ready => (true, false),
             GetRespState::FragmentationToggleLow => (false, false),
@@ -97,12 +106,13 @@ impl GetResp {
         self.buffer.push(frame.data);
 
         if frame.eof {
-            let value = self.type_deserializer
+            let value = self
+                .type_deserializer
                 .deserialize(&self.buffer.as_slice().as_bits());
             self.object_entry.push_get_response(value, timestamp).await;
             self.state = GetRespState::Ready;
             self.buffer.clear();
-        }else {
+        } else {
             // update fragmentation state!
             self.state = match self.state {
                 GetRespState::Ready => GetRespState::FragmentationToggleHigh,
@@ -169,7 +179,11 @@ impl GetRespFrameHandler {
             return Err(Error::InvalidGetResponseServerOrObjectEntryNotFound);
         };
 
-        get_resp.lock().await.receive(get_resp_frame, can_frame.timestamp()).await?;
+        get_resp
+            .lock()
+            .await
+            .receive(get_resp_frame, &can_frame.timestamp)
+            .await?;
 
         Ok(can_frame.new_value(frame))
     }

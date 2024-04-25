@@ -1,5 +1,4 @@
 use std::sync::Arc;
-use chrono;
 
 use crate::{cnl::connection::{ConnectionStatus, ConnectionObject}, state::cnl_state::CNLState};
 

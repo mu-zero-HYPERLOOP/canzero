@@ -4,9 +4,10 @@ use self::{
     stream_frame_handler::StreamFrameHandler,
 };
 
-use super::can_adapter::can_frame::TCanFrame;
 use super::errors::Result;
 use super::frame::TFrame;
+
+use canzero_common::TCanFrame;
 
 pub mod command_resp_frame_handler;
 pub mod get_resp_frame_handler;

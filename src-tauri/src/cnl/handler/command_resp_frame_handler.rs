@@ -1,8 +1,9 @@
 use can_config_rs::config::MessageRef;
 
 use crate::cnl::{
-    can_adapter::can_frame::TCanFrame, deserialize::FrameDeserializer, errors::Result, frame::TFrame
+    deserialize::FrameDeserializer, errors::Result, frame::TFrame
 };
+use canzero_common::TCanFrame;
 
 pub struct CommandRespFrameHandler {
     frame_deserializer: FrameDeserializer,

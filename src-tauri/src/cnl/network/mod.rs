@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
 use can_config_rs::config;
-
 use self::node_object::NodeObject;
 
 use super::tx::TxCom;

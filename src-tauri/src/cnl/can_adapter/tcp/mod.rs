@@ -1,11 +1,9 @@
 use std::sync::Arc;
 
-use self::client::{TcpClient, TcpFrame};
+use canzero_common::{TCanFrame, TCanError, CanFrame};
+use can_tcp_bridge_rs::frame::NetworkFrame;
 
-use super::{
-    can_error::TCanError,
-    can_frame::{CanFrame, TCanFrame},
-};
+use self::client::TcpClient;
 
 pub mod client;
 
@@ -40,7 +38,7 @@ impl TcpCanAdapter {
 
     pub async fn send(&self, frame: CanFrame) -> std::io::Result<()> {
         self.tcp_client
-            .send(TcpFrame {
+            .send(NetworkFrame {
                 can_frame: frame,
                 bus_id: self.bus_id,
             })

@@ -12,8 +12,6 @@ pub mod can_adapter;
 
 use std::sync::Arc;
 
-use crate::state::startup::NetworkConnectionCreateInfo;
-
 use self::{
     can_adapter::CanAdapter,
     connection::{ConnectionObject, ConnectionStatus},

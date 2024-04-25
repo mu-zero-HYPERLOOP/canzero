@@ -6,10 +6,9 @@ use self::{
     observable::TraceObservable,
 };
 
-use super::{
-    can_adapter::{can_error::TCanError, can_frame::TCanFrame},
-    frame::TFrame,
-};
+use super::frame::TFrame;
+
+use canzero_common::{TCanFrame, TCanError};
 
 pub mod database;
 pub mod event;

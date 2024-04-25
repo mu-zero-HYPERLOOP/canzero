@@ -4,13 +4,15 @@ use can_config_rs::config::MessageRef;
 
 use crate::{
     cnl::{
-        can_adapter::{can_error::TCanError, can_frame::TCanFrame, CanAdapter},
+        can_adapter::CanAdapter,
         network::NetworkObject,
         rx::handler_lookup::HandlerLookup,
         trace::TraceObject,
     },
     notification::notify_error,
 };
+
+use canzero_common::{TCanFrame, TCanError};
 
 use crate::cnl::errors::Result;
 

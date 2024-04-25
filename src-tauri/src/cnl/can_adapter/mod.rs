@@ -2,15 +2,8 @@ use std::net::SocketAddr;
 
 use can_config_rs::config::{bus::BusRef, NetworkRef};
 
-use self::{
-    can_error::TCanError,
-    can_frame::{CanFrame, TCanFrame},
-    tcp::TcpCanAdapter,
-};
-
-pub mod can_error;
-pub mod can_frame;
-pub mod timestamped;
+use self::tcp::TcpCanAdapter;
+use canzero_common::{CanFrame, TCanFrame, TCanError};
 
 #[cfg(feature = "socket-can")]
 mod socket_can;
@@ -94,7 +87,7 @@ impl CanAdapter {
         }
     }
 
-    pub async fn send(&self, frame: CanFrame) -> std::io::Result<()>{
+    pub async fn send(&self, frame: CanFrame) -> std::io::Result<()> {
         match &self.imp {
             CanAdapterImpl::TcpCanAdapter(adapter) => adapter.send(frame).await,
             #[cfg(feature = "socket-can")]

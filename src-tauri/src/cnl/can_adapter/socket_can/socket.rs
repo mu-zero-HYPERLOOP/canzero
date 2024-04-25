@@ -6,7 +6,7 @@ pub use libc::{
     SOCK_RAW,
 };
 
-use crate::cnl::can_adapter::{can_error::CanError, can_frame::CanFrame};
+use canzero_common::{CanFrame, CanError};
 
 #[derive(Clone)]
 struct CanSocket {
@@ -14,7 +14,7 @@ struct CanSocket {
 }
 
 impl CanSocket {
-    fn open(ifname: &str, start_of_run : Instant) -> Result<CanSocket, std::io::Error> {
+    fn open(ifname: &str, _start_of_run : Instant) -> Result<CanSocket, std::io::Error> {
         let ifindex = nix::net::if_::if_nametoindex(ifname)?;
         let mut addr: sockaddr_can = unsafe { mem::zeroed() };
         addr.can_family = AF_CAN as sa_family_t;

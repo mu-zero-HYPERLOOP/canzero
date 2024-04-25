@@ -4,12 +4,13 @@ use can_config_rs::config::MessageRef;
 
 use crate::cnl::{
     self,
-    can_adapter::{can_frame::TCanFrame, timestamped::Timestamped},
     deserialize::FrameDeserializer,
     errors::{Error, Result},
     frame::{Frame, TFrame, Value},
     network::{object_entry_object::ObjectEntryObject, NetworkObject},
 };
+
+use canzero_common::TCanFrame;
 
 struct SetResponseFrame {
     // client_id: u8,

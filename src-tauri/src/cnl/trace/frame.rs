@@ -1,10 +1,9 @@
 use can_config_rs::config::MessageId;
 use serde::{ser::SerializeMap, Serialize};
 
-use crate::cnl::{
-    can_adapter::can_frame::CanFrame,
-    frame::{Attribute, Frame, Value},
-};
+use crate::cnl::frame::{Attribute, Frame, Value};
+
+use canzero_common::CanFrame;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum CanErrorType {

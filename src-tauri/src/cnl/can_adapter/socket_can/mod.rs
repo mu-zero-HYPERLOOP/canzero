@@ -1,32 +1,26 @@
 use std::time::Instant;
 
 use can_config_rs::config::bus::BusRef;
-use tauri::plugin::Plugin;
 use tokio::{
     runtime::Handle,
     sync::{
-        mpsc::{error::SendTimeoutError, Receiver, Sender},
+        mpsc::{Receiver, Sender},
         Mutex,
     },
 };
+use canzero_common::{TCanFrame, CanFrame, TCanError, Timestamped};
 
 use crate::notification::notify_error;
 
 use self::socket::OwnedCanSocket;
 
-use super::{
-    can_error::TCanError,
-    can_frame::{CanFrame, TCanFrame},
-    timestamped::Timestamped,
-};
-
 mod socket;
 
 pub struct SocketCanAdapter {
-    socket: OwnedCanSocket,
+    _socket: OwnedCanSocket,
     rx: Mutex<Receiver<Result<TCanFrame, TCanError>>>,
     tx: Sender<CanFrame>,
-    start_of_run: Instant,
+    // start_of_run: Instant,
 }
 
 impl SocketCanAdapter {
@@ -89,9 +83,9 @@ impl SocketCanAdapter {
 
         Ok(SocketCanAdapter {
             tx: txtx,
-            socket,
+            _socket : socket,
             rx: Mutex::new(rx),
-            start_of_run,
+            // start_of_run,
         })
     }
 

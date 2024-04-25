@@ -1,6 +1,6 @@
 use std::{
     sync::{
-        atomic::{AtomicBool, AtomicU64},
+        atomic::AtomicU64,
         Arc,
     },
     time::Duration,
