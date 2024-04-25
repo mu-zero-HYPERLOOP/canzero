@@ -37,7 +37,7 @@ nix = {version = "0.28.0", features = ["net"], optional = true }
 can-config-rs = { git = "https://github.com/mu-zero-HYPERLOOP/can-config-rs.git" }
 can-appdata = { git = "https://github.com/mu-zero-HYPERLOOP/can-appdata.git" }
 can-yaml-config-rs = { git = "https://github.com/mu-zero-HYPERLOOP/can-yaml-config-rs.git" }
-can-tcp-bridge-rs = { git = "https://github.com/mu-zero-HYPERLOOP/can-tcp-bridge-rs.git" } 
+can-tcp-bridge-rs = { git = "https://github.com/mu-zero-HYPERLOOP/can-tcp-bridge-rs.git" }
 canzero-common = { git = "https://github.com/mu-zero-HYPERLOOP/canzero-common.git" }
 sorted-vec = "0.8.3"
 fix-path-env = { git = "https://github.com/tauri-apps/fix-path-env-rs.git"}
