@@ -12,7 +12,6 @@ pub enum CanErrorType {
     FormError,
     AckError,
     CrcError,
-    Internal,
 }
 
 impl CanErrorType {
@@ -23,7 +22,6 @@ impl CanErrorType {
             CanErrorType::FormError => "Form Error",
             CanErrorType::AckError => "ACK Error",
             CanErrorType::CrcError => "CRC Error",
-            CanErrorType::Internal => "Internal Error",
         }
     }
     pub fn description(&self) -> &'static str {
@@ -33,7 +31,6 @@ impl CanErrorType {
                 CanErrorType::FormError => "Node detected a bit of an invalid logic level in the SOF/EOF field or ACK/CRC delimiter.",
                 CanErrorType::AckError => "Node transmits a CAN message, but the ACK slot is not made dominant by receiver(s).",
                 CanErrorType::CrcError => "Node calculated a CAN message CRC that differs from the transmitted CRC field value.",
-                CanErrorType::Internal => "Internal Error on the control panel",
             }
     }
 }
@@ -55,7 +52,6 @@ impl TraceFrame {
                 CanErrorType::FormError => 0x20000004,
                 CanErrorType::AckError => 0x20000008,
                 CanErrorType::CrcError => 0x20000016,
-                CanErrorType::Internal => 0x20000032,
             },
             TraceFrame::Frame(frame) => match frame.id() {
                 MessageId::StandardId(id) => *id,
@@ -66,7 +62,7 @@ impl TraceFrame {
     pub fn ide(&self) -> bool {
         match &self {
             TraceFrame::Undefined(can_frame) => can_frame.get_ide_flag(),
-            TraceFrame::Error(err) => false,
+            TraceFrame::Error(_) => false,
             TraceFrame::Frame(frame) => match frame.id() {
                 MessageId::StandardId(_) => false,
                 MessageId::ExtendedId(_) => true,
@@ -111,7 +107,6 @@ impl TraceFrame {
                 CanErrorType::FormError => 0x20000004,
                 CanErrorType::AckError => 0x20000008,
                 CanErrorType::CrcError => 0x20000016,
-                CanErrorType::Internal => 0x20000032,
             },
             TraceFrame::Frame(frame) => match frame.id() {
                 MessageId::StandardId(id) => *id,

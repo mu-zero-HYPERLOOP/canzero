@@ -1,7 +1,6 @@
 use std::{net::SocketAddr, time::Duration};
 
 use can_appdata::AppData;
-use can_config_rs::config::NetworkRef;
 use serde::Serialize;
 use tauri::Manager;
 
@@ -39,6 +38,7 @@ pub async fn download_network_configuration(
 
 const UDP_DISCOVERY_SERVICE_NAME: &'static str = "CANzero";
 
+#[allow(unused)]
 pub enum ConnectionType {
     SocketCan = 0,
     Tcp = 1,
@@ -66,11 +66,6 @@ pub struct ConnectionDescription {
 pub async fn discover_servers(
     state: tauri::State<'_, StartupState>,
 ) -> Result<Vec<ConnectionDescription>, String> {
-    let Some(network_configuration): Option<NetworkRef> = state.network_configuration().await
-    else {
-        return Err("Failed to discover networks. No network configuration avaiable.".to_owned());
-    };
-
     let Ok(socket) = tokio::net::UdpSocket::bind(&format!("0.0.0.0:0")).await else {
         return Err("Failed to bind UDP discovery socket".to_owned());
     };
@@ -124,7 +119,7 @@ pub async fn discover_servers(
         Err(_) => vec![],
     };
 
-    let mut connections: Vec<NetworkConnectionCreateInfo> = connections
+    let connections: Vec<NetworkConnectionCreateInfo> = connections
         .into_iter()
         .map(|(ip_addr, port)| {
             return NetworkConnectionCreateInfo::Tcp(SocketAddr::new(ip_addr, port));
@@ -132,7 +127,16 @@ pub async fn discover_servers(
         .collect();
 
     #[cfg(feature = "socket-can")]
-    check_for_socketcan(&network_configuration, &mut connections);
+    let Some(network_configuration): Option<can_config_rs::config::NetworkRef> = state.network_configuration().await
+    else {
+        return Err("Failed to discover networks. No network configuration avaiable.".to_owned());
+    };
+    #[cfg(feature = "socket-can")]
+    let connections = {
+        let mut connections = connections.clone();
+        check_for_socketcan(&network_configuration, &mut connections);
+        connections
+    };
 
     state.set_connections(connections.clone()).await;
     Ok(connections
@@ -160,7 +164,7 @@ pub async fn discover_servers(
 
 #[cfg(feature = "socket-can")]
 pub fn check_for_socketcan(
-    network_ref: &NetworkRef,
+    network_ref: &can_config_rs::config::NetworkRef,
     connections: &mut Vec<NetworkConnectionCreateInfo>,
 ) {
     for bus in network_ref.buses() {

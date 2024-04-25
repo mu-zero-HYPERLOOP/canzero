@@ -32,7 +32,8 @@ impl StartupState {
     pub async fn set_network_config(&self, network_config: NetworkRef) {
         *self.network_config.lock().await = Some(network_config);
     }
-
+    
+    #[allow(unused)]
     pub async fn network_configuration(&self) -> Option<NetworkRef> {
         self.network_config.lock().await.as_ref().cloned()
     }

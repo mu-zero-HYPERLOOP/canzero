@@ -10,13 +10,12 @@ use crate::cnl::{
     network::{object_entry_object::ObjectEntryObject, NetworkObject},
 };
 
-use canzero_common::{TCanFrame, Timestamped};
+use canzero_common::TCanFrame;
 
 struct GetRespFrame {
     sof: bool,
     eof: bool,
     toggle: bool,
-    client_id: u8,
     server_id: u8,
     object_entry_id: u16,
     data: u32,
@@ -45,9 +44,6 @@ impl GetRespFrame {
         let Some(Value::UnsignedValue(object_entry_id)) = header.attribute("od_index") else {
             panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame : header.od_index missing");
         };
-        let Some(Value::UnsignedValue(client_id)) = header.attribute("client_id") else {
-            panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame : header.client_id missing");
-        };
         let Some(Value::UnsignedValue(server_id)) = header.attribute("server_id") else {
             panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame : header.server_id missing");
         };
@@ -60,7 +56,6 @@ impl GetRespFrame {
             sof: *sof != 0,
             eof: *eof != 0,
             toggle: *toggle != 0,
-            client_id: *client_id as u8,
             server_id: *server_id as u8,
             object_entry_id: *object_entry_id as u16,
             data: *data as u32,

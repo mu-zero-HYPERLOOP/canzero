@@ -47,9 +47,6 @@ impl TraceEvent {
     pub fn timestamp(&self) -> &Duration {
         &self.timestamp
     }
-    pub fn arrive(&self) -> &Instant {
-        &self.arrive
-    }
 }
 
 impl Serialize for TraceEvent {
