@@ -9,10 +9,10 @@ export default defineConfig(async () => ({
     rollupOptions: {
       input: {
         main: resolve(__dirname, "index.html"),
-        splashscreen: resolve(__dirname, "splashscreen.html"),
         startup: resolve(__dirname, "startup.html")
       }
-    }
+    },
+    chunkSizeWarningLimit: 1600,
   },
   plugins: [react()],
 
