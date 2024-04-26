@@ -1,4 +1,4 @@
-use std::time::Instant;
+use std::{time::Instant, sync::Arc};
 
 use can_config_rs::config::bus::BusRef;
 use tokio::{
@@ -10,14 +10,11 @@ use tokio::{
 };
 use canzero_common::{TCanFrame, CanFrame, TCanError, Timestamped};
 
+use can_socketcan_platform_rs::CanSocket;
+
 use crate::notification::notify_error;
 
-use self::socket::OwnedCanSocket;
-
-mod socket;
-
 pub struct SocketCanAdapter {
-    _socket: OwnedCanSocket,
     rx: Mutex<Receiver<Result<TCanFrame, TCanError>>>,
     tx: Sender<CanFrame>,
     // start_of_run: Instant,
@@ -30,14 +27,14 @@ impl SocketCanAdapter {
         app_handle: &tauri::AppHandle,
     ) -> Result<SocketCanAdapter, std::io::Error> {
         let ifname = bus.name();
-        let socket = OwnedCanSocket::open(ifname, start_of_run)?;
+        let socket = Arc::new(CanSocket::open(ifname).unwrap());
         let app_handle = app_handle.clone();
 
         let (tx, rx) = tokio::sync::mpsc::channel::<Result<TCanFrame, TCanError>>(16);
 
         let (txtx, mut txrx) = tokio::sync::mpsc::channel::<CanFrame>(16);
 
-        let socket_ref = socket.as_ref();
+        let socket_ref = socket.clone();
         tokio::task::spawn_blocking(move || loop {
             let frame = match socket_ref.receive() {
                 Ok(frame) => frame,
@@ -69,7 +66,7 @@ impl SocketCanAdapter {
             });
         });
 
-        let socket_ref = socket.as_ref();
+        let socket_ref = socket.clone();
         tokio::task::spawn_blocking(move || loop {
             let frame = Handle::current().block_on(async {
                 txrx.recv()
@@ -83,7 +80,6 @@ impl SocketCanAdapter {
 
         Ok(SocketCanAdapter {
             tx: txtx,
-            _socket : socket,
             rx: Mutex::new(rx),
             // start_of_run,
         })
