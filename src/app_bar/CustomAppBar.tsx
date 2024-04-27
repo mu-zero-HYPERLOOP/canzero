@@ -236,17 +236,22 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
 
   useEffect(() => {
     async function asyncSetup() {
-
-      const resp = await invoke<ObjectEntryListenLatestResponse>("listen_to_latest_object_entry_value", STATE_OE);
-      if (resp.latest !== undefined && resp.latest !== null) {
-        updateState(resp.latest.value as string);
-      }
-      const unlistenJs = await listen<ObjectEntryEvent>(resp.event_name, event => {
-        updateState(event.payload.value as string);
-      });
-      return () => {
-        invoke("unlisten_from_latest_object_entry_value", STATE_OE).catch(console.error);
-        unlistenJs();
+      try {
+        const resp = await invoke<ObjectEntryListenLatestResponse>("listen_to_latest_object_entry_value", STATE_OE);
+        if (resp.latest !== undefined && resp.latest !== null) {
+          updateState(resp.latest.value as string);
+        }
+        const unlistenJs = await listen<ObjectEntryEvent>(resp.event_name, event => {
+          updateState(event.payload.value as string);
+        });
+        return () => {
+          invoke("unlisten_from_latest_object_entry_value", STATE_OE).catch(console.error);
+          unlistenJs();
+        }
+      }catch (e)  {
+        console.error(`Failed to register listeners for CustomAppBar component: Object entry ${STATE_OE.nodeName}:${STATE_OE.objectEntryName} not found`);
+        return () => {
+        }
       }
     }
 
@@ -338,7 +343,7 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
             <StateDisplay state={state} />
             {/* Buttons */}
             <AppBarButton variant="contained" width="15em" color="stateError" onClick={sendEmergencyCommand} >
-              <p>Emergency <br/>[Space bar]</p>
+              <p>Emergency <br />[Space bar]</p>
             </AppBarButton>
 
             <AppBarButton color="stateIdle" disabled={commandList.disableStart} onClick={commandList.startCommand} >
@@ -368,11 +373,11 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
               top: "0.2em",
               marginRight: "1rem",
             }}
-            >
-            <WarningIconDisplay/>
-            <BatteryIconDisplay/>
-            <TemperatureIconDisplay/>
-            <ElectricIconDisplay/>
+          >
+            <WarningIconDisplay />
+            <BatteryIconDisplay />
+            <TemperatureIconDisplay />
+            <ElectricIconDisplay />
           </Stack>
         </Stack>
       </Toolbar>

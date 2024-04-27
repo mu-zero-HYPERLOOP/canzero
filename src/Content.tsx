@@ -30,7 +30,7 @@ function Content() {
 
   const theme = useTheme();
   return (
-    <Box id="content" component="form" sx={{ display: 'flex' }}>
+    <Box id="content" component="div" sx={{ display: 'flex' }}>
       <CssBaseline />
       <CustomAppBar
         stateColor="stateIdle"
@@ -49,7 +49,7 @@ function Content() {
           marginTop: "75px",
         }}
       >
-        <Box component="form" sx={{ width: '100%' }}>
+        <Box component="div" sx={{ width: '100%' }}>
           <ShowPages connectionSuccess={backendAvaiable} />
         </Box>
       </Box>

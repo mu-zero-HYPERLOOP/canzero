@@ -89,6 +89,8 @@ impl ObjectEntryHistroyObservable {
         start_index: usize,
         start_time: std::time::Instant,
     ) {
+        println!("notify task started");
+        // println!("start notify task {event_name}");
         let mut start_index = start_index;
         let mut latest_index = latest_index;
         let mut rx = rx.lock().await;
@@ -194,6 +196,7 @@ impl ObjectEntryHistroyObservable {
                 }
             }
         }
+        // println!("start notify task {event_name}");
     }
 
     pub fn event_name(&self) -> &str {

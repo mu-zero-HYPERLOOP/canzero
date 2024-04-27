@@ -23,6 +23,7 @@ interface ObjectEntryGraph {
 }
 
 
+
 function ObjectEntryGraph({
   nodeName,
   objectEntryName,
@@ -36,10 +37,11 @@ function ObjectEntryGraph({
   const [graphList, setGraphList] = useState<ReactElement[]>([]);
 
   // creates a mutable history object, which is modified in the useEffect.
-  const history = useMemo<ObjectEntryEvent[]>(() => [], [nodeName, objectEntryName]);
+  const history = useMemo<ObjectEntryEvent[]>(() => {
+    return []
+  }, [nodeName, objectEntryName]);
 
   const [timeDomainState, setTimeDomainState] = useState<number>(timeDomain);
-
 
   useEffect(() => {
 
@@ -68,17 +70,18 @@ function ObjectEntryGraph({
       let graphList: ReactElement[] = [];
 
       // register tauri listener!
-      let extraTime : number;
+      let extraTime: number;
       if (timeDomainState < 3000) {
         extraTime = Math.floor(timeDomainState * 2);
-      }else {
+      } else {
         extraTime = Math.floor(timeDomainState * 0.2);
       }
       let response = await invoke<ObjectEntryListenHistoryResponse>("listen_to_history_of_object_entry",
         { nodeName, objectEntryName, frameSize: timeDomainState + extraTime, minInterval: updateIntervalMillis });
       // initalize history
-      history.splice(0, history.length);
+      let len = history.length;
       history.push(...response.history);
+      history.splice(0, len);
 
       let acc: number = 0;
       let refreshRate: number;
@@ -96,7 +99,7 @@ function ObjectEntryGraph({
 
       // this function creates a list of Graphs
       // for struct types it is called recursively.
-      function buildGraphList(now : number, ty: Type, property: (event: ObjectEntryEvent) => Value, unit?: string) {
+      function buildGraphList(now: number, ty: Type, property: (event: ObjectEntryEvent) => Value, unit?: string) {
         acc += 1;
         if (ty.id == "int" || ty.id == "uint" || ty.id == "real") {
           graphList.push(<NumberGraph<ObjectEntryEvent>
@@ -133,7 +136,7 @@ function ObjectEntryGraph({
         } else if (ty.id == "struct") {
           let structInfo = ty.info as StructTypeInfo;
           for (const [attrib_name, attrib_type] of Object.entries(structInfo.attributes)) {
-            buildGraphList(now,  attrib_type, (event) => {
+            buildGraphList(now, attrib_type, (event) => {
               return (property(event) as { [name: string]: Value })[attrib_name];
             }, undefined);
           };
@@ -146,13 +149,14 @@ function ObjectEntryGraph({
 
       setGraphList(graphList);
 
+      console.log("register listener");
       // register js listener
       let unlistenJs = listen<ObjectEntryHistoryEvent>(response.event_name, (event) => {
         // update history
         history.splice(0, event.payload.deprecated_count);
         history.push(...event.payload.new_values);
-        console.log("recv event");
       });
+      console.log("successfully registered");
 
       return () => {
         // unregister js listener
@@ -177,12 +181,12 @@ function ObjectEntryGraph({
 
 
   function clampTimeDomain(domain: number) {
-    if (domain <= 1000){
+    if (domain <= 1000) {
       return 1000;
     }
-    if (domain >= 60000*3) {
+    if (domain >= 60000 * 3) {
       return 60000 * 3;
-    } 
+    }
     return domain;
   }
 

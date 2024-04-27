@@ -10,7 +10,7 @@ mod tx;
 
 pub mod can_adapter;
 
-use std::sync::Arc;
+use std::{sync::Arc, time::Instant};
 
 use self::{
     can_adapter::CanAdapter,
@@ -44,6 +44,7 @@ impl CNL {
         network_config: &config::NetworkRef,
         app_handle: &tauri::AppHandle,
         can_adapters: Vec<Arc<CanAdapter>>,
+        timebase : Instant,
     ) -> Self {
         let connection_object =
             ConnectionObject::new(ConnectionStatus::CanDisconnected, app_handle);
@@ -58,6 +59,7 @@ impl CNL {
             network_config,
             app_handle,
             tx.clone(),
+            timebase
         ));
 
         let rx = RxCom::create(network_config, &trace, &network, app_handle, &can_adapters);

@@ -33,6 +33,8 @@ function NumberGraph<T>({
   bounds,
   timeShiftMs = 0,
 }: NumberGraphProps<T>) {
+
+  console.log("render number graph");
   margin.left += 60;
   margin.bottom += 20;
   margin.top += 20;
@@ -190,6 +192,7 @@ function NumberGraph<T>({
 
 
     function updateSvg() {
+
       timestamp += refreshRate;
       updateXScale();
       updateYScale();

@@ -3,7 +3,7 @@ use std::{
         atomic::AtomicU64,
         Arc,
     },
-    time::Duration,
+    time::{Duration, Instant},
 };
 
 use can_config_rs::config;
@@ -32,7 +32,7 @@ pub mod latest;
 pub struct ObjectEntryObject {
     object_entry_ref: config::ObjectEntryRef,
     store: Arc<Mutex<ObjectEntryDatabase>>,
-    start_time: std::time::Instant,
+    timebase: std::time::Instant,
     latest_observable: ObjectEntryLatestObservable,
     latest_event_name: String,
     history_observables: Mutex<Vec<ObjectEntryHistroyObservable>>,
@@ -51,6 +51,7 @@ impl ObjectEntryObject {
         object_entry_config: &config::ObjectEntryRef,
         app_handle: &tauri::AppHandle,
         tx_com: Arc<TxCom>,
+        timebase : Instant,
     ) -> Self {
         let latest_event_name = format!(
             "{}_{}_latest",
@@ -66,7 +67,7 @@ impl ObjectEntryObject {
         Self {
             object_entry_ref: object_entry_config.clone(),
             store: Arc::new(Mutex::new(ObjectEntryDatabase::new())),
-            start_time: std::time::Instant::now(),
+            timebase,
             latest_observable: ObjectEntryLatestObservable::new(
                 &latest_event_name,
                 Duration::from_millis(100),
@@ -325,9 +326,11 @@ impl ObjectEntryObject {
         frame_size: Duration,
         min_interval: Duration,
     ) -> (String, Vec<OwnedObjectEntryEvent>) {
+        println!("acquire store lock (in listen to history [start])");
         let store_lock = self.store.lock().await;
+        println!("acquired store lock [start]");
         let history = store_lock.history();
-        let now = std::time::Instant::now().duration_since(self.start_time);
+        let now = std::time::Instant::now().duration_since(self.timebase);
         let breakpoint = now.saturating_sub(frame_size);
         let mut breakpoint_index = None;
         for (i, event) in history.iter().enumerate().rev() {
@@ -357,13 +360,16 @@ impl ObjectEntryObject {
             frame_size,
             &self.app_handle,
             start_index,
-            self.start_time,
+            self.timebase,
         );
+        println!("start notify task");
         new_history_observable.start_notify_task(&self.store).await;
+        println!("acquire history observable lock");
         self.history_observables
             .lock()
             .await
             .push(new_history_observable);
+        println!("acquire store history observable lock");
 
         (event_name, history_of)
     }
@@ -405,6 +411,6 @@ impl ObjectEntryObject {
     }
 
     pub fn now(&self) -> Duration {
-        std::time::Instant::now().duration_since(self.start_time)
+        std::time::Instant::now().duration_since(self.timebase)
     }
 }

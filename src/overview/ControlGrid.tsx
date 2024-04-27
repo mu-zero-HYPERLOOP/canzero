@@ -32,22 +32,22 @@ function ControlLights() {
       alignItems="top"
       spacing={3}
     >
-      <Box component="form">
+      <Box component="div">
         <FontAwesomeIcon icon={faTriangleExclamation} fontSize="40px" />
         <div />
         Warning
       </Box>
-      <Box component="form">
+      <Box component="div">
         <FontAwesomeIcon icon={faCarBattery} fontSize="40px" />
         <div />
         Battery
       </Box>
-      <Box component="form">
+      <Box component="div">
         <Thermostat sx={{ fontSize: "42px" }} />
         <div style={{ marginBottom: "-6px" }} />
         Temperature
       </Box>
-      <Box component="form">
+      <Box component="div">
         <Bolt sx={{ fontSize: "42px" }} />
         <div style={{ marginBottom: "-6px" }} />
         Electric

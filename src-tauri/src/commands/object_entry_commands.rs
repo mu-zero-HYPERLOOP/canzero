@@ -216,12 +216,15 @@ pub async fn listen_to_history_of_object_entry(
     frame_size: u64,
     min_interval: u64,
 ) -> Result<ObjectEntryListenHistoryResponse, ()> {
-    #[cfg(feature = "logging-invoke")]
+    // #[cfg(feature = "logging-invoke")]
     println!("invoke: listen_to_history_of_object_entry({node_name:?}, {object_entry_name:}, {frame_size})");
     let frame_size = Duration::from_millis(frame_size);
     let min_interval = Duration::from_millis(min_interval);
 
+    println!("acquire state lock");
     let cnl = state.lock().await;
+    println!("state lock acquired");
+
 
     let Some(node) = cnl.nodes().iter().find(|no| no.name() == &node_name) else {
         eprintln!("error during listen_to_history_of_object_entry");
@@ -244,6 +247,8 @@ pub async fn listen_to_history_of_object_entry(
         history,
         now : object_entry_object.now().as_millis() as u64,
     };
+
+    println!("exit listen_to_history_of_object_entry");
 
     Ok(x)
 }

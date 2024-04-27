@@ -3,7 +3,7 @@ use std::{net::SocketAddr, sync::Arc, time::Instant};
 use crate::notification::notify_warning;
 
 use can_tcp_bridge_rs::{
-    frame::{NetworkFrame, TNetworkFrame},
+    frame::{NetworkDescription, NetworkFrame, TNetworkFrame},
     tcpcan::TcpCan,
 };
 
@@ -11,15 +11,17 @@ use canzero_common::{TCanError, TCanFrame, Timestamped};
 
 pub struct TcpClient {
     tcpcan: Arc<TcpCan>,
+    timebase : Instant,
 }
 
 impl TcpClient {
     pub async fn create(
-        address: &SocketAddr,
+        network_description: &NetworkDescription,
         app_handle: &tauri::AppHandle,
         can_rx_adapters: Vec<tokio::sync::mpsc::Sender<Result<TCanFrame, TCanError>>>,
     ) -> std::io::Result<Self> {
         let app_handle = app_handle.clone();
+        let address = SocketAddr::new(network_description.server_addr, network_description.service_port);
         let stream = tokio::net::TcpStream::connect(address).await?;
 
         let tcpcan = Arc::new(TcpCan::new(stream));
@@ -54,10 +56,10 @@ impl TcpClient {
                 };
             }
         });
-        Ok(Self { tcpcan })
+        Ok(Self { tcpcan, timebase : network_description.timebase})
     }
 
     pub async fn send(&self, frame: NetworkFrame) -> std::io::Result<()> {
-        self.tcpcan.send(&TNetworkFrame::now(Instant::now(), frame)).await
+        self.tcpcan.send(&TNetworkFrame::now(self.timebase, frame)).await
     }
 }

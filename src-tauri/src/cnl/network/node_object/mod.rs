@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{sync::Arc, time::Instant};
 
 use can_config_rs::config;
 
@@ -22,6 +22,7 @@ impl NodeObject {
         node_config: &config::NodeRef,
         app_handle: &tauri::AppHandle,
         tx_com: Arc<TxCom>,
+        timebase : Instant,
     ) -> Self {
         let object_entries = node_config
             .object_entries()
@@ -31,6 +32,7 @@ impl NodeObject {
                     object_entry,
                     app_handle,
                     tx_com.clone(),
+                    timebase
                 ))
             })
             .collect();

@@ -278,7 +278,7 @@ function EditDialog({ open, onClose, nodeName, objectEntryInfo }: EditDialogProp
           <strong>Upload: {nodeName}::{objectEntryInfo.name}</strong>
         </Typography>
         {propertyInputFields}
-        <Box component="form"
+        <Box component="div"
           sx={{
             display: "flex",
             justifyContent: "flex-end",

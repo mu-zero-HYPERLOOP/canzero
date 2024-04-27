@@ -22,6 +22,7 @@ function NumberListEntry({ label, nodeName, objectEntryName }: Readonly<NumberLi
 
   useEffect(() => {
     async function asyncSetup() {
+      try {
       const info = await invoke<ObjectEntryInformation>("object_entry_information", { nodeName, objectEntryName });
       setInformation(info);
       const resp = await invoke<ObjectEntryListenLatestResponse>("listen_to_latest_object_entry_value", { nodeName, objectEntryName });
@@ -35,6 +36,11 @@ function NumberListEntry({ label, nodeName, objectEntryName }: Readonly<NumberLi
         invoke("unlisten_from_latest_object_entry_value", { nodeName, objectEntryName }).catch(console.error);
         unlisten();
       };
+      }catch {
+        console.error(`Failed to register listeners for NumberListEntry component: Object entry ${nodeName}:${objectEntryName} not found.`);
+        return () => {
+        }
+      }
     }
     const asyncCleanup = asyncSetup();
     return () => {

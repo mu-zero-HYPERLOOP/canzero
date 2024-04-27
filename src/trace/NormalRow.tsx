@@ -52,7 +52,7 @@ function NormalRow({ useAbsoluteTime, open, setOpen, event }: UndefinedRowProps)
         }
       </TableCell>
       <TableCell>
-        {useAbsoluteTime ? `${event.absoluteTime}s` : `${event.deltaTime}ms`}
+        {useAbsoluteTime ? `${event.absoluteTime}` : `${event.deltaTime}`}
       </TableCell>
       <TableCell>
         {event.frame.id}

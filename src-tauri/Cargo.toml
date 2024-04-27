@@ -47,6 +47,6 @@ default = ["socket-can"]
 # DO NOT REMOVE!!
 custom-protocol = ["tauri/custom-protocol"]
 
-socket-can = ["dep:can-socketcan-platform-rs", "dep:nix"]
+socket-can = ["dep:can-socketcan-platform-rs", "dep:nix", "can-tcp-bridge-rs/socket-can"]
 # Custom features!
 logging-invoke = []

@@ -1,6 +1,5 @@
-use std::net::SocketAddr;
-
 use can_config_rs::config::{bus::BusRef, NetworkRef};
+use can_tcp_bridge_rs::frame::NetworkDescription;
 
 use self::tcp::TcpCanAdapter;
 use canzero_common::{CanFrame, TCanFrame, TCanError};
@@ -25,7 +24,7 @@ impl CanAdapter {
     pub async fn create_tcp_adapters(
         network_config: &NetworkRef,
         app_handle: &tauri::AppHandle,
-        sockaddr: &SocketAddr,
+        network_description: &NetworkDescription,
     ) -> std::io::Result<Vec<Self>> {
         let channels: Vec<(
             tokio::sync::mpsc::Sender<Result<TCanFrame, TCanError>>,
@@ -40,7 +39,7 @@ impl CanAdapter {
             .map(|(tx, _rx)| tx.clone())
             .collect();
         let tcp_client = std::sync::Arc::new(
-            self::tcp::client::TcpClient::create(sockaddr, app_handle, tx_channels).await?,
+            self::tcp::client::TcpClient::create(network_description, app_handle, tx_channels).await?,
         );
 
         let mut adapters = vec![];

@@ -56,6 +56,7 @@ function SideMenu({ open, toggleOpen }: Readonly<SideMenuProps>) {
   useEffect(() => {
     async function asyncSetup() {
 
+      try {
       const resp = await invoke<ObjectEntryListenLatestResponse>("listen_to_latest_object_entry_value", STATE_OE);
       if (resp.latest !== undefined && resp.latest !== null) {
         setState(resp.latest.value as string);
@@ -63,6 +64,9 @@ function SideMenu({ open, toggleOpen }: Readonly<SideMenuProps>) {
       listen<ObjectEntryEvent>(resp.event_name, event => {
         setState(event.payload.value as string);
       });
+      }catch {
+        console.error(`Failed to register listener for SideMenu component: Object entry ${STATE_OE.nodeName}:${STATE_OE.objectEntryName} not found`)
+      }
       return () => {
       }
     }

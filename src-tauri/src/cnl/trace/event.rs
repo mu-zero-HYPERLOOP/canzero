@@ -56,7 +56,7 @@ impl Serialize for TraceEvent {
     {
         let mut map = serializer.serialize_map(Some(3))?;
         map.serialize_entry("frame", &self.frame)?;
-        map.serialize_entry("deltaTime", &format!("{}", self.delta_time.as_millis()))?;
+        map.serialize_entry("deltaTime", &format!("{}ms", self.delta_time.as_millis()))?;
         map.serialize_entry(
             "timeSinceLast",
             &Instant::now().duration_since(self.arrive).as_millis(),
@@ -65,7 +65,7 @@ impl Serialize for TraceEvent {
         map.serialize_entry("key", &self.key)?;
         map.serialize_entry(
             "absoluteTime",
-            &format!("{}", self.timestamp.as_millis()),
+            &format!("{:.1}s", self.timestamp.as_millis() as f32 / 1e3f32),
         )?;
         map.end()
     }

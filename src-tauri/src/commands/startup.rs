@@ -1,4 +1,3 @@
-use std::{net::SocketAddr, time::Duration};
 
 use can_appdata::AppData;
 use serde::Serialize;
@@ -74,60 +73,25 @@ pub async fn discover_servers(
         return Err("Failed set SO_BROADCAST option for UDP discovery socket".to_owned());
     };
 
-    let mut hello_msg = vec![0u8];
-    hello_msg.extend_from_slice(UDP_DISCOVERY_SERVICE_NAME.as_bytes());
-    // CANzero discovery broadcast are always broadcast on port 9002!
-
-    let connections = match socket
-        .send_to(&hello_msg, format!("255.255.255.255:9002"))
-        .await
-    {
-        Ok(bytes_send) => {
-            if bytes_send != hello_msg.len() {
-                return Err(
-                    "Failed to send complete hello packet on UDP discovery socket".to_owned(),
-                );
-            }
-
-            let mut rx_buffer = [0u8; 1024];
-            let mut connections = vec![];
-            loop {
-                match tokio::time::timeout(
-                    Duration::from_millis(1000),
-                    socket.recv_from(&mut rx_buffer),
-                )
-                .await
-                {
-                    Ok(Ok((packet_size, server_addr))) => {
-                        let ty = rx_buffer[0];
-                        let server_port = (rx_buffer[1] as u16) | ((rx_buffer[2] as u16) << 8);
-                        let server_service_name =
-                            std::str::from_utf8(&rx_buffer[3..packet_size]).unwrap();
-                        if ty == 1u8 && server_service_name == UDP_DISCOVERY_SERVICE_NAME {
-                            connections.push((server_addr.ip(), server_port));
-                        }
-                        continue;
-                    }
-                    Err(_) => {
-                        break;
-                    }
-                    _ => continue,
-                }
-            }
-            connections
-        }
-        Err(_) => vec![],
+    let Ok(connections) = can_tcp_bridge_rs::client::udp_discover::start_udp_discover(
+        UDP_DISCOVERY_SERVICE_NAME,
+        9002,
+    )
+    .await
+    else {
+        return Err("Failed to start udp discovery".to_owned());
     };
+
+    // CANzero discovery broadcast are always broadcast on port 9002!
 
     let connections: Vec<NetworkConnectionCreateInfo> = connections
         .into_iter()
-        .map(|(ip_addr, port)| {
-            return NetworkConnectionCreateInfo::Tcp(SocketAddr::new(ip_addr, port));
-        })
+        .map(NetworkConnectionCreateInfo::Tcp)
         .collect();
 
     #[cfg(feature = "socket-can")]
-    let Some(network_configuration): Option<can_config_rs::config::NetworkRef> = state.network_configuration().await
+    let Some(network_configuration): Option<can_config_rs::config::NetworkRef> =
+        state.network_configuration().await
     else {
         return Err("Failed to discover networks. No network configuration avaiable.".to_owned());
     };
@@ -142,9 +106,9 @@ pub async fn discover_servers(
     Ok(connections
         .iter()
         .map(|con| match con {
-            NetworkConnectionCreateInfo::Tcp(addr) => ConnectionDescription {
+            NetworkConnectionCreateInfo::Tcp(nd) => ConnectionDescription {
                 tag: ConnectionType::Tcp,
-                description: format!("{addr:?}"),
+                description: format!("{} at {}:{}", nd.server_name, nd.server_addr, nd.service_port),
             },
             #[cfg(feature = "socket-can")]
             NetworkConnectionCreateInfo::SocketCan => ConnectionDescription {

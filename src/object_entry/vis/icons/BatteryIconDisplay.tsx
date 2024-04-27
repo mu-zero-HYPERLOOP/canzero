@@ -16,17 +16,23 @@ function BatteryIconDisplay() {
 
   useEffect(()=>{
     async function asyncSetup() {
-      const resp = await invoke<ObjectEntryListenLatestResponse>("listen_to_latest_object_entry_value", OE);
-      if (resp.latest !== undefined && resp.latest !== null) {
-        setState(resp.latest.value as string == "ERROR");
+      try {
+        const resp = await invoke<ObjectEntryListenLatestResponse>("listen_to_latest_object_entry_value", OE);
+        if (resp.latest !== undefined && resp.latest !== null) {
+          setState(resp.latest.value as string == "ERROR");
+        }
+        const unlisten = await listen<ObjectEntryEvent>(resp.event_name, event => {
+            setState(event.payload.value as string == "ERROR");
+        });
+        return () => {
+          unlisten();
+          invoke("unlisten_from_latest_object_entry_value", OE).catch(console.error);
+        };
+      }catch (e) {
+        console.error(`Failed to register listener for battery icon: Object entry ${OE.nodeName}:${OE.objectEntryName} not found`);
+        return () => {
+        }
       }
-      const unlisten = await listen<ObjectEntryEvent>(resp.event_name, event => {
-          setState(event.payload.value as string == "ERROR");
-      });
-      return () => {
-        unlisten();
-        invoke("unlisten_from_latest_object_entry_value", OE).catch(console.error);
-      };
     }
     const asyncCleanup = asyncSetup();
 
