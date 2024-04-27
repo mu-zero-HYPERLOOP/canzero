@@ -225,6 +225,7 @@ impl ObjectEntryObject {
         // The value has to be stored before notify because the observables
         // use the values in the store directly to reduce clones
         store.push_value(ObjectEntryValue::new(value, timestamp.clone(), delta_time));
+        drop(store); // <- Gentlemen we got him.
         self.latest_observable.notify().await;
         for history_observable in self.history_observables.lock().await.iter() {
             history_observable.notify().await;
