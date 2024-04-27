@@ -51,10 +51,7 @@ impl ObjectEntryHistroyObservable {
 
     pub async fn notify(&self) {
         // intentionally ignore the result!
-        match self.tx.send(ObserverCommand::Value).await {
-            Ok(_) => (),
-            Err(_) => (),
-        }
+        self.tx.send_timeout(ObserverCommand::Value, Duration::from_millis(1000)).await.expect("Failed to notify history observable");
     }
 
     pub async fn start_notify_task(&self, store: &Arc<Mutex<ObjectEntryDatabase>>) {
@@ -73,9 +70,9 @@ impl ObjectEntryHistroyObservable {
 
     pub async fn stop_notify_task(&self) {
         self.tx
-            .send(ObserverCommand::Poison)
+            .send_timeout(ObserverCommand::Poison, Duration::from_millis(1000))
             .await
-            .expect("failed to send poison to object entry history notify task");
+            .expect("Failed to send poison to object entry history notify task");
     }
 
     async fn notify_task(
@@ -89,7 +86,6 @@ impl ObjectEntryHistroyObservable {
         start_index: usize,
         start_time: std::time::Instant,
     ) {
-        println!("notify task started");
         // println!("start notify task {event_name}");
         let mut start_index = start_index;
         let mut latest_index = latest_index;

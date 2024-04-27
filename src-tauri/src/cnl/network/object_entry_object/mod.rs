@@ -326,9 +326,7 @@ impl ObjectEntryObject {
         frame_size: Duration,
         min_interval: Duration,
     ) -> (String, Vec<OwnedObjectEntryEvent>) {
-        println!("acquire store lock (in listen to history [start])");
         let store_lock = self.store.lock().await;
-        println!("acquired store lock [start]");
         let history = store_lock.history();
         let now = std::time::Instant::now().duration_since(self.timebase);
         let breakpoint = now.saturating_sub(frame_size);
@@ -362,14 +360,11 @@ impl ObjectEntryObject {
             start_index,
             self.timebase,
         );
-        println!("start notify task");
         new_history_observable.start_notify_task(&self.store).await;
-        println!("acquire history observable lock");
         self.history_observables
             .lock()
             .await
             .push(new_history_observable);
-        println!("acquire store history observable lock");
 
         (event_name, history_of)
     }

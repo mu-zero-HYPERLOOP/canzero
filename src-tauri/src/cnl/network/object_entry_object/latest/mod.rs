@@ -42,7 +42,7 @@ impl ObjectEntryLatestObservable {
 
     pub async fn notify(&self) {
         if self.listen_count.load(std::sync::atomic::Ordering::SeqCst) != 0 {
-            self.tx.send(ObserverCommand::Value).await.unwrap();
+            self.tx.send_timeout(ObserverCommand::Value, Duration::from_millis(1000)).await.expect("Failed to notify latest observable");
         }
     }
 
@@ -78,9 +78,9 @@ impl ObjectEntryLatestObservable {
 
     pub async fn stop_notify_task(&self) {
         self.tx
-            .send(ObserverCommand::Poison)
+            .send_timeout(ObserverCommand::Poison, Duration::from_millis(1000))
             .await
-            .expect("failed to send posion message");
+            .expect("Failed to send posion message to latest observable");
     }
 
     async fn notify_task(
