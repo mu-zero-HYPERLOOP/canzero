@@ -46,7 +46,7 @@ pub struct ObjectEntryObject {
 
 impl ObjectEntryObject {
     pub fn create(
-        network_config: &config::NetworkRef,
+        _network_config: &config::NetworkRef,
         node_config: &config::NodeRef,
         object_entry_config: &config::ObjectEntryRef,
         app_handle: &tauri::AppHandle,

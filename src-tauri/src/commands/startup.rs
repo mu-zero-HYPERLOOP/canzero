@@ -73,7 +73,7 @@ pub async fn discover_servers(
         return Err("Failed set SO_BROADCAST option for UDP discovery socket".to_owned());
     };
 
-    let Ok(connections) = can_tcp_bridge_rs::client::udp_discover::start_udp_discover(
+    let Ok(connections) = can_tcp_bridge_rs::discovery::udp_discover::start_udp_discover(
         UDP_DISCOVERY_SERVICE_NAME,
         9002,
     )
