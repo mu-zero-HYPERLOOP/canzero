@@ -6,6 +6,7 @@ export interface ObjectEntryInformation {
   id: number,
   unit?: string,
   ty: Type,
+  plottable: boolean,
 }
 
 

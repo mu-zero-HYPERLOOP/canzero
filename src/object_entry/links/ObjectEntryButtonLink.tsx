@@ -7,16 +7,18 @@ interface ObjectEntryButtonLinkProps {
   nodeName: string,
   objectEntryName: string,
   sx?: SxProps<Theme>,
+  disabled?: boolean,
 }
 
 
 
 
-function ObjectEntryButtonLink({ nodeName, objectEntryName, sx }: Readonly<ObjectEntryButtonLinkProps>) {
+function ObjectEntryButtonLink({ disabled, nodeName, objectEntryName, sx }: Readonly<ObjectEntryButtonLinkProps>) {
   const nav = useNavigate();
 
   return (
     <IconButton 
+      disabled={disabled}
       size="small"
       onClick={()=>nav(`/${nodeName}/${objectEntryName}`)}
       sx={sx}>

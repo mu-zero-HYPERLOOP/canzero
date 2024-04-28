@@ -26,6 +26,7 @@ impl NetworkObject {
                 .iter()
                 .map(|node_config| {
                     Arc::new(NodeObject::create(
+                        network_config,
                         node_config,
                         app_handle,
                         tx_com.clone(),

@@ -19,6 +19,7 @@ pub struct NodeObject {
 
 impl NodeObject {
     pub fn create(
+        network_config : &config::NetworkRef,
         node_config: &config::NodeRef,
         app_handle: &tauri::AppHandle,
         tx_com: Arc<TxCom>,
@@ -29,6 +30,8 @@ impl NodeObject {
             .iter()
             .map(|object_entry| {
                 Arc::new(ObjectEntryObject::create(
+                    network_config,
+                    node_config,
                     object_entry,
                     app_handle,
                     tx_com.clone(),

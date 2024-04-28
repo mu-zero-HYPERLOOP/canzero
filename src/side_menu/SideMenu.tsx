@@ -5,7 +5,7 @@ import List from '@mui/material/List';
 import IconButton from '@mui/material/IconButton';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import { ListEntries } from '../dashboard/PageList';
-import { Box} from '@mui/material';
+import { Box } from '@mui/material';
 import StateIndiciatorBar from '../app_bar/StateIndiciatorBar';
 import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api';
@@ -57,14 +57,14 @@ function SideMenu({ open, toggleOpen }: Readonly<SideMenuProps>) {
     async function asyncSetup() {
 
       try {
-      const resp = await invoke<ObjectEntryListenLatestResponse>("listen_to_latest_object_entry_value", STATE_OE);
-      if (resp.latest !== undefined && resp.latest !== null) {
-        setState(resp.latest.value as string);
-      }
-      listen<ObjectEntryEvent>(resp.event_name, event => {
-        setState(event.payload.value as string);
-      });
-      }catch {
+        const resp = await invoke<ObjectEntryListenLatestResponse>("listen_to_latest_object_entry_value", STATE_OE);
+        if (resp.latest !== undefined && resp.latest !== null) {
+          setState(resp.latest.value as string);
+        }
+        listen<ObjectEntryEvent>(resp.event_name, event => {
+          setState(event.payload.value as string);
+        });
+      } catch {
         console.error(`Failed to register listener for SideMenu component: Object entry ${STATE_OE.nodeName}:${STATE_OE.objectEntryName} not found`)
       }
       return () => {

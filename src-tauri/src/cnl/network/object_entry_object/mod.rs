@@ -1,8 +1,5 @@
 use std::{
-    sync::{
-        atomic::AtomicU64,
-        Arc,
-    },
+    sync::{atomic::AtomicU64, Arc},
     time::{Duration, Instant},
 };
 
@@ -44,14 +41,17 @@ pub struct ObjectEntryObject {
     open_get_request: Arc<Mutex<u64>>,
     set_request_timeout: Duration,
     get_request_timeout: Duration,
+    plottable: bool,
 }
 
 impl ObjectEntryObject {
     pub fn create(
+        network_config: &config::NetworkRef,
+        node_config: &config::NodeRef,
         object_entry_config: &config::ObjectEntryRef,
         app_handle: &tauri::AppHandle,
         tx_com: Arc<TxCom>,
-        timebase : Instant,
+        timebase: Instant,
     ) -> Self {
         let latest_event_name = format!(
             "{}_{}_latest",
@@ -64,6 +64,15 @@ impl ObjectEntryObject {
             object_entry_config.name()
         );
         let get_req_num_frames = object_entry_config.ty().size().div_ceil(32) as u64;
+
+        let plottable = node_config.tx_streams().iter().any(|stream| {
+            stream
+                .mapping()
+                .iter()
+                .flatten()
+                .any(|o| o.id() == object_entry_config.id())
+        });
+
         Self {
             object_entry_ref: object_entry_config.clone(),
             store: Arc::new(Mutex::new(ObjectEntryDatabase::new())),
@@ -83,6 +92,7 @@ impl ObjectEntryObject {
             open_get_request: Arc::new(Mutex::new(0)),
             set_request_timeout: Duration::from_millis(100),
             get_request_timeout: Duration::from_millis(100 + get_req_num_frames * 50),
+            plottable,
         }
     }
     pub fn name(&self) -> &str {
@@ -168,7 +178,7 @@ impl ObjectEntryObject {
                     );
                     return;
                 }
-            },
+            }
             Err(_) => {
                 notify_warning(
                     &self.app_handle,
@@ -198,20 +208,21 @@ impl ObjectEntryObject {
             let set_requests = self.open_set_request.clone();
 
             async move {
-            tokio::time::sleep(timeout).await;
-            let mut new_req_num = set_requests.lock().await;
-            if *new_req_num == my_req_num {
-                *new_req_num += 1;
-                notify_error(
-                    &app_handle,
-                    "set request timed out",
-                    &format!(
-                        "Set request for object entry with id {id} of node {node_id} timed out",
-                    ),
-                    chrono::Local::now(),
-                );
+                tokio::time::sleep(timeout).await;
+                let mut new_req_num = set_requests.lock().await;
+                if *new_req_num == my_req_num {
+                    *new_req_num += 1;
+                    notify_error(
+                        &app_handle,
+                        "set request timed out",
+                        &format!(
+                            "Set request for object entry with id {id} of node {node_id} timed out",
+                        ),
+                        chrono::Local::now(),
+                    );
+                }
             }
-        }});
+        });
     }
 
     pub async fn push_value(&self, value: Value, timestamp: &Duration) {
@@ -403,6 +414,7 @@ impl ObjectEntryObject {
             self.object_entry_ref.id() as u16,
             self.object_entry_ref.unit().map(str::to_owned),
             ObjectEntryType::new(self.object_entry_ref.ty()),
+            self.plottable
         )
     }
 

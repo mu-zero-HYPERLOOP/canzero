@@ -5,6 +5,9 @@ import SetValueButton from "../object_entry/panel/SetValueButton";
 import RefreshButton from "../object_entry/panel/RefreshButton";
 import ObjectEntryButtonLink from "../object_entry/links/ObjectEntryButtonLink";
 import ExportButton from "../object_entry/panel/ExportButton";
+import { useEffect, useState } from "react";
+import { ObjectEntryInformation } from "../object_entry/types/ObjectEntryInformation";
+import { invoke } from "@tauri-apps/api";
 
 
 interface ObjectEntryRowProps {
@@ -33,8 +36,8 @@ function ObjectEntryAttribRow({ name, value }: ObjectEntryAttribRowProps) {
           overflow: "clip",
         }}>
 
-          <Typography variant="body2" sx={{marginLeft: "5px"}}>
-          {`• ${name}`}
+          <Typography variant="body2" sx={{ marginLeft: "5px" }}>
+            {`• ${name}`}
           </Typography>
         </TableCell>
         <TableCell sx={{
@@ -42,13 +45,20 @@ function ObjectEntryAttribRow({ name, value }: ObjectEntryAttribRowProps) {
         }}>
           {value}
         </TableCell>
-        <TableCell sx={{width: "20px"}}/>
+        <TableCell sx={{ width: "20px" }} />
       </TableRow>
     );
   }
 }
 
 function ObjectEntryRow({ nodeName, objectEntryName, value }: ObjectEntryRowProps) {
+  const [info, setInfo] = useState<ObjectEntryInformation>();
+
+  useEffect(() => {
+    invoke<ObjectEntryInformation>("object_entry_information", { nodeName, objectEntryName })
+      .then(setInfo);
+  }, [nodeName, objectEntryName]);
+
   if (typeof value === "object") {
     return (<>
       <TableRow >
@@ -74,7 +84,7 @@ function ObjectEntryRow({ nodeName, objectEntryName, value }: ObjectEntryRowProp
           <Stack direction="row" spacing={1}>
             <SetValueButton nodeName={nodeName} objectEntryName={objectEntryName} />
             <RefreshButton nodeName={nodeName} objectEntryName={objectEntryName} />
-            <ObjectEntryButtonLink nodeName={nodeName} objectEntryName={objectEntryName} />
+            <ObjectEntryButtonLink nodeName={nodeName} objectEntryName={objectEntryName} disabled={info == undefined ? true : !info.plottable} />
             <ExportButton nodeName={nodeName} objectEntryName={objectEntryName} />
           </Stack>
         </TableCell>
@@ -110,7 +120,7 @@ function ObjectEntryRow({ nodeName, objectEntryName, value }: ObjectEntryRowProp
           <Stack direction="row" spacing={1}>
             <SetValueButton nodeName={nodeName} objectEntryName={objectEntryName} />
             <RefreshButton nodeName={nodeName} objectEntryName={objectEntryName} />
-            <ObjectEntryButtonLink nodeName={nodeName} objectEntryName={objectEntryName} />
+            <ObjectEntryButtonLink nodeName={nodeName} objectEntryName={objectEntryName} disabled={info == undefined ? true : !info.plottable} />
             <ExportButton nodeName={nodeName} objectEntryName={objectEntryName} />
           </Stack>
         </TableCell>

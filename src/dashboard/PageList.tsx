@@ -17,6 +17,7 @@ import React, { useEffect, useState } from "react";
 import { invoke } from '@tauri-apps/api';
 import Box from "@mui/material/Box";
 import SaveIcon from '@mui/icons-material/Save';
+import { ObjectEntryInformation } from '../object_entry/types/ObjectEntryInformation.tsx';
 
 interface ListItemLinkProps {
   icon?: React.ReactElement;
@@ -129,31 +130,41 @@ export const RouterList = (
 );
 
 interface NodeEntriesProps {
-  nodeInfo: NodeInformation,
+  nodeInfo: CompleteNodeInformation,
 }
 
 function NodeEntries({ nodeInfo }: Readonly<NodeEntriesProps>) {
 
+
   /*Page name has to equal the nodeId!*/
   return (<>
-    {nodeInfo.object_entries.map((entry) =>
-      <CustomTreeItem key={nodeInfo.name + "/" + entry} nodeId={nodeInfo.name + "/" + entry} label={entry} />
+    {nodeInfo.objectEntries.filter(e=>e.plottable).map((entry) =>
+      <CustomTreeItem key={nodeInfo.node.name + "/" + entry.name} nodeId={nodeInfo.node.name + "/" + entry.name} label={entry.name} />
     )}
   </>);
 
 }
 
+interface CompleteNodeInformation {
+  node: NodeInformation,
+  objectEntries: ObjectEntryInformation[],
+}
+
 export function NodeList() {
-  const [nodes, setNodes] = useState<NodeInformation[]>();
+  const [nodes, setNodes] = useState<CompleteNodeInformation[]>();
 
   useEffect(() => {
     async function asyncFetchNetworkInfo() {
-
       let networkInfo = await invoke<NetworkInformation>("network_information");
-      let nodes = [];
+      let nodes: CompleteNodeInformation[] = [];
       for (let nodeName of networkInfo.node_names) {
-        let node_info = await invoke<NodeInformation>("node_information", { nodeName: nodeName });
-        nodes.push(node_info);
+        let node = await invoke<NodeInformation>("node_information", { nodeName });
+        let objectEntries: ObjectEntryInformation[] = [];
+        for (let objectEntryName of node.object_entries) {
+          let objectEntry = await invoke<ObjectEntryInformation>("object_entry_information", { nodeName, objectEntryName });
+          objectEntries.push(objectEntry);
+        }
+        nodes.push({ node, objectEntries });
       }
       setNodes(nodes);
     }
@@ -168,12 +179,12 @@ export function NodeList() {
       defaultCollapseIcon={<ExpandMoreIcon />}
       defaultExpandIcon={<ChevronRightIcon />}
     >
-      {nodes === undefined 
-      ? <></> 
-      : nodes.map((node) =>
-        <CustomTreeItem key={node.name} nodeId={node.name} label={node.name}>
-          <NodeEntries nodeInfo={node} />
-        </CustomTreeItem>)
+      {nodes === undefined
+        ? <></>
+        : nodes.map((completeNode) =>
+          <CustomTreeItem key={completeNode.node.name} nodeId={completeNode.node.name} label={completeNode.node.name}>
+            <NodeEntries nodeInfo={completeNode} />
+          </CustomTreeItem>)
       }
 
     </TreeView>

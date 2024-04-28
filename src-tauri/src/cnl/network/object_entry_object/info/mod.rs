@@ -14,19 +14,21 @@ pub struct ObjectEntryInformation {
     id: u16,
     unit: Option<String>,
     ty : ObjectEntryType,
+    plottable : bool,
 }
 
 impl ObjectEntryInformation {
     pub fn new(name : String, description : Option<String>, 
                id : u16,
                unit : Option<String>,
-               ty : ObjectEntryType) -> Self {
+               ty : ObjectEntryType, plottable : bool) -> Self {
         Self {
             name,
             description,
             id,
             unit,
             ty,
+            plottable
 
         }
     }
