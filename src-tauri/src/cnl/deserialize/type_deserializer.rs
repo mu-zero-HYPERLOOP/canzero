@@ -79,7 +79,7 @@ impl TypeDeserializer {
                 // append / remove most significant bits!
                 u8_vector.resize(8usize, 0u8);
                 // NOTE cursed bullshit! C is so easy!
-                let unsigned_value = u64::from_ne_bytes(u8_vector.try_into().unwrap());
+                let unsigned_value = u64::from_le_bytes(u8_vector.try_into().unwrap());
                 match ty {
                     SignalType::UnsignedInt { size: _ } => Value::UnsignedValue(unsigned_value),
                     SignalType::SignedInt { size: _ } => {

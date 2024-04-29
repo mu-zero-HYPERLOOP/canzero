@@ -53,7 +53,7 @@ impl CNL {
 
         let trace = Arc::new(TraceObject::create(app_handle));
 
-        let tx = Arc::new(TxCom::create(&network_config, &can_adapters));
+        let tx = Arc::new(TxCom::create(&network_config, &can_adapters, &trace, timebase));
 
         let network = Arc::new(NetworkObject::create(
             network_config,

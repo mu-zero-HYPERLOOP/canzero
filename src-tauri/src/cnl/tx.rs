@@ -1,22 +1,33 @@
-use std::{sync::Arc, time::Duration};
+use std::{
+    sync::Arc,
+    time::{Duration, Instant},
+};
 
-use can_config_rs::config;
+use can_config_rs::config::{self, MessageRef};
 use tokio::time;
 
-use super::CanAdapter;
+use super::{deserialize::FrameDeserializer, trace::TraceObject, CanAdapter};
 
-use canzero_common::CanFrame;
+use canzero_common::{CanFrame, Timestamped};
 
 pub struct TxCom {
     network_ref: config::NetworkRef,
     set_req_can_adapter: Arc<CanAdapter>,
+    get_req_frame_deserializer: FrameDeserializer,
     get_req_can_adapter: Arc<CanAdapter>,
     my_node_id: u8,
     frag_time_ms: u64,
+    timebase: Instant,
+    trace: Arc<TraceObject>,
 }
 
 impl TxCom {
-    pub fn create(network_ref: &config::NetworkRef, can_adapters: &Vec<Arc<CanAdapter>>) -> TxCom {
+    pub fn create(
+        network_ref: &config::NetworkRef,
+        can_adapters: &Vec<Arc<CanAdapter>>,
+        trace: &Arc<TraceObject>,
+        basetime: Instant,
+    ) -> TxCom {
         let set_req_can_adapter = can_adapters
             .iter()
             .find(|adapter| adapter.bus().id() == network_ref.set_req_message().bus().id())
@@ -33,8 +44,11 @@ impl TxCom {
             network_ref: network_ref.clone(),
             my_node_id: network_ref.nodes().len() as u8,
             set_req_can_adapter,
+            get_req_frame_deserializer: FrameDeserializer::new(network_ref.get_req_message()),
             get_req_can_adapter,
             frag_time_ms: 50,
+            timebase: basetime,
+            trace: trace.clone(),
         }
     }
 
@@ -81,35 +95,73 @@ impl TxCom {
         fragmented_can_send(
             frame_data,
             self.set_req_can_adapter.clone(),
+            self.network_ref.set_req_message().clone(),
             self.frag_time_ms,
-        ).await;
+            self.timebase,
+            self.trace.clone(),
+        )
+        .await;
     }
 
     pub async fn send_get_req(&self, server_id: u8, object_entry_id: u16) {
-        let mut data : u64= 0;
+        let mut data: u64 = 0;
         data |= object_entry_id as u64;
         data |= (self.network_ref.nodes().len() as u64) << 13;
         data |= (server_id as u64) << 21;
 
-        if let Err(err) = self.get_req_can_adapter.send(CanFrame::new(
+        let get_req_frame = CanFrame::new(
             self.network_ref.get_req_message().id().as_u32(),
             self.network_ref.get_req_message().id().ide(),
             false,
             self.network_ref.get_req_message().dlc(),
             data,
-        )).await {
+        );
+
+        if let Err(err) = self.get_req_can_adapter.send(get_req_frame).await {
             eprintln!("{err:?}");
-        };
+        }
+
+        let frame = Timestamped::now(
+            self.timebase,
+            self.get_req_frame_deserializer.deserialize(data),
+        );
+        self.trace
+            .push_normal_frame(
+                frame,
+                self.network_ref.get_req_message().bus().name(),
+                self.network_ref.get_req_message().bus().id(),
+            )
+            .await;
     }
 }
 
-async fn fragmented_can_send(frames: Vec<CanFrame>, can_adapter: Arc<CanAdapter>, frag_time_ms: u64) {
+async fn fragmented_can_send(
+    frames: Vec<CanFrame>,
+    can_adapter: Arc<CanAdapter>,
+    set_req_config: MessageRef,
+    frag_time_ms: u64,
+    timebase: Instant,
+    trace: Arc<TraceObject>,
+) {
     let mut interval = time::interval(Duration::from_millis(frag_time_ms));
+
+    let frame_deserializer = FrameDeserializer::new(&set_req_config);
+
     for frame in frames {
         // first tick completes instantaniously
         interval.tick().await;
+
+        let tframe = Timestamped::now(
+            timebase,
+            frame_deserializer.deserialize(frame.get_data_u64()),
+        );
+
         if let Err(err) = can_adapter.send(frame).await {
             eprintln!("{err:?}");
         }
+
+        trace
+            .push_normal_frame(tframe, set_req_config.bus().name(), set_req_config.bus().id())
+            .await;
     }
 }

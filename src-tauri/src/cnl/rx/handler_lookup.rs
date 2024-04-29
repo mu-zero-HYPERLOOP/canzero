@@ -4,8 +4,10 @@ use can_config_rs::config::{message, MessageId, MessageRef};
 
 use crate::cnl::{
     handler::{
-        get_resp_frame_handler::GetRespFrameHandler, set_resp_frame_handler::SetRespFrameHandler,
-        stream_frame_handler::StreamFrameHandler, MessageHandler,
+        get_req_frame_handler::GetReqFrameHandler, get_resp_frame_handler::GetRespFrameHandler,
+        heartbeat_frame_handler::HeartbeatFrameHandler, set_req_frame_handler::SetReqFrameHandler,
+        set_resp_frame_handler::SetRespFrameHandler, stream_frame_handler::StreamFrameHandler,
+        MessageHandler,
     },
     network::NetworkObject,
 };
@@ -55,22 +57,35 @@ impl HandlerLookup {
                             msg,
                         )),
                     )),
-                    message::MessageUsage::GetReq => None, // TODO timeout
+                    message::MessageUsage::GetReq => Some((
+                        key,
+                        MessageHandler::GetReqFrameHandler(GetReqFrameHandler::create(msg)),
+                    )),
                     message::MessageUsage::SetResp => Some((
                         key,
-                        MessageHandler::SetRespFrameHandler(SetRespFrameHandler::create(network_object, msg)),
+                        MessageHandler::SetRespFrameHandler(SetRespFrameHandler::create(
+                            network_object,
+                            msg,
+                        )),
                     )),
-                    message::MessageUsage::SetReq => None, // TODO timeout
-                    message::MessageUsage::Heartbeat => None, // TODO heartbeat protocol
-                    message::MessageUsage::External { interval : _ } => None,
+                    message::MessageUsage::SetReq => Some((
+                        key,
+                        MessageHandler::SetReqFrameHandler(SetReqFrameHandler::create(msg)),
+                    )),
+                    message::MessageUsage::Heartbeat => Some((
+                        key,
+                        MessageHandler::HeartbeatFrameHandler(HeartbeatFrameHandler::create(msg)),
+                    )),
+                    message::MessageUsage::External { interval: _ } => None,
                 }
             })
-            .flatten().collect();
+            .flatten()
+            .collect();
 
         Self(map)
     }
 
-    pub fn get_handler(&self, key : u32) -> Option<&MessageHandler> {
+    pub fn get_handler(&self, key: u32) -> Option<&MessageHandler> {
         self.0.get(&key)
     }
 }
