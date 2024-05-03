@@ -2,7 +2,7 @@
 name = "control_panel"
 version = "0.0.0"
 description = "Control Panel for the muzero CAN protocol. Developed for mu-zero HYPERLOOP Season IV."
-authors = ["Karl Sassie", "Jakob Schmit", "Niklas Henaka", "Nicolas Fliegel"]
+authors = ["Karl Sassie", "Jakob Schmit", "Niklas Heneka", "Nicolas Fliegel"]
 repository = "https://github.com/mu-zero-HYPERLOOP/control-panel.git"
 edition = "2021"
 rust-version = "1.75"
