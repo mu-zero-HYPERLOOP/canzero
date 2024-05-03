@@ -1,5 +1,5 @@
 [package]
-name = "control_panel"
+name = "canzero"
 version = "0.0.0"
 description = "Control Panel for the muzero CAN protocol. Developed for mu-zero HYPERLOOP Season IV."
 authors = ["Karl Sassie", "Jakob Schmit", "Niklas Heneka", "Nicolas Fliegel"]
