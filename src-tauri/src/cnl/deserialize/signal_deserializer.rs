@@ -1,4 +1,4 @@
-use can_config_rs::config::SignalRef;
+use canzero_config::config::{self, SignalRef};
 
 use crate::cnl::frame::Value;
 
@@ -22,13 +22,13 @@ impl SignalDeserializer {
             bit_offset,
             bit_mask : (u64::MAX.overflowing_shr(u64::BITS - bit_size)).0,
             type_info: match signal.ty() {
-                can_config_rs::config::SignalType::UnsignedInt { size: _ } => {
+                config::SignalType::UnsignedInt { size: _ } => {
                     SignalDeserializerTypeInfo::UnsignedSignalDeserializer
                 }
-                can_config_rs::config::SignalType::SignedInt { size: _ } => {
+                config::SignalType::SignedInt { size: _ } => {
                     SignalDeserializerTypeInfo::SignedSignalDeserializer
                 }
-                can_config_rs::config::SignalType::Decimal {
+                config::SignalType::Decimal {
                     size: _,
                     offset,
                     scale,

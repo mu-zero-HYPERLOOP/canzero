@@ -3,7 +3,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use can_config_rs::config::{self, MessageRef};
+use canzero_config::config::{self, MessageRef};
 use tokio::time;
 
 use super::{deserialize::FrameDeserializer, trace::TraceObject, CanAdapter};

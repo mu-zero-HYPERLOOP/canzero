@@ -1,6 +1,6 @@
 use std::{ops::Deref, sync::Arc, time::Instant};
 
-use can_config_rs::config::NetworkRef;
+use canzero_config::config::NetworkRef;
 use tokio::sync::Mutex;
 
 use crate::cnl::{can_adapter::CanAdapter, CNL};

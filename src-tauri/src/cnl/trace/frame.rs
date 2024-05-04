@@ -1,4 +1,4 @@
-use can_config_rs::config::MessageId;
+use canzero_config::config::MessageId;
 use serde::{ser::SerializeMap, Serialize};
 
 use crate::cnl::frame::{Attribute, Frame, Value};

@@ -1,5 +1,5 @@
 
-use can_config_rs::config::MessageRef;
+use canzero_config::config::MessageRef;
 use canzero_common::TCanFrame;
 
 use crate::cnl::frame::TFrame;

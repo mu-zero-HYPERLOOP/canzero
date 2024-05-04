@@ -1,4 +1,4 @@
-use can_config_rs::config::Type;
+use canzero_config::config::Type;
 
 use crate::{cnl::frame::Value, notification::notify_error, notification::notify_info, state::cnl_state::CNLState};
 

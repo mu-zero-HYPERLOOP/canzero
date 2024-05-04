@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
-use canzero_common::{TCanFrame, TCanError, CanFrame};
-use can_tcp_bridge_rs::frame::NetworkFrame;
+use canzero_common::{CanFrame, NetworkFrame, TCanError, TCanFrame};
 
 use self::client::TcpClient;
 

@@ -1,4 +1,4 @@
-use can_config_rs::config::MessageRef;
+use canzero_config::config::MessageRef;
 
 use self::encoding_deserializer::EncodedDeserializer;
 

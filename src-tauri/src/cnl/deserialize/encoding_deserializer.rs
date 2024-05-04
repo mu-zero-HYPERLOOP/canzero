@@ -1,4 +1,4 @@
-use can_config_rs::config::{SignalRef, Type, TypeSignalEncoding};
+use canzero_config::config::{SignalRef, Type, TypeSignalEncoding};
 
 use crate::cnl::frame::Value;
 

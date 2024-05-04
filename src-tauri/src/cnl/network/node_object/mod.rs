@@ -1,6 +1,6 @@
 use std::{sync::Arc, time::Instant};
 
-use can_config_rs::config;
+use canzero_config::config;
 
 use crate::cnl::tx::TxCom;
 

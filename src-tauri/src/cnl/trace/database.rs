@@ -1,5 +1,6 @@
 use std::{cmp::Reverse, collections::HashMap, time::Duration};
 
+use canzero_config::config;
 use tokio::sync::Mutex;
 
 use super::{
@@ -186,8 +187,8 @@ impl TraceDatabase {
                     }
                     TraceFrame::Error(err) => err.name().to_owned(),
                     TraceFrame::Frame(frame) => match frame.id() {
-                        can_config_rs::config::MessageId::StandardId(id) => format!("0x{id:X}"),
-                        can_config_rs::config::MessageId::ExtendedId(id) => format!("0x{id:X}x"),
+                        config::MessageId::StandardId(id) => format!("0x{id:X}"),
+                        config::MessageId::ExtendedId(id) => format!("0x{id:X}x"),
                     },
                 });
                 unlocked_data.trace.push(TraceEvent::new_relative(

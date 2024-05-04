@@ -1,6 +1,6 @@
 use std::{time::Instant, sync::Arc};
 
-use can_config_rs::config::bus::BusRef;
+use canzero_config::config::bus::BusRef;
 use tokio::{
     runtime::Handle,
     sync::{

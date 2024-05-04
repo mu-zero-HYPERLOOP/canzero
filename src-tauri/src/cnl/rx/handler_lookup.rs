@@ -1,6 +1,6 @@
 use std::{collections::HashMap, sync::Arc};
 
-use can_config_rs::config::{message, MessageId, MessageRef};
+use canzero_config::config::{message, MessageId, MessageRef};
 
 use crate::cnl::{
     handler::{

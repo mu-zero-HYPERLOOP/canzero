@@ -1,7 +1,7 @@
 use std::{collections::HashMap, sync::Arc, time::Duration};
 
 use bitvec::view::AsBits;
-use can_config_rs::config;
+use canzero_config::config;
 
 use crate::cnl::{
     deserialize::{type_deserializer::TypeDeserializer, FrameDeserializer},

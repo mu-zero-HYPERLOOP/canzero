@@ -6,8 +6,8 @@ use crate::cnl::frame::{Value, Attribute};
 use crate::cnl::network::object_entry_object::latest::event::OwnedObjectEntryEvent;
 use crate::state::cnl_state::CNLState;
 
-use can_config_rs::config;
-use can_config_rs::config::{SignalType, Type};
+use canzero_config::config;
+use canzero_config::config::{SignalType, Type};
 
 use serde_json;
 

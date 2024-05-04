@@ -3,7 +3,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use can_config_rs::config;
+use canzero_config::config;
 use chrono;
 use tokio::sync::Mutex;
 

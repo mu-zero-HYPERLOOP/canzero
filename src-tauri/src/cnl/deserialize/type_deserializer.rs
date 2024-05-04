@@ -1,7 +1,7 @@
 use std::io::Read;
 
 use bitvec::slice::BitSlice;
-use can_config_rs::config::{SignalType, Type};
+use canzero_config::config::{SignalType, Type};
 
 use crate::cnl::frame::{Attribute, Value};
 

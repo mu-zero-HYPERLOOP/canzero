@@ -1,4 +1,4 @@
-use can_config_rs::config;
+use canzero_config::config;
 use serde::{ser::SerializeMap, Serialize};
 
 #[derive(Clone, Serialize)]

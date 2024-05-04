@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use can_config_rs::config::NetworkRef;
+use canzero_config::config::NetworkRef;
 
 use self::can_receiver::CanReceiver;
 

@@ -1,5 +1,5 @@
-use can_config_rs::config::{bus::BusRef, NetworkRef};
-use can_tcp_bridge_rs::frame::NetworkDescription;
+use canzero_config::config::{bus::BusRef, NetworkRef};
+use canzero_udp::frame::NetworkDescription;
 
 use self::tcp::TcpCanAdapter;
 use canzero_common::{CanFrame, TCanFrame, TCanError};

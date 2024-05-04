@@ -2,12 +2,9 @@ use std::{net::SocketAddr, sync::Arc, time::Instant};
 
 use crate::notification::notify_warning;
 
-use can_tcp_bridge_rs::{
-    frame::{NetworkDescription, NetworkFrame, TNetworkFrame},
-    tcpcan::TcpCan,
-};
-
-use canzero_common::{TCanError, TCanFrame, Timestamped};
+use canzero_common::{NetworkFrame, TCanError, TCanFrame, TNetworkFrame, Timestamped};
+use canzero_tcp::tcpcan::TcpCan;
+use canzero_udp::frame::NetworkDescription;
 
 pub struct TcpClient {
     tcpcan: Arc<TcpCan>,

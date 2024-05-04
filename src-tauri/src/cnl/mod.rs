@@ -7,6 +7,7 @@ pub mod network;
 mod rx;
 pub mod trace;
 mod tx;
+mod watchdog;
 
 pub mod can_adapter;
 
@@ -18,10 +19,10 @@ use self::{
     network::{node_object::NodeObject, NetworkObject},
     rx::RxCom,
     trace::TraceObject,
-    tx::TxCom,
+    tx::TxCom, watchdog::WatchdogOverlord,
 };
 
-use can_config_rs::config;
+use canzero_config::config;
 
 // Can Network Layer (CNL)
 pub struct CNL {
@@ -37,6 +38,8 @@ pub struct CNL {
     tx: Arc<TxCom>,
     network: Arc<NetworkObject>,
     connection_object: Arc<ConnectionObject>,
+
+    watchdog_overlord : WatchdogOverlord,
 }
 
 impl CNL {
@@ -69,6 +72,7 @@ impl CNL {
             trace,
             network,
             connection_object: Arc::new(connection_object),
+            watchdog_overlord : WatchdogOverlord::new(),
         }
     }
 

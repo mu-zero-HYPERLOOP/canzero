@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use can_config_rs::config;
+use canzero_config::config;
 
 use crate::cnl::{
     deserialize::FrameDeserializer,

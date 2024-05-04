@@ -1,4 +1,4 @@
-use can_config_rs::config::{MessageId, MessageRef, SignalType, Type};
+use canzero_config::config::{MessageId, MessageRef, SignalType, Type};
 use serde::{ser::SerializeMap, Serialize};
 
 use canzero_common::Timestamped;

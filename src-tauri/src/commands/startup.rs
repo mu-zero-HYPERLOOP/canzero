@@ -1,5 +1,7 @@
+use std::time::Duration;
 
-use can_appdata::AppData;
+use canzero_appdata::AppData;
+use canzero_udp::scanner::UdpNetworkScanner;
 use serde::Serialize;
 use tauri::Manager;
 
@@ -20,11 +22,7 @@ pub async fn download_network_configuration(
                 "No config set use \n$ canzero config set-path <path-to-config>".to_owned(),
             );
         };
-        let Ok(network_config) = can_yaml_config_rs::parse_yaml_config_from_file(
-            config_path
-                .to_str()
-                .expect("FUCK YOU for using non utf8 filenames"),
-        ) else {
+        let Ok(network_config) = appdata.config() else {
             return Err(format!("Failed to parse configuration at {config_path:?}"));
         };
         Ok(network_config)
@@ -34,8 +32,6 @@ pub async fn download_network_configuration(
     state.set_network_config(network_config).await;
     Ok(())
 }
-
-const UDP_DISCOVERY_SERVICE_NAME: &'static str = "CANzero";
 
 #[allow(unused)]
 pub enum ConnectionType {
@@ -65,22 +61,24 @@ pub struct ConnectionDescription {
 pub async fn discover_servers(
     state: tauri::State<'_, StartupState>,
 ) -> Result<Vec<ConnectionDescription>, String> {
-    let Ok(socket) = tokio::net::UdpSocket::bind(&format!("0.0.0.0:0")).await else {
-        return Err("Failed to bind UDP discovery socket".to_owned());
-    };
-
-    let Ok(()) = socket.set_broadcast(true) else {
-        return Err("Failed set SO_BROADCAST option for UDP discovery socket".to_owned());
-    };
-
-    let Ok(connections) = can_tcp_bridge_rs::discovery::udp_discover::start_udp_discover(
-        UDP_DISCOVERY_SERVICE_NAME,
-        9002,
-    )
-    .await
-    else {
-        return Err("Failed to start udp discovery".to_owned());
-    };
+    let scanner = UdpNetworkScanner::create()
+        .await
+        .map_err(|err| format!("{err:?}"))?;
+    scanner.start();
+    let mut connections = vec![];
+    loop {
+        match scanner.next_timeout(Duration::from_millis(1000)).await {
+            Some(Ok(con)) => {
+                connections.push(con);
+                continue;
+            },
+            Some(Err(err)) => {
+                return Err(format!("{err:?}"));
+            }
+            None => break,
+        }
+    }
+    drop(scanner);
 
     // CANzero discovery broadcast are always broadcast on port 9002!
 
@@ -108,7 +106,10 @@ pub async fn discover_servers(
         .map(|con| match con {
             NetworkConnectionCreateInfo::Tcp(nd) => ConnectionDescription {
                 tag: ConnectionType::Tcp,
-                description: format!("{} at {}:{}", nd.server_name, nd.server_addr, nd.service_port),
+                description: format!(
+                    "{} at {}:{}",
+                    nd.server_name, nd.server_addr, nd.service_port
+                ),
             },
             #[cfg(feature = "socket-can")]
             NetworkConnectionCreateInfo::SocketCan => ConnectionDescription {

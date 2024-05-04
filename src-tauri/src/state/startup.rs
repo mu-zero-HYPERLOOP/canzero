@@ -3,8 +3,8 @@ use std::{
     time::Instant,
 };
 
-use can_config_rs::config::NetworkRef;
-use can_tcp_bridge_rs::frame::NetworkDescription;
+use canzero_config::config::NetworkRef;
+use canzero_udp::frame::NetworkDescription;
 use tokio::sync::Mutex;
 
 use crate::cnl::can_adapter::CanAdapter;

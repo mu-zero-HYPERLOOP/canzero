@@ -1,7 +1,7 @@
 use std::{sync::Arc, time::Instant};
 
 use self::node_object::NodeObject;
-use can_config_rs::config;
+use canzero_config::config;
 
 use super::tx::TxCom;
 

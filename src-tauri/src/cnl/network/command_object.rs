@@ -1,4 +1,4 @@
-use can_config_rs::config;
+use canzero_config::config;
 
 pub struct CommandObject {
     command_ref: config::CommandRef,
