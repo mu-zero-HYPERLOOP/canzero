@@ -222,6 +222,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "build-time"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f1219c19fc29b7bfd74b7968b420aff5bc951cf517800176e795d6b2300dd382"
+dependencies = [
+ "chrono",
+ "once_cell",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.60",
+]
+
+[[package]]
 name = "bumpalo"
 version = "3.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -361,9 +374,12 @@ dependencies = [
 [[package]]
 name = "canzero-udp"
 version = "0.1.0"
-source = "git+https://github.com/mu-zero-HYPERLOOP/canzero-udp.git#1a0031fe85956bf66fce6782c71ae3f2e79827ae"
+source = "git+https://github.com/mu-zero-HYPERLOOP/canzero-udp.git#c6a87f788b5da2cf971c8edb1c4da376e0f41020"
 dependencies = [
  "bincode",
+ "build-time",
+ "canzero-config",
+ "chrono",
  "color-print",
  "serde",
  "tokio",
@@ -1972,9 +1988,9 @@ checksum = "51d515d32fb182ee37cda2ccdcb92950d6a3c2893aa280e540671c2cd0f3b1d9"
 
 [[package]]
 name = "num-traits"
-version = "0.2.18"
+version = "0.2.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "da0df0e5185db44f69b44f26786fe401b6c293d1907744beaa7fa62b2e5a517a"
+checksum = "071dfc062690e90b734c0b2273ce72ad0ffa95f0c74596bc250dcfd960262841"
 dependencies = [
  "autocfg",
 ]

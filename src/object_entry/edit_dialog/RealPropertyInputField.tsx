@@ -3,7 +3,7 @@ import { useState } from "react";
 
 
 function parseInputToNumber(input: string): number | null {
-  let regex = /^-?\d*[.]?\d+$/;
+  let regex = /^-?\d*[.]?\d*$/;
   if (!regex.test(input)) {
     return null;
   }

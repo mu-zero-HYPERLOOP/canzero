@@ -18,8 +18,6 @@ pub async fn set_object_entry_value(
     object_entry_name: String,
     new_value_json: String,
 ) -> Result<(), ()> {
-    #[cfg(feature = "logging-invoke")]
-    println!("invoke: set_object_entry_value({node_name:?}, {object_entry_name:?}, {new_value_json:?})");
     let cnl = state.lock().await;
 
     let Some(node) = cnl.nodes().iter().find(|no| no.name() == &node_name) else {
@@ -39,14 +37,16 @@ pub async fn set_object_entry_value(
         Err(_) => return Err(()),
     };
 
-    fn parse_value(
-        oe_type: &config::TypeRef,
-        json_value: &serde_json::Value,
-    ) -> Result<Value, ()> {
+
+    fn parse_value(oe_type: &config::TypeRef, json_value: &serde_json::Value) -> Result<Value, ()> {
         match oe_type.as_ref() {
             Type::Primitive(SignalType::SignedInt { size }) => {
                 if let Some(val) = json_value.as_i64() {
-                    if 2i64.pow((*size - 1) as u32) > val && 2i64.pow((*size - 1) as u32) >= -val {
+                    let max_uvalue = u64::MAX.overflowing_shr(64 - *size as u32).0;
+                    let max_ivalue: i64 = (max_uvalue.overflowing_shr(1).0) as i64;
+                    let min_ivalue: i64 =
+                        unsafe { std::mem::transmute(u64::MAX.overflowing_shl(*size as u32 - 1).0) };
+                    if val <= max_ivalue && val >= min_ivalue {
                         Ok(Value::SignedValue(val))
                     } else {
                         return Err(());
@@ -57,7 +57,8 @@ pub async fn set_object_entry_value(
             }
             Type::Primitive(SignalType::UnsignedInt { size }) => {
                 if let Some(val) = json_value.as_u64() {
-                    if 2u64.pow(*size as u32) > val {
+                    let max_uvalue = u64::MAX.overflowing_shr(64 - *size as u32).0;
+                    if val <= max_uvalue {
                         Ok(Value::UnsignedValue(val))
                     } else {
                         return Err(());
@@ -72,9 +73,10 @@ pub async fn set_object_entry_value(
                 scale,
             }) => {
                 if let Some(val) = json_value.as_f64() {
+                    let max_uvalue = u64::MAX.overflowing_shr(64 - *size as u32).0;
                     let min = *offset;
-                    let max = (0xffffffffffffffff as u64 >> (64 - size)) as f64 * scale + offset;
-                    if val >= min && val <= max {
+                    let max = (max_uvalue as f64) * scale + offset;
+                    if val <= max && val >= min {
                         Ok(Value::RealValue(val))
                     } else {
                         return Err(());
@@ -91,7 +93,7 @@ pub async fn set_object_entry_value(
                 visibility: _,
             } => {
                 if let Some(map) = json_value.as_object() {
-                    let mut attributes : Vec<Attribute> = vec![];
+                    let mut attributes: Vec<Attribute> = vec![];
 
                     for (name, attr_type) in attribs {
                         if let Some(val) = map.get(name) {
@@ -135,6 +137,7 @@ pub async fn set_object_entry_value(
         Ok(x) => x,
         Err(_) => return Err(()),
     };
+
 
     object_entry_object.set_request(value).await;
 

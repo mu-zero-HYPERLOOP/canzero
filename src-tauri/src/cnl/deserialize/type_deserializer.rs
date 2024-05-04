@@ -82,8 +82,18 @@ impl TypeDeserializer {
                 let unsigned_value = u64::from_le_bytes(u8_vector.try_into().unwrap());
                 match ty {
                     SignalType::UnsignedInt { size: _ } => Value::UnsignedValue(unsigned_value),
-                    SignalType::SignedInt { size: _ } => {
-                        Value::SignedValue(unsafe { std::mem::transmute(unsigned_value) })
+                    SignalType::SignedInt { size } => {
+                        let neg = unsigned_value & (1 << (*size - 1)) != 0;
+                        if neg {
+                            // pad with ones
+                            Value::SignedValue(unsafe {
+                                std::mem::transmute(
+                                    u64::MAX.overflowing_shl(*size as u32 - 1).0 | unsigned_value,
+                                )
+                            })
+                        } else {
+                            Value::SignedValue(unsafe {std::mem::transmute(unsigned_value)})
+                        }
                     }
                     SignalType::Decimal {
                         size: _,

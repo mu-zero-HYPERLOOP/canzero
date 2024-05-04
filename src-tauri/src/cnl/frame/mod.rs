@@ -138,7 +138,7 @@ impl Value {
                 }
                 (Value::SignedValue(val), Type::Primitive(SignalType::SignedInt { size })) => {
                     for i in 0..*size {
-                        let bit_int = (*val >> i) & 0x1;
+                        let bit_int = (val.overflowing_shr(i as u32).0) & 0x1;
                         bit_vec.push(if bit_int == 0 { false } else { true });
                     }
                 }
@@ -151,18 +151,13 @@ impl Value {
                     }),
                 ) => {
                     let base_float = (val - offset) / scale;
-                    let base_bits = base_float.round() as i64;
-                    // just in case floating point errors fuck us.
-                    // not sure if actually needed.
-                    let base_bits: u64 = if base_bits < 0 {
-                        0
-                    } else if (base_bits >> size) > 0 {
-                        0xffff_ffff_ffff_ffff
-                    } else {
-                        base_bits as u64
-                    };
+                    let mut base_bits = base_float.round() as u64;
+                    let max_uvalue = u64::MAX.overflowing_shr(64 - *size as u32).0;
+                    if base_bits > max_uvalue {
+                        base_bits = max_uvalue;
+                    }
                     for i in 0..*size {
-                        let bit_int = (base_bits >> i) & 0x1;
+                        let bit_int = (base_bits.overflowing_shr(i as u32).0) & 0x1;
                         bit_vec.push(if bit_int == 0 { false } else { true });
                     }
                 }
@@ -206,6 +201,11 @@ impl Value {
         continue_get_as_bin(self, ty, &mut bit_vec);
         let num_bytes = (bit_vec.len() + 7) / 8;
         let last_fill: u8 = (num_bytes % std::mem::size_of::<S>()) as u8;
+        let last_fill = if last_fill == 0 as u8 {
+            std::mem::size_of::<S>() as u8
+        } else {
+            last_fill
+        };
 
         bit_vec.set_uninitialized(false);
         let vec_t = bit_vec.into_vec();
