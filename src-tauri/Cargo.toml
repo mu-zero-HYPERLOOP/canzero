@@ -34,6 +34,7 @@ canzero-tcp = { git = "https://github.com/mu-zero-HYPERLOOP/canzero-tcp.git" }
 canzero-udp = { git = "https://github.com/mu-zero-HYPERLOOP/canzero-udp.git" }
 canzero-common = { git = "https://github.com/mu-zero-HYPERLOOP/canzero-common.git" }
 canzero-socketcan = { git = "https://github.com/mu-zero-HYPERLOOP/canzero-socketcan.git", optional = true}
+canzero-cli = { git = "https://github.com/mu-zero-HYPERLOOP/canzero-cli.git"}
 fix-path-env = { git = "https://github.com/tauri-apps/fix-path-env-rs.git"}
 bitvec = "1.0.1"
 chrono = { version = "0.4.34", features = [ "serde" ] }
@@ -48,6 +49,6 @@ default = []
 # DO NOT REMOVE!!
 custom-protocol = ["tauri/custom-protocol"]
 
-socket-can = ["dep:canzero-socketcan", "dep:nix"]
+socket-can = ["dep:canzero-socketcan", "dep:nix", "canzero-cli/socket-can"]
 # Custom features!
 logging-invoke = []

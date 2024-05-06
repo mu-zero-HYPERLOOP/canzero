@@ -1,4 +1,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+use canzero_cli::run_cli;
 use tauri::Manager;
 
 use crate::{commands::{connection_status, network_information, object_entry_commands}, state::startup::StartupState};
@@ -10,8 +11,14 @@ mod state;
 
 #[tokio::main(flavor = "multi_thread", worker_threads = 4)]
 async fn main() {
+
     let _ = fix_path_env::fix();
     tauri::async_runtime::set(tokio::runtime::Handle::current());
+
+    if !run_cli().await {
+        return;
+    }
+
     // setup tauri
     tauri::Builder::default()
         .setup(|app| {
