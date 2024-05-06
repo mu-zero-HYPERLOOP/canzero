@@ -11,7 +11,10 @@ mod watchdog;
 
 pub mod can_adapter;
 
-use std::{sync::Arc, time::Instant};
+use std::{
+    sync::Arc,
+    time::{Duration, Instant},
+};
 
 use self::{
     can_adapter::CanAdapter,
@@ -19,7 +22,8 @@ use self::{
     network::{node_object::NodeObject, NetworkObject},
     rx::RxCom,
     trace::TraceObject,
-    tx::TxCom, watchdog::WatchdogOverlord,
+    tx::TxCom,
+    watchdog::{Watchdog, WatchdogOverlord, WdgTag},
 };
 
 use canzero_config::config;
@@ -39,7 +43,8 @@ pub struct CNL {
     network: Arc<NetworkObject>,
     connection_object: Arc<ConnectionObject>,
 
-    watchdog_overlord : WatchdogOverlord,
+    _watchdog_overlord: WatchdogOverlord,
+    external_watchdog: Watchdog,
 }
 
 impl CNL {
@@ -47,32 +52,67 @@ impl CNL {
         network_config: &config::NetworkRef,
         app_handle: &tauri::AppHandle,
         can_adapters: Vec<Arc<CanAdapter>>,
-        timebase : Instant,
+        timebase: Instant,
     ) -> Self {
-        let connection_object =
-            ConnectionObject::new(ConnectionStatus::CanDisconnected, app_handle);
-
-        connection_object.set_status(ConnectionStatus::CanConnected);
+        let connection_object = Arc::new(ConnectionObject::new(
+            ConnectionStatus::NetworkConnected,
+            app_handle,
+        ));
 
         let trace = Arc::new(TraceObject::create(app_handle));
 
-        let tx = Arc::new(TxCom::create(&network_config, &can_adapters, &trace, timebase));
+        let tx = Arc::new(TxCom::create(
+            &network_config,
+            &can_adapters,
+            &trace,
+            timebase,
+            &connection_object,
+        ));
 
         let network = Arc::new(NetworkObject::create(
             network_config,
             app_handle,
             tx.clone(),
-            timebase
+            timebase,
         ));
 
-        let rx = RxCom::create(network_config, &trace, &network, app_handle, &can_adapters);
+        let rx = RxCom::create(
+            network_config,
+            &trace,
+            &network,
+            app_handle,
+            &can_adapters,
+            &connection_object,
+        );
+
+        let watchdog_overlord = WatchdogOverlord::new(&connection_object);
+        let external_watchdog =
+            watchdog_overlord.register(WdgTag::FrontendWdg, Duration::from_millis(1000));
+        let deadlock_watchdog =
+            watchdog_overlord.register(WdgTag::DeadlockWdg, Duration::from_millis(1000));
+
+        let network_dead = network.clone();
+        let trace_dead = trace.clone();
+        let connection_object_dead = connection_object.clone();
+        tokio::spawn(async move {
+            let mut deadlock_interval = tokio::time::interval(Duration::from_millis(200));
+            loop {
+                deadlock_interval.tick().await;
+                network_dead.deadlock_watchdog().await;
+                trace_dead.deadlock_watchdog().await;
+                connection_object_dead.deadlock_watchdog().await;
+                deadlock_watchdog.reset().await;
+            }
+        });
+
         Self {
             rx,
             tx,
             trace,
             network,
-            connection_object: Arc::new(connection_object),
-            watchdog_overlord : WatchdogOverlord::new(),
+            connection_object,
+            _watchdog_overlord: watchdog_overlord,
+            external_watchdog,
         }
     }
 
@@ -86,5 +126,9 @@ impl CNL {
 
     pub fn connection_object(&self) -> &Arc<ConnectionObject> {
         &self.connection_object
+    }
+
+    pub async fn reset_watchdog(&self) {
+        self.external_watchdog.reset().await;
     }
 }

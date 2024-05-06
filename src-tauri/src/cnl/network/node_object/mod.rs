@@ -76,4 +76,14 @@ impl NodeObject {
     pub async fn unlisten(&self) {
         self.latest_observable.unlisten().await
     }
+
+    pub async fn deadlock_watchdog(&self) {
+        for oe in &self.object_entries {
+            oe.deadlock_watchdog().await;
+        }
+        // for c in &self.commands {
+        //     c.deadlock_watchdog().await;
+        // }
+        // let _ = self.latest_observable.deadlock_watchdog().await;
+    }
 }

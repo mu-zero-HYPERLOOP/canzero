@@ -21,6 +21,10 @@ impl CommandObject {
     pub fn build_invoke(&self) -> InvokeCommandBuilder {
         InvokeCommandBuilder::new(self)
     }
+
+    pub async fn deadlock_watchdog(&self) {
+        // pass
+    }
 }
 
 pub struct InvokeCommandBuilder {

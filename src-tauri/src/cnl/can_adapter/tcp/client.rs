@@ -26,7 +26,7 @@ impl TcpClient {
         tokio::spawn(async move {
             loop {
                 let Some(tnetwork_frame) = tcpcan_rx.recv().await else {
-                    panic!("Tcp connection closed early");
+                    break;
                 };
 
                 let network_frame = tnetwork_frame.value;

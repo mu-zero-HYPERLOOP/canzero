@@ -4,7 +4,7 @@ use canzero_config::config::NetworkRef;
 
 use self::can_receiver::CanReceiver;
 
-use super::{can_adapter::CanAdapter, network::NetworkObject, trace::TraceObject};
+use super::{can_adapter::CanAdapter, connection::ConnectionObject, network::NetworkObject, trace::TraceObject};
 
 mod can_receiver;
 mod handler_lookup;
@@ -26,6 +26,7 @@ impl RxCom {
         network_object: &Arc<NetworkObject>,
         app_handle: &tauri::AppHandle,
         can_adapters: &Vec<Arc<CanAdapter>>,
+        connection_object : &Arc<ConnectionObject>
     ) -> Self {
         Self {
             can_receivers: can_adapters
@@ -37,6 +38,7 @@ impl RxCom {
                         trace,
                         network_object,
                         app_handle,
+                        connection_object.clone(),
                     )
                 })
                 .collect(),

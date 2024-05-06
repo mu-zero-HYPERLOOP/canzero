@@ -1,4 +1,4 @@
-import { Grid, Paper, Skeleton, Stack, styled } from '@mui/material';
+import { Grid, Paper, Stack, styled } from '@mui/material';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCarBattery, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
 import Thermostat from '@mui/icons-material/Thermostat';
@@ -19,7 +19,6 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 interface ControlGridProps {
-  connectionSuccess: boolean;
   nodes: NodeInformation[];
 }
 
@@ -98,100 +97,76 @@ function createGridEntries(nodes: NodeInformation[]) {
 //   return entries;
 // }
 
-function ControlGrid({ connectionSuccess, nodes }: Readonly<ControlGridProps>) {
+function ControlGrid({ nodes }: Readonly<ControlGridProps>) {
 
   return (
     <Grid container rowSpacing={2} columnSpacing={{ xs: 1, md: 2 }} sx={{ margin: "1%" }}>
-      {!connectionSuccess ? (
-        <>
-          <Grid item xs={6} md={12}>
-            <Skeleton variant="rounded" width="49.5%" height="72px" />
-          </Grid>
-          <Grid item xs={6} md={6}>
-            <Skeleton variant="rounded" width="100%" height="300px" />
-          </Grid>
-          <Grid item xs={6} md={6}>
-            <Skeleton variant="rounded" width="100%" height="300px" />
-          </Grid>
-          <Grid item xs={6} md={4}>
-            <Skeleton variant="rounded" width="100%" height="300px" />
-          </Grid>
-          <Grid item xs={6} md={8}>
-            <Skeleton variant="rounded" width="100%" height="300px" />
-          </Grid>
-        </>
-      ) : (
-        <>
-          <Grid item xs={6} md={12}>
-            <Item sx={{ width: "49.5%", height: "72px" }}>
-              <ControlLights />
-            </Item>
-          </Grid>
-          <Grid item xs={6} md={6}>
-            <Item sx={{ width: "100%", height: "300px" }}>
-              3D Pod Model
-            </Item>
-          </Grid>
-          <Grid item xs={6} md={6}>
-            <Item sx={{ width: "100%", height: "300px" }}>
-              Table 01
-            </Item>
-          </Grid>
-          <Grid item xs={6} md={4}>
-            <Item sx={{ width: "100%", height: "300px" }}>
-              Table 02
-            </Item>
-          </Grid>
-          <Grid item xs={6} md={8}>
-            <Item sx={{ width: "100%", height: "300px" }}>
-              <ObjectEntryGrid entries={createGridEntries(nodes)} width={150} />
-            </Item>
-          </Grid>
+      <Grid item xs={6} md={12}>
+        <Item sx={{ width: "49.5%", height: "72px" }}>
+          <ControlLights />
+        </Item>
+      </Grid>
+      <Grid item xs={6} md={6}>
+        <Item sx={{ width: "100%", height: "300px" }}>
+          3D Pod Model
+        </Item>
+      </Grid>
+      <Grid item xs={6} md={6}>
+        <Item sx={{ width: "100%", height: "300px" }}>
+          Table 01
+        </Item>
+      </Grid>
+      <Grid item xs={6} md={4}>
+        <Item sx={{ width: "100%", height: "300px" }}>
+          Table 02
+        </Item>
+      </Grid>
+      <Grid item xs={6} md={8}>
+        <Item sx={{ width: "100%", height: "300px" }}>
+          <ObjectEntryGrid entries={createGridEntries(nodes)} width={150} />
+        </Item>
+      </Grid>
 
-          <Grid item xs={12} md={6}>
-            <Item sx={{ width: "350px", margin: 0,padding: 0 }}>
-              <ObjectEntryList
-                sx={{ width: "100%" }}
-                label="MLU Temperatures"
-              >
-                <NumberListEntry nodeName="mlu1" objectEntryName="magnet_temperature" />
-                <NumberListEntry nodeName="mlu2" objectEntryName="magnet_temperature" />
-                <NumberListEntry nodeName="mlu3" objectEntryName="magnet_temperature" />
-                <NumberListEntry nodeName="mlu4" objectEntryName="magnet_temperature" />
-                <NumberListEntry nodeName="mlu5" objectEntryName="magnet_temperature" />
-                <NumberListEntry nodeName="mlu6" objectEntryName="magnet_temperature" />
-              </ObjectEntryList>
-            </Item>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Item sx={{ width: "400px", margin: 0,padding: 0 }}>
-              <ObjectEntryList
-                sx={{ width: "100%" }}
-                label="MGU Temperatures"
-              >
-                <NumberListEntry nodeName="mgu1" objectEntryName="magnet_temperature_starboard" />
-                <NumberListEntry nodeName="mgu1" objectEntryName="magnet_temperature_port" />
-                <NumberListEntry nodeName="mgu2" objectEntryName="magnet_temperature_starboard" />
-                <NumberListEntry nodeName="mgu2" objectEntryName="magnet_temperature_port" />
-              </ObjectEntryList>
-            </Item>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Item sx={{ width: "250px", margin: 0,padding: 0 }}>
-              <ObjectEntryList
-                sx={{ width: "100%" }}
-                label="Motor Temperatures"
-              >
-                <NumberListEntry label="dslim_starboard" nodeName="motor_driver" objectEntryName="magnet_temperature_starboard" />
-                <NumberListEntry label="dslim_port" nodeName="motor_driver" objectEntryName="magnet_temperature_port" />
-                <NumberListEntry label="mosfet" nodeName="motor_driver" objectEntryName="mosfet_temperature" />
-              </ObjectEntryList>
-            </Item>
-          </Grid>
-
-
-        </>
-      )}
+      <Grid item xs={12} md={6}>
+        <Item sx={{ width: "350px", margin: 0, padding: 0 }}>
+          <ObjectEntryList
+            sx={{ width: "100%" }}
+            label="MLU Temperatures"
+          >
+            <NumberListEntry nodeName="mlu1" objectEntryName="magnet_temperature" />
+            <NumberListEntry nodeName="mlu2" objectEntryName="magnet_temperature" />
+            <NumberListEntry nodeName="mlu3" objectEntryName="magnet_temperature" />
+            <NumberListEntry nodeName="mlu4" objectEntryName="magnet_temperature" />
+            <NumberListEntry nodeName="mlu5" objectEntryName="magnet_temperature" />
+            <NumberListEntry nodeName="mlu6" objectEntryName="magnet_temperature" />
+          </ObjectEntryList>
+        </Item>
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <Item sx={{ width: "400px", margin: 0, padding: 0 }}>
+          <ObjectEntryList
+            sx={{ width: "100%" }}
+            label="MGU Temperatures"
+          >
+            <NumberListEntry nodeName="mgu1" objectEntryName="magnet_temperature_starboard" />
+            <NumberListEntry nodeName="mgu1" objectEntryName="magnet_temperature_port" />
+            <NumberListEntry nodeName="mgu2" objectEntryName="magnet_temperature_starboard" />
+            <NumberListEntry nodeName="mgu2" objectEntryName="magnet_temperature_port" />
+          </ObjectEntryList>
+        </Item>
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <Item sx={{ width: "250px", margin: 0, padding: 0 }}>
+          <ObjectEntryList
+            sx={{ width: "100%" }}
+            label="Motor Temperatures"
+          >
+            <NumberListEntry label="dslim_starboard" nodeName="motor_driver" objectEntryName="magnet_temperature_starboard" />
+            <NumberListEntry label="dslim_port" nodeName="motor_driver" objectEntryName="magnet_temperature_port" />
+            <NumberListEntry label="mosfet" nodeName="motor_driver" objectEntryName="mosfet_temperature" />
+          </ObjectEntryList>
+        </Item>
+      </Grid>
     </Grid>
   );
 }

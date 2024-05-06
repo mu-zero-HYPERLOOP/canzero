@@ -4,10 +4,7 @@ use canzero_config::config::MessageRef;
 
 use crate::{
     cnl::{
-        can_adapter::CanAdapter,
-        network::NetworkObject,
-        rx::handler_lookup::HandlerLookup,
-        trace::TraceObject,
+        can_adapter::CanAdapter, connection::{ConnectionObject, ConnectionStatus}, network::NetworkObject, rx::handler_lookup::HandlerLookup, trace::TraceObject
     },
     notification::notify_error,
 };
@@ -25,6 +22,7 @@ impl CanReceiver {
         trace: &Arc<TraceObject>,
         network_object: &Arc<NetworkObject>,
         app_handle: &tauri::AppHandle,
+        connection_object : Arc<ConnectionObject>,
     ) -> Self {
         let receiver_data = Arc::new(CanReceiverData::create(
             can_adapter,
@@ -87,13 +85,14 @@ impl CanReceiver {
             receiver_data: Arc<CanReceiverData>,
             bus_name: String,
             bus_id: u32,
+            connection_object : Arc<ConnectionObject>
         ) {
             loop {
                 let frame = match receiver_data.can_adapter.receive().await {
                     Ok(frame) => frame,
-                    Err(err) => {
-                        notify_error(&receiver_data.app_handle, "Failed to receive on can adapter", &format!("{err:?}"), chrono::offset::Local::now());
-                        continue;
+                    Err(_) => {
+                        connection_object.set_status(ConnectionStatus::NetworkDisconnected);
+                        break;
                     },
                 };
 
@@ -110,6 +109,7 @@ impl CanReceiver {
             receiver_data.clone(),
             bus_name.clone(),
             bus_id,
+            connection_object
         ));
 
         Self()

@@ -79,6 +79,11 @@ impl NodeLatestObservable {
         let mut listen_count = self.listen_count.lock().await;
         *listen_count = listen_count.saturating_sub(1);
     }
+    
+    pub async fn deadlock_watchdog(&self) {
+        let _ = self.listen_count.lock().await;
+        let _ = self.rx.lock().await;
+    }
 }
 
 async fn notify_task(

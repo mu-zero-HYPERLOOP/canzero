@@ -39,4 +39,9 @@ impl NetworkObject {
     pub fn nodes(&self) -> &Vec<Arc<NodeObject>> {
         &self.nodes
     }
+    pub async fn deadlock_watchdog(&self) {
+        for n in &self.nodes {
+            n.deadlock_watchdog().await;
+        }
+    }
 }

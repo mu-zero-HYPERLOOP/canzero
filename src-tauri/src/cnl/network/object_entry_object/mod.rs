@@ -421,4 +421,11 @@ impl ObjectEntryObject {
     pub fn now(&self) -> Duration {
         std::time::Instant::now().duration_since(self.timebase)
     }
+
+    pub async fn deadlock_watchdog(&self) {
+        drop(self.store.lock().await);
+        drop(self.history_observables.lock().await);
+        drop(self.open_set_request.lock().await);
+        drop(self.open_get_request.lock().await);
+    }
 }

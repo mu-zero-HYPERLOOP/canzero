@@ -222,4 +222,8 @@ impl TraceDatabase {
             .map(|index| unlocked_data.trace[*index].clone())
             .collect()
     }
+
+    pub async fn deadlock_watchdog(&self) {
+        let _ = self.data.lock().await;
+    }
 }

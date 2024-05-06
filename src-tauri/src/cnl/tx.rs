@@ -4,9 +4,12 @@ use std::{
 };
 
 use canzero_config::config::{self, MessageRef};
+use color_print::cprintln;
 use tokio::time;
 
-use super::{deserialize::FrameDeserializer, trace::TraceObject, CanAdapter};
+use crate::cnl::connection::ConnectionStatus;
+
+use super::{connection::ConnectionObject, deserialize::FrameDeserializer, trace::TraceObject, CanAdapter};
 
 use canzero_common::{CanFrame, Timestamped};
 
@@ -19,6 +22,7 @@ pub struct TxCom {
     frag_time_ms: u64,
     timebase: Instant,
     trace: Arc<TraceObject>,
+    connection_object : Arc<ConnectionObject>,
 }
 
 impl TxCom {
@@ -27,6 +31,7 @@ impl TxCom {
         can_adapters: &Vec<Arc<CanAdapter>>,
         trace: &Arc<TraceObject>,
         basetime: Instant,
+        connection_object : &Arc<ConnectionObject>,
     ) -> TxCom {
         let set_req_can_adapter = can_adapters
             .iter()
@@ -49,6 +54,7 @@ impl TxCom {
             frag_time_ms: 50,
             timebase: basetime,
             trace: trace.clone(),
+            connection_object : connection_object.clone(),
         }
     }
 
@@ -99,6 +105,7 @@ impl TxCom {
             self.frag_time_ms,
             self.timebase,
             self.trace.clone(),
+            self.connection_object.clone(),
         )
         .await;
     }
@@ -118,7 +125,8 @@ impl TxCom {
         );
 
         if let Err(err) = self.get_req_can_adapter.send(get_req_frame).await {
-            eprintln!("{err:?}");
+            println!("<red>Failed to send get req </red>: {err:?}");
+            self.connection_object.set_status(ConnectionStatus::NetworkDisconnected);
         }
 
         let frame = Timestamped::now(
@@ -142,6 +150,7 @@ async fn fragmented_can_send(
     frag_time_ms: u64,
     timebase: Instant,
     trace: Arc<TraceObject>,
+    connection_object : Arc<ConnectionObject>,
 ) {
     let mut interval = time::interval(Duration::from_millis(frag_time_ms));
 
@@ -157,7 +166,8 @@ async fn fragmented_can_send(
         );
 
         if let Err(err) = can_adapter.send(frame).await {
-            eprintln!("{err:?}");
+            cprintln!("<red>Failed to send set req </red>: {err:?}");
+            connection_object.set_status(ConnectionStatus::NetworkDisconnected);
         }
 
         trace

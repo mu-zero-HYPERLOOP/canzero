@@ -45,6 +45,7 @@ async fn main() {
             object_entry_commands::set_object_entry_value,
             connection_status::get_connection_status,
             connection_status::heartbeat,
+            connection_status::restart,
             commands::node_commands::listen_to_node_latest,
             commands::node_commands::unlisten_from_node_latest,
             commands::export::export,

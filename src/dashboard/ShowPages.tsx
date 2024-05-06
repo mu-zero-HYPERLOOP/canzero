@@ -21,11 +21,7 @@ function Content() {
   );
 }
 
-interface ConnectionProps {
-  connectionSuccess: boolean
-}
-
-function ShowPages({ connectionSuccess }: Readonly<ConnectionProps>) {
+function ShowPages() {
   const [nodes, setNodes] = useState<NodeInformation[]>([]);
 
 
@@ -50,7 +46,7 @@ function ShowPages({ connectionSuccess }: Readonly<ConnectionProps>) {
 
   let routes = [];
 
-  routes.push(<Route key="Overview" index element={<OverviewPanel connectionSuccess={connectionSuccess} nodes={nodes} />} />);
+  routes.push(<Route key="Overview" index element={<OverviewPanel nodes={nodes} />} />);
   routes.push(<Route key="TracePanel" path="TracePanel" element={<Trace />} />);
   routes.push(<Route key="LevitationControl" path="LevitationControl" element={<LevitationControl nodes={nodes} />} />);
   routes.push(<Route key="GuidanceControl" path="GuidanceControl" element={<GuidanceControl nodes={nodes} />} />);

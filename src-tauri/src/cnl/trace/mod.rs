@@ -90,4 +90,7 @@ impl TraceObject {
     pub async fn unlisten(&self) {
         self.observable.unlisten().await
     }
+
+    pub async fn deadlock_watchdog(&self) {
+    }
 }
