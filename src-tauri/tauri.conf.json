@@ -45,7 +45,13 @@
       ],
       "resources": [
         "test.yaml"
-      ]
+      ],
+      "windows": {
+        "webviewInstallMode": {
+          "silent": true,
+          "type": "downloadBootstrapper"
+        }
+      }
     },
     "security": {
       "csp": null
