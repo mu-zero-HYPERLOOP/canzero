@@ -195,10 +195,11 @@ export function NodeList() {
 function ExportListButton() {
   return (
     <li>
-      <ListItemButton>
-        <ListItemIcon><SaveIcon /></ListItemIcon>
-        <ListItemText primary="Export" onClick={() => invoke("export").catch(console.error)} />
-      </ListItemButton>
+      <ListItemButtonLink to="/Logging" primary="Export" icon={<SaveIcon />} />
+      {/*<ListItemButton>*/}
+      {/*  <ListItemIcon><SaveIcon /></ListItemIcon>*/}
+      {/*  <ListItemText primary="Logging" onClick={() => invoke("export").catch(console.error)} />*/}
+      {/*</ListItemButton>*/}
     </li>
   );
 }

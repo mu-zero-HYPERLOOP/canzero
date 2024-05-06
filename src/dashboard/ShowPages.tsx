@@ -11,6 +11,7 @@ import GuidanceControl from "../divisions/GuidanceControl.tsx";
 import MotorControl from "../divisions/MotorControl.tsx";
 import ObjectEntryPanel from "../object_entry/panel/ObjectEntryPanel.tsx";
 import Trace from '../trace/Trace.tsx';
+import Logging from "../logging/Logging.tsx";
 
 function Content() {
   const location = useLocation();
@@ -48,6 +49,7 @@ function ShowPages() {
 
   routes.push(<Route key="Overview" index element={<OverviewPanel nodes={nodes} />} />);
   routes.push(<Route key="TracePanel" path="TracePanel" element={<Trace />} />);
+  routes.push(<Route key="Logging" path="Logging" element={<Logging nodes={nodes} />} />);
   routes.push(<Route key="LevitationControl" path="LevitationControl" element={<LevitationControl nodes={nodes} />} />);
   routes.push(<Route key="GuidanceControl" path="GuidanceControl" element={<GuidanceControl nodes={nodes} />} />);
   routes.push(<Route key="MotorControl" path="MotorControl" element={<MotorControl nodes={nodes} />} />);
