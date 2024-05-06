@@ -1,6 +1,6 @@
 [package]
 name = "canzero"
-version = "0.0.0"
+version = "0.1.0"
 description = "Control Panel for the muzero CAN protocol. Developed for mu-zero HYPERLOOP Season IV."
 authors = ["Karl Sassie", "Jakob Schmit", "Niklas Heneka", "Nicolas Fliegel"]
 repository = "https://github.com/mu-zero-HYPERLOOP/control-panel.git"
@@ -16,7 +16,6 @@ lto = false
 strip = "symbols"  # Automatically strip symbols from the binary.
 lto = "fat" # Enables link time optimizations
 codegen-units = 1 # Compile crates one after another so the compiler can optimize better
-panic = "abort"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
