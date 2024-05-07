@@ -9,7 +9,7 @@
   },
   "package": {
     "productName": "canzero",
-    "version": "0.0.0"
+    "version": "0.1.0"
   },
   "tauri": {
     "cli": {
@@ -30,6 +30,14 @@
       },
       "fs": {
         "all": true
+      },
+      "dialog": {
+        "all": true, 
+        "ask": true, 
+        "confirm": true, 
+        "message": true,
+        "open": true, 
+        "save": true 
       }
     },
     "bundle": {

@@ -23,3 +23,9 @@ pub fn restart(app_handle : tauri::AppHandle) {
     println!("Restarting...");
     app_handle.restart();
 }
+
+#[tauri::command]
+pub fn close(app_handle : tauri::AppHandle) {
+    println!("Closing...");
+    app_handle.exit(0);
+}

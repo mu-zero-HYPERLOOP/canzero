@@ -53,6 +53,7 @@ async fn main() {
             connection_status::get_connection_status,
             connection_status::heartbeat,
             connection_status::restart,
+            connection_status::close,
             commands::node_commands::listen_to_node_latest,
             commands::node_commands::unlisten_from_node_latest,
             commands::export::export,
@@ -61,6 +62,9 @@ async fn main() {
             commands::startup::try_connect,
             commands::startup::complete_setup,
             commands::startup::close_startup,
+            commands::settings::open_settings,
+            commands::settings::close_settings,
+            commands::settings::select_network_configuration,
         ])
         .run(tauri::generate_context!())
         .expect("Error while running tauri application");
