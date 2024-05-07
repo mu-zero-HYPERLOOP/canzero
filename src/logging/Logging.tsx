@@ -1,6 +1,8 @@
 import {NodeInformation} from "../nodes/types/NodeInformation.ts";
 import {ObjectEntryEvent} from "../object_entry/types/events/ObjectEntryEvent.tsx";
 import {
+    Button,
+    Checkbox,
     InputAdornment,
     Paper,
     Skeleton,
@@ -11,6 +13,7 @@ import {
     TableHead,
     TableRow,
     TextField,
+    Typography,
     useTheme
 } from "@mui/material";
 import {TableComponents, TableVirtuoso} from "react-virtuoso";
@@ -21,6 +24,7 @@ import {NodeEvent} from "../nodes/types/NodeEvent.ts";
 import useFocusOnCtrlShortcut from "../trace/FocusOnKey.tsx";
 import SearchIcon from "@mui/icons-material/Search";
 import LoggingRow from "./LoggingRow.tsx";
+import SaveIcon from "@mui/icons-material/Save";
 
 interface ExportPanelProps {
     nodes: NodeInformation[]
@@ -51,18 +55,22 @@ const VirtuosoTableComponents: TableComponents<RowData> = {
     )),
 };
 
+function indexOf(arr: [string, string][], id: [string, string]) {
+    for (let i = 0; i < arr.length; i+=1) {
+        if (arr[i][0] === id[0] && arr[i][1] === id[1]) return i
+    }
+    return -1
+}
 
-function Logging({nodes}: ExportPanelProps) {
-
+function Logging({nodes}: Readonly<ExportPanelProps>) {
     const [filter, setFilter] = useState<number[]>([]);
     const [searchString, setSearchString] = useState<string>("");
     const [rowData, setRowData] = useState<RowData[][]>([]);
-    const [selected, setSelected] = React.useState<readonly string[]>([]);
+    const [selected, setSelected] = React.useState<[string, string][]>([]);
 
     // register listener
-    nodes.forEach( (node, idx) => {
-        useEffect(() => {
-        async function asyncSetup() {
+    useEffect(() => {
+        async function asyncSetup(node: NodeInformation) {
             const event_name = await invoke<string>("listen_to_node_latest", {nodeName: node.name});
             const unlistenJs = await listen<NodeEvent>(event_name, event => {
                 const data = event.payload.object_entry_values.map((value, index) => {
@@ -72,8 +80,9 @@ function Logging({nodes}: ExportPanelProps) {
                         value,
                     };
                 });
-                rowData[idx] = data
-                setRowData(rowData);
+                let newData = rowData
+                newData[nodes.indexOf(node)] = data
+                setRowData(newData);
             });
 
             return () => {
@@ -81,18 +90,20 @@ function Logging({nodes}: ExportPanelProps) {
                 invoke("unlisten_from_node_latest", {nodeName: node.name}).catch(console.error);
             };
         }
+
         // init!
         setRowData([]);
-        setFilter(node.object_entries.map((_,i) => i));
+        setFilter(nodes[0].object_entries.map((_, i) => i));
         setSearchString("");
-        let asyncCleanup = asyncSetup();
+        let asyncCleanup = nodes.map((node) => asyncSetup(node))
         return () => {
-            asyncCleanup.then(f => f()).catch(console.error);
+            asyncCleanup.forEach((asyncCleanup) => asyncCleanup.then(f => f()).catch(console.error))
         };
-    }, [node.name]);})
+    }, []);
 
-    function rowContent(_index: number, row: RowData) {
-        return <LoggingRow nodeName={row.nodeName} objectEntryName={row?.objectEntryName} handleClick={handleClick} isSelected={isSelected}/>
+    function rowContent(_index: number, row?: RowData) {
+        if (row !== undefined) return <LoggingRow nodeName={row.nodeName} objectEntryName={row?.objectEntryName}
+                                                  handleClick={handleClick} isSelected={isSelected}/>
     }
 
     const searchFieldRef = useRef() as any;
@@ -104,7 +115,7 @@ function Logging({nodes}: ExportPanelProps) {
         let offset = 0
         for (let node of nodes) {
             for (let oe_index = 0; oe_index < node.object_entries.length; oe_index++) {
-                if (node.object_entries[oe_index].includes(filter_string)) {
+                if (node.object_entries[oe_index].includes(filter_string) || node.name.includes(filter_string)) {
                     filter.push(oe_index + offset);
                 }
             }
@@ -112,15 +123,15 @@ function Logging({nodes}: ExportPanelProps) {
         }
         setFilter(filter);
     }
+
     const theme = useTheme();
 
-    // @ts-ignore for now
     const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.checked) {
-            const newSelected = []
+            const newSelected: [string, string][] = []
             for (let node of nodes) {
                 for (let oe of node.object_entries) {
-                    newSelected.push(node.name + "/" + oe)
+                    newSelected.push([node.name, oe])
                 }
             }
             setSelected(newSelected);
@@ -129,25 +140,24 @@ function Logging({nodes}: ExportPanelProps) {
         setSelected([]);
     };
 
-    // TODO: REmove
     function selectAll() {
-        const newSelected = []
+        const newSelected: [string, string][] = []
         for (let node of nodes) {
             for (let oe of node.object_entries) {
-                newSelected.push(node.name + "/" + oe)
+                newSelected.push([node.name, oe])
             }
         }
         setSelected(newSelected);
     }
 
-    const isSelected = (id: string) => selected.indexOf(id) !== -1;
+    const isSelected = (id: [string, string]) => indexOf(selected, id) !== -1;
 
-    const handleClick = (id: string) => {
-        const selectedIndex = selected.indexOf(id);
-        let newSelected: readonly string[] = [];
+    const handleClick = (id: [string, string]) => {
+        const selectedIndex = indexOf(selected, id);
+        let newSelected: [string, string][] = [];
 
         if (selectedIndex === -1) {
-            newSelected = newSelected.concat(selected, id);
+            newSelected = newSelected.concat(selected, [id]);
         } else if (selectedIndex === 0) {
             newSelected = newSelected.concat(selected.slice(1));
         } else if (selectedIndex === selected.length - 1) {
@@ -160,7 +170,7 @@ function Logging({nodes}: ExportPanelProps) {
         }
         setSelected(newSelected);
     };
-
+    console.log(selected)
     return (
         <Paper sx={{
             marginTop: "30px",
@@ -174,6 +184,39 @@ function Logging({nodes}: ExportPanelProps) {
             paddingBottom: "20px",
             position: "relative"
         }}>
+            <Checkbox
+                color="primary"
+                sx={{
+                    position: "absolute",
+                    top: "5px",
+                    left: "20px",
+                    maxWidth: "400px",
+                }}
+                defaultChecked
+                onChange={handleSelectAllClick}
+
+            />
+            <Typography sx={{
+                position: "absolute",
+                top: "15px",
+                left: "60px",
+                maxWidth: "400px",
+            }}>
+                Select all
+            </Typography>
+
+            <Button variant="contained"
+                    sx={{
+                position: "absolute",
+                top: "5px",
+                left: "485px",
+                width: "150px",
+            }}
+                    onClick={() => invoke("export", {nodes: selected.map((value) => value[0]), oes: selected.map((value) => value[1])}).catch(console.error)}
+                    startIcon={<SaveIcon />}
+            >
+                Export
+            </Button>
 
             <TextField
                 inputRef={searchFieldRef}
@@ -203,6 +246,7 @@ function Logging({nodes}: ExportPanelProps) {
                 }}
             >
             </TextField>
+
             {rowData.length == 0 ? <Skeleton
 
                     variant="rounded"

@@ -1,15 +1,15 @@
-import {Checkbox, TableCell, TableRow} from "@mui/material";
+import {Checkbox, TableCell, TableRow, Typography} from "@mui/material";
 import {index} from "d3";
 
 interface ObjectEntryRowProps {
     nodeName: string,
     objectEntryName: string,
-    handleClick: (id: string) => void,
-    isSelected: (id: string) => boolean,
+    handleClick: (id: [string, string]) => void,
+    isSelected: (id: [string, string]) => boolean,
 }
 
-function ObjectEntryRow({nodeName, objectEntryName, handleClick, isSelected}: ObjectEntryRowProps) {
-    const id = nodeName + "/" + objectEntryName
+function ObjectEntryRow({nodeName, objectEntryName, handleClick, isSelected}: Readonly<ObjectEntryRowProps>) {
+    const id: [string, string] = [nodeName, objectEntryName]
     const isItemSelected = isSelected(id);
     const labelId = `enhanced-table-checkbox-${index}`;
 
@@ -20,24 +20,33 @@ function ObjectEntryRow({nodeName, objectEntryName, handleClick, isSelected}: Ob
             onClick={() => handleClick(id)}
             aria-checked={isItemSelected}
             selected={isItemSelected}
-            key={id}
+            key={nodeName + "/" + objectEntryName}
         >
             <TableCell
-                sx={{
-                    minWidth: "100vw",
-                    maxWidth: "100vw",
-                    overflow: "clip",
-                }}
+                padding="checkbox"
             >
                 <Checkbox
-                    color="primary"
-                    checked={isItemSelected}
-                    inputProps={{
-                        'aria-labelledby': labelId,
-                    }}
-                />
-                {nodeName}: {objectEntryName}
+                color="primary"
+                checked={isItemSelected}
+                inputProps={{
+                    'aria-labelledby': labelId,
+                }}
+            />
             </TableCell>
+            <TableCell
+                component="th"
+                id={labelId}
+                scope="row"
+                padding="none"
+                sx={{
+                    width: "100%",
+                    overflow: "clip",
+                }}>
+                <Typography variant="inherit" sx={{ marginLeft: "10px", width: "100%" }}>
+                    {nodeName}: {objectEntryName}
+                </Typography>
+            </TableCell>
+
 
         </TableRow>);
 

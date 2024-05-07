@@ -22,7 +22,7 @@ interface ObjectEntryAttribRowProps {
   value: Value,
 }
 
-function ObjectEntryAttribRow({ name, value }: ObjectEntryAttribRowProps) {
+function ObjectEntryAttribRow({ name, value }: Readonly<ObjectEntryAttribRowProps>) {
   if (typeof value === "object") {
     return Object.entries(value).map(([attrib_name, attrib_value]) => {
       return <ObjectEntryAttribRow name={`${name}.${attrib_name}`} value={attrib_value} />

@@ -196,10 +196,6 @@ function ExportListButton() {
   return (
     <li>
       <ListItemButtonLink to="/Logging" primary="Export" icon={<SaveIcon />} />
-      {/*<ListItemButton>*/}
-      {/*  <ListItemIcon><SaveIcon /></ListItemIcon>*/}
-      {/*  <ListItemText primary="Logging" onClick={() => invoke("export").catch(console.error)} />*/}
-      {/*</ListItemButton>*/}
     </li>
   );
 }
