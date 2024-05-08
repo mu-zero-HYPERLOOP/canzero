@@ -170,7 +170,7 @@ function Logging({nodes}: Readonly<ExportPanelProps>) {
         }
         setSelected(newSelected);
     };
-    console.log(selected)
+
     return (
         <Paper sx={{
             marginTop: "30px",
