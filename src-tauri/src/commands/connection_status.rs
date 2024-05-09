@@ -13,6 +13,8 @@ pub async fn get_connection_status(state: tauri::State<'_, CNLState>) -> Result<
 
 #[tauri::command]
 pub async fn heartbeat(state : tauri::State<'_, CNLState>) -> Result<(),()> {
+
+    #[cfg(not(debug_assertions))]
     state.lock().await.reset_watchdog().await;   
 
     Ok(())

@@ -86,8 +86,11 @@ impl CNL {
         );
 
         let watchdog_overlord = WatchdogOverlord::new(&connection_object);
+            
+        // disable the frontend heartbeat only for release
         let external_watchdog =
             watchdog_overlord.register(WdgTag::FrontendWdg, Duration::from_millis(1000));
+
         let deadlock_watchdog =
             watchdog_overlord.register(WdgTag::DeadlockWdg, Duration::from_millis(1000));
 
@@ -112,6 +115,7 @@ impl CNL {
             network,
             connection_object,
             _watchdog_overlord: watchdog_overlord,
+
             external_watchdog,
         }
     }
@@ -129,6 +133,7 @@ impl CNL {
     }
 
     pub async fn reset_watchdog(&self) {
+        #[cfg(not(debug_assertions))]
         self.external_watchdog.reset().await;
     }
 }
