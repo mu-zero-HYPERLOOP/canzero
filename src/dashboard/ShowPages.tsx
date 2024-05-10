@@ -40,7 +40,7 @@ function ShowPages() {
     }
     // this asynchronously (in the background) invokes function
     asyncFetchNodeData().catch(console.error);
-  }, []);
+  }, [nodes.map((node) => node.name)]);
 
   let key = 0;
 
