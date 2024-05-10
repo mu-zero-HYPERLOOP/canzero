@@ -8,6 +8,7 @@ import Paper from '@mui/material/Paper';
 import '../styles.css'
 import CustomTableCell from "./CustomTableCell.tsx";
 import {ValueTableCellInformation} from "./types/ValueTableCellInformation.tsx";
+import {Skeleton} from "@mui/material";
 
 interface ValueTableprops {
     entries: ValueTableCellInformation[];
@@ -32,18 +33,19 @@ export default function ValueTable({entries, title, width, height, rows, columns
                             </TableCell>
                         </TableRow>
                     </TableHead>
-                    <TableBody>
-                        {Array.from(Array(rows).keys()).map((row, index) => (
-                            <TableRow key={index}>
-                                {Array.from(Array(columns).keys()).map((col, index) => (
-                                    <CustomTableCell key={index} node={entries[columns * row + col].node}
-                                                     name={entries[columns * row + col].entry}
-                                                     min={entries[columns * row + col].min}
-                                                     max={entries[columns * row + col].max}/>
-                                ))}
-                            </TableRow>
-                        ))}
-                    </TableBody>
+                    {(entries.length !== 0) ? <TableBody>
+                            {Array.from(Array(rows).keys()).map((row, index) => (
+                                <TableRow key={index}>
+                                    {Array.from(Array(columns).keys()).map((col, index) => (
+                                        <CustomTableCell key={index} node={entries[columns * row + col].node}
+                                                         name={entries[columns * row + col].entry}
+                                                         min={entries[columns * row + col].min}
+                                                         max={entries[columns * row + col].max}/>
+                                    ))}
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                        : <Skeleton variant="rounded"/>}
                 </Table>
             </TableContainer>
         </div>

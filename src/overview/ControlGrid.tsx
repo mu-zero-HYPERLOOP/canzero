@@ -9,6 +9,8 @@ import ObjectEntryGrid from "./ObjectEntryGrid.tsx";
 import { ObjectEntryGridInformation } from "./types/ObjectEntryGridInformation.tsx";
 import NumberListEntry from '../object_entry/vis/list/NumberListEntry.tsx';
 import ObjectEntryList from '../object_entry/vis/list/ObjectEntryList.tsx';
+import {ValueTableCellInformation} from "./types/ValueTableCellInformation.tsx";
+import ValueTable from "./ValueTable.tsx";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -75,30 +77,31 @@ function ControlLights() {
 function createGridEntries(nodes: NodeInformation[]) {
   let entries: ObjectEntryGridInformation[] = [];
   nodes.map((node: NodeInformation) => {
-    if (node.name === "mlu1") {
-      entries.push({ node: node, entry: "air_gap", interpolate: true, min: 0, max: 20 })
-      entries.push({ node: node, entry: "target_force", interpolate: true, min: 0, max: 100 })
-      entries.push({ node: node, entry: "magnet_temperature", interpolate: true, min: -1, max: 150 })
-      entries.push({ node: node, entry: "control_config", interpolate: true, min: -1, max: 150 })
+    if (node.name === "motor_driver") {
+      entries.push({ node: node, entry: "motor_temperature1", interpolate: true, min: 0, max: 20 })
+      entries.push({ node: node, entry: "motor_temperature2", interpolate: true, min: 0, max: 20 })
+      entries.push({ node: node, entry: "motor_temperature3", interpolate: true, min: 0, max: 20 })
+      entries.push({ node: node, entry: "motor_temperature4", interpolate: true, min: 0, max: 20 })
     }
   });
   return entries;
 }
 
-// function createValueTableEntries(nodes: NodeInformation[]) {
-//   let entries: ValueTableCellInformation[] = [];
-//   nodes.map((node: NodeInformation) => {
-//     if (node.name === "mlu1") {
-//       entries.push({ node: node, entry: "air_gap", min: 0, max: 20 })
-//       entries.push({ node: node, entry: "target_force", min: 0, max: 100 })
-//       entries.push({ node: node, entry: "magnet_temperature", min: -1, max: 150 })
-//     }
-//   });
-//   return entries;
-// }
+function createValueTableEntries(nodes: NodeInformation[]) {
+  let entries: ValueTableCellInformation[] = [];
+  nodes.map((node: NodeInformation) => {
+    if (node.name === "motor_driver") {
+      entries.push({ node: node, entry: "motor_temperature1", min: 0, max: 20 })
+      entries.push({ node: node, entry: "motor_temperature2", min: 0, max: 20 })
+      entries.push({ node: node, entry: "motor_temperature3", min: 0, max: 20 })
+      entries.push({ node: node, entry: "motor_temperature4", min: 0, max: 20 })
+
+    }
+  });
+  return entries;
+}
 
 function ControlGrid({ nodes }: Readonly<ControlGridProps>) {
-
   return (
     <Grid container rowSpacing={2} columnSpacing={{ xs: 1, md: 2 }} sx={{ margin: "1%" }}>
       <Grid item xs={6} md={12}>
@@ -113,57 +116,31 @@ function ControlGrid({ nodes }: Readonly<ControlGridProps>) {
       </Grid>
       <Grid item xs={6} md={6}>
         <Item sx={{ width: "100%", height: "300px" }}>
-          Table 01
-        </Item>
-      </Grid>
-      <Grid item xs={6} md={4}>
-        <Item sx={{ width: "100%", height: "300px" }}>
           Table 02
         </Item>
       </Grid>
       <Grid item xs={6} md={8}>
         <Item sx={{ width: "100%", height: "300px" }}>
-          <ObjectEntryGrid entries={createGridEntries(nodes)} width={150} />
+          <ObjectEntryGrid entries={createGridEntries(nodes)} width={200} />
+        </Item>
+      </Grid>
+
+      <Grid item xs={12} md={12}>
+        <Item sx={{ width: "100%", height: "400px" }}>
+          <ValueTable entries={createValueTableEntries(nodes)} title={"Temp"} width={600} height={40} rows={2} columns={2}/>
         </Item>
       </Grid>
 
       <Grid item xs={12} md={6}>
-        <Item sx={{ width: "350px", margin: 0, padding: 0 }}>
-          <ObjectEntryList
-            sx={{ width: "100%" }}
-            label="MLU Temperatures"
-          >
-            <NumberListEntry nodeName="mlu1" objectEntryName="magnet_temperature" />
-            <NumberListEntry nodeName="mlu2" objectEntryName="magnet_temperature" />
-            <NumberListEntry nodeName="mlu3" objectEntryName="magnet_temperature" />
-            <NumberListEntry nodeName="mlu4" objectEntryName="magnet_temperature" />
-            <NumberListEntry nodeName="mlu5" objectEntryName="magnet_temperature" />
-            <NumberListEntry nodeName="mlu6" objectEntryName="magnet_temperature" />
-          </ObjectEntryList>
-        </Item>
-      </Grid>
-      <Grid item xs={12} md={6}>
         <Item sx={{ width: "400px", margin: 0, padding: 0 }}>
-          <ObjectEntryList
-            sx={{ width: "100%" }}
-            label="MGU Temperatures"
-          >
-            <NumberListEntry nodeName="mgu1" objectEntryName="magnet_temperature_starboard" />
-            <NumberListEntry nodeName="mgu1" objectEntryName="magnet_temperature_port" />
-            <NumberListEntry nodeName="mgu2" objectEntryName="magnet_temperature_starboard" />
-            <NumberListEntry nodeName="mgu2" objectEntryName="magnet_temperature_port" />
-          </ObjectEntryList>
-        </Item>
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <Item sx={{ width: "250px", margin: 0, padding: 0 }}>
           <ObjectEntryList
             sx={{ width: "100%" }}
             label="Motor Temperatures"
           >
-            <NumberListEntry label="dslim_starboard" nodeName="motor_driver" objectEntryName="magnet_temperature_starboard" />
-            <NumberListEntry label="dslim_port" nodeName="motor_driver" objectEntryName="magnet_temperature_port" />
-            <NumberListEntry label="mosfet" nodeName="motor_driver" objectEntryName="mosfet_temperature" />
+            <NumberListEntry label="dslim_starboard" nodeName="motor_driver" objectEntryName="motor_temperature1" />
+            <NumberListEntry label="dslim_port" nodeName="motor_driver" objectEntryName="motor_temperature2" />
+            <NumberListEntry label="mosfet" nodeName="motor_driver" objectEntryName="motor_temperature3" />
+            <NumberListEntry nodeName="motor_driver" objectEntryName="motor_temperature4" />
           </ObjectEntryList>
         </Item>
       </Grid>

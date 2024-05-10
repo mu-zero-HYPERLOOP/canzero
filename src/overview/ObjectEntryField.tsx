@@ -194,7 +194,7 @@ function ObjectEntryField({node, entry, interpolate, min, max, warning, ok, tooG
             return displayEntry(information.ty, value.value, information.name)
         }
     } else {
-        return <Skeleton variant="rounded" height={"100px"}/>
+        return <Skeleton variant="rounded" height={"50px"}/>
     }
 }
 

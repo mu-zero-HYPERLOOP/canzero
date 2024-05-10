@@ -43,8 +43,6 @@ function ShowPages() {
   }, [nodes.map((node) => node.name)]);
 
   let key = 0;
-
-
   let routes = [];
 
   routes.push(<Route key="Overview" index element={<OverviewPanel nodes={nodes} />} />);

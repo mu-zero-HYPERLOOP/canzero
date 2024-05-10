@@ -80,7 +80,7 @@ function CustomTableCell({node, name, min, max}: Readonly<TableCellProps>) {
     } else if (information && value) {
         return <TableCell align="center" color="error">Not a Number</TableCell>
     } else {
-        return <Skeleton variant="rounded" height={"100px"}/>
+        return <Skeleton variant="rounded"/>
     }
 }
 
