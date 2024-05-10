@@ -1,8 +1,8 @@
 import {NodeInformation} from "../nodes/types/NodeInformation.ts";
 import {ObjectEntryEvent} from "../object_entry/types/events/ObjectEntryEvent.tsx";
 import {
-    Button,
     Checkbox,
+    IconButton,
     InputAdornment,
     Paper,
     Skeleton,
@@ -36,6 +36,107 @@ interface RowData {
     value: ObjectEntryEvent | null,
 }
 
+interface TopBarProps {
+    nodes: NodeInformation[],
+    filter: number[],
+    rowData: RowData[][],
+    selected: [string, string][],
+    setSelected: (selected: [string, string][]) => void,
+    searchString: string,
+    setSearchString: (str: string) => void,
+    updateFilter: (str: string) => void,
+
+}
+
+function TopBar({nodes, filter, rowData, selected, setSelected, searchString, setSearchString, updateFilter}: Readonly<TopBarProps>) {
+    const theme = useTheme();
+    const searchFieldRef = useRef() as any;
+
+    useFocusOnCtrlShortcut("f", searchFieldRef)
+
+    const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.checked) {
+            setSelected(filter.map(i => [rowData.flat()[i].nodeName, rowData.flat()[i].objectEntryName]));
+            return;
+        }
+        setSelected([]);
+    };
+
+    function selectAll() {
+        const newSelected: [string, string][] = []
+        for (let node of nodes) {
+            for (let oe of node.object_entries) {
+                newSelected.push([node.name, oe])
+            }
+        }
+        setSelected(newSelected);
+    }
+
+    return (
+        <>
+            <Checkbox
+                color="primary"
+                sx={{
+                    position: "absolute",
+                    top: "5px",
+                    left: "20px",
+                    maxWidth: "400px",
+                }}
+                defaultChecked
+                onChange={handleSelectAllClick}
+            />
+            <Typography sx={{
+                position: "absolute",
+                top: "15px",
+                left: "60px",
+                maxWidth: "400px",
+            }}>
+                Select all
+            </Typography>
+            <IconButton color="primary"
+                        sx={{
+                            position: "absolute",
+                            top: "1px",
+                            right: "435px",
+                            backgroundColor: theme.palette.background.paper2
+                        }}
+                        onClick={() => invoke("export", {
+                            nodes: selected.map((value: [string, string]) => value[0]),
+                            oes: selected.map((value: [string, string]) => value[1])
+                        }).catch(console.error)}
+            >
+                <SaveIcon/>
+            </IconButton>
+            <TextField
+                inputRef={searchFieldRef}
+                value={searchString}
+                sx={{
+                    position: "absolute",
+                    top: "5px",
+                    right: "20px",
+                    width: "50%",
+                    maxWidth: "400px",
+                }}
+                variant="standard"
+                inputProps={{
+                    style: {
+                        boxShadow: "none"
+                    }
+                }}
+                onAnimationStart={() => selectAll()}
+                onChange={event => {
+                    setSearchString(event.target.value);
+                    updateFilter(event.target.value);
+                }}
+                InputProps={{
+                    startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small"/></InputAdornment>,
+                }}
+            >
+            </TextField>
+        </>
+    )
+}
+
 const StyledTableRow = styled(TableRow)(({theme}) => ({
     backgroundColor: theme.palette.background.paper2,
     // hide last border
@@ -56,7 +157,7 @@ const VirtuosoTableComponents: TableComponents<RowData> = {
 };
 
 function indexOf(arr: [string, string][], id: [string, string]) {
-    for (let i = 0; i < arr.length; i+=1) {
+    for (let i = 0; i < arr.length; i += 1) {
         if (arr[i][0] === id[0] && arr[i][1] === id[1]) return i
     }
     return -1
@@ -67,6 +168,20 @@ function Logging({nodes}: Readonly<ExportPanelProps>) {
     const [searchString, setSearchString] = useState<string>("");
     const [rowData, setRowData] = useState<RowData[][]>([]);
     const [selected, setSelected] = React.useState<[string, string][]>([]);
+
+    function updateFilter(filter_string: string) {
+        const filter = [];
+        let offset = 0
+        for (let node of nodes) {
+            for (let oe_index = 0; oe_index < node.object_entries.length; oe_index++) {
+                if (node.object_entries[oe_index].includes(filter_string) || node.name.includes(filter_string)) {
+                    filter.push(oe_index + offset);
+                }
+            }
+            offset = offset + node.object_entries.length
+        }
+        setFilter(filter);
+    }
 
     // register listener
     useEffect(() => {
@@ -93,7 +208,7 @@ function Logging({nodes}: Readonly<ExportPanelProps>) {
 
         // init!
         setRowData([]);
-        setFilter(nodes[0].object_entries.map((_, i) => i));
+        updateFilter("");
         setSearchString("");
         let asyncCleanup = nodes.map((node) => asyncSetup(node))
         return () => {
@@ -106,49 +221,8 @@ function Logging({nodes}: Readonly<ExportPanelProps>) {
                                                   handleClick={handleClick} isSelected={isSelected}/>
     }
 
-    const searchFieldRef = useRef() as any;
-
-    useFocusOnCtrlShortcut("f", searchFieldRef)
-
-    function updateFilter(filter_string: string) {
-        const filter = [];
-        let offset = 0
-        for (let node of nodes) {
-            for (let oe_index = 0; oe_index < node.object_entries.length; oe_index++) {
-                if (node.object_entries[oe_index].includes(filter_string) || node.name.includes(filter_string)) {
-                    filter.push(oe_index + offset);
-                }
-            }
-            offset = offset + node.object_entries.length
-        }
-        setFilter(filter);
-    }
-
     const theme = useTheme();
 
-    const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.checked) {
-            const newSelected: [string, string][] = []
-            for (let node of nodes) {
-                for (let oe of node.object_entries) {
-                    newSelected.push([node.name, oe])
-                }
-            }
-            setSelected(newSelected);
-            return;
-        }
-        setSelected([]);
-    };
-
-    function selectAll() {
-        const newSelected: [string, string][] = []
-        for (let node of nodes) {
-            for (let oe of node.object_entries) {
-                newSelected.push([node.name, oe])
-            }
-        }
-        setSelected(newSelected);
-    }
 
     const isSelected = (id: [string, string]) => indexOf(selected, id) !== -1;
 
@@ -183,69 +257,11 @@ function Logging({nodes}: Readonly<ExportPanelProps>) {
             paddingTop: "45px",
             paddingBottom: "20px",
             position: "relative"
-        }}>
-            <Checkbox
-                color="primary"
-                sx={{
-                    position: "absolute",
-                    top: "5px",
-                    left: "20px",
-                    maxWidth: "400px",
-                }}
-                defaultChecked
-                onChange={handleSelectAllClick}
+        }}
+        >
 
-            />
-            <Typography sx={{
-                position: "absolute",
-                top: "15px",
-                left: "60px",
-                maxWidth: "400px",
-            }}>
-                Select all
-            </Typography>
-
-            <Button variant="contained"
-                    sx={{
-                position: "absolute",
-                top: "5px",
-                left: "485px",
-                width: "150px",
-            }}
-                    onClick={() => invoke("export", {nodes: selected.map((value) => value[0]), oes: selected.map((value) => value[1])}).catch(console.error)}
-                    startIcon={<SaveIcon />}
-            >
-                Export
-            </Button>
-
-            <TextField
-                inputRef={searchFieldRef}
-                value={searchString}
-                sx={{
-                    position: "absolute",
-                    top: "5px",
-                    right: "20px",
-                    width: "50%",
-                    maxWidth: "400px",
-                }}
-                variant="standard"
-                inputProps={{
-                    style: {
-                        boxShadow: "none"
-                    }
-                }}
-                onAnimationStart={() => {
-                    selectAll()
-                }}
-                onChange={event => {
-                    setSearchString(event.target.value);
-                    updateFilter(event.target.value);
-                }}
-                InputProps={{
-                    startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small"/></InputAdornment>,
-                }}
-            >
-            </TextField>
+            <TopBar nodes={nodes} filter={filter} rowData={rowData} selected={selected} setSelected={setSelected} searchString={searchString}
+                    setSearchString={setSearchString} updateFilter={updateFilter}/>
 
             {rowData.length == 0 ? <Skeleton
 
