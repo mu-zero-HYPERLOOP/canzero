@@ -1,5 +1,4 @@
-import { Input, InputAdornment, Paper, Stack, Typography } from "@mui/material";
-import SimpleEnumDisplay from "./SimpleEnumDisplay";
+import { Input, Paper, Stack, Typography } from "@mui/material";
 import { useRef, useState } from "react";
 
 
@@ -36,18 +35,18 @@ function ObjectEntryPropertyInputField({ }: Readonly<ObjectEntryPropertyInputFie
           e.target.setSelectionRange(e.target.value.length - unit.length, e.target.value.length - unit.length);
         }, 0);
       }}
-      onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-        setTimeout(() => {
-          if (e.target.selectionStart > e.target.value.length - unit.length) {
-            e.target.setSelectionRange((e.target as any).value.length - unit.length, (e.target as any).value.length - unit.length);
-          }
-        }, 0);
-      }}
-      onClick={(e: React.MouseEvent<HTMLInputElement>) => {
-        if (e.target.selectionStart > e.target.value.length - unit.length) {
-          e.target.setSelectionRange((e.target as any).value.length - unit.length, (e.target as any).value.length - unit.length);
-        }
-      }}
+      // onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+      //   setTimeout(() => {
+      //     if (e.target.selectionStart > e.target.value.length - unit.length) {
+      //       e.target.setSelectionRange((e.target as any).value.length - unit.length, (e.target as any).value.length - unit.length);
+      //     }
+      //   }, 0);
+      // }}
+      // onClick={(e: React.MouseEvent<HTMLInputElement>) => {
+      //   if (e.target.selectionStart > e.target.value.length - unit.length) {
+      //     e.target.setSelectionRange((e.target as any).value.length - unit.length, (e.target as any).value.length - unit.length);
+      //   }
+      // }}
     >
     </Input>
   );

@@ -1,13 +1,12 @@
-import { Grid, Paper, Stack, Typography } from "@mui/material";
+import { Grid, } from "@mui/material";
 import { NodeInformation } from "../nodes/types/NodeInformation.ts";
-import ObjectEntryField from "../overview/ObjectEntryField.tsx";
 import ObjectEntryEditPaper from "../object_entry/vis/ObjectEntryEditPaper.tsx";
 
 interface NodesProps {
   nodes: NodeInformation[],
 }
 
-function MotorControl({ nodes }: NodesProps) {
+function MotorControl({ nodes : _ }: NodesProps) {
 
   return (
     <Grid container spacing={2} padding={2}
