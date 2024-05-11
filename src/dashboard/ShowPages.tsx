@@ -40,16 +40,24 @@ function ShowPages() {
     // this asynchronously (in the background) invokes function
     asyncFetchNodeData().catch(console.error);
   }, []); 
+  // [] is intentional, because *_information commands will always return the same value, making it useless to call 
+  // them multiple times! (only once when mounting the component is sufficient)
 
   let key = 0;
   let routes = [];
 
-  routes.push(<Route key="Overview" index element={<OverviewPanel nodes={nodes} />} />);
+  if (nodes) {
+    routes.push(<Route key="Overview" index element={<OverviewPanel nodes={nodes} />} />);
+  }
   routes.push(<Route key="TracePanel" path="TracePanel" element={<Trace />} />);
-  routes.push(<Route key="Logging" path="Logging" element={<Logging nodes={nodes} />} />);
-  routes.push(<Route key="LevitationControl" path="LevitationControl" element={<LevitationControl nodes={nodes} />} />);
-  routes.push(<Route key="GuidanceControl" path="GuidanceControl" element={<GuidanceControl nodes={nodes} />} />);
-  routes.push(<Route key="MotorControl" path="MotorControl" element={<MotorControl nodes={nodes} />} />);
+  if (nodes) {
+    routes.push(<Route key="Logging" path="Logging" element={<Logging nodes={nodes} />} />);
+  }
+  if (nodes) {
+    routes.push(<Route key="LevitationControl" path="LevitationControl" element={<LevitationControl nodes={nodes} />} />);
+    routes.push(<Route key="GuidanceControl" path="GuidanceControl" element={<GuidanceControl nodes={nodes} />} />);
+    routes.push(<Route key="MotorControl" path="MotorControl" element={<MotorControl nodes={nodes} />} />);
+  }
   for (let node of nodes) {
     routes.push(<Route key={key++} path={node.name} element={<NodePanel node={node} />} />);
     for (let objectEntryName of node.object_entries) {

@@ -19,8 +19,6 @@ import {
 import {TableComponents, TableVirtuoso} from "react-virtuoso";
 import React, {useEffect, useRef, useState} from "react";
 import {invoke} from "@tauri-apps/api";
-import {listen} from "@tauri-apps/api/event";
-import {NodeEvent} from "../nodes/types/NodeEvent.ts";
 import useFocusOnCtrlShortcut from "../trace/FocusOnKey.tsx";
 import SearchIcon from "@mui/icons-material/Search";
 import LoggingRow from "./LoggingRow.tsx";
@@ -33,13 +31,12 @@ interface ExportPanelProps {
 interface RowData {
     nodeName: string,
     objectEntryName: string,
-    value: ObjectEntryEvent | null,
 }
 
 interface TopBarProps {
     nodes: NodeInformation[],
     filter: number[],
-    rowData: RowData[][],
+    rowData: RowData[],
     selected: [string, string][],
     setSelected: (selected: [string, string][]) => void,
     searchString: string,
@@ -56,7 +53,7 @@ function TopBar({nodes, filter, rowData, selected, setSelected, searchString, se
 
     const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.checked) {
-            setSelected(filter.map(i => [rowData.flat()[i].nodeName, rowData.flat()[i].objectEntryName]));
+            setSelected(filter.map(i => [rowData[i].nodeName, rowData[i].objectEntryName]));
             return;
         }
         setSelected([]);
@@ -166,7 +163,7 @@ function indexOf(arr: [string, string][], id: [string, string]) {
 function Logging({nodes}: Readonly<ExportPanelProps>) {
     const [filter, setFilter] = useState<number[]>([]);
     const [searchString, setSearchString] = useState<string>("");
-    const [rowData, setRowData] = useState<RowData[][]>([]);
+    const [rowData, setRowData] = useState<RowData[]>([]);
     const [selected, setSelected] = React.useState<[string, string][]>([]);
 
     function updateFilter(filter_string: string) {
@@ -183,42 +180,35 @@ function Logging({nodes}: Readonly<ExportPanelProps>) {
         setFilter(filter);
     }
 
-    // register listener
-    useEffect(() => {
-        async function asyncSetup(node: NodeInformation) {
-            const event_name = await invoke<string>("listen_to_node_latest", {nodeName: node.name});
-            const unlistenJs = await listen<NodeEvent>(event_name, event => {
-                const data = event.payload.object_entry_values.map((value, index) => {
-                    return {
-                        nodeName: node.name,
-                        objectEntryName: node.object_entries[index],
-                        value,
-                    };
-                });
-                let newData = rowData
-                newData[nodes.indexOf(node)] = data
-                setRowData(newData);
-            });
-
-            return () => {
-                unlistenJs();
-                invoke("unlisten_from_node_latest", {nodeName: node.name}).catch(console.error);
-            };
-        }
-
-        // init!
-        setRowData([]);
-        updateFilter("");
-        setSearchString("");
-        let asyncCleanup = nodes.map((node) => asyncSetup(node))
-        return () => {
-            asyncCleanup.forEach((asyncCleanup) => asyncCleanup.then(f => f()).catch(console.error))
-        };
+    useEffect(()=> {
+      updateFilter(searchString);
     }, []);
+
+    
+    useEffect(() =>{
+      async function asyncSetup() {
+        let rowData : RowData[] = [];
+        for (let node of nodes) {
+          let nodeInformation = await invoke<NodeInformation>("node_information", {nodeName : node.name});
+          for (let objectEntryName of nodeInformation.object_entries) {
+            rowData.push({
+              nodeName : node.name,
+              objectEntryName,
+            });
+          }
+        }
+        setRowData(rowData);
+      }
+      asyncSetup().catch(console.error);
+      return () => {
+      }
+    }, [nodes]);
 
     function rowContent(_index: number, row?: RowData) {
         if (row !== undefined) return <LoggingRow nodeName={row.nodeName} objectEntryName={row?.objectEntryName}
                                                   handleClick={handleClick} isSelected={isSelected}/>
+        console.log("undefined");
+        return undefined;
     }
 
     const theme = useTheme();
@@ -280,6 +270,7 @@ function Logging({nodes}: Readonly<ExportPanelProps>) {
                         width: "100%",
                         backgroundColor: theme.palette.background.paper2,
                     }}
+                    key={"x"}
                     data={filter.map(i => rowData.flat()[i])}
                     components={VirtuosoTableComponents}
                     itemContent={rowContent}

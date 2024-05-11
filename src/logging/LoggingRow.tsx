@@ -1,14 +1,14 @@
 import {Checkbox, TableCell, TableRow, Typography} from "@mui/material";
 import {index} from "d3";
 
-interface ObjectEntryRowProps {
+interface LoggingEntryRowProps {
     nodeName: string,
     objectEntryName: string,
     handleClick: (id: [string, string]) => void,
     isSelected: (id: [string, string]) => boolean,
 }
 
-function ObjectEntryRow({nodeName, objectEntryName, handleClick, isSelected}: Readonly<ObjectEntryRowProps>) {
+function LoggingEntryRow({nodeName, objectEntryName, handleClick, isSelected}: Readonly<LoggingEntryRowProps>) {
     const id: [string, string] = [nodeName, objectEntryName]
     const isItemSelected = isSelected(id);
     const labelId = `enhanced-table-checkbox-${index}`;
@@ -20,7 +20,7 @@ function ObjectEntryRow({nodeName, objectEntryName, handleClick, isSelected}: Re
             onClick={() => handleClick(id)}
             aria-checked={isItemSelected}
             selected={isItemSelected}
-            key={nodeName + "/" + objectEntryName}
+            key={"logging/" + nodeName + "/" + objectEntryName}
         >
             <TableCell
                 padding="checkbox"
@@ -52,4 +52,4 @@ function ObjectEntryRow({nodeName, objectEntryName, handleClick, isSelected}: Re
 
 }
 
-export default ObjectEntryRow;
+export default LoggingEntryRow;
