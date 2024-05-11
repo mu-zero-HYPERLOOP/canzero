@@ -27,13 +27,13 @@ tauri = { version = "1.5", features = [ "cli", "fs-all", "shell-open", "dialog-a
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tokio = { version = "1.34.0", features = ["full"] }
-canzero-config = { git = "https://github.com/mu-zero-HYPERLOOP/canzero-config.git" }
-canzero-appdata = { git = "https://github.com/mu-zero-HYPERLOOP/canzero-appdata.git" }
-canzero-tcp = { git = "https://github.com/mu-zero-HYPERLOOP/canzero-tcp.git" }
-canzero-udp = { git = "https://github.com/mu-zero-HYPERLOOP/canzero-udp.git" }
-canzero-common = { git = "https://github.com/mu-zero-HYPERLOOP/canzero-common.git" }
-canzero-socketcan = { git = "https://github.com/mu-zero-HYPERLOOP/canzero-socketcan.git", optional = true}
-canzero-cli = { git = "https://github.com/mu-zero-HYPERLOOP/canzero-cli.git"}
+canzero-config = { path = "./lib/config" }
+canzero-appdata = { path = "./lib/appdata" }
+canzero-tcp = { path = "./lib/tcp" }
+canzero-udp = { path = "./lib/udp" }
+canzero-common = { path = "./lib/common" }
+canzero-socketcan = { path = "./lib/socketcan/", optional = true}
+canzero-cli = { path = "./lib/cli/" }
 fix-path-env = { git = "https://github.com/tauri-apps/fix-path-env-rs.git"}
 bitvec = "1.0.1"
 chrono = { version = "0.4.34", features = [ "serde" ] }

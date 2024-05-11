@@ -368,7 +368,6 @@ dependencies = [
 [[package]]
 name = "canzero-appdata"
 version = "0.1.0"
-source = "git+https://github.com/mu-zero-HYPERLOOP/canzero-appdata.git#15e8dace76f269dcd6932271d6e80e3c4b4f9778"
 dependencies = [
  "canzero-config",
  "canzero-yaml",
@@ -380,7 +379,6 @@ dependencies = [
 [[package]]
 name = "canzero-cli"
 version = "0.1.0"
-source = "git+https://github.com/mu-zero-HYPERLOOP/canzero-cli.git#51be0777782b0782fb69bb2c6ce4c0d76a4dec46"
 dependencies = [
  "build-time",
  "canzero-appdata",
@@ -404,7 +402,6 @@ dependencies = [
 [[package]]
 name = "canzero-codegen"
 version = "0.1.0"
-source = "git+https://github.com/mu-zero-HYPERLOOP/canzero-codegen.git#b9dece6e918457d54fb0a3829cf4841ab6c742ca"
 dependencies = [
  "canzero-config",
 ]
@@ -412,7 +409,6 @@ dependencies = [
 [[package]]
 name = "canzero-common"
 version = "0.1.0"
-source = "git+https://github.com/mu-zero-HYPERLOOP/canzero-common.git#7b7079fec6ef3744de4eda62901ecd4b27f35289"
 dependencies = [
  "serde",
 ]
@@ -420,7 +416,6 @@ dependencies = [
 [[package]]
 name = "canzero-config"
 version = "0.1.0"
-source = "git+https://github.com/mu-zero-HYPERLOOP/canzero-config.git#6d4db07da6bfae656f736466f1497f121e9a2a02"
 dependencies = [
  "bit_reverse",
  "can-dbc",
@@ -432,7 +427,6 @@ dependencies = [
 [[package]]
 name = "canzero-server"
 version = "0.1.0"
-source = "git+https://github.com/mu-zero-HYPERLOOP/canzero-server.git#babcce847ae557dc87f455004e5e349b12ff29b2"
 dependencies = [
  "bincode",
  "canzero-appdata",
@@ -454,7 +448,6 @@ dependencies = [
 [[package]]
 name = "canzero-socketcan"
 version = "0.1.0"
-source = "git+https://github.com/mu-zero-HYPERLOOP/canzero-socketcan.git#2eed48e82a7e3db6f1e7799fd2ef07518011e9c1"
 dependencies = [
  "canzero-common",
  "color-print",
@@ -468,7 +461,6 @@ dependencies = [
 [[package]]
 name = "canzero-tcp"
 version = "0.1.0"
-source = "git+https://github.com/mu-zero-HYPERLOOP/canzero-tcp.git#45c6e3db316008e18281d19e203954720d43da25"
 dependencies = [
  "bincode",
  "canzero-common",
@@ -480,7 +472,6 @@ dependencies = [
 [[package]]
 name = "canzero-udp"
 version = "0.1.0"
-source = "git+https://github.com/mu-zero-HYPERLOOP/canzero-udp.git#af6dac88d4a455f4440fe03e552a9ed9392c5f1e"
 dependencies = [
  "bincode",
  "build-time",
@@ -494,7 +485,6 @@ dependencies = [
 [[package]]
 name = "canzero-yaml"
 version = "0.1.0"
-source = "git+https://github.com/mu-zero-HYPERLOOP/canzero-yaml.git#7f0c6f546b3849bcfbf12a78558ff67db4674d58"
 dependencies = [
  "canzero-config",
  "regex",

@@ -52,7 +52,6 @@
         "icons/icon.ico"
       ],
       "resources": [
-        "test.yaml"
       ],
       "windows": {
         "webviewInstallMode": {
