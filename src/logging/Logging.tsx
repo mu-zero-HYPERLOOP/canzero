@@ -1,5 +1,4 @@
 import {NodeInformation} from "../nodes/types/NodeInformation.ts";
-import {ObjectEntryEvent} from "../object_entry/types/events/ObjectEntryEvent.tsx";
 import {
     Checkbox,
     IconButton,
