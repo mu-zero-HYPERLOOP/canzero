@@ -28,7 +28,6 @@ function ShowPages() {
 
 
   useEffect(() => {
-
     async function asyncFetchNodeData() {
       let nodes = [];
       let networkInformation = await invoke<NetworkInformation>("network_information");
@@ -40,7 +39,7 @@ function ShowPages() {
     }
     // this asynchronously (in the background) invokes function
     asyncFetchNodeData().catch(console.error);
-  }, [nodes.map((node) => node.name)]);
+  }, []); 
 
   let key = 0;
   let routes = [];
