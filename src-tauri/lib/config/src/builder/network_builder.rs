@@ -486,6 +486,7 @@ impl NetworkBuilder {
             enum_node_id.add_entry(&node_name, Some(node_id))?;
             node_id += 1;
         }
+        enum_node_id.add_entry("count", Some(node_id))?;
         let heartbeat_message = self.create_message("heartbeat", Some(Duration::from_millis(100)));
         heartbeat_message.__assign_to_heartbeat();
         heartbeat_message.set_any_std_id(MessagePriority::SuperLow);

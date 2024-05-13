@@ -42,9 +42,6 @@ pub fn generate_types(
                 for (entry_name, entry_value) in entries {
                     def.push_str(&format!("{indent}{name}_{entry_name} = {entry_value},\n"));
                 }
-                if name == "node_id" {
-                    def.push_str(&format!("{indent}{name}_count = {}\n", network_config.nodes().len()));
-                }
                 def.push_str(&format!("}} {name};\n"));
                 header.push_str(&def);
             }
