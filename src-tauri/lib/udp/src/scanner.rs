@@ -83,15 +83,15 @@ impl UdpNetworkScanner {
 
 
     async fn broadcast_scanner_task(socket: Arc<UdpSocket>, tx: mpsc::Sender<NetworkDescription>) {
-        let mut rx_buffer = [0u8; 1024];
+        let mut rx_buffer = [0u8; 216];
         let mut interval = tokio::time::interval(Duration::from_millis(1000));
 
         let broadcast_addr = format!("255.255.255.255:{BROADCAST_PORT}");
 
-        let hello_frame = bincode::serialize(&UdpFrame::Hello(HelloFrame {
+        let mut hello_frame = [0;216];
+        UdpFrame::Hello(HelloFrame {
             service_name: SERVICE_NAME.to_owned(),
-        }))
-        .expect("Failed to serialize udp discovery HelloFrame");
+        }).into_bin(&mut hello_frame);
 
 
         let mut discovered_networks: HashSet<SocketAddr> = HashSet::new();
@@ -102,7 +102,7 @@ impl UdpNetworkScanner {
                 continue;
             };
 
-            let Ok(Ok((packet_size, udp_server_addr))) = tokio::time::timeout(
+            let Ok(Ok((_, udp_server_addr))) = tokio::time::timeout(
                 Duration::from_millis(1000),
                 socket.recv_from(&mut rx_buffer),
             )
@@ -112,7 +112,7 @@ impl UdpNetworkScanner {
             };
 
             let local_timebase = Instant::now();
-            let Ok(frame) = bincode::deserialize::<UdpFrame>(&rx_buffer[..packet_size]) else {
+            let Ok(frame) = UdpFrame::from_bin(&rx_buffer) else {
                 cprintln!("<yellow>UdpNetworkScanner: Received ill formed frame from {} [ignored]</yellow>", {udp_server_addr});
                 continue;
             };

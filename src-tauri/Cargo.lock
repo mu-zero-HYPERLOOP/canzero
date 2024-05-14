@@ -462,7 +462,6 @@ dependencies = [
 name = "canzero-udp"
 version = "0.1.0"
 dependencies = [
- "bincode",
  "build-time",
  "canzero-config",
  "chrono",
