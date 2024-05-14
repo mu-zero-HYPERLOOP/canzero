@@ -1,31 +1,17 @@
 use std::{net::SocketAddr, ops::DerefMut, sync::Arc, time::Duration};
 
 use color_print::cprintln;
-use serde::{Deserialize, Serialize};
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::{
         tcp::{OwnedReadHalf, OwnedWriteHalf},
         TcpStream,
-    },
-    sync::Mutex,
+    }, sync::Mutex,
 };
 
-use canzero_common::{CanFrame, NetworkFrame, TNetworkFrame};
+use canzero_common::TNetworkFrame;
 
-use crate::wdg::Watchdog;
-
-#[derive(Serialize, Deserialize, Clone)]
-pub enum ConnectionHandshakeFrame {
-    ConnectionIdRequest { request: u8, _padding: u8 },
-    ConnectionId { success: u8, node_id: u8 },
-}
-
-#[derive(Serialize, Deserialize, Clone)]
-pub enum TcpFrame {
-    NetworkFrame(TNetworkFrame),
-    KeepAlive { _padding: [u8; 29] },
-}
+use crate::{frame::{ConnectionHandshakeFrame, TcpFrame}, wdg::Watchdog};
 
 #[derive(Debug)]
 pub struct ConnectionIdHost {
@@ -87,7 +73,7 @@ pub enum ConnectionId {
 #[derive(Debug)]
 pub struct TcpCan {
     tx_stream: Arc<Mutex<OwnedWriteHalf>>,
-    rx_stream: Mutex<(Vec<u8>, OwnedReadHalf)>,
+    rx_stream: Mutex<OwnedReadHalf>,
     wdg: Watchdog,
     node_id: Option<u8>,
     id_host: Option<Arc<ConnectionIdHost>>,
@@ -103,43 +89,24 @@ impl TcpCan {
     }
 
     pub async fn new(tcp_stream: TcpStream, connection_id: ConnectionId) -> Self {
-        let network_frame_size =
-            bincode::serialized_size(&TcpFrame::NetworkFrame(TNetworkFrame::new(
-                Duration::from_secs(0),
-                NetworkFrame {
-                    bus_id: 0,
-                    can_frame: CanFrame::new(0, false, false, 0, 0),
-                },
-            )))
-            .unwrap();
-
-        let keep_alive_frame_size =
-            bincode::serialized_size(&TcpFrame::KeepAlive { _padding: [0; 29] }).unwrap();
-        assert_eq!(keep_alive_frame_size, network_frame_size);
-
-        let handshake_size = bincode::serialized_size(&ConnectionHandshakeFrame::ConnectionId {
-            success: 0,
-            node_id: 0,
-        })
-        .unwrap();
 
         let (mut rx, mut tx) = tcp_stream.into_split();
 
         let node_id: Option<u8> = match &connection_id {
             ConnectionId::Request => {
-                let request = bincode::serialize(&ConnectionHandshakeFrame::ConnectionIdRequest {
-                    request: 1,
-                    _padding: 0,
-                })
-                .unwrap();
+                let mut request = [0;2];
+                ConnectionHandshakeFrame::ConnectionIdRequest {
+                    request: true,
+                }.into_bin(&mut request);
+
                 tx.write_all(&request).await.unwrap();
 
-                let mut rx_buffer = vec![0; handshake_size as usize];
+                let mut rx_buffer = [0; 2usize];
                 match rx.read_exact(&mut rx_buffer).await {
-                    Ok(_) => match bincode::deserialize::<ConnectionHandshakeFrame>(&rx_buffer) {
-                        Ok(tcp_frame) => match tcp_frame {
+                    Ok(_) => match ConnectionHandshakeFrame::from_bin(&rx_buffer) {
+                        Ok(handshake_frame) => match handshake_frame {
                             ConnectionHandshakeFrame::ConnectionId { success, node_id } => {
-                                if success == 1 {
+                                if success {
                                     Some(node_id)
                                 } else {
                                     panic!("Connection ID request failed")
@@ -147,7 +114,6 @@ impl TcpCan {
                             }
                             ConnectionHandshakeFrame::ConnectionIdRequest {
                                 request: _,
-                                _padding,
                             } => {
                                 panic!("Illegal request: This tcpcan doesn't act as a id server")
                             }
@@ -159,18 +125,17 @@ impl TcpCan {
             }
             ConnectionId::None => {
                 // explicitly tell the host that no connection id is required!
-                let request = bincode::serialize(&ConnectionHandshakeFrame::ConnectionIdRequest {
-                    request: 0,
-                    _padding: 0,
-                })
-                .unwrap();
+                let mut request = [0;2];
+                ConnectionHandshakeFrame::ConnectionIdRequest {
+                    request: false,
+                }.into_bin(&mut request);
                 tx.write_all(&request).await.unwrap();
                 None
             }
             ConnectionId::Host(host) => {
-                let mut rx_buffer = vec![0; handshake_size as usize];
+                let mut rx_buffer = [0;2];
                 match rx.read_exact(&mut rx_buffer).await {
-                    Ok(_) => match bincode::deserialize::<ConnectionHandshakeFrame>(&rx_buffer) {
+                    Ok(_) => match ConnectionHandshakeFrame::from_bin(&rx_buffer) {
                         Ok(tcp_frame) => match tcp_frame {
                             ConnectionHandshakeFrame::ConnectionId {
                                 success: _,
@@ -178,28 +143,24 @@ impl TcpCan {
                             } => {
                                 panic!("Unexpected response: Host received connection id response during handshake");
                             }
-                            ConnectionHandshakeFrame::ConnectionIdRequest { request, _padding } => {
-                                if request == 1 {
+                            ConnectionHandshakeFrame::ConnectionIdRequest { request } => {
+                                if request {
                                     match host.alloc_id() {
                                         Some(node_id) => {
-                                            let response = bincode::serialize(
-                                                &ConnectionHandshakeFrame::ConnectionId {
-                                                    success: 1,
+                                            let mut response = [0;2];
+                                            ConnectionHandshakeFrame::ConnectionId {
+                                                    success: true,
                                                     node_id,
-                                                },
-                                            )
-                                            .unwrap();
+                                            }.into_bin(&mut response);
                                             tx.write_all(&response).await.unwrap();
                                             Some(node_id)
                                         }
                                         None => {
-                                            let response = bincode::serialize(
-                                                &ConnectionHandshakeFrame::ConnectionId {
-                                                    success: 0,
-                                                    node_id: 0,
-                                                },
-                                            )
-                                            .unwrap();
+                                            let mut response = [0;2];
+                                            ConnectionHandshakeFrame::ConnectionId {
+                                                success: true,
+                                                node_id: 0,
+                                            }.into_bin(&mut response);
                                             tx.write_all(&response).await.unwrap();
                                             None
                                         }
@@ -220,8 +181,8 @@ impl TcpCan {
 
         let keep_alive_sock = tx.clone();
         tokio::spawn(async move {
-            let keep_alive_frame =
-                bincode::serialize(&TcpFrame::KeepAlive { _padding: [0; 29] }).unwrap();
+            let mut keep_alive_frame = [0;24];
+            TcpFrame::KeepAlive.into_bin(&mut keep_alive_frame);
             loop {
                 tokio::time::interval(Duration::from_millis(500))
                     .tick()
@@ -243,7 +204,7 @@ impl TcpCan {
 
         Self {
             tx_stream: tx,
-            rx_stream: Mutex::new((vec![0; network_frame_size as usize], rx)),
+            rx_stream: Mutex::new(rx),
             wdg,
             node_id,
             id_host: match connection_id {
@@ -254,20 +215,22 @@ impl TcpCan {
     }
 
     pub async fn send(&self, frame: &TNetworkFrame) -> std::io::Result<()> {
-        let bytes = bincode::serialize(&TcpFrame::NetworkFrame(frame.clone())).unwrap();
+        let mut bytes = [0;24];
+        TcpFrame::NetworkFrame(frame.clone()).into_bin(&mut bytes);
         self.tx_stream.lock().await.write_all(&bytes).await
     }
 
     pub async fn recv(&self) -> Option<TNetworkFrame> {
         let mut rx_lock = self.rx_stream.lock().await;
-        let (rx_buffer, rx_stream) = rx_lock.deref_mut();
+        let rx_stream = rx_lock.deref_mut();
+        let mut rx_buffer = [0;24];
         loop {
             tokio::select! {
-                rx_res = rx_stream.read_exact(rx_buffer) => {
+                rx_res = rx_stream.read_exact(&mut rx_buffer) => {
                     match rx_res {
-                        Ok(_) => match bincode::deserialize::<TcpFrame>(rx_buffer).unwrap() {
+                        Ok(_) => match TcpFrame::from_bin(&rx_buffer).unwrap() {
                             TcpFrame::NetworkFrame(network_frame) => return Some(network_frame),
-                            TcpFrame::KeepAlive { _padding } => {
+                            TcpFrame::KeepAlive => {
                                 self.wdg.reset().await;
                             },
                         },

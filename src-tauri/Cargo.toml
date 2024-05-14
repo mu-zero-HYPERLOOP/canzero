@@ -43,7 +43,7 @@ color-print = "0.3.6"
 
 
 [features]
-default = ["socket-can"]
+default = []
 # this feature is used for production builds or when `devPath` points to the filesystem
 # DO NOT REMOVE!!
 custom-protocol = ["tauri/custom-protocol"]

@@ -109,6 +109,14 @@ impl CanFrame {
         }
     }
 
+    pub fn new_raw(id_key : u32, dlc : u8, data : u64) -> Self {
+        Self {
+            id : id_key,
+            dlc,
+            data
+        }
+    }
+
     pub fn key(&self) -> u32 {
         self.id
     }

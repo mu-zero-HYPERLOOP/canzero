@@ -1,6 +1,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 use canzero_cli::run_cli;
-use nix::libc::exit;
 use tauri::Manager;
 
 use crate::{
@@ -28,7 +27,7 @@ async fn main() {
                     .resolve_resource("xcompl/canzero-cli-armv7-unknown-linux-gnueabihf")
                     .unwrap();
                 if !run_cli(Some(armv7_binary)).await {
-                    unsafe { exit(0) };
+                    std::process::exit(0);
                 }
                 handle.manage(StartupState::new());
                 tauri::WindowBuilder::new(
