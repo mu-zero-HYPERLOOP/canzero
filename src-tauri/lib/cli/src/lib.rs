@@ -1,7 +1,6 @@
 use std::path::PathBuf;
 
-use build_time::build_time_local;
-use clap::{Parser, Subcommand};
+use build_time::build_time_local; use clap::{Parser, Subcommand};
 use config::command_config_get;
 
 use crate::{
@@ -66,11 +65,8 @@ enum Command {
         #[command(subcommand)]
         command: ServerCommand,
     },
-    #[command(about = "Interact with or start the client node.")]
-    Client {
-        #[command(subcommand)]
-        command: ClientCommand,
-    },
+    #[command(about = "Connect to a network (SocketCAN).")]
+    Connect,
     #[command(about = "Print the CAN trace to the control.")]
     Dump {
         #[clap(alias = "msg")]
@@ -135,8 +131,7 @@ enum ServerCommand {
     Restart,
     Reboot,
     Ssh { host: Option<String> },
-    Build,
-    Upload { host: Option<String> },
+    Update { host: Option<String> },
 }
 
 #[derive(Subcommand, Debug)]
@@ -145,7 +140,7 @@ enum ClientCommand {
 }
 
 /// returns true iff. the gui should be started!
-pub async fn run_cli() -> bool {
+pub async fn run_cli(armv7_cli_binary : Option<PathBuf>) -> bool {
     let cli = Cli::parse();
     let res = match cli.command {
         Some(cmd) => match cmd {
@@ -178,19 +173,21 @@ pub async fn run_cli() -> bool {
                 ServerCommand::Restart => Err(Error::NotYetImplemented),
                 ServerCommand::Reboot => command_ssh_reboot(None).await,
                 ServerCommand::Ssh { host } => command_ssh(host).await,
-                ServerCommand::Build => command_update_server(None, false, false, true).await,
-                ServerCommand::Upload { host } => {
-                    command_update_server(host, false, true, false).await
+                ServerCommand::Update { host } => {
+                    command_update_server(host, false, true, armv7_cli_binary).await
                 }
             },
-            Command::Client { command } => match command {
-                ClientCommand::Start => command_client().await,
-            },
+            Command::Connect => command_client().await,
             Command::Dump { messages, ids } => command_dump(messages, ids).await,
             Command::Status => command_status().await,
             Command::Update { socketcan } => command_update_self(socketcan),
             Command::Version => {
                 println!("build-time : {}", build_time_local!());
+                if cfg!(feature="socket-can") {
+                    println!("socket-can : enabled");
+                }else {
+                    println!("socket-can : disabled");
+                }
                 Ok(())
             }
         },

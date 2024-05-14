@@ -17,6 +17,7 @@ struct GetRespFrame {
     eof: bool,
     toggle: bool,
     server_id: u8,
+    client_id: u8,
     object_entry_id: u16,
     data: u32,
 }
@@ -47,6 +48,9 @@ impl GetRespFrame {
         let Some(Value::UnsignedValue(server_id)) = header.attribute("server_id") else {
             panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame : header.server_id missing");
         };
+        let Some(Value::UnsignedValue(client_id)) = header.attribute("client_id") else {
+            panic!("DETECTED INVALID CONFIG: invalid format of get_resp_frame : header.client_id missing");
+        };
         let Some(Value::UnsignedValue(data)) = frame.attribute("data") else {
             panic!(
                 "DETECTED INVALID CONFIG: invalid format of get_resp_frame : header.data missing"
@@ -57,6 +61,7 @@ impl GetRespFrame {
             eof: *eof != 0,
             toggle: *toggle != 0,
             server_id: *server_id as u8,
+            client_id: *client_id as u8,
             object_entry_id: *object_entry_id as u16,
             data: *data as u32,
         }
@@ -128,10 +133,15 @@ struct GetRespIdentifier {
 pub struct GetRespFrameHandler {
     frame_deserializer: FrameDeserializer,
     get_resp_lookup: HashMap<GetRespIdentifier, tokio::sync::Mutex<GetResp>>,
+    node_id: u8,
 }
 
 impl GetRespFrameHandler {
-    pub fn create(network: &Arc<NetworkObject>, get_resp_msg: &config::MessageRef) -> Self {
+    pub fn create(
+        network: &Arc<NetworkObject>,
+        get_resp_msg: &config::MessageRef,
+        node_id: u8,
+    ) -> Self {
         let mut get_resp_lookup = HashMap::new();
         for node in network.nodes() {
             let node_id = node.id() as u8;
@@ -154,32 +164,34 @@ impl GetRespFrameHandler {
         Self {
             frame_deserializer: FrameDeserializer::new(get_resp_msg),
             get_resp_lookup,
+            node_id,
         }
     }
 
     pub async fn handle(&self, can_frame: &TCanFrame) -> Result<TFrame> {
-        
         let frame = self
             .frame_deserializer
             .deserialize(can_frame.get_data_u64());
 
         let get_resp_frame = GetRespFrame::new(&frame);
 
-        let get_resp_identifier = GetRespIdentifier {
-            server_id: get_resp_frame.server_id,
-            object_entry_id: get_resp_frame.object_entry_id,
-        };
+        if get_resp_frame.client_id == self.node_id {
+            let get_resp_identifier = GetRespIdentifier {
+                server_id: get_resp_frame.server_id,
+                object_entry_id: get_resp_frame.object_entry_id,
+            };
 
-        // lookup the correct GetResp "similar to handlers"
-        let Some(get_resp) = self.get_resp_lookup.get(&get_resp_identifier) else {
-            return Err(Error::InvalidGetResponseServerOrObjectEntryNotFound);
-        };
+            // lookup the correct GetResp "similar to handlers"
+            let Some(get_resp) = self.get_resp_lookup.get(&get_resp_identifier) else {
+                return Err(Error::InvalidGetResponseServerOrObjectEntryNotFound);
+            };
 
-        get_resp
-            .lock()
-            .await
-            .receive(get_resp_frame, &can_frame.timestamp)
-            .await?;
+            get_resp
+                .lock()
+                .await
+                .receive(get_resp_frame, &can_frame.timestamp)
+                .await?;
+        }
 
         Ok(can_frame.new_value(frame))
     }

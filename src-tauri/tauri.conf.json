@@ -1,7 +1,12 @@
 {
   "build": {
     "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run build",
+    "beforeBuildCommand": {
+      "script": "cross build --manifest-path src-tauri/lib/cli/Cargo.toml --target=armv7-unknown-linux-gnueabihf --release && mkdir -p src-tauri/xcompl && rm -f src-tauri/xcompl/canzero-cli-armv7-unknown-linux-gnueabihf && mv -f src-tauri/lib/cli/target/armv7-unknown-linux-gnueabihf/release/canzero-cli src-tauri/xcompl/canzero-cli-armv7-unknown-linux-gnueabihf && npm run build",
+      "wait": true
+
+
+    },
     "devPath": "http://localhost:1420",
     "distDir": "../dist",
     "withGlobalTauri": false,
@@ -12,16 +17,6 @@
     "version": "0.1.0"
   },
   "tauri": {
-    "cli": {
-      "description": "muzero Control Panel",
-      "args": [
-        {
-          "name": "address",
-          "short": "a",
-          "takesValue": true
-        }
-      ]
-    },
     "allowlist": {
       "all": false,
       "shell": {
@@ -52,6 +47,7 @@
         "icons/icon.ico"
       ],
       "resources": [
+        "xcompl/canzero-cli-armv7-unknown-linux-gnueabihf"
       ],
       "windows": {
         "webviewInstallMode": {

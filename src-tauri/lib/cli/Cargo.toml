@@ -26,7 +26,7 @@ chrono = "0.4.38"
 build-time = "0.1.3"
 
 [features]
-default = []
+default = ["socket-can"]
 socket-can = ["canzero-server/socket-can", "dep:canzero-socketcan"]
 
 [workspace.metadata.cross.build]

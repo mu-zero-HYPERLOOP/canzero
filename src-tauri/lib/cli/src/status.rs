@@ -7,8 +7,8 @@ use std::{
 use canzero_appdata::AppData;
 use canzero_common::{CanFrame, NetworkFrame, TNetworkFrame};
 use canzero_config::config;
-use canzero_tcp::tcpcan::TcpCan;
-use chrono::{DateTime, Datelike, Local, NaiveDate, NaiveDateTime, NaiveTime, Timelike};
+use canzero_tcp::tcpcan::{ConnectionId, TcpCan};
+use chrono::{DateTime, Datelike, NaiveDate, NaiveDateTime, NaiveTime, Timelike};
 use color_print::cprintln;
 
 use crate::{dump::discover, errors::Result};
@@ -18,6 +18,7 @@ async fn rx_get_req_hash_code(
     resp_id: u32,
     resp_ide: bool,
     node_id: u8,
+    my_id : u8,
 ) -> u64 {
     let mut hash: u64 = 0;
     let mut rx_count = 0;
@@ -29,7 +30,7 @@ async fn rx_get_req_hash_code(
             let client_id = (data & (0xFFu64 << 16)).overflowing_shr(16).0 as u8;
             let server_id = (data & (0xFFu64 << 24)).overflowing_shr(24).0 as u8;
 
-            if client_id != 0xFFu8 {
+            if client_id != my_id {
                 continue;
             }
             if server_id != node_id {
@@ -52,6 +53,7 @@ async fn rx_get_req_build_time(
     resp_id: u32,
     resp_ide: bool,
     node_id: u8,
+    my_id : u8,
 ) -> Option<NaiveDateTime> {
     let mut build_time_data: u64 = 0;
     let mut rx_count = 0;
@@ -63,7 +65,7 @@ async fn rx_get_req_build_time(
             let client_id = (data & (0xFFu64 << 16)).overflowing_shr(16).0 as u8;
             let server_id = (data & (0xFFu64 << 24)).overflowing_shr(24).0 as u8;
 
-            if client_id != 0xFFu8 {
+            if client_id != my_id {
                 continue;
             }
             if server_id != node_id {
@@ -104,7 +106,9 @@ pub async fn command_status() -> Result<()> {
             .await
             .unwrap();
 
-    let tcpcan = Arc::new(canzero_tcp::tcpcan::TcpCan::new(stream));
+    let tcpcan = Arc::new(canzero_tcp::tcpcan::TcpCan::new(stream, ConnectionId::Request).await);
+
+    let my_id = tcpcan.connection_id().unwrap();
 
     let get_req = network_config.get_req_message();
 
@@ -151,7 +155,7 @@ pub async fn command_status() -> Result<()> {
             .unwrap();
         let mut req_hash_data: u64 = 0;
         req_hash_data |= config_hash_oe.id() as u64;
-        req_hash_data |= 0xFF << 13;
+        req_hash_data |= (my_id as u64) << 13;
         req_hash_data |= (node.id() as u64) << (13 + 8);
 
         let get_req_hash_frame =
@@ -165,7 +169,7 @@ pub async fn command_status() -> Result<()> {
 
         let mut req_build_time_data: u64 = 0;
         req_build_time_data |= build_time_oe.id() as u64;
-        req_build_time_data |= 0xFF << 13;
+        req_build_time_data |= (my_id as u64) << 13;
         req_build_time_data |= (node.id() as u64) << (13 + 8);
 
         let req_build_time_frame =
@@ -193,6 +197,7 @@ pub async fn command_status() -> Result<()> {
                 network_config.get_resp_message().id().as_u32(),
                 network_config.get_resp_message().id().ide(),
                 node.id(),
+                my_id,
             ),
         )
         .await
@@ -216,6 +221,7 @@ pub async fn command_status() -> Result<()> {
                     network_config.get_resp_message().id().as_u32(),
                     network_config.get_resp_message().id().ide(),
                     node.id(),
+                    my_id,
                 ),
             )
             .await
@@ -234,7 +240,7 @@ pub async fn command_status() -> Result<()> {
                     );
                 } else {
                     cprintln!(
-                    "{:25} : <yellow> {:7}</yellow> ({:0>4}-{:0>2}-{:0>2} {:0>2}:{:0>2}:{:0>2})",
+                    "{:25} : <yellow> {:7}</yellow> ({:0>4}-{:0>2}-{:0>2} {:0>2}:{:0>2}:{:0>2}) [{}]",
                     node.name(),
                     "DESYNC",
                     build_time.year(),
@@ -242,7 +248,8 @@ pub async fn command_status() -> Result<()> {
                     build_time.day(),
                     build_time.hour(),
                     build_time.minute(),
-                    build_time.second()
+                    build_time.second(),
+                    hash,
                 );
                 }
             }else {

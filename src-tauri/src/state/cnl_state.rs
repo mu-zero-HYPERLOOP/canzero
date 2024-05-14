@@ -19,9 +19,10 @@ impl Deref for CNLState {
 
 impl CNLState {
     pub async fn create(network_config: NetworkRef, app_handle: &tauri::AppHandle, can_adapters : Vec<Arc<CanAdapter>>,
-                        timebase : Instant) -> Self {
+                        timebase : Instant, node_id : Option<u8>) -> Self {
         Self {
-            cnl: Mutex::new(CNL::create(&network_config, app_handle, can_adapters, timebase).await),
+            cnl: Mutex::new(CNL::create(&network_config, app_handle, can_adapters, timebase, 
+                                        node_id).await),
         }
     }
 }

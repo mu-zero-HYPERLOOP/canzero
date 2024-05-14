@@ -3,12 +3,12 @@ use std::{net::SocketAddr, sync::Arc, time::Instant};
 use crate::notification::notify_warning;
 
 use canzero_common::{NetworkFrame, TCanError, TCanFrame, TNetworkFrame, Timestamped};
-use canzero_tcp::tcpcan::TcpCan;
+use canzero_tcp::tcpcan::{ConnectionId, TcpCan};
 use canzero_udp::frame::NetworkDescription;
 
 pub struct TcpClient {
     tcpcan: Arc<TcpCan>,
-    timebase : Instant,
+    timebase: Instant,
 }
 
 impl TcpClient {
@@ -18,10 +18,13 @@ impl TcpClient {
         can_rx_adapters: Vec<tokio::sync::mpsc::Sender<Result<TCanFrame, TCanError>>>,
     ) -> std::io::Result<Self> {
         let app_handle = app_handle.clone();
-        let address = SocketAddr::new(network_description.server_addr, network_description.service_port);
+        let address = SocketAddr::new(
+            network_description.server_addr,
+            network_description.service_port,
+        );
         let stream = tokio::net::TcpStream::connect(address).await?;
 
-        let tcpcan = Arc::new(TcpCan::new(stream));
+        let tcpcan = Arc::new(TcpCan::new(stream, ConnectionId::Request).await);
         let tcpcan_rx = tcpcan.clone();
         tokio::spawn(async move {
             loop {
@@ -53,10 +56,21 @@ impl TcpClient {
                 };
             }
         });
-        Ok(Self { tcpcan, timebase : network_description.timebase})
+        Ok(Self {
+            tcpcan,
+            timebase: network_description.timebase,
+        })
     }
 
     pub async fn send(&self, frame: NetworkFrame) -> std::io::Result<()> {
-        self.tcpcan.send(&TNetworkFrame::now(self.timebase, frame)).await
+        self.tcpcan
+            .send(&TNetworkFrame::now(self.timebase, frame))
+            .await
+    }
+
+    pub fn node_id(&self) -> u8 {
+        self.tcpcan
+            .connection_id()
+            .expect("Expected a connection_requested during handshake")
     }
 }

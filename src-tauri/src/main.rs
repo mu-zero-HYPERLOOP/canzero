@@ -1,8 +1,12 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 use canzero_cli::run_cli;
+use nix::libc::exit;
 use tauri::Manager;
 
-use crate::{commands::{connection_status, network_information, object_entry_commands}, state::startup::StartupState};
+use crate::{
+    commands::{connection_status, network_information, object_entry_commands},
+    state::startup::StartupState,
+};
 
 mod cnl;
 mod commands;
@@ -11,28 +15,34 @@ mod state;
 
 #[tokio::main(flavor = "multi_thread", worker_threads = 4)]
 async fn main() {
-
     let _ = fix_path_env::fix();
     tauri::async_runtime::set(tokio::runtime::Handle::current());
-
-    if !run_cli().await {
-        return;
-    }
 
     // setup tauri
     tauri::Builder::default()
         .setup(|app| {
-            app.app_handle().manage(StartupState::new());
-            tauri::WindowBuilder::new(
-                app,
-                "startup",
-                tauri::WindowUrl::App("startup.html".into()),
-            ).center()
-            .title("CANzero-Startup")
-            .decorations(false)
-            .resizable(false)
-            .inner_size(960f64, 540f64)
-            .build()?;
+            let handle = app.handle();
+            tokio::spawn(async move {
+                let armv7_binary = handle
+                    .path_resolver()
+                    .resolve_resource("xcompl/canzero-cli-armv7-unknown-linux-gnueabihf")
+                    .unwrap();
+                if !run_cli(Some(armv7_binary)).await {
+                    unsafe { exit(0) };
+                }
+                handle.manage(StartupState::new());
+                tauri::WindowBuilder::new(
+                    &handle,
+                    "startup",
+                    tauri::WindowUrl::App("startup.html".into()),
+                )
+                .center()
+                .title("CANzero-Startup")
+                .decorations(false)
+                .resizable(false)
+                .inner_size(960f64, 540f64)
+                .build().unwrap();
+            });
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -50,6 +60,8 @@ async fn main() {
             object_entry_commands::unlisten_from_history_of_object_entry,
             object_entry_commands::request_object_entry_value,
             object_entry_commands::set_object_entry_value,
+            object_entry_commands::get_floating_window_info,
+            object_entry_commands::open_floating_object_entry_window,
             connection_status::get_connection_status,
             connection_status::heartbeat,
             connection_status::restart,

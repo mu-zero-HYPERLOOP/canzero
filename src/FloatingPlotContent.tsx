@@ -1,37 +1,49 @@
-import { useEffect, useState } from "react";
-import { ObjectEntryInformation } from "../types/ObjectEntryInformation.ts";
+import { Paper, Skeleton, Stack, Typography, useTheme } from "@mui/material";
 import { invoke } from "@tauri-apps/api";
-import {
-  Paper,
-  Skeleton,
-  Stack,
-  Typography,
-  useTheme
-} from "@mui/material";
-import { NodeInformation } from "../../nodes/types/NodeInformation.ts";
-import RefreshButton from "./RefreshButton.tsx";
-import ObjectEntryGraph from "../graph/ObjectEntryGraph.tsx";
-import SetValueButton from "./SetValueButton.tsx";
-import InterpolationModeButton from "./InterpolationModeButton.tsx";
-import { GraphInterpolation } from "../../graph/GraphInterpolation.tsx";
-import GraphBufferingButton from "./GraphBufferingButton.tsx";
-import { useNavigate } from "react-router-dom";
-import OpenButton from "./OpenButton.tsx";
+import { useEffect, useState } from "react";
+import { NodeInformation } from "./nodes/types/NodeInformation";
+import { ObjectEntryInformation } from "./object_entry/types/ObjectEntryInformation";
+import { GraphInterpolation } from "./graph/GraphInterpolation";
+import RefreshButton from "./object_entry/panel/RefreshButton";
+import SetValueButton from "./object_entry/panel/SetValueButton";
+import InterpolationModeButton from "./object_entry/panel/InterpolationModeButton";
+import GraphBufferingButton from "./object_entry/panel/GraphBufferingButton";
+import ObjectEntryGraph from "./object_entry/graph/ObjectEntryGraph";
 
-interface ObjectEntryPanelProps {
+
+function FloatingPlotContent() {
+  const [node, setNode] = useState<NodeInformation>();
+  const [objectEntryName, setObjectEntryName] = useState<string>();
+
+  useEffect(() => {
+    invoke<[string, string]>("get_floating_window_info").then(([nodeName, objectEntryName]) => {
+      invoke<NodeInformation>("node_information", { nodeName }).then(setNode).catch(console.error);
+      setObjectEntryName(objectEntryName as any);
+    }).catch(console.error);
+  }, []);
+
+  if (node === undefined || objectEntryName === undefined) {
+    return <Skeleton />
+  } else {
+    return <FloatingObjectEntryPanel node={node} name={objectEntryName} />
+  }
+}
+
+
+
+interface FloatingObjectEntryPanelProps {
   node: NodeInformation,
   name: string,
 }
 
-function ObjectEntryPanel({ node, name }: Readonly<ObjectEntryPanelProps>) {
+function FloatingObjectEntryPanel({ node, name }: Readonly<FloatingObjectEntryPanelProps>) {
 
   const [information, setInformation] = useState<ObjectEntryInformation | null>(null);
 
   const [interpolationMode, setInterpolationMode] = useState<GraphInterpolation>(GraphInterpolation.Step);
   const [buffering, setBuffering] = useState<boolean>(true);
-  
+
   const theme = useTheme();
-  const nav = useNavigate();
 
   useEffect(() => {
     async function fetchInformation() {
@@ -54,7 +66,7 @@ function ObjectEntryPanel({ node, name }: Readonly<ObjectEntryPanelProps>) {
     paddingRight: "12px",
     paddingTop: "45px",
     paddingBottom: "20px",
-    width: "calc(100% - 16px)",
+    width: "calc(100% - 40px)",
     position: "relative"
   }}>
     <Stack component="div" sx={{
@@ -66,9 +78,8 @@ function ObjectEntryPanel({ node, name }: Readonly<ObjectEntryPanelProps>) {
       <Typography
         sx={{
           "&:hover": { color: theme.palette.info.main, textDecoration: "underline" }
-        }} 
+        }}
         variant="h5"
-        onClick={()=>nav(`/${node.name}`)}
       >{node.name}
       </Typography>
       <Typography sx={{
@@ -95,29 +106,20 @@ function ObjectEntryPanel({ node, name }: Readonly<ObjectEntryPanelProps>) {
               left: "calc(100% - 50px)",
             }}
           />
-          <OpenButton
-            nodeName={node.name}
-            objectEntryName={information.name}
-            sx={{
-              position: "absolute",
-              top: "7px",
-              left: "calc(100% - 90px)",
-            }}
-          />
           <SetValueButton
             nodeName={node.name}
             objectEntryInfo={information}
             sx={{
               position: "absolute",
               top: "7px",
-              left: "calc(100% - 130px)",
+              left: "calc(100% - 90px)",
             }}
           />
           <InterpolationModeButton
             sx={{
               position: "absolute",
               top: "7px",
-              left: "calc(100% - 170px)",
+              left: "calc(100% - 130px)",
             }}
             mode={interpolationMode}
             onClick={() => {
@@ -137,7 +139,7 @@ function ObjectEntryPanel({ node, name }: Readonly<ObjectEntryPanelProps>) {
             sx={{
               position: "absolute",
               top: "7px",
-              left: "calc(100% - 210px)",
+              left: "calc(100% - 170px)",
             }}
             buffer={buffering}
             onClick={() => {
@@ -158,5 +160,5 @@ function ObjectEntryPanel({ node, name }: Readonly<ObjectEntryPanelProps>) {
 }
 
 
-export default ObjectEntryPanel;
 
+export default FloatingPlotContent;

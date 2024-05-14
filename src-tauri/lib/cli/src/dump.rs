@@ -2,6 +2,7 @@ use std::{net::SocketAddr, time::Duration};
 
 use canzero_appdata::AppData;
 use canzero_config::config::MessageId;
+use canzero_tcp::tcpcan::ConnectionId;
 use canzero_udp::{frame::NetworkDescription, scanner::UdpNetworkScanner};
 use color_print::cprintln;
 
@@ -38,7 +39,7 @@ pub async fn command_dump(filter_msg_names: Vec<String>, filter_ids: Vec<String>
         network.service_port
     );
 
-    let tcpcan = canzero_tcp::tcpcan::TcpCan::new(connection);
+    let tcpcan = canzero_tcp::tcpcan::TcpCan::new(connection, ConnectionId::None).await;
 
     loop {
         let Some(frame) = tcpcan.recv().await else {

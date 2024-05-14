@@ -1,6 +1,5 @@
-use std::{net::SocketAddr, sync::Arc};
 
-use canzero_udp::scanner::UdpNetworkScanner;
+use canzero_tcp::tcpcan::ConnectionId;
 
 use crate::errors::Result;
 
@@ -8,34 +7,41 @@ pub async fn command_client() -> Result<()> {
     if cfg!(feature = "socket-can") {
         #[cfg(feature = "socket-can")]
         {
-            let scanner = UdpNetworkScanner::create().await?;
+            let scanner = canzero_udp::scanner::UdpNetworkScanner::create().await?;
             scanner.start();
             let connection = scanner.next().await?;
             drop(scanner);
 
-            let socketcan = Arc::new(canzero_socketcan::socket_can::SocketCan::connect().await?);
+            let socketcan = std::sync::Arc::new(canzero_socketcan::socket_can::SocketCan::connect().await?);
 
-            let tcpcan = Arc::new(
-                canzero_tcp::tcpcan::TcpCan::connect(SocketAddr::new(
+            let tcpcan = std::sync::Arc::new(
+                canzero_tcp::tcpcan::TcpCan::connect(std::net::SocketAddr::new(
                     connection.server_addr,
                     connection.service_port,
-                ))
+                ), ConnectionId::None)
                 .await?,
             );
+            color_print::cprintln!("<green>Established connection to {} at {}:{}</green>", connection.server_name, connection.server_addr, connection.service_port);
 
             let socketcan_rx = socketcan.clone();
             let tcpcan_tx = tcpcan.clone();
-            tokio::spawn(async move {
+            let abort_handle = tokio::spawn(async move {
                 loop {
                     let frame = socketcan_rx.recv().await.unwrap();
-                    tcpcan_tx.send(&frame).await.unwrap();
+                    let Ok(_) = tcpcan_tx.send(&frame).await else {
+                        break;
+                    };
                 }
-            });
+            }).abort_handle();
 
             loop {
-                let frame = tcpcan.recv().await.unwrap();
+                let Some(frame) = tcpcan.recv().await else {
+                    break;
+                };
                 socketcan.send(&frame).await.unwrap();
             }
+            abort_handle.abort();
+            color_print::cprintln!("<red>Connection closed</red>");
         }
     } else {
         eprintln!("client command not avaiable. client only avaiable if compiled with the socket-can feature");

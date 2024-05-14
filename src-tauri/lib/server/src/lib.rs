@@ -4,7 +4,7 @@ use std::{
 };
 
 use canzero_config::config::NetworkRef;
-use canzero_tcp::tcpcan::TcpCan;
+use canzero_tcp::tcpcan::{ConnectionId, ConnectionIdHost, TcpCan};
 use canzero_udp::beacon::UdpNetworkBeacon;
 use color_print::cprintln;
 use tokio::{net::TcpListener, task::AbortHandle};
@@ -19,19 +19,27 @@ pub struct Server {
     welcome: Arc<TcpListener>,
     tcp_service_port: u16,
     task_handle: Arc<Mutex<Option<AbortHandle>>>,
-    config : NetworkRef,
+    config: NetworkRef,
+    id_host : Arc<ConnectionIdHost>,
 }
 
 impl Server {
-    pub async fn create(config : NetworkRef) -> std::io::Result<Self> {
+    pub async fn create(config: NetworkRef) -> std::io::Result<Self> {
         let timebase = Instant::now();
+
+        let id_host = ConnectionIdHost::new((config.nodes().len() + 16) as u8);
+        for n in config.nodes() {
+            id_host.alloc_specific_id(n.id());
+        }
 
         let network = Network::new();
 
         #[cfg(feature = "socket-can")]
         {
             network
-                .start(NetworkNode::SocketCanNode(canzero_socketcan::socket_can::SocketCan::connect().await?))
+                .start(NetworkNode::SocketCanNode(
+                    canzero_socketcan::socket_can::SocketCan::connect().await?,
+                ))
                 .await
         }
 
@@ -46,6 +54,7 @@ impl Server {
             tcp_service_port,
             task_handle: Arc::new(Mutex::new(None)),
             config,
+            id_host : Arc::new(id_host),
         })
     }
 
@@ -63,6 +72,7 @@ impl Server {
                     self.welcome.clone(),
                     self.tcp_service_port,
                     self.config.clone(),
+                    self.id_host.clone()
                 ))
                 .abort_handle(),
             );
@@ -87,17 +97,20 @@ impl Server {
         timebase: Instant,
         welcome: Arc<TcpListener>,
         tcp_service_port: u16,
-        config : NetworkRef
+        config: NetworkRef,
+        id_host: Arc<ConnectionIdHost>,
     ) {
         async fn pserver_task(
             network: &Network,
             timebase: Instant,
             welcome: &TcpListener,
             tcp_service_port: u16,
-            config : NetworkRef,
+            config: NetworkRef,
+            id_host: Arc<ConnectionIdHost>,
         ) -> std::io::Result<()> {
             let server_name = format!("{}@{}", whoami::devicename(), whoami::username());
-            let beacon = UdpNetworkBeacon::create(tcp_service_port, timebase, &server_name, config).await?;
+            let beacon =
+                UdpNetworkBeacon::create(tcp_service_port, timebase, &server_name, config).await?;
             beacon.start();
             cprintln!("<green>Successfully started UDP Beacon</green>");
 
@@ -105,12 +118,23 @@ impl Server {
                 let (stream, addr) = welcome.accept().await.unwrap();
                 println!("\u{1b}[32mConnection from {addr:?}\u{1b}[0m");
                 network
-                    .start(NetworkNode::TcpCanNode(TcpCan::new(stream)))
+                    .start(NetworkNode::TcpCanNode(TcpCan::new(
+                        stream,
+                        ConnectionId::Host(id_host.clone()),
+                    ).await))
                     .await;
             }
         }
         loop {
-            let Err(err) = pserver_task(&network, timebase, &welcome, tcp_service_port, config.clone()).await
+            let Err(err) = pserver_task(
+                &network,
+                timebase,
+                &welcome,
+                tcp_service_port,
+                config.clone(),
+                id_host.clone(),
+            )
+            .await
             else {
                 continue;
             };

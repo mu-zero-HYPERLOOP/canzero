@@ -77,6 +77,7 @@ pub struct CanFrame {
     data: u64,
 }
 
+#[repr(u32)]
 enum CanFrameIdFlags {
     IdeMask = 0x80000000,
     RtrMask = 0x40000000,

@@ -1,8 +1,10 @@
 use std::time::Duration;
 
 use serde::Serialize;
+use tauri::Manager;
 
-use crate::cnl::frame::{Value, Attribute};
+use crate::cnl::frame::{Attribute, Value};
+use crate::cnl::network::object_entry_object::info::ObjectEntryInformation;
 use crate::cnl::network::object_entry_object::latest::event::OwnedObjectEntryEvent;
 use crate::state::cnl_state::CNLState;
 
@@ -10,6 +12,8 @@ use canzero_config::config;
 use canzero_config::config::{SignalType, Type};
 
 use serde_json;
+
+use super::network_information::NodeInformation;
 
 #[tauri::command]
 pub async fn set_object_entry_value(
@@ -37,15 +41,15 @@ pub async fn set_object_entry_value(
         Err(_) => return Err(()),
     };
 
-
     fn parse_value(oe_type: &config::TypeRef, json_value: &serde_json::Value) -> Result<Value, ()> {
         match oe_type.as_ref() {
             Type::Primitive(SignalType::SignedInt { size }) => {
                 if let Some(val) = json_value.as_i64() {
                     let max_uvalue = u64::MAX.overflowing_shr(64 - *size as u32).0;
                     let max_ivalue: i64 = (max_uvalue.overflowing_shr(1).0) as i64;
-                    let min_ivalue: i64 =
-                        unsafe { std::mem::transmute(u64::MAX.overflowing_shl(*size as u32 - 1).0) };
+                    let min_ivalue: i64 = unsafe {
+                        std::mem::transmute(u64::MAX.overflowing_shl(*size as u32 - 1).0)
+                    };
                     if val <= max_ivalue && val >= min_ivalue {
                         Ok(Value::SignedValue(val))
                     } else {
@@ -138,7 +142,6 @@ pub async fn set_object_entry_value(
         Err(_) => return Err(()),
     };
 
-
     object_entry_object.set_request(value).await;
 
     Ok(())
@@ -174,7 +177,10 @@ pub async fn listen_to_latest_object_entry_value(
 
     let x = ObjectEntryListenLatestResponse {
         event_name: object_entry_object.latest_event_name().to_owned(),
-        latest: object_entry_object.latest_event().await.map(|x| x.to_owned()),
+        latest: object_entry_object
+            .latest_event()
+            .await
+            .map(|x| x.to_owned()),
     };
 
     Ok(x)
@@ -226,7 +232,6 @@ pub async fn listen_to_history_of_object_entry(
 
     let cnl = state.lock().await;
 
-
     let Some(node) = cnl.nodes().iter().find(|no| no.name() == &node_name) else {
         eprintln!("error during listen_to_history_of_object_entry");
         return Err(());
@@ -246,7 +251,7 @@ pub async fn listen_to_history_of_object_entry(
     let x = ObjectEntryListenHistoryResponse {
         event_name,
         history,
-        now : object_entry_object.now().as_millis() as u64,
+        now: object_entry_object.now().as_millis() as u64,
     };
 
     Ok(x)
@@ -301,4 +306,37 @@ pub async fn request_object_entry_value(
     object_entry.request_current_value().await;
 
     Ok(())
+}
+
+#[tauri::command]
+pub fn get_floating_window_info(window: tauri::Window) -> (String, String) {
+    let split : Vec<&str> = window.label().split("-").collect();
+    let node_name = split.get(1).unwrap();
+    let object_entry_name = split.get(2).unwrap();
+    return ((*node_name).to_owned(), (*object_entry_name).to_owned());
+}
+
+#[tauri::command]
+pub fn open_floating_object_entry_window(
+    app_handle: tauri::AppHandle,
+    node_name: String,
+    object_entry_name: String,
+) {
+    let label = format!("plot-{node_name}-{object_entry_name}");
+    let None = app_handle.get_window(&label) else {
+        return;
+    };
+
+    tauri::WindowBuilder::new(
+        &app_handle,
+        label,
+        tauri::WindowUrl::App("plot.html".into()),
+    )
+    .center()
+    .title(format!("CANzero {node_name}::{object_entry_name}"))
+    .inner_size(1200f64, 525f64)
+    .resizable(true)
+    .visible(true)
+    .build()
+    .unwrap();
 }
