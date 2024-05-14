@@ -10,7 +10,6 @@ use tokio::net::UdpSocket;
 use crate::frame::{NetworkDescriptionFrame, UdpFrame};
 
 use crate::service_id::{BROADCAST_PORT, SERVICE_NAME};
-const MAX_REFLECTOR_FRAME_SIZE: usize = 1024;
 
 pub struct UdpNetworkBeacon {
     beacon_name: String,
@@ -89,9 +88,9 @@ impl UdpNetworkBeacon {
     ) {
         loop {
             loop {
-                let mut rx_buffer = [0; MAX_REFLECTOR_FRAME_SIZE];
+                let mut rx_buffer = [0; 216];
                 println!("\u{1b}[34mUDP-Reflector: listening\u{1b}[0m");
-                let (number_of_bytes, source_addr) = socket
+                let (_, source_addr) = socket
                     .recv_from(&mut rx_buffer)
                     .await
                     .expect("Failed to receive from UDP socket");
@@ -101,8 +100,7 @@ impl UdpNetworkBeacon {
                 let server_name = beacon_name.to_owned();
                 let socket = socket.clone();
                 tokio::spawn(async move {
-                    let Ok(frame) =
-                        bincode::deserialize::<UdpFrame>(&rx_buffer[0..number_of_bytes])
+                    let Ok(frame) = UdpFrame::from_bin(&rx_buffer)
                     else {
                         println!(
                             "\u{1b}[34mUDP-Discover: Received ill formed frame [ignored]\u{1b}[0m"
@@ -125,9 +123,9 @@ impl UdpNetworkBeacon {
                         server_name,
                     };
                     println!("\u{1b}[34mUDP-Reflector: responding to {source_addr}\u{1b}[33m");
-                    let ndf = bincode::serialize(&UdpFrame::NDF(ndf))
-                        .expect("Failed to serialize NDF frame");
-                    let Ok(_) = socket.send_to(&ndf, &source_addr).await else {
+                    let mut ndf_buf = [0;216];
+                    UdpFrame::NDF(ndf).into_bin(&mut ndf_buf);
+                    let Ok(_) = socket.send_to(&ndf_buf, &source_addr).await else {
                         println!(
                             "\u{1b}[34mUDP-Reflector: Failed to respond {source_addr}\u{1b}[33m"
                         );

@@ -37,7 +37,7 @@ async fn main() {
                 )
                 .center()
                 .title("CANzero-Startup")
-                .decorations(false)
+                .decorations(true)
                 .resizable(false)
                 .inner_size(960f64, 540f64)
                 .build().unwrap();
