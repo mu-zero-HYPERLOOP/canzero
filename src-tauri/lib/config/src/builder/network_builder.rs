@@ -492,6 +492,8 @@ impl NetworkBuilder {
         heartbeat_message.set_any_std_id(MessagePriority::SuperLow);
         let heartbeat_message_format = heartbeat_message.make_type_format();
         heartbeat_message_format.add_type("node_id", "node_id");
+        heartbeat_message_format.add_type("u1", "unregister");
+        heartbeat_message_format.add_type("u7", "ticks_next");
         for node_builder in self.0.borrow().nodes.borrow().iter() {
             node_builder.add_tx_message(&heartbeat_message);
             node_builder.add_rx_message(&heartbeat_message);
