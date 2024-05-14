@@ -5,7 +5,6 @@ use crate::messages::signal_type_to_c_type;
 use crate::options::Options;
 
 pub fn generate_types(
-    network_config: &config::NetworkRef,
     node_config: &config::NodeRef,
     header: &mut String,
     options: &Options,
