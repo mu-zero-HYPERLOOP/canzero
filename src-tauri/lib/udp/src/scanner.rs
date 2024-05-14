@@ -97,12 +97,13 @@ impl UdpNetworkScanner {
         let mut discovered_networks: HashSet<SocketAddr> = HashSet::new();
         loop {
             interval.tick().await;
-            let Ok(_) = socket.send_to(&hello_frame, &broadcast_addr).await else {
+            let Ok(bytes_send) = socket.send_to(&hello_frame, &broadcast_addr).await else {
                 cprintln!("<red>UdpNetworkScanner: Failed to send hello packet [retrying]</red>");
                 continue;
             };
+            assert_eq!(bytes_send, 216);
 
-            let Ok(Ok((_, udp_server_addr))) = tokio::time::timeout(
+            let Ok(Ok((received_bytes, udp_server_addr))) = tokio::time::timeout(
                 Duration::from_millis(1000),
                 socket.recv_from(&mut rx_buffer),
             )
@@ -110,6 +111,7 @@ impl UdpNetworkScanner {
             else {
                 continue;
             };
+            assert_eq!(received_bytes, 216);
 
             let local_timebase = Instant::now();
             let Ok(frame) = UdpFrame::from_bin(&rx_buffer) else {
