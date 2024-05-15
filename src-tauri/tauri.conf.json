@@ -2,7 +2,7 @@
   "build": {
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": {
-      "script": "cross build --manifest-path src-tauri/lib/cli/Cargo.toml --target=armv7-unknown-linux-gnueabihf --release --features socket-can && mkdir -p src-tauri/xcompl && rm -f src-tauri/xcompl/canzero-cli-armv7-unknown-linux-gnueabihf && mv -f src-tauri/lib/cli/target/armv7-unknown-linux-gnueabihf/release/canzero-cli src-tauri/xcompl/canzero-cli-armv7-unknown-linux-gnueabihf && npm run build",
+      "script": "npm run build",
       "wait": true
 
 
