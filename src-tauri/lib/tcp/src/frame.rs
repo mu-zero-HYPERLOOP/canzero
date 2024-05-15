@@ -28,7 +28,7 @@ impl ConnectionHandshakeFrame {
                 if *success {
                     buf[0] = 0x81;
                 }else {
-                    buf[0] = 0x00;
+                    buf[0] = 0x1;
                 }
                 buf[1] = *node_id;
             }
