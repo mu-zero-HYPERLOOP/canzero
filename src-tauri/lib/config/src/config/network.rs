@@ -15,7 +15,7 @@ pub struct Network {
     get_req_message : MessageRef,
     set_resp_message : MessageRef,
     set_req_message : MessageRef,
-    heartbeat_message : MessageRef,
+    heartbeat_messages : Vec<MessageRef>,
     buses : Vec<BusRef>,
 }
 
@@ -53,7 +53,7 @@ impl Network {
         get_resp_message : MessageRef,
         set_req_message : MessageRef,
         set_resp_message : MessageRef,
-        heartbeat_message : MessageRef,
+        heartbeat_messages : Vec<MessageRef>,
         buses : Vec<BusRef>,
     ) -> Network {
         Network {
@@ -65,7 +65,7 @@ impl Network {
             get_resp_message,
             set_req_message,
             set_resp_message,
-            heartbeat_message,
+            heartbeat_messages,
             buses
         }
     }
@@ -96,8 +96,8 @@ impl Network {
     pub fn set_req_message(&self) -> &MessageRef {
         &self.set_req_message
     }
-    pub fn heartbeat_message(&self) -> &MessageRef {
-        &self.heartbeat_message
+    pub fn heartbeat_messages(&self) -> &Vec<MessageRef> {
+        &self.heartbeat_messages
     }
     /// The control panel ids start at 0.
     /// returns the node_id associated with the control_panel.

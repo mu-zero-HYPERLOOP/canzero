@@ -478,25 +478,6 @@ impl NetworkBuilder {
     }
 
     pub fn build(self) -> errors::Result<NetworkRef> {
-        // Generate Heartbeat messages!
-        let enum_node_id = self.define_enum("node_id");
-        let mut node_id = 0;
-        for node_builder in self.0.borrow().nodes.borrow().iter() {
-            let node_name = node_builder.0.borrow().name.clone();
-            enum_node_id.add_entry(&node_name, Some(node_id))?;
-            node_id += 1;
-        }
-        enum_node_id.add_entry("count", Some(node_id))?;
-        let heartbeat_message = self.create_message("heartbeat", Some(Duration::from_millis(100)));
-        heartbeat_message.__assign_to_heartbeat();
-        heartbeat_message.set_any_std_id(MessagePriority::SuperLow);
-        let heartbeat_message_format = heartbeat_message.make_type_format();
-        heartbeat_message_format.add_type("node_id", "node_id");
-        for node_builder in self.0.borrow().nodes.borrow().iter() {
-            node_builder.add_tx_message(&heartbeat_message);
-            node_builder.add_rx_message(&heartbeat_message);
-        }
-
         if self.0.borrow().buses.borrow().is_empty() {
             // ensure that there is always at least one bus defined!
             self.create_bus("can0", None);
@@ -520,6 +501,36 @@ impl NetworkBuilder {
                 ))
             })
             .collect();
+
+        // Generate Heartbeat messages!
+        let enum_node_id = self.define_enum("node_id");
+        let mut node_id = 0;
+        for node_builder in self.0.borrow().nodes.borrow().iter() {
+            let node_name = node_builder.0.borrow().name.clone();
+            enum_node_id.add_entry(&node_name, Some(node_id))?;
+            node_id += 1;
+        }
+        enum_node_id.add_entry("count", Some(node_id))?;
+        drop(builder);
+
+        for bus in buses.iter() {
+            let heartbeat_message = self.create_message(
+                &format!("heartbeat_{}", bus.name()), 
+                Some(Duration::from_millis(100)));
+            heartbeat_message.assign_bus(bus.name());
+            heartbeat_message.__assign_to_heartbeat();
+            heartbeat_message.set_any_std_id(MessagePriority::SuperLow);
+            let heartbeat_message_format = heartbeat_message.make_type_format();
+            heartbeat_message_format.add_type("node_id", "node_id");
+            heartbeat_message_format.add_type("u1", "unregister");
+            heartbeat_message_format.add_type("u7", "ticks_next");
+            for node_builder in self.0.borrow().nodes.borrow().iter() {
+                node_builder.add_tx_message(&heartbeat_message);
+                node_builder.add_rx_message(&heartbeat_message);
+            }
+        }
+        let builder = self.0.borrow();
+
 
         // sort types in topological order!
         let type_builders = Self::topo_sort_type_builders(&builder.types.borrow())?;
@@ -767,6 +778,15 @@ impl NetworkBuilder {
             .unwrap()
             .clone();
         set_req_message.__set_usage(MessageUsage::SetReq);
+        let heartbeat_messages = messages
+            .iter()
+            .filter(|message| message.name().starts_with("heartbeat_"))
+            .cloned()
+            .collect::<Vec<config::MessageRef>>();
+        for heartbeat_msg in heartbeat_messages.iter() {
+            heartbeat_msg.__set_usage(MessageUsage::Heartbeat);
+        }
+
 
         pub fn rec_type_acc(node_types: &mut Vec<TypeRef>, encoding: &TypeSignalEncoding) {
             match encoding {
@@ -1182,12 +1202,6 @@ impl NetworkBuilder {
             }
         }
 
-        let heartbeat_message = messages
-            .iter()
-            .find(|message| message.name() == "heartbeat")
-            .expect("heartbeat message was not defined")
-            .clone();
-
         #[cfg(feature = "logging_info")]
         println!("[CANZERO-CONFIG::build] Successfully build configuration");
         let network_ref = make_config_ref(Network::new(
@@ -1199,7 +1213,7 @@ impl NetworkBuilder {
             get_resp_message,
             set_req_message,
             set_resp_message,
-            heartbeat_message,
+            heartbeat_messages,
             buses,
         ));
 

@@ -1,12 +1,15 @@
 use canzero_config::config;
 
-use crate::options::Options;
 use crate::errors::Result;
+use crate::options::Options;
 
-
-
-
-pub fn generate_scheduler(network_config : &config::NetworkRef, node_config : &config::NodeRef,  source : &mut String, _header :&mut String, options: &Options) -> Result<()>{
+pub fn generate_scheduler(
+    network_config: &config::NetworkRef,
+    node_config: &config::NodeRef,
+    source: &mut String,
+    _header: &mut String,
+    options: &Options,
+) -> Result<()> {
     let namespace = options.namespace();
     let mut indent = String::new();
     for _ in 0..options.indent() {
@@ -23,10 +26,12 @@ pub fn generate_scheduler(network_config : &config::NetworkRef, node_config : &c
     for bus in network_config.buses() {
         let bus_name = bus.name();
         let bus_id = bus.id();
-        command_resp_send_on_bus_cases.push_str(&format!("{indent3}case {bus_id}:
+        command_resp_send_on_bus_cases.push_str(&format!(
+            "{indent3}case {bus_id}:
 {indent4}{namespace}_{bus_name}_send(&command_error_frame);
 {indent4}break;
-"));
+"
+        ));
     }
 
     let mut stream_case_logic = String::new();
@@ -44,9 +49,9 @@ pub fn generate_scheduler(network_config : &config::NetworkRef, node_config : &c
         let stream_name = tx_stream.name();
         let stream_max_interval = tx_stream.max_interval().as_millis() as u32;
         let stream_min_interval = tx_stream.min_interval().as_millis() as u32;
-    
+
         schedule_stream_job_def.push_str(&format!(
-"static job_t {stream_name}_interval_job;
+            "static job_t {stream_name}_interval_job;
 static const uint32_t {stream_name}_interval = {stream_min_interval};
 static void schedule_{stream_name}_interval_job(){{
 {indent}uint32_t time = {namespace}_get_time();
@@ -56,11 +61,19 @@ static void schedule_{stream_name}_interval_job(){{
 {indent}{stream_name}_interval_job.job.stream_job.last_schedule = time;
 {indent}scheduler_schedule(&{stream_name}_interval_job);
 }}
-"));
+"
+        ));
 
         let mut write_attribs_logic = String::new();
         let mut first = true;
-        for (mapping, encoding) in std::iter::zip(tx_stream.mapping(), tx_stream.message().encoding().expect("stream messages are expected to define a encoding").attributes()) { 
+        for (mapping, encoding) in std::iter::zip(
+            tx_stream.mapping(),
+            tx_stream
+                .message()
+                .encoding()
+                .expect("stream messages are expected to define a encoding")
+                .attributes(),
+        ) {
             if !first {
                 write_attribs_logic.push_str("\n");
             }
@@ -70,7 +83,9 @@ static void schedule_{stream_name}_interval_job(){{
                     let oe_name = object_entry.name();
                     let oe_var = format!("__oe_{oe_name}");
                     let msg_attrib = encoding.name();
-                    write_attribs_logic.push_str(&format!("{indent4}stream_message.m_{msg_attrib} = {oe_var};"));
+                    write_attribs_logic.push_str(&format!(
+                        "{indent4}stream_message.m_{msg_attrib} = {oe_var};"
+                    ));
                 }
                 None => panic!("tx_streams are expected to define a complete mapping"),
             }
@@ -91,13 +106,16 @@ static void schedule_{stream_name}_interval_job(){{
 {indent3}}}"));
         stream_id += 1;
     }
-        
-    let heartbeat_bus_name = network_config.heartbeat_message().bus().name();
-    let get_resp_bus_name = network_config.get_resp_message().bus().name();
-    source.push_str(&format!(
-"
-__attribute__((weak)) void {namespace}_wdg_timeout(uint8_t node_id) {{}}
 
+    let get_resp_bus_name = network_config.get_resp_message().bus().name();
+    for heartbeat in network_config.heartbeat_messages() {
+        source.push_str(&format!(
+            "__attribute__((weak)) void {namespace}_{0}_wdg_timeout(uint8_t node_id) {{}}\n",
+            heartbeat.bus().name()));
+    }
+
+    source.push_str(&format!(
+        "
 typedef enum {{
   HEARTBEAT_JOB_TAG = 0,
   HEARTBEAT_WDG_JOB_TAG = 1,
@@ -119,12 +137,21 @@ typedef struct {{
 }} stream_interval_job;
 
 #define MAX_DYN_HEARTBEATS 10
-typedef struct {{
-{indent}unsigned int static_wdg_armed[node_id_count];
-{indent}unsigned int static_tick_counters[node_id_count];
-{indent}unsigned int dynamic_wdg_armed[MAX_DYN_HEARTBEATS];
-{indent}unsigned int dynamic_tick_counters[MAX_DYN_HEARTBEATS];
-}} heartbeat_wdg_job_t;
+typedef struct {{"
+    ));
+    for heartbeat in network_config.heartbeat_messages() {
+        source.push_str(&format!(
+            "
+{indent}unsigned int {0}_static_wdg_armed[node_id_count];
+{indent}int {0}_static_tick_countdowns[node_id_count];
+{indent}unsigned int {0}_dynamic_wdg_armed[MAX_DYN_HEARTBEATS];
+{indent}int {0}_dynamic_tick_countdowns[MAX_DYN_HEARTBEATS];
+",
+            heartbeat.bus().name()
+        ));
+    }
+    source.push_str(&format!(
+"}} heartbeat_wdg_job_t;
 
 typedef struct {{
 {indent}uint32_t climax;
@@ -266,13 +293,30 @@ static void schedule_heartbeat_wdg_job() {{
 {indent}heartbeat_wdg_job.climax = canzero_get_time() + 100;
 {indent}heartbeat_wdg_job.tag = HEARTBEAT_WDG_JOB_TAG;
 {indent}for (unsigned int i = 0; i < node_id_count; ++i) {{
-{indent2}heartbeat_wdg_job.job.wdg_job.static_tick_counters[i] = 0;
-{indent2}heartbeat_wdg_job.job.wdg_job.static_wdg_armed[i] = 0;
-{indent}}}
+"));
+    for heartbeat in network_config.heartbeat_messages() {
+        source.push_str(&format!(
+"{indent2}heartbeat_wdg_job.job.wdg_job.{0}_static_tick_countdowns[i] = 4;
+{indent2}heartbeat_wdg_job.job.wdg_job.{0}_static_wdg_armed[i] = 0;
+",
+            heartbeat.bus().name()
+        ));
+    }
+    source.push_str(&format!(
+"{indent}}}
 {indent}for (unsigned int i = 0; i < MAX_DYN_HEARTBEATS; ++i) {{
-{indent2}heartbeat_wdg_job.job.wdg_job.dynamic_tick_counters[i] = 0;
-{indent2}heartbeat_wdg_job.job.wdg_job.dynamic_wdg_armed[i] = 0;
-{indent}}}
+"
+    ));
+    for heartbeat in network_config.heartbeat_messages() {
+        source.push_str(&format!(
+"{indent2}heartbeat_wdg_job.job.wdg_job.{0}_dynamic_tick_countdowns[i] = 4;
+{indent2}heartbeat_wdg_job.job.wdg_job.{0}_dynamic_wdg_armed[i] = 0;
+",
+            heartbeat.bus().name()
+        ));
+    }
+    source.push_str(&format!(
+"{indent}}}
 {indent}scheduler_schedule(&heartbeat_wdg_job);
 }}
 
@@ -298,34 +342,71 @@ static void schedule_jobs(uint32_t time) {{
 {indent3}case HEARTBEAT_JOB_TAG: {{
 {indent4}scheduler_reschedule(time + heartbeat_interval);
 {indent4}{namespace}_exit_critical();
-{indent4}{namespace}_message_heartbeat heartbeat;
-{indent4}heartbeat.m_node_id = node_id_{node_name};
 {indent4}{namespace}_frame heartbeat_frame;
-{indent4}{namespace}_serialize_{namespace}_message_heartbeat(&heartbeat, &heartbeat_frame);
-{indent4}{namespace}_{heartbeat_bus_name}_send(&heartbeat_frame);
-{indent4}break;
+"));
+    for heartbeat in network_config.heartbeat_messages() {
+        source.push_str(&format!(
+"{indent4}{namespace}_message_heartbeat_{0} heartbeat_{0};
+{indent4}heartbeat_{0}.m_node_id = node_id_{node_name};
+{indent4}heartbeat_{0}.m_unregister = 0;
+{indent4}heartbeat_{0}.m_ticks_next = 4;
+{indent4}{namespace}_serialize_{namespace}_message_heartbeat_{0}(&heartbeat_{0}, &heartbeat_frame);
+{indent4}{namespace}_{}_send(&heartbeat_frame);
+", 
+            heartbeat.bus().name()));
+    }
+    source.push_str(&format!(
+"{indent4}break;
 {indent3}}}
 {indent3}case HEARTBEAT_WDG_JOB_TAG: {{
 {indent4}scheduler_reschedule(time + heartbeat_wdg_tick_duration);
 {indent4}{namespace}_exit_critical();
 {indent4}for (unsigned int i = 0; i < node_id_count; ++i) {{
-{indent5}heartbeat_wdg_job.job.wdg_job.static_tick_counters[i] 
-{indent6}+= heartbeat_wdg_job.job.wdg_job.static_wdg_armed[i];
-{indent4}}}
+"));
+    for heartbeat in network_config.heartbeat_messages() {
+        source.push_str(&format!(
+"{indent5}heartbeat_wdg_job.job.wdg_job.{0}_static_tick_countdowns[i] 
+{indent6}-= heartbeat_wdg_job.job.wdg_job.{0}_static_wdg_armed[i];
+",
+            heartbeat.bus().name()));
+    }
+    source.push_str(&format!(
+"{indent4}}}
 {indent4}for (unsigned int i = 0; i < MAX_DYN_HEARTBEATS; ++i) {{
-{indent5}heartbeat_wdg_job.job.wdg_job.dynamic_tick_counters[i] 
-{indent6}+= heartbeat_wdg_job.job.wdg_job.dynamic_wdg_armed[i];
-{indent4}}}
+"));
+    for heartbeat in network_config.heartbeat_messages() {
+        source.push_str(&format!(
+"{indent5}heartbeat_wdg_job.job.wdg_job.{0}_dynamic_tick_countdowns[i] 
+{indent6}-= heartbeat_wdg_job.job.wdg_job.{0}_dynamic_wdg_armed[i];
+", 
+            heartbeat.bus().name()));
+    }
+    source.push_str(&format!(
+"{indent4}}}
 {indent4}for (unsigned int i = 0; i < node_id_count; ++i) {{
-{indent5}if (heartbeat_wdg_job.job.wdg_job.static_tick_counters[i] >= 4) {{
-{indent6}{namespace}_wdg_timeout(i);
+"));
+    for heartbeat in network_config.heartbeat_messages() {
+        source.push_str(&format!(
+"{indent5}if (heartbeat_wdg_job.job.wdg_job.{0}_static_tick_countdowns[i] <= 0) {{
+{indent6}{namespace}_{0}_wdg_timeout(i);
 {indent5}}}
-{indent4}}}
+",
+            heartbeat.bus().name()));
+    }
+    source.push_str(&format!(
+"{indent4}}}
 {indent4}for (unsigned int i = 0; i < MAX_DYN_HEARTBEATS; ++i) {{
-{indent5}if (heartbeat_wdg_job.job.wdg_job.dynamic_tick_counters[i] >= 4) {{
-{indent6}{namespace}_wdg_timeout(node_id_count + i);
+"));
+    for heartbeat in network_config.heartbeat_messages() {
+        source.push_str(&format!(
+"{indent5}if (heartbeat_wdg_job.job.wdg_job.{0}_dynamic_tick_countdowns[i] <= 0) {{
+{indent6}{namespace}_{0}_wdg_timeout(node_id_count + i);
 {indent5}}}
-{indent4}}}
+",
+            heartbeat.bus().name()));
+    }
+    source.push_str(&format!(
+"{indent4}}}
 {indent4}break;
 {indent3}}}
 {indent3}case GET_RESP_FRAGMENTATION_JOB_TAG: {{
@@ -348,7 +429,7 @@ static void schedule_jobs(uint32_t time) {{
 {indent4}{namespace}_exit_critical();
 {indent4}canzero_frame fragmentation_frame;
 {indent4}{namespace}_serialize_{namespace}_message_get_resp(&fragmentation_response, &fragmentation_frame);
-{indent4}canzero_{get_resp_bus_name}_send(&fragmentation_frame);
+{indent4}{namespace}_{get_resp_bus_name}_send(&fragmentation_frame);
 {indent4}break;
 {indent3}}}
 {indent3}default: {{

@@ -54,7 +54,7 @@ pub fn generate(
 
     generate_header_guard_top(&mut header)?;
     generate_includes(&mut src, &mut header, &options)?;
-    generate_types(&network_config, node_config, &mut header, &options)?;
+    generate_types(node_config, &mut header, &options)?;
     generate_pil(&mut src, &mut header, &options)?;
     generate_hooks(network_config.buses(), &mut src, &mut header, &options)?;
     generate_command_hooks(node_config.commands(), &mut src, &mut header, &options)?;
