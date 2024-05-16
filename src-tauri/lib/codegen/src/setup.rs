@@ -101,6 +101,7 @@ pub fn generate_setup(node_config : &config::NodeRef, network_config : &config::
 {indent}job_pool_allocator_init();
 {indent}scheduler.size = 0;
 {indent}schedule_heartbeat_job();
+{indent}schedule_heartbeat_wdg_job();
 {schedule_stream_jobs_logic}
 }}\n");
     source.push_str(&init_def);

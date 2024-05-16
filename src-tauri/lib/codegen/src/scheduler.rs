@@ -143,9 +143,9 @@ typedef struct {{"
         source.push_str(&format!(
             "
 {indent}unsigned int {0}_static_wdg_armed[node_id_count];
-{indent}unsigned int {0}_static_tick_countdowns[node_id_count];
+{indent}int {0}_static_tick_countdowns[node_id_count];
 {indent}unsigned int {0}_dynamic_wdg_armed[MAX_DYN_HEARTBEATS];
-{indent}unsigned int {0}_dynamic_tick_countdowns[MAX_DYN_HEARTBEATS];
+{indent}int {0}_dynamic_tick_countdowns[MAX_DYN_HEARTBEATS];
 ",
             heartbeat.bus().name()
         ));
@@ -387,7 +387,7 @@ static void schedule_jobs(uint32_t time) {{
 "));
     for heartbeat in network_config.heartbeat_messages() {
         source.push_str(&format!(
-"{indent5}if (heartbeat_wdg_job.job.wdg_job.{0}_static_tick_countdowns[i] == 0) {{
+"{indent5}if (heartbeat_wdg_job.job.wdg_job.{0}_static_tick_countdowns[i] <= 0) {{
 {indent6}{namespace}_{0}_wdg_timeout(i);
 {indent5}}}
 ",
@@ -399,7 +399,7 @@ static void schedule_jobs(uint32_t time) {{
 "));
     for heartbeat in network_config.heartbeat_messages() {
         source.push_str(&format!(
-"{indent5}if (heartbeat_wdg_job.job.wdg_job.{0}_dynamic_tick_countdowns[i] == 0) {{
+"{indent5}if (heartbeat_wdg_job.job.wdg_job.{0}_dynamic_tick_countdowns[i] <= 0) {{
 {indent6}{namespace}_{0}_wdg_timeout(node_id_count + i);
 {indent5}}}
 ",

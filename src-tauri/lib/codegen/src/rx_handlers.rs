@@ -815,21 +815,39 @@ pub fn generate_rx_handlers(
                 (logic, false)
             },
             message::MessageUsage::Heartbeat => {
-                let logic = format!(
+                let mut logic = String::new();
+                logic.push_str(&format!(
 "
 {indent}if (msg.m_node_id < node_id_count) {{
-{indent2}heartbeat_wdg_job.job.wdg_job.{0}_static_wdg_armed[msg.m_node_id] 
+"
+                ));
+                for heartbeat in network_config.heartbeat_messages() {
+                    logic.push_str(&format!(
+"{indent2}heartbeat_wdg_job.job.wdg_job.{0}_static_wdg_armed[msg.m_node_id] 
 {indent3}= (~msg.m_unregister) & 0b1;
-{indent2}heartbeat_wdg_job.job.wdg_job.{0}_static_tick_countdowns[msg.m_node_id] = msg.m_ticks_next;
+",
+                        heartbeat.bus().name()));
+                }
+                logic.push_str(&format!(
+"{indent2}heartbeat_wdg_job.job.wdg_job.{0}_static_tick_countdowns[msg.m_node_id] = msg.m_ticks_next;
 {indent}}} else {{
-{indent2}heartbeat_wdg_job.job.wdg_job.{0}_dynamic_wdg_armed[msg.m_node_id - node_id_count] 
+",
+                    message.bus().name()
+                ));
+                for heartbeat in network_config.heartbeat_messages() {
+                    logic.push_str(&format!(
+"{indent2}heartbeat_wdg_job.job.wdg_job.{0}_dynamic_wdg_armed[msg.m_node_id - node_id_count] 
 {indent3}= (~msg.m_unregister) & 0b1;
-{indent2}heartbeat_wdg_job.job.wdg_job.{0}_dynamic_tick_countdowns[msg.m_node_id - node_id_count]
+",
+                        heartbeat.bus().name()));
+                }
+                logic.push_str(&format!(
+"{indent2}heartbeat_wdg_job.job.wdg_job.{0}_dynamic_tick_countdowns[msg.m_node_id - node_id_count]
 {indent3}= msg.m_ticks_next;
 {indent}}}
 ",
                     message.bus().name()
-                );
+                ));
                 (logic, false)
             },
             message::MessageUsage::External { interval: _ } => ("".to_owned(), true),
