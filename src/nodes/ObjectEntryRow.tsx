@@ -4,10 +4,10 @@ import ObjectEntryValueCell from "./ObjectEntryValueCell";
 import SetValueButton from "../object_entry/panel/SetValueButton";
 import RefreshButton from "../object_entry/panel/RefreshButton";
 import ObjectEntryButtonLink from "../object_entry/links/ObjectEntryButtonLink";
-import ExportButton from "../object_entry/panel/ExportButton";
 import { useEffect, useState } from "react";
 import { ObjectEntryInformation } from "../object_entry/types/ObjectEntryInformation";
 import { invoke } from "@tauri-apps/api";
+import OpenButton from "../object_entry/panel/OpenButton";
 
 
 interface ObjectEntryRowProps {
@@ -22,7 +22,7 @@ interface ObjectEntryAttribRowProps {
   value: Value,
 }
 
-function ObjectEntryAttribRow({ name, value }: ObjectEntryAttribRowProps) {
+function ObjectEntryAttribRow({ name, value }: Readonly<ObjectEntryAttribRowProps>) {
   if (typeof value === "object") {
     return Object.entries(value).map(([attrib_name, attrib_value]) => {
       return <ObjectEntryAttribRow name={`${name}.${attrib_name}`} value={attrib_value} />
@@ -85,7 +85,7 @@ function ObjectEntryRow({ nodeName, objectEntryName, value }: ObjectEntryRowProp
             <SetValueButton nodeName={nodeName} objectEntryName={objectEntryName} />
             <RefreshButton nodeName={nodeName} objectEntryName={objectEntryName} />
             <ObjectEntryButtonLink nodeName={nodeName} objectEntryName={objectEntryName} disabled={info == undefined ? true : !info.plottable} />
-            <ExportButton nodeName={nodeName} objectEntryName={objectEntryName} />
+            <OpenButton nodeName={nodeName} objectEntryName={objectEntryName} />
           </Stack>
         </TableCell>
       </TableRow >
@@ -121,7 +121,7 @@ function ObjectEntryRow({ nodeName, objectEntryName, value }: ObjectEntryRowProp
             <SetValueButton nodeName={nodeName} objectEntryName={objectEntryName} />
             <RefreshButton nodeName={nodeName} objectEntryName={objectEntryName} />
             <ObjectEntryButtonLink nodeName={nodeName} objectEntryName={objectEntryName} disabled={info == undefined ? true : !info.plottable} />
-            <ExportButton nodeName={nodeName} objectEntryName={objectEntryName} />
+            <OpenButton nodeName={nodeName} objectEntryName={objectEntryName} />
           </Stack>
         </TableCell>
       </TableRow>);

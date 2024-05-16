@@ -1,6 +1,7 @@
 use std::{time::Instant, sync::Arc};
 
 use canzero_config::config::bus::BusRef;
+use canzero_socketcan::can_socket::CanSocket;
 use tokio::{
     runtime::Handle,
     sync::{
@@ -9,8 +10,6 @@ use tokio::{
     },
 };
 use canzero_common::{TCanFrame, CanFrame, TCanError, Timestamped};
-
-use can_socketcan_platform_rs::CanSocket;
 
 use crate::notification::notify_error;
 

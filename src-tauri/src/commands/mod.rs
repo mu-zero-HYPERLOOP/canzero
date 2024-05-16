@@ -5,3 +5,4 @@ pub mod connection_status;
 pub mod node_commands;
 pub mod export;
 pub mod startup;
+pub mod settings;

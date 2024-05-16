@@ -11,12 +11,12 @@ import {
 import { NodeInformation } from "../../nodes/types/NodeInformation.ts";
 import RefreshButton from "./RefreshButton.tsx";
 import ObjectEntryGraph from "../graph/ObjectEntryGraph.tsx";
-import ExportButton from "./ExportButton.tsx";
 import SetValueButton from "./SetValueButton.tsx";
 import InterpolationModeButton from "./InterpolationModeButton.tsx";
 import { GraphInterpolation } from "../../graph/GraphInterpolation.tsx";
 import GraphBufferingButton from "./GraphBufferingButton.tsx";
 import { useNavigate } from "react-router-dom";
+import OpenButton from "./OpenButton.tsx";
 
 interface ObjectEntryPanelProps {
   node: NodeInformation,
@@ -95,7 +95,7 @@ function ObjectEntryPanel({ node, name }: Readonly<ObjectEntryPanelProps>) {
               left: "calc(100% - 50px)",
             }}
           />
-          <ExportButton
+          <OpenButton
             nodeName={node.name}
             objectEntryName={information.name}
             sx={{

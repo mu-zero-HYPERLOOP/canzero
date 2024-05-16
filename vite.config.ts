@@ -9,12 +9,16 @@ export default defineConfig(async () => ({
     rollupOptions: {
       input: {
         main: resolve(__dirname, "index.html"),
-        startup: resolve(__dirname, "startup.html")
+        startup: resolve(__dirname, "startup.html"),
+        settings: resolve(__dirname, "settings.html"),
+        plot: resolve(__dirname, "plot.html")
       }
     },
     chunkSizeWarningLimit: 1600,
   },
-  plugins: [react()],
+  plugins: [
+    react()
+  ],
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //

@@ -88,7 +88,7 @@ pub async fn discover_servers(
         .collect();
 
     #[cfg(feature = "socket-can")]
-    let Some(network_configuration): Option<can_config_rs::config::NetworkRef> =
+    let Some(network_configuration): Option<canzero_config::config::NetworkRef> =
         state.network_configuration().await
     else {
         return Err("Failed to discover networks. No network configuration avaiable.".to_owned());
@@ -129,7 +129,7 @@ pub async fn discover_servers(
 
 #[cfg(feature = "socket-can")]
 pub fn check_for_socketcan(
-    network_ref: &can_config_rs::config::NetworkRef,
+    network_ref: &canzero_config::config::NetworkRef,
     connections: &mut Vec<NetworkConnectionCreateInfo>,
 ) {
     for bus in network_ref.buses() {

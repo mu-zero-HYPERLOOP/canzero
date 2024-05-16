@@ -42,7 +42,7 @@ const VirtuosoTableComponents: TableComponents<RowData> = {
 };
 
 
-function NodePanel({ node }: NodePanelProps) {
+function NodePanel({ node }: Readonly<NodePanelProps>) {
 
   const [rowData, setRowData] = useState<(RowData)[]>([]);
   const [filter, setFilter] = useState<number[]>(node.object_entries.map((_,i) => i));

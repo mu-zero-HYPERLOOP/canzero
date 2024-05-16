@@ -26,7 +26,8 @@ impl RxCom {
         network_object: &Arc<NetworkObject>,
         app_handle: &tauri::AppHandle,
         can_adapters: &Vec<Arc<CanAdapter>>,
-        connection_object : &Arc<ConnectionObject>
+        connection_object : &Arc<ConnectionObject>,
+        node_id : u8,
     ) -> Self {
         Self {
             can_receivers: can_adapters
@@ -39,6 +40,7 @@ impl RxCom {
                         network_object,
                         app_handle,
                         connection_object.clone(),
+                        node_id,
                     )
                 })
                 .collect(),

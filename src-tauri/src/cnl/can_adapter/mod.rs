@@ -25,7 +25,7 @@ impl CanAdapter {
         network_config: &NetworkRef,
         app_handle: &tauri::AppHandle,
         network_description: &NetworkDescription,
-    ) -> std::io::Result<Vec<Self>> {
+    ) -> std::io::Result<(Vec<Self>,u8)> {
         let channels: Vec<(
             tokio::sync::mpsc::Sender<Result<TCanFrame, TCanError>>,
             tokio::sync::mpsc::Receiver<Result<TCanFrame, TCanError>>,
@@ -55,7 +55,7 @@ impl CanAdapter {
                 )),
             });
         }
-        Ok(adapters)
+        Ok((adapters, tcp_client.node_id()))
     }
 
     #[cfg(feature = "socket-can")]

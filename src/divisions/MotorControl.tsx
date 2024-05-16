@@ -1,22 +1,43 @@
-import {NodeInformation} from "../nodes/types/NodeInformation.ts";
+import { Grid, } from "@mui/material";
+import { NodeInformation } from "../nodes/types/NodeInformation.ts";
+import ObjectEntryEditPaper from "../object_entry/vis/ObjectEntryEditPaper.tsx";
 
 interface NodesProps {
-    nodes: NodeInformation[],
+  nodes: NodeInformation[],
 }
 
-function MotorControl({nodes}: NodesProps) {
+function MotorControl({ nodes : _ }: NodesProps) {
 
-    return (
-        <>
-            <h1>Motor Control</h1>
-            {nodes.map((entry: NodeInformation) => {
-                if (entry.name === "secu")
-                    return (<>
-                        </>
-                    )
-            })}
-        </>
-    );
+  return (
+    <Grid container spacing={2} padding={2}
+      direction="row"
+      justifyContent={"space-between"}>
+      <Grid item xs>
+        <ObjectEntryEditPaper title="mcu_temperature" nodeName="motor_driver" objectEntryName="build_time" />
+      </Grid>
+      <Grid item xs>
+        <ObjectEntryEditPaper title="magnet_temperature" nodeName="motor_driver" objectEntryName="build_time" />
+      </Grid>
+      <Grid item xs>
+        <ObjectEntryEditPaper title="mosfet_temperature" nodeName="motor_driver" objectEntryName="build_time" />
+      </Grid>
+      <Grid item xs>
+        <ObjectEntryEditPaper title="cooling_temperature" nodeName="motor_driver" objectEntryName="build_time" />
+      </Grid>
+      <Grid item xs>
+        <ObjectEntryEditPaper title="cooling_temperature" nodeName="motor_driver" objectEntryName="build_time" />
+      </Grid>
+      <Grid item xs>
+        <ObjectEntryEditPaper title="cooling_temperature" nodeName="motor_driver" objectEntryName="build_time" />
+      </Grid>
+      <Grid item xs>
+        <ObjectEntryEditPaper title="cooling_temperature" nodeName="motor_driver" objectEntryName="build_time" />
+      </Grid>
+      <Grid item xs>
+        <ObjectEntryEditPaper title="cooling_temperature" nodeName="motor_driver" objectEntryName="build_time" />
+      </Grid>
+    </Grid>
+  );
 }
 
 export default MotorControl;

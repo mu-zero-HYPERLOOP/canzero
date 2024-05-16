@@ -6,7 +6,6 @@ import StartupContent from "./StartupContent";
 
 
 function StartupApp() {
-  console.log("I'm alive");
   return (
     <ThemeProvider theme={theme}>
       <SnackbarProvider preventDuplicate maxSnack={7}>

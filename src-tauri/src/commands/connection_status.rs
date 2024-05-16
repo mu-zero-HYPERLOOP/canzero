@@ -13,6 +13,8 @@ pub async fn get_connection_status(state: tauri::State<'_, CNLState>) -> Result<
 
 #[tauri::command]
 pub async fn heartbeat(state : tauri::State<'_, CNLState>) -> Result<(),()> {
+
+    #[cfg(not(debug_assertions))]
     state.lock().await.reset_watchdog().await;   
 
     Ok(())
@@ -22,4 +24,10 @@ pub async fn heartbeat(state : tauri::State<'_, CNLState>) -> Result<(),()> {
 pub fn restart(app_handle : tauri::AppHandle) {
     println!("Restarting...");
     app_handle.restart();
+}
+
+#[tauri::command]
+pub fn close(app_handle : tauri::AppHandle) {
+    println!("Closing...");
+    app_handle.exit(0);
 }

@@ -1,6 +1,6 @@
 [package]
 name = "canzero"
-version = "0.0.0"
+version = "0.1.0"
 description = "Control Panel for the muzero CAN protocol. Developed for mu-zero HYPERLOOP Season IV."
 authors = ["Karl Sassie", "Jakob Schmit", "Niklas Heneka", "Nicolas Fliegel"]
 repository = "https://github.com/mu-zero-HYPERLOOP/control-panel.git"
@@ -16,7 +16,6 @@ lto = false
 strip = "symbols"  # Automatically strip symbols from the binary.
 lto = "fat" # Enables link time optimizations
 codegen-units = 1 # Compile crates one after another so the compiler can optimize better
-panic = "abort"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -24,17 +23,17 @@ panic = "abort"
 tauri-build = { version = "1.5", features = [] }
 
 [dependencies]
-tauri = { version = "1.5", features = [ "cli", "fs-all", "shell-open"] }
+tauri = { version = "1.5", features = [ "fs-all", "shell-open", "dialog-all"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tokio = { version = "1.34.0", features = ["full"] }
-canzero-config = { git = "https://github.com/mu-zero-HYPERLOOP/canzero-config.git" }
-canzero-appdata = { git = "https://github.com/mu-zero-HYPERLOOP/canzero-appdata.git" }
-canzero-tcp = { git = "https://github.com/mu-zero-HYPERLOOP/canzero-tcp.git" }
-canzero-udp = { git = "https://github.com/mu-zero-HYPERLOOP/canzero-udp.git" }
-canzero-common = { git = "https://github.com/mu-zero-HYPERLOOP/canzero-common.git" }
-canzero-socketcan = { git = "https://github.com/mu-zero-HYPERLOOP/canzero-socketcan.git", optional = true}
-canzero-cli = { git = "https://github.com/mu-zero-HYPERLOOP/canzero-cli.git"}
+canzero-config = { path = "./lib/config" }
+canzero-appdata = { path = "./lib/appdata" }
+canzero-tcp = { path = "./lib/tcp" }
+canzero-udp = { path = "./lib/udp" }
+canzero-common = { path = "./lib/common" }
+canzero-socketcan = { path = "./lib/socketcan/", optional = true}
+canzero-cli = { path = "./lib/cli/" }
 fix-path-env = { git = "https://github.com/tauri-apps/fix-path-env-rs.git"}
 bitvec = "1.0.1"
 chrono = { version = "0.4.34", features = [ "serde" ] }

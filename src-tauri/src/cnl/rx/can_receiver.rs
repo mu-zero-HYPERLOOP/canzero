@@ -4,12 +4,16 @@ use canzero_config::config::MessageRef;
 
 use crate::{
     cnl::{
-        can_adapter::CanAdapter, connection::{ConnectionObject, ConnectionStatus}, network::NetworkObject, rx::handler_lookup::HandlerLookup, trace::TraceObject
+        can_adapter::CanAdapter,
+        connection::{ConnectionObject, ConnectionStatus},
+        network::NetworkObject,
+        rx::handler_lookup::HandlerLookup,
+        trace::TraceObject,
     },
     notification::notify_error,
 };
 
-use canzero_common::{TCanFrame, TCanError};
+use canzero_common::{TCanError, TCanFrame};
 
 use crate::cnl::errors::Result;
 
@@ -22,7 +26,8 @@ impl CanReceiver {
         trace: &Arc<TraceObject>,
         network_object: &Arc<NetworkObject>,
         app_handle: &tauri::AppHandle,
-        connection_object : Arc<ConnectionObject>,
+        connection_object: Arc<ConnectionObject>,
+        node_id: u8,
     ) -> Self {
         let receiver_data = Arc::new(CanReceiverData::create(
             can_adapter,
@@ -30,6 +35,7 @@ impl CanReceiver {
             trace,
             network_object,
             app_handle,
+            node_id,
         ));
         async fn receive_msg(
             frame: std::result::Result<TCanFrame, TCanError>,
@@ -85,7 +91,7 @@ impl CanReceiver {
             receiver_data: Arc<CanReceiverData>,
             bus_name: String,
             bus_id: u32,
-            connection_object : Arc<ConnectionObject>
+            connection_object: Arc<ConnectionObject>,
         ) {
             loop {
                 let frame = match receiver_data.can_adapter.receive().await {
@@ -93,7 +99,7 @@ impl CanReceiver {
                     Err(_) => {
                         connection_object.set_status(ConnectionStatus::NetworkDisconnected);
                         break;
-                    },
+                    }
                 };
 
                 let receiver_data = receiver_data.clone();
@@ -109,7 +115,7 @@ impl CanReceiver {
             receiver_data.clone(),
             bus_name.clone(),
             bus_id,
-            connection_object
+            connection_object,
         ));
 
         Self()
@@ -130,6 +136,7 @@ impl CanReceiverData {
         trace: &Arc<TraceObject>,
         network_object: &Arc<NetworkObject>,
         app_handle: &tauri::AppHandle,
+        node_id: u8,
     ) -> Self {
         Self {
             can_adapter: can_adapter.clone(),
@@ -142,6 +149,7 @@ impl CanReceiverData {
                     .filter(|msg| msg.bus().id() == can_adapter.bus().id())
                     .collect(),
                 network_object,
+                node_id,
             ),
         }
     }

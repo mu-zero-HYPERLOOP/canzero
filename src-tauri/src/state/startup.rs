@@ -21,7 +21,7 @@ pub enum NetworkConnectionCreateInfo {
 pub struct StartupState {
     network_config: Mutex<Option<NetworkRef>>,
     connections: Mutex<Vec<NetworkConnectionCreateInfo>>,
-    established_connection: Mutex<(Vec<Arc<CanAdapter>>, Option<Instant>)>,
+    established_connection: Mutex<(Vec<Arc<CanAdapter>>, Option<Instant>, Option<u8>)>,
 }
 
 impl StartupState {
@@ -29,7 +29,7 @@ impl StartupState {
         StartupState {
             network_config: Mutex::new(None),
             connections: Mutex::new(vec![]),
-            established_connection: Mutex::new((vec![], None)),
+            established_connection: Mutex::new((vec![], None, None)),
         }
     }
 
@@ -65,11 +65,11 @@ impl StartupState {
 
         match connection {
             NetworkConnectionCreateInfo::Tcp(nd) => {
-                let can_adapters = CanAdapter::create_tcp_adapters(&network_ref, app_handle, nd)
+                let (can_adapters, node_id) = CanAdapter::create_tcp_adapters(&network_ref, app_handle, nd)
                     .await
                     .map_err(|err| format!("{err:?}"))?;
                 let adapters = can_adapters.into_iter().map(Arc::new).collect();
-                *self.established_connection.lock().await = (adapters, Some(nd.timebase));
+                *self.established_connection.lock().await = (adapters, Some(nd.timebase), Some(node_id));
             }
             #[cfg(feature = "socket-can")]
             NetworkConnectionCreateInfo::SocketCan => {
@@ -78,6 +78,7 @@ impl StartupState {
                 *self.established_connection.lock().await = (
                     can_adapter.into_iter().map(Arc::new).collect(),
                     Some(Instant::now()),
+                    None
                 );
             }
         };
@@ -88,13 +89,14 @@ impl StartupState {
         let Some(network_config) = self.network_config.lock().await.as_ref().cloned() else {
             return Err("Failed to complete setup. No network configuration avaiable".to_owned());
         };
-        let can_adapters = self.established_connection.lock().await.0.clone();
+        let (can_adapters,_,node_id) = self.established_connection.lock().await.clone();
 
         Ok(CNLState::create(
             network_config,
             app_handle,
             can_adapters,
             self.established_connection.lock().await.1.unwrap(),
+            node_id,
         )
         .await)
     }

@@ -1,7 +1,12 @@
 {
   "build": {
     "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run build",
+    "beforeBuildCommand": {
+      "script": "npm run build",
+      "wait": true
+
+
+    },
     "devPath": "http://localhost:1420",
     "distDir": "../dist",
     "withGlobalTauri": false,
@@ -9,19 +14,9 @@
   },
   "package": {
     "productName": "canzero",
-    "version": "0.0.0"
+    "version": "0.1.0"
   },
   "tauri": {
-    "cli": {
-      "description": "muzero Control Panel",
-      "args": [
-        {
-          "name": "address",
-          "short": "a",
-          "takesValue": true
-        }
-      ]
-    },
     "allowlist": {
       "all": false,
       "shell": {
@@ -30,6 +25,14 @@
       },
       "fs": {
         "all": true
+      },
+      "dialog": {
+        "all": true, 
+        "ask": true, 
+        "confirm": true, 
+        "message": true,
+        "open": true, 
+        "save": true 
       }
     },
     "bundle": {
@@ -44,8 +47,14 @@
         "icons/icon.ico"
       ],
       "resources": [
-        "test.yaml"
-      ]
+        "xcompl/canzero-cli-armv7-unknown-linux-gnueabihf"
+      ],
+      "windows": {
+        "webviewInstallMode": {
+          "silent": true,
+          "type": "downloadBootstrapper"
+        }
+      }
     },
     "security": {
       "csp": null

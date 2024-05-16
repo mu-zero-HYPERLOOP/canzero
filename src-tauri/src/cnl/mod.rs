@@ -53,11 +53,14 @@ impl CNL {
         app_handle: &tauri::AppHandle,
         can_adapters: Vec<Arc<CanAdapter>>,
         timebase: Instant,
+        node_id : Option<u8>,
     ) -> Self {
         let connection_object = Arc::new(ConnectionObject::new(
             ConnectionStatus::NetworkConnected,
             app_handle,
         ));
+
+        let node_id = node_id.unwrap_or(network_config.nodes().len() as u8);
 
         let trace = Arc::new(TraceObject::create(app_handle));
 
@@ -67,6 +70,7 @@ impl CNL {
             &trace,
             timebase,
             &connection_object,
+            node_id, 
         ));
 
         let network = Arc::new(NetworkObject::create(
@@ -83,11 +87,15 @@ impl CNL {
             app_handle,
             &can_adapters,
             &connection_object,
+            node_id,
         );
 
         let watchdog_overlord = WatchdogOverlord::new(&connection_object);
+            
+        // disable the frontend heartbeat only for release
         let external_watchdog =
             watchdog_overlord.register(WdgTag::FrontendWdg, Duration::from_millis(1000));
+
         let deadlock_watchdog =
             watchdog_overlord.register(WdgTag::DeadlockWdg, Duration::from_millis(1000));
 
@@ -112,6 +120,7 @@ impl CNL {
             network,
             connection_object,
             _watchdog_overlord: watchdog_overlord,
+
             external_watchdog,
         }
     }
@@ -129,6 +138,7 @@ impl CNL {
     }
 
     pub async fn reset_watchdog(&self) {
+        #[cfg(not(debug_assertions))]
         self.external_watchdog.reset().await;
     }
 }

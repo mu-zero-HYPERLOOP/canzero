@@ -32,6 +32,7 @@ impl TxCom {
         trace: &Arc<TraceObject>,
         basetime: Instant,
         connection_object : &Arc<ConnectionObject>,
+        node_id : u8,
     ) -> TxCom {
         let set_req_can_adapter = can_adapters
             .iter()
@@ -47,7 +48,7 @@ impl TxCom {
 
         TxCom {
             network_ref: network_ref.clone(),
-            my_node_id: network_ref.nodes().len() as u8,
+            my_node_id: node_id,
             set_req_can_adapter,
             get_req_frame_deserializer: FrameDeserializer::new(network_ref.get_req_message()),
             get_req_can_adapter,
