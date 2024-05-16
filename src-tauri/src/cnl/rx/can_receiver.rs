@@ -39,7 +39,7 @@ impl CanReceiver {
         ));
         async fn receive_msg(
             frame: std::result::Result<TCanFrame, TCanError>,
-            receiver_data: Arc<CanReceiverData>,
+            receiver_data: &Arc<CanReceiverData>,
             bus_name: String,
             bus_id: u32,
         ) -> Result<()> {
@@ -75,11 +75,10 @@ impl CanReceiver {
             bus_name: String,
             bus_id: u32,
         ) {
-            let app_handle = receiver_data.app_handle.clone();
-            match receive_msg(frame, receiver_data, bus_name, bus_id).await {
+            match receive_msg(frame, &receiver_data, bus_name, bus_id).await {
                 Ok(_) => (),
                 Err(err) => notify_error(
-                    &app_handle,
+                    &receiver_data.app_handle.clone(),
                     err.reason(),
                     err.description(),
                     chrono::Local::now(),

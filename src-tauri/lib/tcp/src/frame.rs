@@ -102,7 +102,6 @@ impl TcpFrame {
             let buf : &[u64;3] = unsafe {std::mem::transmute(buf)};
             let timestamp = Duration::from_micros(buf[1]);
             let data = buf[2];
-
             Ok(TcpFrame::NetworkFrame(TNetworkFrame::new(timestamp, NetworkFrame { bus_id, can_frame: CanFrame::new_raw(can_id, dlc, data) })))
         }else {
             Err(())
