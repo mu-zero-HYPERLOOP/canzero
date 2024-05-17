@@ -1,12 +1,13 @@
 use std::time::Duration;
 
 use canzero_common::{CanFrame, NetworkFrame, TNetworkFrame};
+use color_print::cprintln;
 
 
 #[derive(Clone)]
 pub enum ConnectionHandshakeFrame {
-    ConnectionIdRequest { request: bool },
-    ConnectionId { success: bool, node_id: u8 },
+    ClientServer { request: bool, sync : bool },
+    ServerClient { success: bool, node_id: u8 },
 }
 
 impl ConnectionHandshakeFrame {
@@ -17,18 +18,20 @@ impl ConnectionHandshakeFrame {
 
     pub fn into_bin(&self, buf : &mut [u8;2]) {
         match &self {
-            ConnectionHandshakeFrame::ConnectionIdRequest { request } => {
+            ConnectionHandshakeFrame::ClientServer { request, sync } => {
+                buf[0] = 0x0;
                 if *request {
-                    buf[0] = 0x80;
-                }else {
-                    buf[0] = 0;
+                    buf[0] |= 0x80;
                 }
+                if *sync {
+                    buf[0] |= 0x40;
+                }
+                buf[1] = 0x0; //could be uninitalized
             }
-            ConnectionHandshakeFrame::ConnectionId { success, node_id } => {
+            ConnectionHandshakeFrame::ServerClient { success, node_id } => {
+                buf[0] = 0x1;
                 if *success {
-                    buf[0] = 0x81;
-                }else {
-                    buf[0] = 0x1;
+                    buf[0] |= 0x80;
                 }
                 buf[1] = *node_id;
             }
@@ -36,15 +39,17 @@ impl ConnectionHandshakeFrame {
     }
 
     pub fn from_bin(buf : &[u8;2]) -> Result<Self,()> {
-        let tag = buf[0] & 0x7F;
+        let tag = buf[0] & 0xF;
         if tag == 0 {
             let request = buf[0] & 0x80 != 0;
-            Ok(Self::ConnectionIdRequest { request})
+            let sync = buf[0] & 0x40 != 0;
+            Ok(Self::ClientServer { request, sync})
         }else if tag == 1 {
             let success = buf[0] & 0x80 != 0;
             let node_id = buf[1];
-            Ok(Self::ConnectionId { success, node_id })
+            Ok(Self::ServerClient { success, node_id })
         }else {
+            cprintln!("<red>Invalid ConnectionHandshake tag : {tag} </red>");
             Err(())
         }
     }
@@ -54,6 +59,7 @@ impl ConnectionHandshakeFrame {
 #[derive(Clone)]
 pub enum TcpFrame {
     NetworkFrame(TNetworkFrame),
+    SyncEnd,
     KeepAlive,
 }
 
@@ -87,6 +93,9 @@ impl TcpFrame {
             TcpFrame::KeepAlive => {
                 buf[0] = 0x0;
             }
+            TcpFrame::SyncEnd => {
+                buf[0] = 0x2;
+            },
         }
     }
 
@@ -103,7 +112,9 @@ impl TcpFrame {
             let timestamp = Duration::from_micros(buf[1]);
             let data = buf[2];
             Ok(TcpFrame::NetworkFrame(TNetworkFrame::new(timestamp, NetworkFrame { bus_id, can_frame: CanFrame::new_raw(can_id, dlc, data) })))
-        }else {
+        }else if tag == 0x2 {
+            Ok(TcpFrame::SyncEnd)
+        } else {
             Err(())
         }
     }

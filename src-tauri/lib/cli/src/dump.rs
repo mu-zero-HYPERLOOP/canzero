@@ -39,7 +39,14 @@ pub async fn command_dump(filter_msg_names: Vec<String>, filter_ids: Vec<String>
         network.service_port
     );
 
-    let tcpcan = canzero_tcp::tcpcan::TcpCan::new(connection, ConnectionId::None).await;
+    let tcpcan = canzero_tcp::tcpcan::TcpCan::new(
+        connection,
+        ConnectionId::Client {
+            request_id: false,
+            sync_history: false,
+        },
+    )
+    .await.unwrap();
 
     loop {
         let Some(frame) = tcpcan.recv().await else {

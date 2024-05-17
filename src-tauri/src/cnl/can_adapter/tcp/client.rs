@@ -24,7 +24,17 @@ impl TcpClient {
         );
         let stream = tokio::net::TcpStream::connect(address).await?;
 
-        let tcpcan = Arc::new(TcpCan::new(stream, ConnectionId::Request).await);
+        let tcpcan = Arc::new(
+            TcpCan::new(
+                stream,
+                ConnectionId::Client {
+                    request_id: true,
+                    sync_history: true,
+                },
+            )
+            .await
+            .unwrap(),
+        );
         let tcpcan_rx = tcpcan.clone();
         tokio::spawn(async move {
             loop {

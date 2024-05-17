@@ -23,6 +23,10 @@ impl Network {
         }
     }
 
+    pub async fn sync_history(&self) -> Vec<TNetworkFrame> {
+        return self.history.lock().await.clone() //hopefully fast enough
+    }
+
     pub async fn start(&self, node: NetworkNode) {
         match &node {
             #[cfg(feature = "socket-can")]
@@ -38,12 +42,6 @@ impl Network {
                     }
                 };
                 cprintln!("<green>Establish tcp connection {}</green>", addr);
-                for frame in self.history.lock().await.iter() {
-                    if let Err(_) = tcpcan.send(frame).await {
-                        cprintln!("<red>Shutdown tcp connection {}</red>", addr);
-                        return;
-                    };
-                }
             }
         }
         let nodes = self.nodes.clone();

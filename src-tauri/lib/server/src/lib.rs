@@ -20,7 +20,7 @@ pub struct Server {
     tcp_service_port: u16,
     task_handle: Arc<Mutex<Option<AbortHandle>>>,
     config: NetworkRef,
-    id_host : Arc<ConnectionIdHost>,
+    id_host: Arc<ConnectionIdHost>,
 }
 
 impl Server {
@@ -54,7 +54,7 @@ impl Server {
             tcp_service_port,
             task_handle: Arc::new(Mutex::new(None)),
             config,
-            id_host : Arc::new(id_host),
+            id_host: Arc::new(id_host),
         })
     }
 
@@ -72,7 +72,7 @@ impl Server {
                     self.welcome.clone(),
                     self.tcp_service_port,
                     self.config.clone(),
-                    self.id_host.clone()
+                    self.id_host.clone(),
                 ))
                 .abort_handle(),
             );
@@ -118,10 +118,16 @@ impl Server {
                 let (stream, addr) = welcome.accept().await.unwrap();
                 println!("\u{1b}[32mConnection from {addr:?}\u{1b}[0m");
                 network
-                    .start(NetworkNode::TcpCanNode(TcpCan::new(
-                        stream,
-                        ConnectionId::Host(id_host.clone()),
-                    ).await))
+                    .start(NetworkNode::TcpCanNode(
+                        TcpCan::new(
+                            stream,
+                            ConnectionId::Host {
+                                id_host: id_host.clone(),
+                                sync_history: Some(network.sync_history().await),
+                            },
+                        )
+                        .await?,
+                    ))
                     .await;
             }
         }

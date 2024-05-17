@@ -18,7 +18,7 @@ async fn rx_get_req_hash_code(
     resp_id: u32,
     resp_ide: bool,
     node_id: u8,
-    my_id : u8,
+    my_id: u8,
 ) -> u64 {
     let mut hash: u64 = 0;
     let mut rx_count = 0;
@@ -53,7 +53,7 @@ async fn rx_get_req_build_time(
     resp_id: u32,
     resp_ide: bool,
     node_id: u8,
-    my_id : u8,
+    my_id: u8,
 ) -> Option<NaiveDateTime> {
     let mut build_time_data: u64 = 0;
     let mut rx_count = 0;
@@ -106,7 +106,16 @@ pub async fn command_status() -> Result<()> {
             .await
             .unwrap();
 
-    let tcpcan = Arc::new(canzero_tcp::tcpcan::TcpCan::new(stream, ConnectionId::Request).await);
+    let tcpcan = Arc::new(
+        canzero_tcp::tcpcan::TcpCan::new(
+            stream,
+            ConnectionId::Client {
+                request_id: true,
+                sync_history: false,
+            },
+        )
+        .await.unwrap(),
+    );
 
     let my_id = tcpcan.connection_id().unwrap();
 
@@ -252,7 +261,7 @@ pub async fn command_status() -> Result<()> {
                     hash,
                 );
                 }
-            }else {
+            } else {
                 cprintln!("{:25} : <red> {:7}</red>", node.name(), "FUCKED");
             }
         } else {
