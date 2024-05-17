@@ -1012,7 +1012,6 @@ impl NetworkBuilder {
             );
             let node_types = Self::topo_sort_types(&node_types);
 
-            println!("LENGTH of node_data.buses {}", node_data.buses.len());
             let node_buses = node_data
                 .buses
                 .iter()

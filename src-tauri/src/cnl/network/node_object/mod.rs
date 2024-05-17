@@ -111,14 +111,14 @@ impl NodeObject {
         // let _ = self.latest_observable.deadlock_watchdog().await;
     }
 
-    pub async fn reset_heartbeat_wdg(&self, bus_id: u32, unregister: bool) {
+    pub async fn reset_heartbeat_wdg(&self, bus_id: u32, unregister: bool, ticks_next: Option<u8>) {
         if let Some(wdg) = self.heartbeat_wdgs.iter().find(|wdg| {
             wdg.tag() == &WdgTag::Heartbeat {
                     node_id: self.id(),
                     bus_id,
                 }
         }) {
-            wdg.reset(unregister).await;
+            wdg.reset(unregister, ticks_next).await;
             return;
         }
         notify_error(

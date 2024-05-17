@@ -110,7 +110,7 @@ impl CNL {
                 network_dead.deadlock_watchdog().await;
                 trace_dead.deadlock_watchdog().await;
                 connection_object_dead.deadlock_watchdog().await;
-                deadlock_watchdog.reset(false).await;
+                deadlock_watchdog.reset(false, None).await;
             }
         });
 

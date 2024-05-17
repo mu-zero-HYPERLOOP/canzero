@@ -11,7 +11,8 @@ use crate::cnl::connection::ConnectionStatus;
 use super::connection::ConnectionObject;
 
 struct WatchdogSignal {
-    unregister: bool
+    unregister: bool,
+    ticks_next: Option<u8>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -76,9 +77,12 @@ impl Watchdog {
         let mut active = false;
         loop {
             tokio::select! {
-                Some(WatchdogSignal{unregister}) = reset_rx.recv() => {
+                Some(WatchdogSignal{unregister, ticks_next}) = reset_rx.recv() => {
                     active = !unregister;
-                    sleep.as_mut().reset(Instant::now() + timeout)
+                    match ticks_next {
+                        Some(ticks) => sleep.as_mut().reset(Instant::now() + Duration::from_millis(50 * ticks as u64)),
+                        None => sleep.as_mut().reset(Instant::now() + timeout),
+                    };
                 },
                 () = sleep.as_mut(), if active => {
                     overlord.notify_timeout(WatchdogTimeout {
@@ -91,8 +95,16 @@ impl Watchdog {
         }
     }
 
-    pub async fn reset(&self, unregister: bool) {
-        if let Err(_) = self.0.reset_tx.send(WatchdogSignal{unregister}).await {
+    pub async fn reset(&self, unregister: bool, ticks_next: Option<u8>) {
+        if let Err(_) = self
+            .0
+            .reset_tx
+            .send(WatchdogSignal {
+                unregister,
+                ticks_next,
+            })
+            .await
+        {
             self.0.overlord.notify_timeout(WatchdogTimeout {
                 tag: self.0.tag,
                 error: WatchdogError::PoisonError,
