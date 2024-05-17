@@ -15,7 +15,11 @@ use crate::cnl::{
 pub struct HandlerLookup(HashMap<u32, MessageHandler>);
 
 impl HandlerLookup {
-    pub fn create(messages: &Vec<MessageRef>, network_object: &Arc<NetworkObject>, node_id : u8) -> Self {
+    pub fn create(
+        messages: &Vec<MessageRef>,
+        network_object: &Arc<NetworkObject>,
+        node_id: u8,
+    ) -> Self {
         let map = messages
             .iter()
             .map(|msg| {
@@ -67,7 +71,7 @@ impl HandlerLookup {
                         MessageHandler::SetRespFrameHandler(SetRespFrameHandler::create(
                             network_object,
                             msg,
-                            node_id
+                            node_id,
                         )),
                     )),
                     message::MessageUsage::SetReq => Some((
@@ -76,7 +80,10 @@ impl HandlerLookup {
                     )),
                     message::MessageUsage::Heartbeat => Some((
                         key,
-                        MessageHandler::HeartbeatFrameHandler(HeartbeatFrameHandler::create(msg)),
+                        MessageHandler::HeartbeatFrameHandler(HeartbeatFrameHandler::create(
+                            msg,
+                            network_object.nodes(),
+                        )),
                     )),
                     message::MessageUsage::External { interval: _ } => None,
                 }

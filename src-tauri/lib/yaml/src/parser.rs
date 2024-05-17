@@ -282,7 +282,7 @@ pub fn parse_node(
     let mut node_builder = network_builder.create_node(node_name);
     let yaml_rust::Yaml::Hash(map) = node_map else {
         return Err(Error::YamlInvalidType(format!(
-            "nodes have to be defined has maps"
+            "nodes have to be defined as maps"
         )));
     };
 
@@ -313,7 +313,7 @@ pub fn parse_node(
     if map.contains_key(&yaml_rust::Yaml::String("tx_streams".to_owned())) {
         let yaml_rust::Yaml::Hash(streams_map) = &node_map["tx_streams"] else {
             return Err(Error::YamlInvalidType(format!(
-                "tx_streams have to be defined has maps"
+                "tx_streams have to be defined as maps"
             )));
         };
         for (stream_name, stream_def) in streams_map {
@@ -329,7 +329,7 @@ pub fn parse_node(
     if map.contains_key(&yaml_rust::Yaml::String("rx_streams".to_owned())) {
         let yaml_rust::Yaml::Hash(rx_node) = &node_map["rx_streams"] else {
             return Err(Error::YamlInvalidType(format!(
-                "rx_streams have to be defined has maps"
+                "rx_streams have to be defined as maps"
             )));
         };
         for (node_name, tx_node_streams) in rx_node {
@@ -602,6 +602,15 @@ pub fn parse_top_level(
             bus_map,
             &mut network_builder.create_bus(bus_name, None),
         )?;
+    }
+
+    // all nodes are connected to all buses!!
+    let node_builders = network_builder.0.borrow().nodes.clone();
+    let bus_builders = network_builder.0.borrow().buses.clone();
+    for node_builder in node_builders.borrow().iter() {
+        for bus_builder in bus_builders.borrow().iter() {
+            node_builder.assign_bus(&bus_builder.0.borrow().name);
+        }
     }
 
     Ok(())

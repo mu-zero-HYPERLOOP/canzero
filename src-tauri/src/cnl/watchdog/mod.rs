@@ -10,15 +10,15 @@ use crate::cnl::connection::ConnectionStatus;
 
 use super::connection::ConnectionObject;
 
-struct WatchdogSignal;
+struct WatchdogSignal {
+    unregister: bool
+}
 
-#[derive(Clone,Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum WdgTag {
     FrontendWdg,
     DeadlockWdg,
-    Heartbeat{
-        node_id : u8,
-    },
+    Heartbeat { node_id: u8, bus_id: u32 },
 }
 
 pub struct WatchdogTimeout {
@@ -29,7 +29,7 @@ pub struct WatchdogTimeout {
 #[derive(Debug, Clone)]
 pub enum WatchdogError {
     Timeout,
-    PosionError, // channel dropped early
+    PoisonError, // channel dropped early
 }
 
 struct WatchdogInner {
@@ -42,18 +42,14 @@ struct WatchdogInner {
 pub struct Watchdog(Arc<WatchdogInner>);
 
 impl Watchdog {
-    fn create(
-        tag: WdgTag,
-        timeout: Duration,
-        overlord: Arc<WatchdogOverlordInner>,
-    ) -> Self {
+    fn create(tag: WdgTag, timeout: Duration, overlord: Arc<WatchdogOverlordInner>) -> Self {
         let (reset_tx, reset_rx) = mpsc::channel(16);
 
         let abort_handle = tokio::spawn(Self::watchdog_task(
             reset_rx,
             timeout,
             overlord.clone(),
-            tag
+            tag,
         ))
         .abort_handle();
 
@@ -63,6 +59,10 @@ impl Watchdog {
             overlord,
             tag,
         }))
+    }
+
+    pub fn tag(&self) -> &WdgTag {
+        &self.0.tag
     }
 
     async fn watchdog_task(
@@ -76,14 +76,9 @@ impl Watchdog {
         let mut active = false;
         loop {
             tokio::select! {
-                msg = reset_rx.recv() => {
-                    match msg {
-                        Some(_) => {
-                            active = true;
-                            sleep.as_mut().reset(Instant::now() + timeout)
-                        }
-                        None => break,
-                    }
+                Some(WatchdogSignal{unregister}) = reset_rx.recv() => {
+                    active = !unregister;
+                    sleep.as_mut().reset(Instant::now() + timeout)
                 },
                 () = sleep.as_mut(), if active => {
                     overlord.notify_timeout(WatchdogTimeout {
@@ -96,11 +91,11 @@ impl Watchdog {
         }
     }
 
-    pub async fn reset(&self) {
-        if let Err(_) = self.0.reset_tx.send(WatchdogSignal).await {
+    pub async fn reset(&self, unregister: bool) {
+        if let Err(_) = self.0.reset_tx.send(WatchdogSignal{unregister}).await {
             self.0.overlord.notify_timeout(WatchdogTimeout {
-                tag : self.0.tag,
-                error: WatchdogError::PosionError,
+                tag: self.0.tag,
+                error: WatchdogError::PoisonError,
             });
         }
     }
@@ -114,16 +109,22 @@ impl Drop for Watchdog {
 
 struct WatchdogOverlordInner {
     watchdogs: Mutex<Vec<Watchdog>>,
-    connection_object : Arc<ConnectionObject>,
+    connection_object: Arc<ConnectionObject>,
 }
 
 impl WatchdogOverlordInner {
     fn notify_timeout(&self, timeout: WatchdogTimeout) {
         cprintln!("<red> Watchdog {:?} timeout</red>", timeout.tag);
         match timeout.tag {
-            WdgTag::FrontendWdg => self.connection_object.set_status(ConnectionStatus::FrontendWdgTimeout),
-            WdgTag::DeadlockWdg => self.connection_object.set_status(ConnectionStatus::DeadlockWdgTimeout),
-            WdgTag::Heartbeat { node_id } => self.connection_object.set_status(ConnectionStatus::HeartbeatMiss { node_id }),
+            WdgTag::FrontendWdg => self
+                .connection_object
+                .set_status(ConnectionStatus::FrontendWdgTimeout),
+            WdgTag::DeadlockWdg => self
+                .connection_object
+                .set_status(ConnectionStatus::DeadlockWdgTimeout),
+            WdgTag::Heartbeat { node_id, bus_id } => self
+                .connection_object
+                .set_status(ConnectionStatus::HeartbeatMiss { node_id, bus_id }),
         }
     }
 }
@@ -131,14 +132,14 @@ impl WatchdogOverlordInner {
 pub struct WatchdogOverlord(Arc<WatchdogOverlordInner>);
 
 impl WatchdogOverlord {
-    pub fn new(connection_object : &Arc<ConnectionObject> ) -> Self {
+    pub fn new(connection_object: &Arc<ConnectionObject>) -> Self {
         Self(Arc::new(WatchdogOverlordInner {
             watchdogs: Mutex::new(vec![]),
-            connection_object : connection_object.clone(),
+            connection_object: connection_object.clone(),
         }))
     }
 
-    pub fn register(&self, tag : WdgTag, timeout: Duration) -> Watchdog {
+    pub fn register(&self, tag: WdgTag, timeout: Duration) -> Watchdog {
         let watchdog = Watchdog::create(tag, timeout, self.0.clone());
         self.0
             .watchdogs
@@ -155,7 +156,7 @@ impl WatchdogOverlord {
     //         return;
     //     };
     //     watchdog_lock.remove(pos);
-    //     // afterwards the watchdog is destructured because the local ref 
+    //     // afterwards the watchdog is destructured because the local ref
     //     // is gone and the ref in the vec. It's fair to assume that these two are the only once
     //     // because clone is not exposed.
     //     // note: destructing the watchdog also aborts it's watchdog task!

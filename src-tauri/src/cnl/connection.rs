@@ -6,8 +6,9 @@ use tauri::Manager;
 #[derive(Clone, Debug)]
 pub enum ConnectionStatus {
     NetworkConnected,
-    HeartbeatMiss{
+    HeartbeatMiss {
         node_id : u8,
+        bus_id: u32,
     },
     NetworkDisconnected,
     FrontendWdgTimeout,
@@ -21,7 +22,7 @@ impl Serialize for ConnectionStatus {
     {
         match &self {
             ConnectionStatus::NetworkConnected => serializer.serialize_str("network-connected"),
-            ConnectionStatus::HeartbeatMiss{node_id : _} => serializer.serialize_str("heartbeat-miss"),
+            ConnectionStatus::HeartbeatMiss{node_id : _, bus_id : _} => serializer.serialize_str("heartbeat-miss"),
             ConnectionStatus::NetworkDisconnected => serializer.serialize_str("network-disconnected"),
             ConnectionStatus::FrontendWdgTimeout => serializer.serialize_str("frontend-wdg-timeout"),
             ConnectionStatus::DeadlockWdgTimeout => serializer.serialize_str("deadlock-wdg-timeout"),

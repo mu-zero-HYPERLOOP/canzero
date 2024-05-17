@@ -144,9 +144,9 @@ impl CanReceiverData {
             app_handle: app_handle.clone(),
             lookup: HandlerLookup::create(
                 &messages
-                    .clone()
-                    .into_iter()
+                    .iter()
                     .filter(|msg| msg.bus().id() == can_adapter.bus().id())
+                    .cloned()
                     .collect(),
                 network_object,
                 node_id,

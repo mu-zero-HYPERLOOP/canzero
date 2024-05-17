@@ -73,11 +73,14 @@ impl CNL {
             node_id, 
         ));
 
+        let watchdog_overlord = WatchdogOverlord::new(&connection_object);
+
         let network = Arc::new(NetworkObject::create(
             network_config,
             app_handle,
             tx.clone(),
             timebase,
+            &watchdog_overlord
         ));
 
         let rx = RxCom::create(
@@ -89,8 +92,6 @@ impl CNL {
             &connection_object,
             node_id,
         );
-
-        let watchdog_overlord = WatchdogOverlord::new(&connection_object);
             
         // disable the frontend heartbeat only for release
         let external_watchdog =
@@ -109,7 +110,7 @@ impl CNL {
                 network_dead.deadlock_watchdog().await;
                 trace_dead.deadlock_watchdog().await;
                 connection_object_dead.deadlock_watchdog().await;
-                deadlock_watchdog.reset().await;
+                deadlock_watchdog.reset(false).await;
             }
         });
 
@@ -139,6 +140,6 @@ impl CNL {
 
     pub async fn reset_watchdog(&self) {
         #[cfg(not(debug_assertions))]
-        self.external_watchdog.reset().await;
+        self.external_watchdog.reset(false).await;
     }
 }
