@@ -818,31 +818,41 @@ pub fn generate_rx_handlers(
                 let mut logic = String::new();
                 logic.push_str(&format!(
 "
-{indent}if (msg.m_node_id < node_id_count) {{
+{indent}if (msg.m_node_id < node_id_count) {{   // static heartbeat
+{indent2}if (msg.m_unregister != 0) {{  // unregister only unregisters this bus
 "
                 ));
-                for heartbeat in network_config.heartbeat_messages() {
-                    logic.push_str(&format!(
-"{indent2}heartbeat_wdg_job.job.wdg_job.{0}_static_wdg_armed[msg.m_node_id] 
-{indent3}= (~msg.m_unregister) & 0b1;
-",
-                        heartbeat.bus().name()));
-                }
                 logic.push_str(&format!(
-"{indent2}heartbeat_wdg_job.job.wdg_job.{0}_static_tick_countdowns[msg.m_node_id] = msg.m_ticks_next;
-{indent}}} else {{
+"{indent3}heartbeat_wdg_job.job.wdg_job.{0}_static_wdg_armed[msg.m_node_id] = 0;
+{indent2}}} else {{ // register registers all buses
 ",
                     message.bus().name()
                 ));
                 for heartbeat in network_config.heartbeat_messages() {
                     logic.push_str(&format!(
-"{indent2}heartbeat_wdg_job.job.wdg_job.{0}_dynamic_wdg_armed[msg.m_node_id - node_id_count] 
-{indent3}= (~msg.m_unregister) & 0b1;
+"{indent3}heartbeat_wdg_job.job.wdg_job.{0}_static_wdg_armed[msg.m_node_id] = 1;
 ",
                         heartbeat.bus().name()));
                 }
                 logic.push_str(&format!(
-"{indent2}heartbeat_wdg_job.job.wdg_job.{0}_dynamic_tick_countdowns[msg.m_node_id - node_id_count]
+"{indent2}}}
+{indent2}heartbeat_wdg_job.job.wdg_job.{0}_static_tick_countdowns[msg.m_node_id] = msg.m_ticks_next;
+{indent}}} else {{  // dynamic heartbeat
+{indent2}if (msg.m_unregister != 0) {{ // unregister only unregisters this bus
+{indent3}heartbeat_wdg_job.job.wdg_job.{0}_dynamic_wdg_armed[msg.m_node_id - node_id_count] = 0;
+{indent2}}} else {{ // register registers all buses
+",
+                    message.bus().name()
+                ));
+                for heartbeat in network_config.heartbeat_messages() {
+                    logic.push_str(&format!(
+"{indent3}heartbeat_wdg_job.job.wdg_job.{0}_dynamic_wdg_armed[msg.m_node_id - node_id_count] = 1
+",
+                        heartbeat.bus().name()));
+                }
+                logic.push_str(&format!(
+"{indent2}}}
+{indent2}heartbeat_wdg_job.job.wdg_job.{0}_dynamic_tick_countdowns[msg.m_node_id - node_id_count]
 {indent3}= msg.m_ticks_next;
 {indent}}}
 ",
