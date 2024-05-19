@@ -18,6 +18,8 @@ import { invoke } from '@tauri-apps/api';
 import Box from "@mui/material/Box";
 import SaveIcon from '@mui/icons-material/Save';
 import { ObjectEntryInformation } from '../object_entry/types/ObjectEntryInformation.tsx';
+import HeartbeatStatus from '../nodes/HeartbeatStatus.tsx';
+import HeartbeatNodeStatus from './HeartbeatNodeStatus.tsx';
 
 interface ListItemLinkProps {
   icon?: React.ReactElement;
@@ -92,10 +94,28 @@ const CustomContent = React.forwardRef(function CustomContent(
   );
 });
 
+interface CustomTreeItemProps extends TreeItemProps {
+  nodeName: string,
+  busNames: string[],
+}
+
+const CustomNodeTreeItem = React.forwardRef(function CustomTreeItem(
+  props: CustomTreeItemProps,
+  ref: React.Ref<HTMLLIElement>,
+) {
+
+  return <TreeItem 
+    ContentComponent={CustomContent} 
+    nodeId={props.nodeId} 
+    children={props.children} 
+    label={(<HeartbeatNodeStatus nodeName={props.nodeId} busNames={props.busNames}></HeartbeatNodeStatus>)} ref={ref} />;
+});
+
 const CustomTreeItem = React.forwardRef(function CustomTreeItem(
   props: TreeItemProps,
   ref: React.Ref<HTMLLIElement>,
 ) {
+
   return <TreeItem ContentComponent={CustomContent} {...props} ref={ref} />;
 });
 
@@ -182,9 +202,14 @@ export function NodeList() {
       {nodes === undefined
         ? <></>
         : nodes.map((completeNode) =>
-          <CustomTreeItem key={completeNode.node.name} nodeId={completeNode.node.name} label={completeNode.node.name}>
+          <CustomNodeTreeItem 
+            key={completeNode.node.name} 
+            nodeId={completeNode.node.name} 
+            label={completeNode.node.name} 
+            nodeName={completeNode.node.name} 
+            busNames={completeNode.node.buses}>
             <NodeEntries nodeInfo={completeNode} />
-          </CustomTreeItem>)
+          </CustomNodeTreeItem>)
       }
 
     </TreeView>
