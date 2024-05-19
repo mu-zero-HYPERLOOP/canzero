@@ -7,7 +7,7 @@ pub mod network;
 mod rx;
 pub mod trace;
 mod tx;
-mod watchdog;
+pub mod watchdog;
 
 pub mod can_adapter;
 
@@ -140,6 +140,6 @@ impl CNL {
 
     pub async fn reset_watchdog(&self) {
         #[cfg(not(debug_assertions))]
-        self.external_watchdog.reset(false).await;
+        self.external_watchdog.reset(false, None).await;
     }
 }

@@ -4,7 +4,8 @@ use std::{
 };
 
 use color_print::cprintln;
-use tokio::{sync::mpsc, task::AbortHandle, time::Instant};
+use serde::Serialize;
+use tokio::{sync::{mpsc, watch}, task::AbortHandle, time::Instant};
 
 use crate::cnl::connection::ConnectionStatus;
 
@@ -22,6 +23,14 @@ pub enum WdgTag {
     Heartbeat { node_id: u8, bus_id: u32 },
 }
 
+#[derive(Copy, Clone, Serialize)]
+pub enum WdgStatus {
+    TimedOut,
+    Good,
+    InActive,
+}
+
+
 pub struct WatchdogTimeout {
     pub tag: WdgTag,
     pub error: WatchdogError,
@@ -36,6 +45,7 @@ pub enum WatchdogError {
 struct WatchdogInner {
     abort_handle: AbortHandle,
     reset_tx: mpsc::Sender<WatchdogSignal>,
+    status_rx: watch::Receiver<WdgStatus>,
     overlord: Arc<WatchdogOverlordInner>,
     tag: WdgTag,
 }
@@ -45,9 +55,11 @@ pub struct Watchdog(Arc<WatchdogInner>);
 impl Watchdog {
     fn create(tag: WdgTag, timeout: Duration, overlord: Arc<WatchdogOverlordInner>) -> Self {
         let (reset_tx, reset_rx) = mpsc::channel(16);
+        let (status_tx, status_rx) = watch::channel(WdgStatus::InActive);
 
         let abort_handle = tokio::spawn(Self::watchdog_task(
             reset_rx,
+            status_tx,
             timeout,
             overlord.clone(),
             tag,
@@ -57,6 +69,7 @@ impl Watchdog {
         Watchdog(Arc::new(WatchdogInner {
             abort_handle,
             reset_tx,
+            status_rx,
             overlord,
             tag,
         }))
@@ -66,8 +79,13 @@ impl Watchdog {
         &self.0.tag
     }
 
+    pub fn status_rx(&self) -> &watch::Receiver<WdgStatus> {
+        &self.0.status_rx
+    }
+
     async fn watchdog_task(
         mut reset_rx: mpsc::Receiver<WatchdogSignal>,
+        status_tx: watch::Sender<WdgStatus>,
         timeout: Duration,
         overlord: Arc<WatchdogOverlordInner>,
         wdg_tag: WdgTag,
@@ -78,6 +96,9 @@ impl Watchdog {
         loop {
             tokio::select! {
                 Some(WatchdogSignal{unregister, ticks_next}) = reset_rx.recv() => {
+                    if !active {
+                        let _ = status_tx.send(WdgStatus::Good);
+                    }
                     active = !unregister;
                     match ticks_next {
                         Some(ticks) => sleep.as_mut().reset(Instant::now() + Duration::from_millis(50 * ticks as u64)),
@@ -89,6 +110,7 @@ impl Watchdog {
                         tag : wdg_tag,
                         error : WatchdogError::Timeout,
                     });
+                    let _ = status_tx.send(WdgStatus::TimedOut);
                     sleep.as_mut().reset(Instant::now() + timeout)
                 },
             }
@@ -110,6 +132,19 @@ impl Watchdog {
                 error: WatchdogError::PoisonError,
             });
         }
+    }
+
+    pub fn status(&self) -> WdgStatus {
+        *self.0.status_rx.borrow()
+    }
+
+    pub fn status_on_change(&self, new_status: WdgStatus) {
+        match self.tag() {
+            WdgTag::FrontendWdg => todo!(),
+            WdgTag::DeadlockWdg => todo!(),
+            WdgTag::Heartbeat { node_id, bus_id } => todo!(),
+        }
+
     }
 }
 

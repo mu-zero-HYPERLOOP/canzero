@@ -3,20 +3,21 @@ use std::{
     time::{Duration, Instant},
 };
 
-use canzero_config::config;
+use canzero_config::config::{self, bus::BusRef};
 
 use crate::{
     cnl::{
         tx::TxCom,
-        watchdog::{Watchdog, WatchdogOverlord, WdgTag},
+        watchdog::{Watchdog, WatchdogOverlord, WdgStatus, WdgTag},
     },
     notification::notify_error,
 };
 
-use self::latest::NodeLatestObservable;
+use self::{heartbeat_observable::HeartbeatObservable, latest::NodeLatestObservable};
 
 use super::{command_object::CommandObject, object_entry_object::ObjectEntryObject};
 
+pub mod heartbeat_observable;
 pub mod latest;
 
 pub struct NodeObject {
@@ -25,6 +26,7 @@ pub struct NodeObject {
     commands: Vec<Arc<CommandObject>>,
     latest_observable: NodeLatestObservable,
     heartbeat_wdgs: Vec<Watchdog>,
+    heartbeat_observables: Vec<HeartbeatObservable>,
     app_handle: tauri::AppHandle,
 }
 
@@ -53,14 +55,23 @@ impl NodeObject {
             .collect();
         let node_name = node_config.name();
         let mut heartbeat_wdgs = vec![];
+        let mut heartbeat_observables = vec![];
         for bus in node_config.buses() {
-            heartbeat_wdgs.push(watchdog_overloard.register(
+            let wdg = watchdog_overloard.register(
                 WdgTag::Heartbeat {
                     node_id: node_config.id(),
                     bus_id: bus.id(),
                 },
                 Duration::from_millis(200),
-            ));
+            );
+            let heartbeat_observable = HeartbeatObservable::new(
+                &format!("{node_name}_{}_heartbeat", bus.name()),
+                app_handle,
+                wdg.status_rx().clone(),
+                bus.id(),
+            );
+            heartbeat_wdgs.push(wdg);
+            heartbeat_observables.push(heartbeat_observable);
         }
         Self {
             latest_observable: NodeLatestObservable::new(
@@ -76,6 +87,7 @@ impl NodeObject {
                 .collect(),
             node_ref: node_config.clone(),
             heartbeat_wdgs,
+            heartbeat_observables,
             app_handle: app_handle.clone(),
         }
     }
@@ -93,6 +105,9 @@ impl NodeObject {
     }
     pub fn commands(&self) -> &Vec<Arc<CommandObject>> {
         &self.commands
+    }
+    pub fn buses(&self) -> &Vec<BusRef> {
+        self.node_ref.buses()
     }
     pub async fn listen(&self) -> String {
         self.latest_observable.listen().await
@@ -113,7 +128,8 @@ impl NodeObject {
 
     pub async fn reset_heartbeat_wdg(&self, bus_id: u32, unregister: bool, ticks_next: Option<u8>) {
         if let Some(wdg) = self.heartbeat_wdgs.iter().find(|wdg| {
-            wdg.tag() == &WdgTag::Heartbeat {
+            wdg.tag()
+                == &WdgTag::Heartbeat {
                     node_id: self.id(),
                     bus_id,
                 }
@@ -123,9 +139,55 @@ impl NodeObject {
         }
         notify_error(
             &self.app_handle,
-            &format!("received heartbeat for node {} on non-existent bus", self.name()),
-            &format!("received heartbeat for node {} on non-existent bus", self.name()),
+            &format!(
+                "received heartbeat for node {} on non-existent bus",
+                self.name()
+            ),
+            &format!(
+                "received heartbeat for node {} on non-existent bus",
+                self.name()
+            ),
             chrono::Local::now(),
         );
+    }
+
+    pub fn get_heartbeat_status(&self, bus_id: u32) -> Result<WdgStatus, ()> {
+        let wdg = self.heartbeat_wdgs.iter().find(|wdg| match wdg.tag() {
+            WdgTag::FrontendWdg => return false,
+            WdgTag::DeadlockWdg => return false,
+            WdgTag::Heartbeat {
+                node_id: _,
+                bus_id: id1,
+            } => return *id1 == bus_id,
+        });
+        match wdg {
+            Some(wdg) => Ok(wdg.status()),
+            None => Err(()),
+        }
+    }
+
+    pub async fn listen_heartbeat_change(&self, bus_id: u32) -> Result<String, ()> {
+        let observable = self
+            .heartbeat_observables
+            .iter()
+            .find(|&obs| obs.bus_id() == bus_id);
+        match observable {
+            Some(obs) => return Ok(obs.listen().await),
+            None => Err(()),
+        }
+    }
+
+    pub async fn unlisten_heartbeat_change(&self, bus_id: u32) -> Result<(), ()> {
+        match self
+            .heartbeat_observables
+            .iter()
+            .find(|&obs| obs.bus_id() == bus_id)
+        {
+            Some(obs) => {
+                obs.unlisten().await;
+                Ok(())
+            }
+            None => Err(()),
+        }
     }
 }

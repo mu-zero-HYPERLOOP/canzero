@@ -846,7 +846,7 @@ pub fn generate_rx_handlers(
                 ));
                 for heartbeat in network_config.heartbeat_messages() {
                     logic.push_str(&format!(
-"{indent3}heartbeat_wdg_job.job.wdg_job.{0}_dynamic_wdg_armed[msg.m_node_id - node_id_count] = 1
+"{indent3}heartbeat_wdg_job.job.wdg_job.{0}_dynamic_wdg_armed[msg.m_node_id - node_id_count] = 1;
 ",
                         heartbeat.bus().name()));
                 }

@@ -1,4 +1,4 @@
-import { InputAdornment, Paper, Skeleton, Table, TableBody, TableContainer, TableHead, TableRow, TextField, Typography, styled, useTheme } from "@mui/material";
+import { Box, InputAdornment, Paper, Skeleton, Stack, Table, TableBody, TableContainer, TableHead, TableRow, TextField, Typography, styled, useTheme } from "@mui/material";
 import { NodeInformation } from "./types/NodeInformation.ts";
 import { useEffect, useRef, useState } from "react";
 import { ObjectEntryEvent } from "../object_entry/types/events/ObjectEntryEvent.tsx";
@@ -10,6 +10,7 @@ import { TableComponents, TableVirtuoso } from "react-virtuoso";
 import React from "react";
 import SearchIcon from '@mui/icons-material/Search';
 import useFocusOnCtrlShortcut from "../trace/FocusOnKey.tsx";
+import HeartbeatStatus from "./HeartbeatStatus.tsx";
 
 
 interface NodePanelProps {
@@ -111,14 +112,22 @@ function NodePanel({ node }: Readonly<NodePanelProps>) {
       paddingBottom: "20px",
       position: "relative"
     }}>
-      <Typography sx={{
-        position: "absolute",
-        top: "-12px",
-        left: "12px",
-        padding: "1px",
-
-      }} variant="h5">{node.name}
-      </Typography>
+      <Stack direction={"row"} sx={{
+          position: "absolute",
+          top: "-12px",
+          left: "12px",
+          padding: "1px",
+        }} spacing={2} alignItems={"center"}>
+        <Typography variant="h5">{node.name}</Typography>
+        {
+          node.buses.map(bus => (
+          <Box position={"relative"} top={"-0.25em"}>
+            <HeartbeatStatus nodeName={node.name} busName={bus}>
+            </HeartbeatStatus>
+          </Box>
+          ))
+        }
+      </Stack>
 
       {node.description ? <Typography sx={{
         position: "absolute",
