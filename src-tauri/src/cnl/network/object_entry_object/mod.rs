@@ -90,8 +90,8 @@ impl ObjectEntryObject {
             tx_com,
             open_set_request: Arc::new(Mutex::new(0)),
             open_get_request: Arc::new(Mutex::new(0)),
-            set_request_timeout: Duration::from_millis(100),
-            get_request_timeout: Duration::from_millis(100 + get_req_num_frames * 50),
+            set_request_timeout: Duration::from_millis(1000 + get_req_num_frames * 200),
+            get_request_timeout: Duration::from_millis(1000 + get_req_num_frames * 200),
             plottable,
         }
     }

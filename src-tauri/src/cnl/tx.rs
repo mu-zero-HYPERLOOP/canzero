@@ -52,7 +52,7 @@ impl TxCom {
             set_req_can_adapter,
             get_req_frame_deserializer: FrameDeserializer::new(network_ref.get_req_message()),
             get_req_can_adapter,
-            frag_time_ms: 50,
+            frag_time_ms: 200,
             timebase: basetime,
             trace: trace.clone(),
             connection_object : connection_object.clone(),
