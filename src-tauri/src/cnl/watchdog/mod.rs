@@ -96,10 +96,12 @@ impl Watchdog {
         loop {
             tokio::select! {
                 Some(WatchdogSignal{unregister, ticks_next}) = reset_rx.recv() => {
-                    if !active {
-                        let _ = status_tx.send(WdgStatus::Good);
-                    }
                     active = !unregister;
+                    if active {
+                        let _ = status_tx.send(WdgStatus::Good);
+                    } else {
+                        let _ = status_tx.send(WdgStatus::InActive);
+                    }
                     match ticks_next {
                         Some(ticks) => sleep.as_mut().reset(Instant::now() + Duration::from_millis(50 * ticks as u64)),
                         None => sleep.as_mut().reset(Instant::now() + timeout),
@@ -136,15 +138,6 @@ impl Watchdog {
 
     pub fn status(&self) -> WdgStatus {
         *self.0.status_rx.borrow()
-    }
-
-    pub fn status_on_change(&self, new_status: WdgStatus) {
-        match self.tag() {
-            WdgTag::FrontendWdg => todo!(),
-            WdgTag::DeadlockWdg => todo!(),
-            WdgTag::Heartbeat { node_id, bus_id } => todo!(),
-        }
-
     }
 }
 

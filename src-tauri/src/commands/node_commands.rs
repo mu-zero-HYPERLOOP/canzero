@@ -62,7 +62,7 @@ pub async fn listen_to_heartbeat(
     bus_name: String,
     state: tauri::State<'_, CNLState>,
 ) -> Result<String, ()> {
-    //#[cfg(feature = "logging-invoke")]
+    #[cfg(feature = "logging-invoke")]
     println!("invoke: listen_to_heartbeat_status({node_name:?})");
     let cnl = state.lock().await;
     let node = cnl.nodes().iter().find(|no| no.name() == &node_name);
@@ -84,7 +84,7 @@ pub async fn unlisten_from_heartbeat(
     bus_name: String,
     state: tauri::State<'_, CNLState>,
 ) -> Result<(), ()> {
-    //#[cfg(feature = "logging-invoke")]
+    #[cfg(feature = "logging-invoke")]
     println!("invoke: unlisten_from_heartbeat_status({node_name:?})");
     let cnl = state.lock().await;
     let node = cnl.nodes().iter().find(|no| no.name() == &node_name);
