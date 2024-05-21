@@ -80,6 +80,7 @@ impl TypeDeserializer {
                 u8_vector.resize(8usize, 0u8);
                 // NOTE cursed bullshit! C is so easy!
                 let unsigned_value = u64::from_le_bytes(u8_vector.try_into().unwrap());
+                println!("unsigned_value = {unsigned_value}");
                 match ty {
                     SignalType::UnsignedInt { size: _ } => Value::UnsignedValue(unsigned_value),
                     SignalType::SignedInt { size } => {
@@ -99,10 +100,11 @@ impl TypeDeserializer {
                         size: _,
                         offset,
                         scale,
-                    } => Value::RealValue(unsigned_value as f64 * *scale + *offset),
+                    } => Value::RealValue(unsigned_value as f64 * (*scale) + (*offset)),
                 }
             }
             TypeDeserilaizeInfo::EnumInfo { entries } => {
+
                 // NOTE get unsigned value from bitslice.
                 let mut bitvec = bitslice[0..self.bit_size].to_bitvec();
                 // NOTE pad bits for alignment
@@ -116,6 +118,7 @@ impl TypeDeserializer {
                 u8_vector.resize(8usize, 0u8);
                 // NOTE cursed bullshit! C is so easy!
                 let unsigned_value = u64::from_le_bytes(u8_vector.try_into().unwrap());
+                println!("enum unsigned_value = {unsigned_value}");
                 Value::EnumValue(
                     entries
                         .iter()

@@ -40,11 +40,11 @@ impl ConnectionHandshakeFrame {
 
     pub fn from_bin(buf : &[u8;2]) -> Result<Self,()> {
         let tag = buf[0] & 0xF;
-        if tag == 0 {
+        if tag == 0x0 {
             let request = buf[0] & 0x80 != 0;
             let sync = buf[0] & 0x40 != 0;
             Ok(Self::ClientServer { request, sync})
-        }else if tag == 1 {
+        }else if tag == 0x1 {
             let success = buf[0] & 0x80 != 0;
             let node_id = buf[1];
             Ok(Self::ServerClient { success, node_id })

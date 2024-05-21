@@ -118,32 +118,40 @@ impl TcpCan {
 
                 tx.write_all(&request).await.unwrap();
 
-                let mut rx_buffer = [0; 2usize];
-                match rx.read_exact(&mut rx_buffer).await {
-                    Ok(_) => match ConnectionHandshakeFrame::from_bin(&rx_buffer) {
-                        Ok(handshake_frame) => match handshake_frame {
-                            ConnectionHandshakeFrame::ServerClient { success, node_id } => {
-                                if success {
-                                    if *sync_history {
-                                        (Some(node_id), Some(sync_tx))
-                                    } else {
-                                        sync_tx.send(()).unwrap();
-                                        (Some(node_id), None)
+                if *request_id || *sync_history {
+                    let mut rx_buffer = [0; 2usize];
+                    match rx.read_exact(&mut rx_buffer).await {
+                        Ok(_) => {
+                            match ConnectionHandshakeFrame::from_bin(&rx_buffer) {
+                                Ok(handshake_frame) => match handshake_frame {
+                                    ConnectionHandshakeFrame::ServerClient { success, node_id } => {
+                                        if success {
+                                            if *sync_history {
+                                                (Some(node_id), Some(sync_tx))
+                                            } else {
+                                                sync_tx.send(()).unwrap();
+                                                (Some(node_id), None)
+                                            }
+                                        } else {
+                                            panic!("Server rejected connection")
+                                        }
                                     }
-                                } else {
-                                    panic!("Server rejected connection")
-                                }
+                                    ConnectionHandshakeFrame::ClientServer {
+                                        request: _,
+                                        sync: _,
+                                    } => {
+                                        panic!("Illegal request: This tcpcan doesn't act as a id server")
+                                    }
+                                },
+                                Err(_) => panic!("Received ill formed TCP frame"),
                             }
-                            ConnectionHandshakeFrame::ClientServer {
-                                request: _,
-                                sync: _,
-                            } => {
-                                panic!("Illegal request: This tcpcan doesn't act as a id server")
-                            }
-                        },
-                        Err(_) => panic!("Received ill formed TCP frame"),
-                    },
-                    Err(_) => panic!("Failed to read ConnectionHandshake TCP frame from socket"),
+                        }
+                        Err(_) => {
+                            panic!("Failed to read ConnectionHandshake TCP frame from socket")
+                        }
+                    }
+                }else {
+                    (None,None)
                 }
             }
             ConnectionId::Host {
