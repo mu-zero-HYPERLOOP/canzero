@@ -236,7 +236,7 @@ pub fn generate_rx_handlers(
                     } else {
                         let buffer_name = format!("{var}_rx_fragmentation_buffer");
                         let buffer_def =
-                            format!("static uint32_t {buffer_name}[{}];\n", size.div_ceil(32));
+                            format!("static uint32_t DMAMEM {buffer_name}[{}];\n", size.div_ceil(32));
                         source.push_str(&buffer_def);
 
                         let mut fragmentation_logic = String::new();
@@ -642,8 +642,8 @@ pub fn generate_rx_handlers(
                         let word_size = size.div_ceil(32);
                         let buffer_name = format!("{oe_var}_tx_fragmentation_buffer");
                         let buffer_offset = format!("{oe_var}_tx_fragmentation_offset");
-                        source.push_str(&format!("static uint32_t {buffer_name}[{word_size}];\n"));
-                        source.push_str(&format!("static uint32_t {buffer_offset} = 0;\n"));
+                        source.push_str(&format!("static uint32_t DMAMEM {buffer_name}[{word_size}];\n"));
+                        source.push_str(&format!("static uint32_t DMAMEM {buffer_offset} = 0;\n"));
 
                         let mut write_logic = String::new();
                         fn generate_write_logic(

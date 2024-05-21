@@ -21,7 +21,7 @@ pub fn generate_object_entries(
         let oe_name = object_entry.name();
         let oe_var = format!("__oe_{oe_name}");
 
-        let var_def = format!("{type_name} {oe_var};\n");
+        let var_def = format!("{type_name} DMAMEM {oe_var};\n");
         source.push_str(&var_def);
 
         let getter_name = format!("{namespace}_get_{oe_name}");

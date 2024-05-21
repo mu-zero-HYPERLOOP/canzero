@@ -16,6 +16,7 @@ pub fn generate_includes(
         .unwrap()
         .to_owned();
     source.push_str(&format!("#include \"{header_name}\"\n"));
+    source.push_str("#include <avr/pgmspace.h>\n");
     
     header.push_str("#include <cinttypes>\n");
     header.push_str("#include <cstddef>\n");

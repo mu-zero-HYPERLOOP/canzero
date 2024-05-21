@@ -174,7 +174,7 @@ typedef struct {{
 {indent}union job_pool_allocator_entry *freelist;
 }} job_pool_allocator;
 
-static job_pool_allocator job_allocator;
+static job_pool_allocator DMAMEM job_allocator;
 static void job_pool_allocator_init() {{
 {indent}for (uint8_t i = 1; i < 64; i++) {{
 {indent2}job_allocator.job[i - 1].next = job_allocator.job + i;
@@ -202,7 +202,7 @@ typedef struct {{
 {indent}job_t *heap[SCHEDULE_HEAP_SIZE]; // job**
 {indent}uint32_t size;
 }} job_scheduler_t;
-static job_scheduler_t scheduler;
+static job_scheduler_t DMAMEM scheduler;
 static void scheduler_promote_job(job_t *job) {{
 {indent}int index = job->position;
 {indent}if (index == 0) {{

@@ -211,6 +211,7 @@ pub async fn command_status() -> Result<()> {
         )
         .await
         {
+            tokio::time::sleep(Duration::from_millis(100)).await;
             let timestamp = Instant::now().duration_since(timebase);
             tcpcan
                 .send(&TNetworkFrame::new(
