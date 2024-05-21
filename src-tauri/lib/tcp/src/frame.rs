@@ -69,7 +69,7 @@ impl TcpFrame {
         return 24;
     }
 
-    pub fn into_bin(&self, buf : &mut [u8;24]) {
+    pub fn into_bin(&self, buf8 : &mut [u8;24]) {
         match &self {
             TcpFrame::NetworkFrame(timestamped) => {
                 let frame = &timestamped.value;
@@ -79,22 +79,22 @@ impl TcpFrame {
                 let data = frame.can_frame.get_data_u64();
                 let dlc = frame.can_frame.get_dlc();
                 
-                buf[0] = 0x1;
-                buf[1] = *bus_id as u8;
-                buf[2] = dlc;
-                let buf : &mut [u32;6] = unsafe {std::mem::transmute(buf)};
-                buf[1] = can_id;
-                let buf : &mut [u64;3] = unsafe {std::mem::transmute(buf)};
-                buf[1] = timestamp;
-                buf[2] = data;
+                buf8[0] = 0x1;
+                buf8[1] = *bus_id as u8;
+                buf8[2] = dlc;
+                let buf32 : &mut [u32;6] = unsafe {std::mem::transmute(buf8)};
+                buf32[1] = can_id;
+                let buf64 : &mut [u64;3] = unsafe {std::mem::transmute(buf32)};
+                buf64[1] = timestamp;
+                buf64[2] = data;
 
 
             }
             TcpFrame::KeepAlive => {
-                buf[0] = 0x0;
+                buf8[0] = 0x0;
             }
             TcpFrame::SyncEnd => {
-                buf[0] = 0x2;
+                buf8[0] = 0x2;
             },
         }
     }
