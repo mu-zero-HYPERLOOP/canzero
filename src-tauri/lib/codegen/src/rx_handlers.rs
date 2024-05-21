@@ -23,7 +23,7 @@ pub fn generate_rx_handlers(
         let msg_name = message.name();
         let handler_name = format!("{namespace}_handle_{msg_name}");
 
-        let (logic, weak) = match message.usage() {
+        let (logic, attrib) = match message.usage() {
             message::MessageUsage::Stream(stream) => {
                 // NOTE this is the instance of the tx_stream NOT the rx_stream !!!
                 // pretty bad that there is no difference. Already lead to multiple bugs that
@@ -51,7 +51,7 @@ pub fn generate_rx_handlers(
                     );
                     // logic += &format!("{indent}{object_entry_var} = msg.{msg_attribute};\n");
                 }
-                (logic, false)
+                (logic, "static")
             }
             message::MessageUsage::CommandReq(command) => {
                 let req_msg = command.tx_message();
@@ -83,10 +83,10 @@ pub fn generate_rx_handlers(
 {indent}{namespace}_can{resp_bus_id}_send(&resp_frame);
 "
                     ),
-                    false,
+                    "static",
                 )
             },
-            message::MessageUsage::CommandResp(_) => ("".to_owned(), false),
+            message::MessageUsage::CommandResp(_) => ("".to_owned(), ""),
             message::MessageUsage::GetResp => panic!(),
             message::MessageUsage::GetReq => {
                 let mut logic = String::new();
@@ -509,7 +509,7 @@ pub fn generate_rx_handlers(
 {indent}{namespace}_{resp_bus_name}_send(&resp_frame);
 "
                 );
-                (logic, false)
+                (logic, "static PROGMEM")
             },
             message::MessageUsage::SetResp => panic!(),
             message::MessageUsage::SetReq => {
@@ -812,7 +812,7 @@ pub fn generate_rx_handlers(
 "
                 );
 
-                (logic, false)
+                (logic, "static PROGMEM")
             },
             message::MessageUsage::Heartbeat => {
                 let mut logic = String::new();
@@ -848,19 +848,13 @@ pub fn generate_rx_handlers(
 ",
                     message.bus().name()
                 ));
-                (logic, false)
+                (logic, "")
             },
-            message::MessageUsage::External { interval: _ } => ("".to_owned(), true),
-        };
-
-        let attributes = if weak {
-            "__attribute__((weak))"
-        } else {
-            "static"
+            message::MessageUsage::External { interval: _ } => ("".to_owned(), "__attribute__((weak))"),
         };
 
         let handler_def = format!(
-            "{attributes} void {handler_name}({frame_type_name}* frame) {{
+            "{attrib} void {handler_name}({frame_type_name}* frame) {{
 {indent}{namespace}_message_{msg_name} msg;
 {indent}{namespace}_deserialize_{namespace}_message_{msg_name}(frame, &msg);
 {logic}}}\n"
