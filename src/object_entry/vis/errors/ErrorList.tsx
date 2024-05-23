@@ -1,4 +1,4 @@
-import { List, ListItem, ListItemIcon, ListItemText, Paper, Typography, useTheme } from "@mui/material";
+import { List, Paper, Typography, useTheme } from "@mui/material";
 import ErrorListItem, { ErrorLevel } from "./ErrorListItem";
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api";
