@@ -119,7 +119,7 @@ pub fn generate_messages(
                                             scale,
                                         } => {
                                             if *size <= 32 {
-                                                serialized_def.push_str(&format!("{indent}uint32_t {attrib_name}_{attrib_offset} = ({attribute_prefix}{attrib_name} - {offset}) / {scale};\n"));
+                                                serialized_def.push_str(&format!("{indent}uint32_t {attrib_name}_{attrib_offset} = (({attribute_prefix}{attrib_name} - {offset}) / {scale}) + 0.5f;\n"));
                                                 let u32_max = (0xFFFFFFFF as u32)
                                                     .overflowing_shr(32 - *size as u32)
                                                     .0;
@@ -131,7 +131,7 @@ pub fn generate_messages(
 "));
                                                 format!("{attrib_name}_{attrib_offset}")
                                             } else {
-                                                serialized_def.push_str(&format!("{indent}uint64_t {attrib_name}_{attrib_offset} = (({attribute_prefix}{attrib_name} - {offset}) / {scale});\n"));
+                                                serialized_def.push_str(&format!("{indent}uint64_t {attrib_name}_{attrib_offset} = (({attribute_prefix}{attrib_name} - {offset}) / {scale}) + 0.5;\n"));
                                                 let u64_max = (0xFFFFFFFFFFFFFFFF as u64)
                                                     .overflowing_shr(64 - *size as u32)
                                                     .0;

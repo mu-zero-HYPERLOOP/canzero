@@ -147,7 +147,6 @@ function TemperatureVis() {
   return (
     <Paper sx={{
       width: "62%",
-      margin: 2,
       padding: 1
     }}>
       <Stack>

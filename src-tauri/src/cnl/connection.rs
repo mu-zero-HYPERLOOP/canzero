@@ -1,14 +1,13 @@
 use std::sync::Mutex;
 
+use color_print::cprintln;
 use serde::Serialize;
 use tauri::Manager;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum ConnectionStatus {
     NetworkConnected,
-    HeartbeatMiss{
-        node_id : u8,
-    },
+    HeartbeatMiss { node_id: u8 },
     NetworkDisconnected,
     FrontendWdgTimeout,
     DeadlockWdgTimeout,
@@ -21,10 +20,18 @@ impl Serialize for ConnectionStatus {
     {
         match &self {
             ConnectionStatus::NetworkConnected => serializer.serialize_str("network-connected"),
-            ConnectionStatus::HeartbeatMiss{node_id : _} => serializer.serialize_str("heartbeat-miss"),
-            ConnectionStatus::NetworkDisconnected => serializer.serialize_str("network-disconnected"),
-            ConnectionStatus::FrontendWdgTimeout => serializer.serialize_str("frontend-wdg-timeout"),
-            ConnectionStatus::DeadlockWdgTimeout => serializer.serialize_str("deadlock-wdg-timeout"),
+            ConnectionStatus::HeartbeatMiss { node_id: _ } => {
+                serializer.serialize_str("heartbeat-miss")
+            }
+            ConnectionStatus::NetworkDisconnected => {
+                serializer.serialize_str("network-disconnected")
+            }
+            ConnectionStatus::FrontendWdgTimeout => {
+                serializer.serialize_str("frontend-wdg-timeout")
+            }
+            ConnectionStatus::DeadlockWdgTimeout => {
+                serializer.serialize_str("deadlock-wdg-timeout")
+            }
         }
     }
 }
@@ -37,7 +44,6 @@ pub struct ConnectionObject {
 }
 
 impl ConnectionObject {
-
     pub fn new(connection_status: ConnectionStatus, app_handle: &tauri::AppHandle) -> Self {
         // broadcast inital state!
         Self::emit_event(app_handle, &connection_status);
@@ -48,13 +54,25 @@ impl ConnectionObject {
     }
 
     pub fn set_status(&self, connection_status: ConnectionStatus) {
+        #[cfg(debug_assertions)]
+        match connection_status {
+            ConnectionStatus::HeartbeatMiss { node_id: _ }
+            | ConnectionStatus::NetworkDisconnected
+            | ConnectionStatus::FrontendWdgTimeout
+            | ConnectionStatus::DeadlockWdgTimeout => {
+                cprintln!("<red>WatchdogTimeout = {connection_status:?}</red>");
+                return;
+            }
+            ConnectionStatus::NetworkConnected => (),
+        }
         *self
             .connection_status
             .lock()
             .expect("failed to acquire connection status lock") = connection_status;
         Self::emit_event(
             &self.app_handle,
-            &self.connection_status
+            &self
+                .connection_status
                 .lock()
                 .expect("failed to acquire connection status lock"),
         );

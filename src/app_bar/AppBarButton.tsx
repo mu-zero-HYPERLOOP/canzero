@@ -17,7 +17,7 @@ function AppBarButton({
   children,
   onClick,
   color,
-  width = "12em",
+  width = "15em",
   variant = "outlined",
   disabled = false,
 }: Readonly<AppBarButtonProps>) {
@@ -29,6 +29,7 @@ function AppBarButton({
       style={{
         maxWidth: width,
         minWidth: width,
+        fontSize: "0.5em",
         maxHeight: '57px',
         minHeight: '57px',
       }}
