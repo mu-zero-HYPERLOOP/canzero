@@ -1,7 +1,6 @@
 use std::{hash::Hash, sync::OnceLock};
 
-use super::{ConfigRef, TypeRef, Visibility, NodeRef};
-
+use super::{ConfigRef, NodeRef, TypeRef, Visibility};
 
 pub type ObjectEntryRef = ConfigRef<ObjectEntry>;
 
@@ -26,17 +25,18 @@ impl Hash for ObjectEntryAccess {
 pub struct ObjectEntry {
     name: String,
     description: Option<String>,
-    unit : Option<String>,
+    friend: Option<String>,
+    unit: Option<String>,
     id: u32,
     ty: TypeRef,
     access: ObjectEntryAccess,
     visibility: Visibility,
-    node : OnceLock<NodeRef>,
+    node: OnceLock<NodeRef>,
 }
 
 impl Hash for ObjectEntry {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        for b in self.name.bytes()  {
+        for b in self.name.bytes() {
             state.write_u8(b);
         }
         match &self.unit {
@@ -56,21 +56,26 @@ impl Hash for ObjectEntry {
 }
 
 impl ObjectEntry {
-    pub fn new(name : String, description : Option<String>,
-               unit : Option<String>,
-               id : u32,
-               ty : TypeRef,
-               access : ObjectEntryAccess,
-               visibility : Visibility) -> Self {
+    pub fn new(
+        name: String,
+        description: Option<String>,
+        friend: Option<String>,
+        unit: Option<String>,
+        id: u32,
+        ty: TypeRef,
+        access: ObjectEntryAccess,
+        visibility: Visibility,
+    ) -> Self {
         Self {
             name,
             description,
+            friend,
             unit,
             id,
             ty,
             access,
             visibility,
-            node : OnceLock::new(),
+            node: OnceLock::new(),
         }
     }
     pub fn id(&self) -> u32 {
@@ -97,8 +102,13 @@ impl ObjectEntry {
             None => None,
         }
     }
-    pub fn __set_node(&self, node : NodeRef){
-        self.node.set(node).expect("can't set the node of a object entry");
+    pub fn friend(&self) -> Option<&str> {
+        self.friend.as_ref().map(|f| f.as_str())
+    }
+    pub fn __set_node(&self, node: NodeRef) {
+        self.node
+            .set(node)
+            .expect("can't set the node of a object entry");
     }
     pub fn node(&self) -> &NodeRef {
         self.node.get().unwrap()

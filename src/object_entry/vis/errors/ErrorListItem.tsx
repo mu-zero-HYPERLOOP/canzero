@@ -1,4 +1,4 @@
-import { ListItem, ListItemIcon, ListItemText, useTheme } from "@mui/material";
+import { ListItem, ListItemIcon, ListItemText, Tooltip, useTheme } from "@mui/material";
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import FeedbackIcon from '@mui/icons-material/Feedback';
@@ -93,6 +93,7 @@ function ErrorListItem({
   }
 
   return (
+    <Tooltip title={description} placement="top">
       <ListItem sx={{
         padding: 0,
         marginLeft: 0,
@@ -123,6 +124,7 @@ function ErrorListItem({
           {errorId.error.objectEntryName}
         </ListItemText>
       </ListItem>
+    </Tooltip>
   );
 
 }

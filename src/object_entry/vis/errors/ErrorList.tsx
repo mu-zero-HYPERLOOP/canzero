@@ -39,7 +39,11 @@ function ErrorList() {
           if (objectEntryInfo.ty.id == "enum") {
             const enumName = (objectEntryInfo.ty.info as EnumTypeInfo).name;
             if (enumName == "error_flag" || enumName == "error_level") {
-              errorIds.push({ error: { nodeName, objectEntryName } });
+              let value = undefined;
+              if (objectEntryInfo.friend !== undefined && objectEntryInfo.friend !== null) {
+                value = {nodeName, objectEntryName : objectEntryInfo.friend};
+              }
+              errorIds.push({ error: { nodeName, objectEntryName }, value});
             }
           }
         }

@@ -27,6 +27,7 @@ pub fn parse_object_entry(
         )));
     };
 
+
     let oe_builder = node_builder.create_object_entry(oe_name, &type_name);
 
     if map.contains_key(&yaml_rust::Yaml::String("description".to_owned())) {
@@ -36,6 +37,15 @@ pub fn parse_object_entry(
             )));
         };
         oe_builder.add_description(&description);
+    }
+
+    if map.contains_key(&yaml_rust::Yaml::String("friend".to_owned())) {
+        let yaml_rust::Yaml::String(friend) = &oe_map["friend"] else {
+            return Err(Error::YamlInvalidType(format!(
+                "descriptions have to be defined has strings"
+            )));
+        };
+        oe_builder.friend(&friend);
     }
 
     if map.contains_key(&yaml_rust::Yaml::String("unit".to_owned())) {

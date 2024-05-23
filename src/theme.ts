@@ -81,16 +81,6 @@ declare module "@mui/material/AppBar" {
 
 let theme = createTheme({
   palette: {
-    // primary: {
-    //   light: "#6E5B54",
-    //   main: "#60504a",
-    //   dark: "#614941",
-    // },
-    // secondary: {
-    //   light: "#f7f7f7",
-    //   main: "#e7e7e7",
-    //   dark: "#787878",
-    // },
     background : {
       appBar: "#e7e7e7",
       drawer: "#ffffff",
