@@ -1,5 +1,6 @@
 use std::{sync::Arc, time::Duration};
 
+use color_print::cprintln;
 use tauri::Manager;
 use tokio::sync::{mpsc, Mutex};
 
@@ -51,7 +52,9 @@ impl ObjectEntryHistroyObservable {
 
     pub async fn notify(&self) {
         // intentionally ignore the result!
-        self.tx.send_timeout(ObserverCommand::Value, Duration::from_millis(1000)).await.expect("Failed to notify history observable");
+        if let Err(_) = self.tx.send_timeout(ObserverCommand::Value, Duration::from_millis(1000)).await {
+            cprintln!("<red> Failed to notify history observable. MPCS capacity is full, dropping the value </red>");
+        };
     }
 
     pub async fn start_notify_task(&self, store: &Arc<Mutex<ObjectEntryDatabase>>) {

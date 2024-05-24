@@ -3,6 +3,7 @@ use std::{
     time::Duration,
 };
 
+use color_print::cprintln;
 use tauri::Manager;
 use tokio::sync::{mpsc, Mutex};
 
@@ -29,7 +30,7 @@ pub struct ObjectEntryLatestObservable {
 
 impl ObjectEntryLatestObservable {
     pub fn new(event_name: &str, min_interval: Duration, app_handle: &tauri::AppHandle) -> Self {
-        let (tx, rx) = mpsc::channel(10);
+        let (tx, rx) = mpsc::channel(128);
         Self {
             event_name: event_name.to_owned(),
             listen_count: AtomicUsize::new(0),
@@ -42,7 +43,9 @@ impl ObjectEntryLatestObservable {
 
     pub async fn notify(&self) {
         if self.listen_count.load(std::sync::atomic::Ordering::SeqCst) != 0 {
-            self.tx.send_timeout(ObserverCommand::Value, Duration::from_millis(1000)).await.expect("Failed to notify latest observable");
+            if let Err(_) = self.tx.send_timeout(ObserverCommand::Value, Duration::from_millis(1000)).await {
+                cprintln!("<red> Failed to notify latest observable. MPCS capacity is full, dropping the value </red>");
+            }
         }
     }
 
