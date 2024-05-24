@@ -56,7 +56,10 @@ function ObjectEntryRow({ nodeName, objectEntryName, value }: ObjectEntryRowProp
 
   useEffect(() => {
     invoke<ObjectEntryInformation>("object_entry_information", { nodeName, objectEntryName })
-      .then(setInfo);
+      .then(setInfo).catch(console.error);
+    return () =>{
+      setInfo(undefined);
+    }
   }, [nodeName, objectEntryName]);
 
   if (typeof value === "object") {

@@ -45,6 +45,7 @@ const VirtuosoTableComponents: TableComponents<RowData> = {
 function NodePanel({ node }: Readonly<NodePanelProps>) {
 
   const [rowData, setRowData] = useState<(RowData)[]>([]);
+  const [currNodeName, setCurrNodeName] = useState<string>(node.name);
   const [filter, setFilter] = useState<number[]>(node.object_entries.map((_,i) => i));
   const [searchString, setSearchString] = useState<string>("");
 
@@ -73,13 +74,14 @@ function NodePanel({ node }: Readonly<NodePanelProps>) {
     setFilter(node.object_entries.map((_,i) => i));
     setSearchString("");
     let asyncCleanup = asyncSetup();
+    setCurrNodeName(node.name);
     return () => {
       asyncCleanup.then(f => f()).catch(console.error);
     };
   }, [node.name]);
 
   function rowContent(_index: number, row: RowData) {
-    return <ObjectEntryRow nodeName={node.name} objectEntryName={row?.objectEntryName} value={row.value?.value} />
+    return <ObjectEntryRow nodeName={currNodeName} objectEntryName={row?.objectEntryName} value={row.value?.value} />
   }
 
   const searchFieldRef = useRef() as any;
