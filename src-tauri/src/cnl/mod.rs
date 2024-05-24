@@ -8,6 +8,7 @@ mod rx;
 pub mod trace;
 mod tx;
 mod watchdog;
+mod gamepad;
 
 pub mod can_adapter;
 
@@ -17,13 +18,7 @@ use std::{
 };
 
 use self::{
-    can_adapter::CanAdapter,
-    connection::{ConnectionObject, ConnectionStatus},
-    network::{node_object::NodeObject, NetworkObject},
-    rx::RxCom,
-    trace::TraceObject,
-    tx::TxCom,
-    watchdog::{Watchdog, WatchdogOverlord, WdgTag},
+    can_adapter::CanAdapter, connection::{ConnectionObject, ConnectionStatus}, gamepad::Gamepad, network::{node_object::NodeObject, NetworkObject}, rx::RxCom, trace::TraceObject, tx::TxCom, watchdog::{Watchdog, WatchdogOverlord, WdgTag}
 };
 
 use canzero_config::config;
@@ -62,6 +57,7 @@ impl CNL {
 
         let node_id = node_id.unwrap_or(network_config.nodes().len() as u8);
 
+
         let trace = Arc::new(TraceObject::create(app_handle));
 
         let tx = Arc::new(TxCom::create(
@@ -72,6 +68,8 @@ impl CNL {
             &connection_object,
             node_id, 
         ));
+
+        let gamepad = Gamepad::create(&tx);
 
         let network = Arc::new(NetworkObject::create(
             network_config,

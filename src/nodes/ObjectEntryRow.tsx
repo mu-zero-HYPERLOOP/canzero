@@ -69,6 +69,9 @@ function ObjectEntryRow({ nodeName, objectEntryName, value }: ObjectEntryRowProp
           minWidth: "25vw",
           maxWidth: "25vw",
           overflow: "clip",
+          minHeight:  "100px",
+          maxHeight:  "100px",
+          heigt:  "100px",
         }}>
           {objectEntryName}
         </TableCell>

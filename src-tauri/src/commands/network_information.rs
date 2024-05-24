@@ -66,6 +66,7 @@ pub async fn object_entry_information(
     node_name: String,
     object_entry_name: String,
 ) -> Result<ObjectEntryInformation, String> {
+    #[cfg(feature = "logging-invoke")]
     println!("invoke: (get) object_entry_information({node_name:?}, {object_entry_name:?})");
 
     let cnl = state.lock().await;

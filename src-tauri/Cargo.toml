@@ -40,6 +40,7 @@ chrono = { version = "0.4.34", features = [ "serde" ] }
 csv = "1.3.0"
 nix = { version = "0.28.0", features = ["net"], optional = true}
 color-print = "0.3.6"
+gilrs = "0.10.7"
 
 
 [features]

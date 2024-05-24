@@ -45,10 +45,10 @@ pub async fn set_object_entry_value(
         match oe_type.as_ref() {
             Type::Primitive(SignalType::SignedInt { size }) => {
                 if let Some(val) = json_value.as_i64() {
-                    let max_uvalue = u64::MAX.overflowing_shr(64 - *size as u32).0;
-                    let max_ivalue: i64 = (max_uvalue.overflowing_shr(1).0) as i64;
+                    let max_uvalue = u64::MAX >> (64 - *size as u32);
+                    let max_ivalue: i64 = (max_uvalue >> 1) as i64;
                     let min_ivalue: i64 = unsafe {
-                        std::mem::transmute(u64::MAX.overflowing_shl(*size as u32 - 1).0)
+                        std::mem::transmute(u64::MAX << *size as u32 - 1.0)
                     };
                     if val <= max_ivalue && val >= min_ivalue {
                         Ok(Value::SignedValue(val))
