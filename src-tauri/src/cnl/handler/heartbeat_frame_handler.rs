@@ -22,8 +22,9 @@ struct HeartbeatFrame {
 
 impl HeartbeatFrame {
     fn new(frame: &Frame) -> Self {
-        // not nice! but node_id should be enum in config but dont want to work with strings here
-        let node_id = frame.data() & 0xf;
+        let Some(Value::UnsignedValue(node_id)) = frame.attribute("node_id") else {
+            panic!("DETECTED INVALID CONFIG: invalid format of heartbeat : node_id missing");
+        };
         let Some(Value::UnsignedValue(unregister)) = frame.attribute("unregister") else {
             panic!("DETECTED INVALID CONFIG: invalid format of heartbeat : unregister missing");
         };
@@ -31,7 +32,7 @@ impl HeartbeatFrame {
             panic!("DETECTED INVALID CONFIG: invalid format of heartbeat : ticks_next missing");
         };
         HeartbeatFrame {
-            node_id: node_id as u8,
+            node_id: *node_id as u8,
             unregister: match unregister {
                 0 => false,
                 _ => true,
