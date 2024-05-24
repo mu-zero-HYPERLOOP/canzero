@@ -45,6 +45,7 @@ const VirtuosoTableComponents: TableComponents<RowData> = {
 function NodePanel({ node }: Readonly<NodePanelProps>) {
 
   const [rowData, setRowData] = useState<(RowData)[]>([]);
+  const [currNode, setCurrNode] = useState<NodeInformation>(node);
   const [filter, setFilter] = useState<number[]>(node.object_entries.map((_,i) => i));
   const [searchString, setSearchString] = useState<string>("");
 
@@ -70,6 +71,7 @@ function NodePanel({ node }: Readonly<NodePanelProps>) {
     }
     // init!
     setRowData([]);
+    setCurrNode(node)
     setFilter(node.object_entries.map((_,i) => i));
     setSearchString("");
     let asyncCleanup = asyncSetup();
@@ -154,7 +156,7 @@ function NodePanel({ node }: Readonly<NodePanelProps>) {
         }}
       >
       </TextField>
-      {rowData.length == 0 ? <Skeleton
+      {(rowData.length == 0 || currNode.name !== node.name) ? <Skeleton
 
         variant="rounded"
         animation="wave"
