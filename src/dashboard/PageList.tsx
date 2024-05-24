@@ -18,7 +18,6 @@ import { invoke } from '@tauri-apps/api';
 import Box from "@mui/material/Box";
 import SaveIcon from '@mui/icons-material/Save';
 import { ObjectEntryInformation } from '../object_entry/types/ObjectEntryInformation.tsx';
-import HeartbeatStatus from '../nodes/HeartbeatStatus.tsx';
 import HeartbeatNodeStatus from './HeartbeatNodeStatus.tsx';
 
 interface ListItemLinkProps {

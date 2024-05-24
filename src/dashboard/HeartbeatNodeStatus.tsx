@@ -40,7 +40,7 @@ function statesToNodeState(states: string[]) {
 
 function HeartbeatNodeStatus({ nodeName, busNames }: Readonly<HeartbeatProps>) {
   const [heartbeatNodeState, setHeartbeatNodeState] = useState<string>();
-  const [heartbeatStates, setHeartbeatStates] = useState<string[]>([]);
+  const [_, setHeartbeatStates] = useState<string[]>([]);
 
   useEffect(() => {
     async function asyncSetup() {
