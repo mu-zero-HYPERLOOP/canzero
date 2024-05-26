@@ -105,6 +105,12 @@ function SideMenu({ open, toggleOpen }: Readonly<SideMenuProps>) {
       >
         <IconButton
           onClick={toggleOpen}
+          sx={{
+              backgroundColor: theme.palette.background.drawer,
+              '&:hover': {
+                  backgroundColor: theme.palette.background.paper,
+              }
+          }}
         >
           <ChevronLeftIcon />
         </IconButton>
@@ -116,7 +122,7 @@ function SideMenu({ open, toggleOpen }: Readonly<SideMenuProps>) {
           backgroundColor: theme.palette.background.drawer,
           position: "relative",
           top: "-5px",
-          borderRight: `1px solid ${theme.palette.background.appBar}`,
+          borderRight: `1px solid ${theme.palette.background.trace}`,
           minHeight: "calc(100vh - 85px)",
           maxHeight: "calc(100vh - 85px)",
         }}

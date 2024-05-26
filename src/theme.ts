@@ -49,10 +49,12 @@ declare module "@mui/material/styles" {
   interface TypeBackground {
     drawer?: string,
     appBar?: string,
+    trace?: string,
     main? : string,
     paper2?: string,
     warn?: string,
     error?: string,
+    disabled?: string
   }
 }
 
@@ -92,7 +94,8 @@ let theme = createTheme({
     //   dark: "#787878",
     // },
     background : {
-      appBar: "#e7e7e7",
+      appBar: "#1F1F1F",
+      trace: "#e7e7e7",
       drawer: "#ffffff",
       default: "#f7f7f7",
       main: "#f7f7f7",
@@ -100,6 +103,7 @@ let theme = createTheme({
       paper2: "#f5f5f5",
       warn: "#f2e9ce",
       error: "#f2d5d5",
+      disabled: "#808080"
     },
     stateInit: {
       main: "#e0d845",

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api";
 import { listen } from "@tauri-apps/api/event";
 import { ObjectEntryEvent } from "../../types/events/ObjectEntryEvent";
+import theme from "../../../theme.ts";
 
 
 const OE = {nodeName : "input_board", objectEntryName : "error_low_battery"};
@@ -45,8 +46,8 @@ function BatteryIconDisplay() {
     <Box component="div" sx={{
       textAlign: "center",
     }}>
-      <FontAwesomeIcon color={state ? "red": "grey" } icon={faCarBattery} fontSize="30px" />
-      <Typography color="black">
+      <FontAwesomeIcon color={state ? "red": theme.palette.background.disabled  } icon={faCarBattery} fontSize="30px" />
+      <Typography color="white">
         Battery
       </Typography>
     </Box>

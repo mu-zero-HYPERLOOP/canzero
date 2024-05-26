@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { ObjectEntryListenLatestResponse } from "../../types/events/ObjectEntryListenLatestResponse";
 import { listen } from "@tauri-apps/api/event";
 import { ObjectEntryEvent } from "../../types/events/ObjectEntryEvent";
+import theme from "../../../theme.ts";
 
 
 
@@ -45,9 +46,9 @@ function TemperatureIconDisplay() {
     <Box component="div" sx={{
       textAlign: "center",
     }}>
-      <Thermostat sx={{ fontSize: "32px", color: state ? "red" : "grey" }} />
+      <Thermostat sx={{ fontSize: "32px", color: state ? "red" : theme.palette.background.disabled  }} />
       <div style={{ marginBottom: "-6px" }} />
-      <Typography color="black">
+      <Typography color="white">
         OverTemp
       </Typography>
     </Box>

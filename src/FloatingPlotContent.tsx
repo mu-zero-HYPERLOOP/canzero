@@ -59,19 +59,19 @@ function FloatingObjectEntryPanel({ node, name }: Readonly<FloatingObjectEntryPa
   }, [node, name]);
 
   return <Paper sx={{
-    marginTop: "30px",
+    marginTop: "20px",
     marginLeft: "8px",
     marginRight: "10px",
     paddingLeft: "12px",
     paddingRight: "12px",
-    paddingTop: "45px",
+    paddingTop: "55px",
     paddingBottom: "20px",
     width: "calc(100% - 40px)",
     position: "relative"
   }}>
     <Stack component="div" sx={{
       position: "absolute",
-      top: "-12px",
+      top: "0px",
       left: "12px",
       padding: "1px",
     }} direction="row">
@@ -91,7 +91,7 @@ function FloatingObjectEntryPanel({ node, name }: Readonly<FloatingObjectEntryPa
         <>
           {information.description ? <Typography sx={{
             position: "absolute",
-            top: "18px",
+            top: "30px",
             left: "20px",
             padding: "1px",
 

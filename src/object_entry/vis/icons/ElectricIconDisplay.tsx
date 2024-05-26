@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api";
 import { listen } from "@tauri-apps/api/event";
 import { ObjectEntryEvent } from "../../types/events/ObjectEntryEvent";
+import theme from "../../../theme.ts";
 
 
 const OE = { nodeName: "master", objectEntryName: "sdc_status" };
@@ -46,9 +47,9 @@ function ElectricIconDisplay() {
     <Box component="div" sx={{
       textAlign: "center",
     }}>
-      <Bolt id="electric-icon" sx={{ fontSize: "32px", color: state ? "yellow" : "grey" }} />
+      <Bolt id="electric-icon" sx={{ fontSize: "32px", color: state ? "yellow" : theme.palette.background.disabled }} />
       <div style={{ marginBottom: "-6px" }} />
-      <Typography color="black">
+      <Typography color="white">
         Electric
       </Typography>
     </Box>

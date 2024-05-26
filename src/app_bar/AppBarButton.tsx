@@ -1,5 +1,6 @@
 import Button from "@mui/material/Button";
 import { ReactElement } from "react";
+import theme from "../theme.ts";
 
 
 interface AppBarButtonProps {
@@ -18,7 +19,7 @@ function AppBarButton({
   onClick,
   color,
   width = "12em",
-  variant = "outlined",
+  variant = "contained",
   disabled = false,
 }: Readonly<AppBarButtonProps>) {
   return (
@@ -31,6 +32,12 @@ function AppBarButton({
         minWidth: width,
         maxHeight: '57px',
         minHeight: '57px',
+      }}
+      sx={{
+          ":disabled": {
+              backgroundColor: theme.palette.background.disabled
+          }
+
       }}
       color={color}
       onClick={onClick}

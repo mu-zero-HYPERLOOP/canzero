@@ -103,27 +103,27 @@ function NodePanel({ node }: Readonly<NodePanelProps>) {
 
   return (
     <Paper sx={{
-      marginTop: "30px",
+      marginTop: "20px",
       marginLeft: "8px",
       marginRight: "10px",
       paddingLeft: "12px",
       paddingRight: "12px",
       width: "calc(100% - 16px)",
-      height: "calc(100vh - 115px)",
-      paddingTop: "45px",
-      paddingBottom: "20px",
+      height: "calc(101vh - 115px)",
+      paddingTop: "60px",
+      paddingBottom: "8px",
       position: "relative"
     }}>
       <Stack direction={"row"} sx={{
           position: "absolute",
-          top: "-12px",
+          top: "2px",
           left: "12px",
           padding: "1px",
         }} spacing={2} alignItems={"center"}>
         <Typography variant="h5">{node.name}</Typography>
         {
           node.buses.map(bus => (
-          <Box position={"relative"} top={"-0.25em"}>
+          <Box position={"relative"} top={"-0.10em"}>
             <HeartbeatStatus nodeName={node.name} busName={bus}>
             </HeartbeatStatus>
           </Box>
@@ -133,7 +133,7 @@ function NodePanel({ node }: Readonly<NodePanelProps>) {
 
       {node.description ? <Typography sx={{
         position: "absolute",
-        top: "18px",
+        top: "32px",
         left: "20px",
         padding: "1px",
 
@@ -145,7 +145,7 @@ function NodePanel({ node }: Readonly<NodePanelProps>) {
         value={searchString}
         sx={{
           position: "absolute",
-          top: "5px",
+          top: "10px",
           right : "20px",
           width: "50%",
           maxWidth: "400px",

@@ -15,7 +15,7 @@ import NormalRow from './NormalRow';
 
 const StyledTableHeader = styled(TableRow)(({theme}) => ({
   "& th": {
-    backgroundColor: theme.palette.background.appBar,
+    backgroundColor: theme.palette.background.trace,
   },
 }));
 

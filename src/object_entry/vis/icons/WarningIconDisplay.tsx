@@ -6,6 +6,7 @@ import { listen } from "@tauri-apps/api/event";
 import { ObjectEntryEvent } from "../../types/events/ObjectEntryEvent";
 import { useEffect, useState } from "react";
 import { ObjectEntryListenLatestResponse } from "../../types/events/ObjectEntryListenLatestResponse";
+import theme from "../../../theme.ts";
 
 
 
@@ -47,8 +48,8 @@ function WarningIconDisplay() {
     <Box component="div" sx={{
       textAlign: "center",
     }}>
-      <FontAwesomeIcon id="warning-icon" color={state ? "red" : "grey"} icon={faTriangleExclamation} fontSize="30px" />
-      <Typography color="black">
+      <FontAwesomeIcon id="warning-icon" color={state ? "red" : theme.palette.background.disabled } icon={faTriangleExclamation} fontSize="30px" />
+      <Typography color="white">
         Warning
       </Typography>
     </Box>

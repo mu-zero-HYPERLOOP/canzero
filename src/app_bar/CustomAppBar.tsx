@@ -319,6 +319,10 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
             onClick={toggleOpen}
             sx={{
               marginRight: '36px',
+              backgroundColor: theme.palette.background.drawer,
+              '&:hover': {
+                backgroundColor: theme.palette.background.paper,
+              }
             }}
           >
             <MenuIcon />
@@ -338,11 +342,11 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
             direction="row"
             justifyContent="flex-end"
             alignItems="center"
-            spacing={3}
+            spacing={2}
           >
             <StateDisplay state={state} />
             {/* Buttons */}
-            <AppBarButton variant="contained" width="15em" color="stateError" onClick={sendEmergencyCommand} >
+            <AppBarButton variant="contained" width="16em" color="stateError" onClick={sendEmergencyCommand} >
               <p>Emergency <br />[Space bar]</p>
             </AppBarButton>
 
