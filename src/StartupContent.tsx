@@ -1,5 +1,4 @@
 import { Alert, AlertTitle, AppBar, Box, Container, CssBaseline, IconButton, LinearProgress, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Paper, Stack, Step, StepContent, StepLabel, Stepper, Toolbar, Typography, useTheme } from "@mui/material";
-import CloseIcon from '@mui/icons-material/Close';
 import AccessibleIcon from '@mui/icons-material/Accessible';
 import LanIcon from '@mui/icons-material/Lan';
 import CellTowerIcon from '@mui/icons-material/CellTower';
@@ -133,9 +132,6 @@ function StartupContent() {
               </IconButton>
               <IconButton onClick={() => invoke("open_settings").catch(console.error)}>
                 <AccessibleIcon />
-              </IconButton>
-              <IconButton onClick={() => invoke("close").catch(console.error)}>
-                <CloseIcon />
               </IconButton>
             </Stack>
           </Toolbar>
