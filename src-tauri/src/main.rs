@@ -67,6 +67,9 @@ async fn main() {
             connection_status::close,
             commands::node_commands::listen_to_node_latest,
             commands::node_commands::unlisten_from_node_latest,
+            commands::node_commands::get_heartbeat_status,
+            commands::node_commands::listen_to_heartbeat,
+            commands::node_commands::unlisten_from_heartbeat,
             commands::export::export,
             commands::startup::download_network_configuration,
             commands::startup::discover_servers,
@@ -76,6 +79,9 @@ async fn main() {
             commands::settings::open_settings,
             commands::settings::close_settings,
             commands::settings::select_network_configuration,
+            commands::settings::get_settings,
+            commands::settings::set_frontend_lvl,
+            commands::settings::set_deadlock_lvl,
         ])
         .run(tauri::generate_context!())
         .expect("Error while running tauri application");

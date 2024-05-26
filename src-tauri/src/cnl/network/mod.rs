@@ -3,7 +3,7 @@ use std::{sync::Arc, time::Instant};
 use self::node_object::NodeObject;
 use canzero_config::config;
 
-use super::tx::TxCom;
+use super::{tx::TxCom, watchdog::WatchdogOverlord};
 
 pub mod command_object;
 pub mod node_object;
@@ -19,6 +19,7 @@ impl NetworkObject {
         app_handle: &tauri::AppHandle,
         tx_com: Arc<TxCom>,
         timebase: Instant,
+        watchdog_overloard: &WatchdogOverlord,
     ) -> Self {
         Self {
             nodes: network_config
@@ -31,6 +32,7 @@ impl NetworkObject {
                         app_handle,
                         tx_com.clone(),
                         timebase,
+                        watchdog_overloard,
                     ))
                 })
                 .collect(),

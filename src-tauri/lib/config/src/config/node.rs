@@ -1,16 +1,16 @@
 use std::hash::Hash;
 
-use super::{ConfigRef, TypeRef, CommandRef, stream::StreamRef, MessageRef, ObjectEntryRef, bus::BusRef};
-
+use super::{
+    bus::BusRef, stream::StreamRef, CommandRef, ConfigRef, MessageRef, ObjectEntryRef, TypeRef,
+};
 
 pub type NodeRef = ConfigRef<Node>;
-
 
 #[derive(Debug)]
 pub struct Node {
     name: String,
     description: Option<String>,
-    id : u8,
+    id: u8,
 
     types: Vec<TypeRef>,
 
@@ -24,7 +24,7 @@ pub struct Node {
     tx_messages: Vec<MessageRef>,
 
     object_entries: Vec<ObjectEntryRef>,
-    buses : Vec<BusRef>,
+    buses: Vec<BusRef>,
 }
 
 impl Hash for Node {
@@ -55,16 +55,20 @@ impl Hash for Node {
 }
 
 impl Node {
-    pub fn new(name : String, description : Option<String>, id : u8,
-               types : Vec<TypeRef>,
-               commands : Vec<CommandRef>,
-               extern_commands : Vec<(String, CommandRef)>,
-               tx_streams : Vec<StreamRef>,
-               rx_streams : Vec<StreamRef>,
-               rx_messages : Vec<MessageRef>,
-               tx_messages : Vec<MessageRef>,
-               object_entries : Vec<ObjectEntryRef>,
-               buses : Vec<BusRef>)-> Self{
+    pub fn new(
+        name: String,
+        description: Option<String>,
+        id: u8,
+        types: Vec<TypeRef>,
+        commands: Vec<CommandRef>,
+        extern_commands: Vec<(String, CommandRef)>,
+        tx_streams: Vec<StreamRef>,
+        rx_streams: Vec<StreamRef>,
+        rx_messages: Vec<MessageRef>,
+        tx_messages: Vec<MessageRef>,
+        object_entries: Vec<ObjectEntryRef>,
+        buses: Vec<BusRef>,
+    ) -> Self {
         Self {
             name,
             description,
@@ -81,7 +85,6 @@ impl Node {
         }
     }
 
-               
     pub fn name(&self) -> &str {
         &self.name
     }

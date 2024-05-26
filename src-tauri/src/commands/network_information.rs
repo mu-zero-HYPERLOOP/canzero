@@ -27,6 +27,7 @@ pub struct NodeInformation {
     id: u8,
     object_entries: Vec<String>,
     commands: Vec<String>,
+    buses: Vec<String>,
 }
 
 #[tauri::command]
@@ -53,6 +54,7 @@ pub async fn node_information(
                 .iter()
                 .map(|c| c.name().to_owned())
                 .collect(),
+            buses: node.buses().iter().map(|b| b.name().to_owned()).collect(),
         }),
         None => Err(format!("node with name '{node_name}' doesn't exist")),
     }

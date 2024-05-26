@@ -6,4 +6,5 @@ export interface NodeInformation {
   id : number,
   object_entries : string[],
   commands : string[],
+  buses : string[],
 }

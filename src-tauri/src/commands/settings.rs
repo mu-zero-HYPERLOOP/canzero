@@ -1,4 +1,4 @@
-use canzero_appdata::AppData;
+use canzero_appdata::{AppData, AppDataConfig, WdgLevel};
 use tauri::{api::dialog::FileDialogBuilder, Manager};
 
 #[tauri::command]
@@ -26,6 +26,39 @@ pub fn close_settings(app_handle: tauri::AppHandle) {
     match app_handle.get_window("settings") {
         Some(win) => win.close().unwrap(),
         None => (),
+    }
+}
+
+#[tauri::command]
+pub fn get_settings() -> Result<AppDataConfig, ()> {
+    let app_data = AppData::read();
+    match app_data {
+        Ok(app_data) => Ok(app_data.get_config().clone()),
+        Err(_) => Err(()),
+    }
+}
+
+#[tauri::command]
+pub fn set_frontend_lvl(lvl: WdgLevel) -> Result<WdgLevel, ()> {
+    let app_data = AppData::read();
+    match app_data {
+        Ok(mut app_data) => {
+            app_data.set_frontend_wdg_lvl(lvl);
+            Ok(app_data.get_frontend_wdg_lvl())
+        }
+        Err(_) => Err(()),
+    }
+}
+
+#[tauri::command]
+pub fn set_deadlock_lvl(lvl: WdgLevel) -> Result<WdgLevel, ()> {
+    let app_data = AppData::read();
+    match app_data {
+        Ok(mut app_data) => {
+            app_data.set_deadlock_wdg_lvl(lvl);
+            Ok(app_data.get_deadlock_wdg_lvl())
+        }
+        Err(_) => Err(()),
     }
 }
 

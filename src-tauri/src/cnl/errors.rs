@@ -7,6 +7,7 @@ pub enum Error {
     InvalidGetResponseToggleFlag,
     InvalidGetResponseServerOrObjectEntryNotFound,
     InvalidSetResponseServerOrObjectEntryNotFound,
+    InvalidHeartbeatNodeId
 }
 
 impl Error {
@@ -17,6 +18,7 @@ impl Error {
             Error::InvalidGetResponseToggleFlag => "invalid get response: invalid toggle bit",
             Error::InvalidGetResponseServerOrObjectEntryNotFound => "invalid get response: server or object entry not found",
             Error::InvalidSetResponseServerOrObjectEntryNotFound => "invalid set response: server or object entry not found",
+            Error::InvalidHeartbeatNodeId => "invalid heartbeat message: node id does not exists",
         }
     }
 
@@ -27,6 +29,7 @@ impl Error {
             Error::InvalidGetResponseToggleFlag => "invalid get response: invalid toggle bit",
             Error::InvalidGetResponseServerOrObjectEntryNotFound => "invalid get response: server not found",
             Error::InvalidSetResponseServerOrObjectEntryNotFound => "No node with given id and object entry index could be found",
+            Error::InvalidHeartbeatNodeId => "invalid heartbeat message: node id does not exists",
         }
     }
 }

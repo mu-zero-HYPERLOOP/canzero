@@ -9,7 +9,7 @@ use bitvec::{
     vec::BitVec,
 };
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Frame {
     config: MessageRef,
     data: u64,
@@ -40,7 +40,7 @@ impl Value {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct FrameValue {
     attributes: Vec<Attribute>,
 }

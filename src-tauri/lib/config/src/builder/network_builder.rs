@@ -521,7 +521,7 @@ impl NetworkBuilder {
             heartbeat_message.__assign_to_heartbeat();
             heartbeat_message.set_any_std_id(MessagePriority::SuperLow);
             let heartbeat_message_format = heartbeat_message.make_type_format();
-            heartbeat_message_format.add_type("node_id", "node_id");
+            heartbeat_message_format.add_type("u8", "node_id");
             heartbeat_message_format.add_type("u1", "unregister");
             heartbeat_message_format.add_type("u7", "ticks_next");
             for node_builder in self.0.borrow().nodes.borrow().iter() {
@@ -824,6 +824,14 @@ impl NetworkBuilder {
 
         // add get and set req,resp to all nodes
         let n_nodes = builder.nodes.borrow().len();
+        let node_id_type = types.iter().find(|&t| {
+            match t as &Type {
+                Type::Primitive(_) => return false,
+                Type::Struct { .. } => return false,
+                Type::Enum { name, .. } => return name == "node_id",
+                Type::Array { .. } => return false,
+            }
+        }).expect("node_id enum is missing from types!").clone();
 
         let mut nodes = vec![];
         // first create messages with tx and rx messages.
@@ -831,6 +839,9 @@ impl NetworkBuilder {
             let node_data = node_builder.0.borrow();
 
             let mut node_types = vec![];
+
+            // node_id enum should be available on all nodes
+            node_types.push(node_id_type.clone());
 
             #[cfg(feature = "logging_info")]
             println!(
@@ -1012,7 +1023,7 @@ impl NetworkBuilder {
             );
             let node_types = Self::topo_sort_types(&node_types);
 
-            let buses = node_data
+            let node_buses = node_data
                 .buses
                 .iter()
                 .map(|bus_builder| {
@@ -1046,7 +1057,7 @@ impl NetworkBuilder {
                 rx_messages,
                 tx_messages,
                 object_entries,
-                buses,
+                node_buses,
             )));
         }
 

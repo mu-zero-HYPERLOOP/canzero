@@ -9,7 +9,10 @@ use tokio::time;
 
 use crate::cnl::connection::ConnectionStatus;
 
-use super::{connection::ConnectionObject, deserialize::FrameDeserializer, trace::TraceObject, CanAdapter};
+use super::{
+    connection::ConnectionObject, deserialize::FrameDeserializer, frame::Frame, trace::TraceObject,
+    CanAdapter,
+};
 
 use canzero_common::{CanFrame, Timestamped};
 
@@ -18,11 +21,12 @@ pub struct TxCom {
     set_req_can_adapter: Arc<CanAdapter>,
     get_req_frame_deserializer: FrameDeserializer,
     get_req_can_adapter: Arc<CanAdapter>,
+    can_adapters: Vec<Arc<CanAdapter>>,
     my_node_id: u8,
     frag_time_ms: u64,
     timebase: Instant,
     trace: Arc<TraceObject>,
-    connection_object : Arc<ConnectionObject>,
+    connection_object: Arc<ConnectionObject>,
 }
 
 impl TxCom {
@@ -31,8 +35,8 @@ impl TxCom {
         can_adapters: &Vec<Arc<CanAdapter>>,
         trace: &Arc<TraceObject>,
         basetime: Instant,
-        connection_object : &Arc<ConnectionObject>,
-        node_id : u8,
+        connection_object: &Arc<ConnectionObject>,
+        node_id: u8,
     ) -> TxCom {
         let set_req_can_adapter = can_adapters
             .iter()
@@ -53,9 +57,10 @@ impl TxCom {
             get_req_frame_deserializer: FrameDeserializer::new(network_ref.get_req_message()),
             get_req_can_adapter,
             frag_time_ms: 200,
+            can_adapters: can_adapters.clone(),
             timebase: basetime,
             trace: trace.clone(),
-            connection_object : connection_object.clone(),
+            connection_object: connection_object.clone(),
         }
     }
 
@@ -127,7 +132,8 @@ impl TxCom {
 
         if let Err(err) = self.get_req_can_adapter.send(get_req_frame).await {
             println!("<red>Failed to send get req </red>: {err:?}");
-            self.connection_object.set_status(ConnectionStatus::NetworkDisconnected);
+            self.connection_object
+                .set_status(ConnectionStatus::NetworkDisconnected);
         }
 
         let frame = Timestamped::now(
@@ -142,6 +148,35 @@ impl TxCom {
             )
             .await;
     }
+
+    pub async fn send_heartbeat(&self, ticks_next: u8) {
+        let mut msg_data = self.my_node_id as u64;
+        if ticks_next >> 7 != 0 {
+            panic!("Invalid ticks_next value for heartbeat");
+        }
+        msg_data |= (ticks_next as u64) << 9;
+
+        for can_adapter in self.can_adapters.iter() {
+            let msg = self
+                .network_ref
+                .heartbeat_messages()
+                .iter()
+                .find(|&m| m.bus().id() == can_adapter.bus().id())
+                .expect(&format!(
+                    "Invalid network object! No heartbeat for {}",
+                    can_adapter.bus().name()
+                ));
+
+            let heartbeat_frame =
+                CanFrame::new(msg.id().as_u32(), msg.id().ide(), false, 2, msg_data);
+
+            if let Err(err) = can_adapter.send(heartbeat_frame).await {
+                println!("<red>Failed to send heartbeat </red>: {err:?}");
+                self.connection_object
+                    .set_status(ConnectionStatus::NetworkDisconnected);
+            }
+        }
+    }
 }
 
 async fn fragmented_can_send(
@@ -151,7 +186,7 @@ async fn fragmented_can_send(
     frag_time_ms: u64,
     timebase: Instant,
     trace: Arc<TraceObject>,
-    connection_object : Arc<ConnectionObject>,
+    connection_object: Arc<ConnectionObject>,
 ) {
     let mut interval = time::interval(Duration::from_millis(frag_time_ms));
 
@@ -172,7 +207,11 @@ async fn fragmented_can_send(
         }
 
         trace
-            .push_normal_frame(tframe, set_req_config.bus().name(), set_req_config.bus().id())
+            .push_normal_frame(
+                tframe,
+                set_req_config.bus().name(),
+                set_req_config.bus().id(),
+            )
             .await;
     }
 }
