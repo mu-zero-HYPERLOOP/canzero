@@ -25,6 +25,13 @@ impl From<std::io::Error> for AppDataError {
     }
 }
 
+#[derive(Serialize, Deserialize, Clone, PartialEq, Copy, Debug)]
+pub enum WdgLevel {
+    Disable,
+    Ignore,
+    Active
+}
+
 #[derive(Clone)]
 pub struct AppData {
     config_change_flag: bool,
@@ -32,9 +39,13 @@ pub struct AppData {
 }
 
 #[derive(Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AppDataConfig {
     config_path: Option<PathBuf>,
+    frontend_wdg_lvl: WdgLevel,
+    deadlock_wdg_lvl: WdgLevel,
 }
+
 
 impl AppData {
     pub fn read() -> Result<Self> {
@@ -52,6 +63,10 @@ impl AppData {
         } else {
             Ok(Self::default())
         }
+    }
+
+    pub fn get_config(&self) -> &AppDataConfig {
+       &self.config 
     }
 
     pub fn dir() -> PathBuf {
@@ -77,8 +92,30 @@ impl AppData {
         Ok(())
     }
 
+    pub fn set_frontend_wdg_lvl(&mut self, lvl: WdgLevel) {
+        if self.get_frontend_wdg_lvl() != lvl {
+            self.config.frontend_wdg_lvl = lvl;
+            self.config_change_flag = true;
+        }
+    }
+
+    pub fn set_deadlock_wdg_lvl(&mut self, lvl: WdgLevel) {
+        if self.get_deadlock_wdg_lvl() != lvl {
+            self.config.deadlock_wdg_lvl = lvl;
+            self.config_change_flag = true;
+        }
+    }
+
     pub fn get_config_path(&self) -> Option<&PathBuf> {
         self.config.config_path.as_ref()
+    }
+
+    pub fn get_frontend_wdg_lvl(&self) -> WdgLevel {
+        self.config.frontend_wdg_lvl
+    }
+
+    pub fn get_deadlock_wdg_lvl(&self) -> WdgLevel {
+        self.config.deadlock_wdg_lvl
     }
 
     fn appdata_path() -> PathBuf {
@@ -148,7 +185,11 @@ impl Default for AppData {
     fn default() -> Self {
         Self {
             config_change_flag: false,
-            config: AppDataConfig { config_path: None },
+            config: AppDataConfig {
+                config_path: None,
+                deadlock_wdg_lvl: WdgLevel::Active,
+                frontend_wdg_lvl: WdgLevel::Active,
+            },
         }
     }
 }

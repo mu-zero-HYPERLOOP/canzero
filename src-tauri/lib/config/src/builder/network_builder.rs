@@ -824,6 +824,14 @@ impl NetworkBuilder {
 
         // add get and set req,resp to all nodes
         let n_nodes = builder.nodes.borrow().len();
+        let node_id_type = types.iter().find(|&t| {
+            match t as &Type {
+                Type::Primitive(_) => return false,
+                Type::Struct { .. } => return false,
+                Type::Enum { name, .. } => return name == "node_id",
+                Type::Array { .. } => return false,
+            }
+        }).expect("node_id enum is missing from types!").clone();
 
         let mut nodes = vec![];
         // first create messages with tx and rx messages.
@@ -831,6 +839,9 @@ impl NetworkBuilder {
             let node_data = node_builder.0.borrow();
 
             let mut node_types = vec![];
+
+            // node_id enum should be available on all nodes
+            node_types.push(node_id_type.clone());
 
             #[cfg(feature = "logging_info")]
             println!(

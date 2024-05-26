@@ -79,6 +79,9 @@ async fn main() {
             commands::settings::open_settings,
             commands::settings::close_settings,
             commands::settings::select_network_configuration,
+            commands::settings::get_settings,
+            commands::settings::set_frontend_lvl,
+            commands::settings::set_deadlock_lvl,
         ])
         .run(tauri::generate_context!())
         .expect("Error while running tauri application");

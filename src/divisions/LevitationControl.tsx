@@ -1,22 +1,22 @@
-import {NodeInformation} from "../nodes/types/NodeInformation.ts";
+import { NodeInformation } from "../nodes/types/NodeInformation.ts";
 
 interface NodesProps {
-    nodes: NodeInformation[],
+  nodes: NodeInformation[],
 }
 
-function LevitationControl({nodes}: NodesProps) {
+function LevitationControl({ nodes }: NodesProps) {
 
-    return (
-        <>
-            <h1>Levitation Control</h1>
-            {nodes.map((entry: NodeInformation) => {
-                if (entry.name === "secu")
-                    return (<>
-                        </>
-                    )
-            })}
-        </>
-    );
+  return (
+    <>
+      <h1>Levitation Control</h1>
+      {nodes.map((entry: NodeInformation) => {
+        if (entry.name === "secu")
+          return (<>
+          </>
+          )
+      })}
+    </>
+  );
 }
 
 export default LevitationControl;

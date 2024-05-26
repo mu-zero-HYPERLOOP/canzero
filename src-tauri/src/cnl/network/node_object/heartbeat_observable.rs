@@ -83,7 +83,7 @@ impl HeartbeatObservable {
         loop {
             let _ = rx_status.changed().await;
             app_handle
-                .emit_all(event_name.as_str(), *rx_status.borrow())
+                .emit_all(event_name.as_str(), *rx_status.borrow_and_update())
                 .expect("Failed to emit heartbeat status");
         }
     }

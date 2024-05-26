@@ -3,13 +3,20 @@ use std::{
     time::Duration,
 };
 
+use canzero_appdata::WdgLevel;
+use chrono::{DateTime, Local};
 use color_print::cprintln;
 use serde::Serialize;
-use tokio::{sync::{mpsc, watch}, task::AbortHandle, time::Instant};
+use tokio::{
+    select,
+    sync::{mpsc, oneshot, watch},
+    task::AbortHandle,
+    time::{timeout, Instant},
+};
 
-use crate::cnl::connection::ConnectionStatus;
+use crate::{cnl::connection::ConnectionStatus, notification::notify_warning};
 
-use super::connection::ConnectionObject;
+use super::{connection::ConnectionObject, tx::TxCom};
 
 struct WatchdogSignal {
     unregister: bool,
@@ -29,7 +36,6 @@ pub enum WdgStatus {
     Good,
     InActive,
 }
-
 
 pub struct WatchdogTimeout {
     pub tag: WdgTag,
@@ -113,7 +119,7 @@ impl Watchdog {
                         error : WatchdogError::Timeout,
                     });
                     let _ = status_tx.send(WdgStatus::TimedOut);
-                    sleep.as_mut().reset(Instant::now() + timeout)
+                    sleep.as_mut().reset(Instant::now() + Duration::from_secs(10))
                 },
             }
         }
@@ -147,24 +153,63 @@ impl Drop for Watchdog {
     }
 }
 
+#[derive(Clone, Copy)]
+enum OverlordTimeoutSignal {
+    Good,
+    Bad,
+}
+
 struct WatchdogOverlordInner {
     watchdogs: Mutex<Vec<Watchdog>>,
     connection_object: Arc<ConnectionObject>,
+    status_tx: watch::Sender<OverlordTimeoutSignal>,
+    deadlock_lvl: WdgLevel,
+    frontend_lvl: WdgLevel,
+    app_handle: tauri::AppHandle,
 }
 
 impl WatchdogOverlordInner {
     fn notify_timeout(&self, timeout: WatchdogTimeout) {
         cprintln!("<red> Watchdog {:?} timeout</red>", timeout.tag);
         match timeout.tag {
-            WdgTag::FrontendWdg => self
-                .connection_object
-                .set_status(ConnectionStatus::FrontendWdgTimeout),
-            WdgTag::DeadlockWdg => self
-                .connection_object
-                .set_status(ConnectionStatus::DeadlockWdgTimeout),
-            WdgTag::Heartbeat { node_id, bus_id } => self
-                .connection_object
-                .set_status(ConnectionStatus::HeartbeatMiss { node_id, bus_id }),
+            WdgTag::FrontendWdg => {
+                if self.frontend_lvl == WdgLevel::Ignore {
+                    notify_warning(
+                        &self.app_handle,
+                        "Frontend Watchdog timed out",
+                        "This might the result of a frozen frontend, or a slow machine",
+                        Local::now(),
+                    );
+                } else if self.frontend_lvl == WdgLevel::Active {
+                    self.connection_object
+                        .set_status(ConnectionStatus::FrontendWdgTimeout);
+                    let _ = self.status_tx.send(OverlordTimeoutSignal::Bad);
+                }
+            }
+            WdgTag::DeadlockWdg => {
+                if self.deadlock_lvl == WdgLevel::Ignore {
+                    notify_warning(
+                        &self.app_handle,
+                        "Deadlock Watchdog timed out",
+                        "This might the result of a deadlock in the backend",
+                        Local::now(),
+                    );
+                } else if self.frontend_lvl == WdgLevel::Active {
+                    self.connection_object
+                        .set_status(ConnectionStatus::DeadlockWdgTimeout);
+                    let _ = self.status_tx.send(OverlordTimeoutSignal::Bad);
+                }
+            }
+            WdgTag::Heartbeat { node_id, bus_id: _ } => {
+                //self.connection_object
+                //    .set_status(ConnectionStatus::HeartbeatMiss { node_id, bus_id });
+                notify_warning(
+                    &self.app_handle,
+                    &format!("Hearbeat timeout of node {node_id}"),
+                    "This might the result of a damaged CAN connection",
+                    Local::now(),
+                );
+            }
         }
     }
 }
@@ -172,11 +217,61 @@ impl WatchdogOverlordInner {
 pub struct WatchdogOverlord(Arc<WatchdogOverlordInner>);
 
 impl WatchdogOverlord {
-    pub fn new(connection_object: &Arc<ConnectionObject>) -> Self {
+    pub fn new(
+        connection_object: &Arc<ConnectionObject>,
+        tx_com: &Arc<TxCom>,
+        deadlock_lvl: WdgLevel,
+        frontend_lvl: WdgLevel,
+        app_handle: &tauri::AppHandle,
+    ) -> Self {
+        let (over_status_tx, over_status_rx) = watch::channel(OverlordTimeoutSignal::Good);
+        let _ = tokio::spawn(Self::over_timeout_task(
+            over_status_rx,
+            tx_com.clone(),
+            Duration::from_millis(400),
+        ));
+
         Self(Arc::new(WatchdogOverlordInner {
             watchdogs: Mutex::new(vec![]),
             connection_object: connection_object.clone(),
+            status_tx: over_status_tx,
+            deadlock_lvl,
+            frontend_lvl,
+            app_handle: app_handle.clone(),
         }))
+    }
+
+    async fn over_timeout_task(
+        mut status_rx: watch::Receiver<OverlordTimeoutSignal>,
+        tx_com: Arc<TxCom>,
+        timeout: Duration,
+    ) {
+        let sleep = tokio::time::sleep(timeout);
+        tokio::pin!(sleep);
+        loop {
+            select! {
+                _ = status_rx.changed() => {
+                    let x = *status_rx.borrow_and_update();
+                    match x {
+                        OverlordTimeoutSignal::Good => {
+                            tx_com.send_heartbeat(12).await;
+                            sleep.as_mut().reset(Instant::now() + timeout);
+                        },
+                        OverlordTimeoutSignal::Bad => {
+                            // Send heartbeat with ticks_next = 0.
+                            // Should react quicker than just letting
+                            // heartbeats time out.
+                            tx_com.send_heartbeat(0).await;
+                            break;
+                        }
+                    }
+                }
+                () = sleep.as_mut() => {
+                    tx_com.send_heartbeat(12).await;
+                    sleep.as_mut().reset(Instant::now() + timeout);
+                }
+            }
+        }
     }
 
     pub fn register(&self, tag: WdgTag, timeout: Duration) -> Watchdog {
@@ -184,7 +279,7 @@ impl WatchdogOverlord {
         self.0
             .watchdogs
             .lock()
-            .expect("Failed to acquire WatchdogOverloard lock")
+            .expect("Failed to acquire WatchdogOverlord lock")
             .push(Watchdog(watchdog.0.clone()));
         watchdog
     }

@@ -26,6 +26,7 @@ use self::{
     watchdog::{Watchdog, WatchdogOverlord, WdgTag},
 };
 
+use canzero_appdata::{AppData, WdgLevel};
 use canzero_config::config;
 
 // Can Network Layer (CNL)
@@ -44,7 +45,7 @@ pub struct CNL {
     connection_object: Arc<ConnectionObject>,
 
     _watchdog_overlord: WatchdogOverlord,
-    external_watchdog: Watchdog,
+    external_watchdog: Option<Watchdog>,
 }
 
 impl CNL {
@@ -53,7 +54,7 @@ impl CNL {
         app_handle: &tauri::AppHandle,
         can_adapters: Vec<Arc<CanAdapter>>,
         timebase: Instant,
-        node_id : Option<u8>,
+        node_id: Option<u8>,
     ) -> Self {
         let connection_object = Arc::new(ConnectionObject::new(
             ConnectionStatus::NetworkConnected,
@@ -70,17 +71,30 @@ impl CNL {
             &trace,
             timebase,
             &connection_object,
-            node_id, 
+            node_id,
         ));
 
-        let watchdog_overlord = WatchdogOverlord::new(&connection_object);
+        let (deadlock_lvl, frontend_lvl) = match AppData::read() {
+            Ok(app_data) => (
+                app_data.get_deadlock_wdg_lvl(),
+                app_data.get_frontend_wdg_lvl(),
+            ),
+            Err(_) => (WdgLevel::Active, WdgLevel::Active),
+        };
+        let watchdog_overlord = WatchdogOverlord::new(
+            &connection_object,
+            &tx,
+            deadlock_lvl,
+            frontend_lvl,
+            &app_handle,
+        );
 
         let network = Arc::new(NetworkObject::create(
             network_config,
             app_handle,
             tx.clone(),
             timebase,
-            &watchdog_overlord
+            &watchdog_overlord,
         ));
 
         let rx = RxCom::create(
@@ -92,27 +106,32 @@ impl CNL {
             &connection_object,
             node_id,
         );
-            
+
         // disable the frontend heartbeat only for release
-        let external_watchdog =
-            watchdog_overlord.register(WdgTag::FrontendWdg, Duration::from_millis(1000));
+        let mut external_watchdog = None;
+        if frontend_lvl != WdgLevel::Disable {
+            println!("external disabled");
+            external_watchdog =
+                Some(watchdog_overlord.register(WdgTag::FrontendWdg, Duration::from_millis(1000)));
+        }
 
-        let deadlock_watchdog =
-            watchdog_overlord.register(WdgTag::DeadlockWdg, Duration::from_millis(1000));
-
-        let network_dead = network.clone();
-        let trace_dead = trace.clone();
-        let connection_object_dead = connection_object.clone();
-        tokio::spawn(async move {
-            let mut deadlock_interval = tokio::time::interval(Duration::from_millis(200));
-            loop {
-                deadlock_interval.tick().await;
-                network_dead.deadlock_watchdog().await;
-                trace_dead.deadlock_watchdog().await;
-                connection_object_dead.deadlock_watchdog().await;
-                deadlock_watchdog.reset(false, None).await;
-            }
-        });
+        if deadlock_lvl != WdgLevel::Disable {
+            let deadlock_watchdog =
+                watchdog_overlord.register(WdgTag::DeadlockWdg, Duration::from_millis(1000));
+            let network_dead = network.clone();
+            let trace_dead = trace.clone();
+            let connection_object_dead = connection_object.clone();
+            tokio::spawn(async move {
+                let mut deadlock_interval = tokio::time::interval(Duration::from_millis(200));
+                loop {
+                    deadlock_interval.tick().await;
+                    network_dead.deadlock_watchdog().await;
+                    trace_dead.deadlock_watchdog().await;
+                    connection_object_dead.deadlock_watchdog().await;
+                    deadlock_watchdog.reset(false, None).await;
+                }
+            });
+        }
 
         Self {
             rx,
@@ -121,7 +140,6 @@ impl CNL {
             network,
             connection_object,
             _watchdog_overlord: watchdog_overlord,
-
             external_watchdog,
         }
     }
@@ -139,7 +157,8 @@ impl CNL {
     }
 
     pub async fn reset_watchdog(&self) {
-        #[cfg(not(debug_assertions))]
-        self.external_watchdog.reset(false, None).await;
+        if let Some(wdg) = &self.external_watchdog {
+            wdg.reset(false, None).await;
+        }
     }
 }
