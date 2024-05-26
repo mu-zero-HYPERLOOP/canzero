@@ -58,7 +58,7 @@ impl ObjectEntryType {
                     scale,
                 } => {
                     let unsigned_max =
-                        (0xFFFFFFFFFFFFFFFFu64.overflowing_shr(u64::BITS - *size as u32)).0;
+                        u64::MAX >> (u64::BITS - *size as u32);
                     let decimal_range = unsigned_max as f64 * *scale;
                     let min = *offset;
                     let max = decimal_range + min;

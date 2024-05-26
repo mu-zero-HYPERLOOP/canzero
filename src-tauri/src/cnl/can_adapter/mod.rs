@@ -43,7 +43,7 @@ impl CanAdapter {
         );
 
         let mut adapters = vec![];
-        for (bus, (_tx, rx)) in
+        for (bus, (tx, rx)) in
             network_config.buses().iter().zip(channels.into_iter())
         {
             adapters.push(Self {
@@ -52,6 +52,8 @@ impl CanAdapter {
                     tcp_client.clone(),
                     bus.id(),
                     rx,
+                    tx,
+                    network_description.timebase,
                 )),
             });
         }
@@ -86,9 +88,9 @@ impl CanAdapter {
         }
     }
 
-    pub async fn send(&self, frame: CanFrame) -> std::io::Result<()> {
+    pub async fn send(&self, frame: CanFrame, loopback:  bool) -> std::io::Result<()> {
         match &self.imp {
-            CanAdapterImpl::TcpCanAdapter(adapter) => adapter.send(frame).await,
+            CanAdapterImpl::TcpCanAdapter(adapter) => adapter.send(frame, loopback).await,
             #[cfg(feature = "socket-can")]
             CanAdapterImpl::SocketCanAdapter(adapter) => adapter.send(frame).await,
         }

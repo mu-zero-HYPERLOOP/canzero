@@ -86,8 +86,7 @@ pub async fn command_dump(filter_msg_names: Vec<String>, filter_ids: Vec<String>
         if pass {
             let dlc = can_frame.get_dlc();
             let mask = 0xFFFFFFFFFFFFFFFFu64
-                .overflowing_shr(64u32 - dlc as u32 * 8u32)
-                .0;
+                .checked_shr(64u32 - dlc as u32 * 8u32).unwrap_or(0);
             let data = can_frame.get_data_u64() & mask;
             println!("{tsec:08.2}s : {bus:4} {id:5} [{dlc:1}] {data:016X}  ({msg_name})");
         }

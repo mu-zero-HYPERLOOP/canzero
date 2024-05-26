@@ -89,7 +89,7 @@ impl TypeDeserializer {
                             // pad with ones
                             Value::SignedValue(unsafe {
                                 std::mem::transmute(
-                                    u64::MAX.overflowing_shl(*size as u32 - 1).0 | unsigned_value,
+                                    (u64::MAX << (*size as u32 - 1)) | unsigned_value,
                                 )
                             })
                         } else {

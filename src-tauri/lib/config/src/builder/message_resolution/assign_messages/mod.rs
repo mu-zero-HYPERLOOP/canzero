@@ -108,7 +108,7 @@ pub fn assign_messages_ids(
                 break;
             }
             let id = fixed_message.id();
-            let code = id & 0xFFFFFFFFu32.overflowing_shr(32 - setcode_len as u32).0;
+            let code = id & 0xFFFFFFFFu32.checked_shr(32 - setcode_len as u32).unwrap_or(0);
             let ok = match setcode {
                 Some(setcode) => setcode == code,
                 None => setcode_allocator.allocate_setcode(code),

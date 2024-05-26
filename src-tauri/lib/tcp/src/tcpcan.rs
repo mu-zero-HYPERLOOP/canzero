@@ -232,12 +232,11 @@ impl TcpCan {
 
         let keep_alive_sock = tx.clone();
         tokio::spawn(async move {
-            let mut keep_alive_frame = [0; 24];
+            let mut keep_alive_frame = [0u8; 24];
             TcpFrame::KeepAlive.into_bin(&mut keep_alive_frame);
+            let mut interval = tokio::time::interval(Duration::from_millis(500));
             loop {
-                tokio::time::interval(Duration::from_millis(500))
-                    .tick()
-                    .await;
+                interval.tick().await;
                 if let Err(_) = keep_alive_sock
                     .lock()
                     .await
@@ -278,6 +277,7 @@ impl TcpCan {
         let mut sync_complete_guard = self.sync_complete.lock().await;
         let sync_complete = sync_complete_guard.deref_mut();
         std::mem::swap(sync_complete, &mut sync_swap);
+
         drop(sync_complete_guard);
         match sync_swap {
             Some(sync_complete) => {

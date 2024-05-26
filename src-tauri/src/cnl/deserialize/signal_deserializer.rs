@@ -21,7 +21,7 @@ impl SignalDeserializer {
         let bit_size = signal.size() as u32;
         Self {
             bit_offset,
-            bit_mask: (u64::MAX.overflowing_shr(u64::BITS - bit_size)).0,
+            bit_mask: (u64::MAX >> (u64::BITS - bit_size)),
             bit_size : bit_size as u8,
             type_info: match signal.ty() {
                 config::SignalType::UnsignedInt { size: _ } => {
@@ -43,7 +43,7 @@ impl SignalDeserializer {
     }
 
     pub fn deserialize(&self, data: u64) -> Value {
-        let unsigned_bits = data.overflowing_shr(self.bit_offset).0 & self.bit_mask;
+        let unsigned_bits = data >> (self.bit_offset) & self.bit_mask;
         match &self.type_info {
             SignalDeserializerTypeInfo::DecimalSignalDeserializer { offset, scale } => {
                 Value::RealValue(unsigned_bits as f64 * scale + offset)
@@ -57,7 +57,7 @@ impl SignalDeserializer {
                     // pad with ones
                     Value::SignedValue(unsafe {
                         std::mem::transmute(
-                            u64::MAX.overflowing_shl(self.bit_size as u32 - 1).0 | unsigned_bits,
+                            u64::MAX << (self.bit_size as u32 - 1) | unsigned_bits,
                         )
                     })
                 } else {

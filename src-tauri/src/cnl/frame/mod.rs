@@ -138,7 +138,7 @@ impl Value {
                 }
                 (Value::SignedValue(val), Type::Primitive(SignalType::SignedInt { size })) => {
                     for i in 0..*size {
-                        let bit_int = (val.overflowing_shr(i as u32).0) & 0x1;
+                        let bit_int = (val >> (i as u32)) & 0x1;
                         bit_vec.push(if bit_int == 0 { false } else { true });
                     }
                 }
@@ -152,12 +152,12 @@ impl Value {
                 ) => {
                     let base_float = (val - offset) / scale;
                     let mut base_bits = base_float.round() as u64;
-                    let max_uvalue = u64::MAX.overflowing_shr(64 - *size as u32).0;
+                    let max_uvalue = u64::MAX >> (64 - *size as u32);
                     if base_bits > max_uvalue {
                         base_bits = max_uvalue;
                     }
                     for i in 0..*size {
-                        let bit_int = (base_bits.overflowing_shr(i as u32).0) & 0x1;
+                        let bit_int = (base_bits >> (i as u32)) & 0x1;
                         bit_vec.push(if bit_int == 0 { false } else { true });
                     }
                 }

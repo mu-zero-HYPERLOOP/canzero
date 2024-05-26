@@ -11,13 +11,14 @@ use crate::cnl::connection::ConnectionStatus;
 
 use super::{connection::ConnectionObject, deserialize::FrameDeserializer, trace::TraceObject, CanAdapter};
 
-use canzero_common::{CanFrame, Timestamped};
+use canzero_common::CanFrame;
 
 pub struct TxCom {
     network_ref: config::NetworkRef,
     set_req_can_adapter: Arc<CanAdapter>,
     get_req_frame_deserializer: FrameDeserializer,
     get_req_can_adapter: Arc<CanAdapter>,
+    can_adapters:  Vec<Arc<CanAdapter>>,
     my_node_id: u8,
     frag_time_ms: u64,
     timebase: Instant,
@@ -52,6 +53,7 @@ impl TxCom {
             set_req_can_adapter,
             get_req_frame_deserializer: FrameDeserializer::new(network_ref.get_req_message()),
             get_req_can_adapter,
+            can_adapters : can_adapters.to_owned(),
             frag_time_ms: 200,
             timebase: basetime,
             trace: trace.clone(),
@@ -102,13 +104,15 @@ impl TxCom {
         fragmented_can_send(
             frame_data,
             self.set_req_can_adapter.clone(),
-            self.network_ref.set_req_message().clone(),
             self.frag_time_ms,
-            self.timebase,
-            self.trace.clone(),
             self.connection_object.clone(),
         )
         .await;
+    }
+
+    pub async fn send_native(&self, msg : &MessageRef, data : u64) {
+        let adapter = self.can_adapters.iter().find(|adap| adap.bus().id() == msg.bus().id()).unwrap();
+        let _ = adapter.send(CanFrame::new(msg.id().as_u32(), msg.id().ide(), false, msg.dlc(), data), true).await;
     }
 
     pub async fn send_get_req(&self, server_id: u8, object_entry_id: u16) {
@@ -125,54 +129,28 @@ impl TxCom {
             data,
         );
 
-        if let Err(err) = self.get_req_can_adapter.send(get_req_frame).await {
+        if let Err(err) = self.get_req_can_adapter.send(get_req_frame, true).await {
             println!("<red>Failed to send get req </red>: {err:?}");
             self.connection_object.set_status(ConnectionStatus::NetworkDisconnected);
         }
-
-        let frame = Timestamped::now(
-            self.timebase,
-            self.get_req_frame_deserializer.deserialize(data),
-        );
-        self.trace
-            .push_normal_frame(
-                frame,
-                self.network_ref.get_req_message().bus().name(),
-                self.network_ref.get_req_message().bus().id(),
-            )
-            .await;
     }
 }
 
 async fn fragmented_can_send(
     frames: Vec<CanFrame>,
     can_adapter: Arc<CanAdapter>,
-    set_req_config: MessageRef,
     frag_time_ms: u64,
-    timebase: Instant,
-    trace: Arc<TraceObject>,
     connection_object : Arc<ConnectionObject>,
 ) {
     let mut interval = time::interval(Duration::from_millis(frag_time_ms));
-
-    let frame_deserializer = FrameDeserializer::new(&set_req_config);
 
     for frame in frames {
         // first tick completes instantaniously
         interval.tick().await;
 
-        let tframe = Timestamped::now(
-            timebase,
-            frame_deserializer.deserialize(frame.get_data_u64()),
-        );
-
-        if let Err(err) = can_adapter.send(frame).await {
+        if let Err(err) = can_adapter.send(frame, true).await {
             cprintln!("<red>Failed to send set req </red>: {err:?}");
             connection_object.set_status(ConnectionStatus::NetworkDisconnected);
         }
-
-        trace
-            .push_normal_frame(tframe, set_req_config.bus().name(), set_req_config.bus().id())
-            .await;
     }
 }

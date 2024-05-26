@@ -36,7 +36,7 @@ pub fn find_filter_configuration(filter_infos: Vec<NodeFilterInfo>) -> Vec<NodeF
             filters: node_filter_info.filter_infos().iter().map(|filter| -> Filter{
                 match filter {
                     super::assign_messages::FilterInfo::Setcode { setcode, setcode_len, ide : _ } => Filter {
-                        mask : 0xFFFFFFFFu32.overflowing_shr(32 - *setcode_len).0,
+                        mask : u32::MAX >> (32 - *setcode_len),
                         id : *setcode
                     },
                     super::assign_messages::FilterInfo::Single { id, ide : _ } => {

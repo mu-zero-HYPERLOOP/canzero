@@ -69,7 +69,7 @@ impl CNL {
             node_id, 
         ));
 
-        let gamepad = Gamepad::create(&tx);
+        let gamepad = Gamepad::create(&tx, network_config);
 
         let network = Arc::new(NetworkObject::create(
             network_config,
