@@ -15,12 +15,21 @@ function StateDisplay({ state }: Readonly<StateDisplayProps>) {
       sx={{
         input: {
           background: "white",
-          width: "200px",
+          width: "100px",
+          height: "25px",
         },
       }}
       InputProps={{
+        style: {
+          fontSize: "0.5em"
+        },
         readOnly: true,
         disableUnderline: true,
+      }}
+      InputLabelProps={{
+        style :{
+          fontSize: "1.2em"
+        }
       }}
     />
   );

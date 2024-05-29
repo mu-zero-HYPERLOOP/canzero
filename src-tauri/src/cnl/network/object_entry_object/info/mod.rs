@@ -11,6 +11,7 @@ pub mod ty;
 pub struct ObjectEntryInformation {
     name: String,
     description: Option<String>,
+    friend : Option<String>,
     id: u16,
     unit: Option<String>,
     ty : ObjectEntryType,
@@ -19,12 +20,14 @@ pub struct ObjectEntryInformation {
 
 impl ObjectEntryInformation {
     pub fn new(name : String, description : Option<String>, 
+               friend : Option<String>,
                id : u16,
                unit : Option<String>,
                ty : ObjectEntryType, plottable : bool) -> Self {
         Self {
             name,
             description,
+            friend,
             id,
             unit,
             ty,

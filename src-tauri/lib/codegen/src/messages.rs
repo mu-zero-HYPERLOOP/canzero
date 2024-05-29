@@ -74,6 +74,7 @@ pub fn generate_messages(
         let mut serialize_def = format!(
 "static void {namespace}_{serialize_func_name}({message_type_name}* msg, {namespace}_frame* frame) {{
 {indent}uint8_t* data = frame->data;
+{indent}*((uint64_t*)data) = 0;
 {indent}frame->id = {id};
 {indent}frame->dlc = {dlc};
 ");
@@ -119,10 +120,9 @@ pub fn generate_messages(
                                             scale,
                                         } => {
                                             if *size <= 32 {
-                                                serialized_def.push_str(&format!("{indent}uint32_t {attrib_name}_{attrib_offset} = ({attribute_prefix}{attrib_name} - {offset}) / {scale};\n"));
+                                                serialized_def.push_str(&format!("{indent}uint32_t {attrib_name}_{attrib_offset} = (({attribute_prefix}{attrib_name} - {offset}) / {scale}) + 0.5f;\n"));
                                                 let u32_max = (0xFFFFFFFF as u32)
-                                                    .overflowing_shr(32 - *size as u32)
-                                                    .0;
+                                                    >> (32 - *size as u32);
 
                                                 serialized_def.push_str(&format!(
 "{indent}if ({attrib_name}_{attrib_offset} > 0x{u32_max:X}) {{
@@ -131,10 +131,9 @@ pub fn generate_messages(
 "));
                                                 format!("{attrib_name}_{attrib_offset}")
                                             } else {
-                                                serialized_def.push_str(&format!("{indent}uint64_t {attrib_name}_{attrib_offset} = (({attribute_prefix}{attrib_name} - {offset}) / {scale});\n"));
+                                                serialized_def.push_str(&format!("{indent}uint64_t {attrib_name}_{attrib_offset} = (({attribute_prefix}{attrib_name} - {offset}) / {scale}) + 0.5;\n"));
                                                 let u64_max = (0xFFFFFFFFFFFFFFFF as u64)
-                                                    .overflowing_shr(64 - *size as u32)
-                                                    .0;
+                                                    >> (64 - *size as u32);
 
                                                 serialized_def.push_str(&format!(
 "{indent}if ({attrib_name}_{attrib_offset} > 0x{u64_max:X}ull) {{
@@ -571,13 +570,12 @@ fn bit_access_code(bit_offset: usize, bit_size: usize, buffer_name: &str) -> Str
         //access half word access!
         let word_bit_offset = bit_offset % 32;
         let word_index = bit_offset / 32;
-        let mask = (0xFFFFFFFF as u32).overflowing_shl(32 - bit_size as u32).0 >> word_bit_offset;
+        let mask = (0xFFFFFFFF as u32) << (32 - bit_size as u32) >> word_bit_offset;
         let shift = word_bit_offset;
         format!("(((int32_t*){buffer_name})[{word_index}] & 0x{mask:X}) >> {shift}")
     } else {
-        let mask = (0xFFFFFFFFFFFFFFFF as u64)
-            .overflowing_shl((32 as usize).saturating_sub(bit_size) as u32)
-            .0
+        let mask = ((0xFFFFFFFFFFFFFFFF as u64)
+            << ((32 as usize).saturating_sub(bit_size) as u32))
             >> bit_offset;
         let shift = bit_offset;
         format!("(*((int64_t*){buffer_name}) & 0x{mask:X}) >> {shift}")

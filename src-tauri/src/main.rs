@@ -12,7 +12,7 @@ mod commands;
 mod notification;
 mod state;
 
-#[tokio::main(flavor = "multi_thread", worker_threads = 4)]
+#[tokio::main(flavor = "multi_thread", worker_threads = 8)]
 async fn main() {
     let _ = fix_path_env::fix();
     tauri::async_runtime::set(tokio::runtime::Handle::current());

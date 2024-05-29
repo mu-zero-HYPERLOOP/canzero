@@ -135,7 +135,6 @@ function StateVis() {
   return (
     <Paper sx={{
       width: "50%",
-      margin: 2,
       padding: 1,
     }}>
       <Stack>

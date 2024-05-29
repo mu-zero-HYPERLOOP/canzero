@@ -1,6 +1,7 @@
-use std::sync::Arc;
+use std::{sync::Arc, time::Instant};
 
 use canzero_common::{CanFrame, NetworkFrame, TCanError, TCanFrame};
+use color_print::cprintln;
 
 use self::client::TcpClient;
 
@@ -10,6 +11,8 @@ pub struct TcpCanAdapter {
     tcp_client: Arc<TcpClient>,
     bus_id: u32,
     rx: tokio::sync::Mutex<tokio::sync::mpsc::Receiver<Result<TCanFrame, TCanError>>>,
+    tx: tokio::sync::Mutex<tokio::sync::mpsc::Sender<Result<TCanFrame, TCanError>>>,
+    timebase : Instant,
 }
 
 impl TcpCanAdapter {
@@ -17,11 +20,15 @@ impl TcpCanAdapter {
         tcp_client: Arc<TcpClient>,
         bus_id: u32,
         rx: tokio::sync::mpsc::Receiver<Result<TCanFrame, TCanError>>,
+        tx: tokio::sync::mpsc::Sender<Result<TCanFrame, TCanError>>,
+        timebase : Instant,
     ) -> Self {
         Self {
             tcp_client,
             bus_id,
             rx: tokio::sync::Mutex::new(rx),
+            tx : tokio::sync::Mutex::new(tx),
+            timebase,
         }
     }
 
@@ -35,7 +42,12 @@ impl TcpCanAdapter {
         Ok(frame)
     }
 
-    pub async fn send(&self, frame: CanFrame) -> std::io::Result<()> {
+    pub async fn send(&self, frame: CanFrame, loopback : bool) -> std::io::Result<()> {
+        if loopback {
+            if let Err(_) = self.tx.lock().await.send(Ok(TCanFrame::now(self.timebase, frame.clone()))).await {
+                cprintln!("<red> Failed to loopback frame</red>");
+            }
+        }
         self.tcp_client
             .send(NetworkFrame {
                 can_frame: frame,

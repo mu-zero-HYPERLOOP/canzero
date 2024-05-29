@@ -19,6 +19,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   ({ theme, open }) => ({
     '& .MuiDrawer-paper': {
       position: 'relative',
+      overflow: "hidden",
       whiteSpace: 'nowrap',
       width: DRAWER_WIDTH,
       transition: theme.transitions.create('width', {

@@ -27,8 +27,8 @@ async fn rx_get_req_hash_code(
         let can_frame = tnf.unwrap().value.can_frame;
         if can_frame.get_id() == resp_id && can_frame.get_ide_flag() == resp_ide {
             let data = can_frame.get_data_u64();
-            let client_id = (data & (0xFFu64 << 16)).overflowing_shr(16).0 as u8;
-            let server_id = (data & (0xFFu64 << 24)).overflowing_shr(24).0 as u8;
+            let client_id = ((data & (0xFFu64 << 16)) >> 16) as u8;
+            let server_id = ((data & (0xFFu64 << 24)) >> 24) as u8;
 
             if client_id != my_id {
                 continue;
@@ -37,7 +37,7 @@ async fn rx_get_req_hash_code(
                 continue;
             }
             if rx_count == 0 {
-                hash |= data.overflowing_shr(32).0;
+                hash |= data >> 32;
                 rx_count = 1;
             } else if rx_count == 1 {
                 hash |= data & (0xFFFFFFFFu64 << 32);
@@ -62,8 +62,8 @@ async fn rx_get_req_build_time(
         let can_frame = tnf.unwrap().value.can_frame;
         if can_frame.get_id() == resp_id && can_frame.get_ide_flag() == resp_ide {
             let data = can_frame.get_data_u64();
-            let client_id = (data & (0xFFu64 << 16)).overflowing_shr(16).0 as u8;
-            let server_id = (data & (0xFFu64 << 24)).overflowing_shr(24).0 as u8;
+            let client_id = ((data & (0xFFu64 << 16)) >> 16) as u8;
+            let server_id = ((data & (0xFFu64 << 24)) >> 24) as u8;
 
             if client_id != my_id {
                 continue;
@@ -72,7 +72,7 @@ async fn rx_get_req_build_time(
                 continue;
             }
             if rx_count == 0 {
-                build_time_data |= data.overflowing_shr(32).0;
+                build_time_data |= data >> 32;
                 rx_count = 1;
             } else if rx_count == 1 {
                 build_time_data |= data & (0xFFFFFFFFu64 << 32);
@@ -81,11 +81,11 @@ async fn rx_get_req_build_time(
         }
     }
     let year = build_time_data & 0xFFFF;
-    let month = build_time_data.overflowing_shr(16).0 & 0xFF;
-    let day = build_time_data.overflowing_shr(24).0 & 0xFF;
-    let hour = build_time_data.overflowing_shr(32).0 & 0xFF;
-    let min = build_time_data.overflowing_shr(40).0 & 0xFF;
-    let sec = build_time_data.overflowing_shr(48).0 & 0xFF;
+    let month = (build_time_data >> 16) & 0xFF;
+    let day = (build_time_data >> 24) & 0xFF;
+    let hour = (build_time_data >> 32) & 0xFF;
+    let min = (build_time_data >> 40) & 0xFF;
+    let sec = (build_time_data >> 48) & 0xFF;
     Some(NaiveDateTime::new(
         NaiveDate::from_ymd_opt(year as i32, month as u32, day as u32)?,
         NaiveTime::from_hms_opt(hour as u32, min as u32, sec as u32)?,

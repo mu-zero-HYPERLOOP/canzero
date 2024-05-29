@@ -56,7 +56,10 @@ function ObjectEntryRow({ nodeName, objectEntryName, value }: ObjectEntryRowProp
 
   useEffect(() => {
     invoke<ObjectEntryInformation>("object_entry_information", { nodeName, objectEntryName })
-      .then(setInfo);
+      .then(setInfo).catch(console.error);
+    return () =>{
+      setInfo(undefined);
+    }
   }, [nodeName, objectEntryName]);
 
   if (typeof value === "object") {
@@ -66,6 +69,9 @@ function ObjectEntryRow({ nodeName, objectEntryName, value }: ObjectEntryRowProp
           minWidth: "25vw",
           maxWidth: "25vw",
           overflow: "clip",
+          minHeight:  "100px",
+          maxHeight:  "100px",
+          heigt:  "100px",
         }}>
           {objectEntryName}
         </TableCell>

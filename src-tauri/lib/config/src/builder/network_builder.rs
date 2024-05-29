@@ -965,6 +965,7 @@ impl NetworkBuilder {
                 object_entries.push(make_config_ref(ObjectEntry::new(
                     object_entry_data.name.clone(),
                     object_entry_data.description.clone(),
+                    object_entry_data.friend.clone(),
                     object_entry_data.unit.clone(),
                     id,
                     ty,

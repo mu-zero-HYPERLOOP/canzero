@@ -9,6 +9,7 @@ pub struct ObjectEntryBuilder(pub BuilderRef<ObjectEntryData>);
 pub struct ObjectEntryData {
     pub name: String,
     pub description: Option<String>,
+    pub friend : Option<String>,
     pub unit: Option<String>,
     pub ty: String,
     pub access: ObjectEntryAccess,
@@ -24,6 +25,7 @@ impl ObjectEntryBuilder {
             name: name.to_owned(),
             ty: ty.to_owned(),
             description: None,
+            friend:  None,
             unit: None,
             access: ObjectEntryAccess::Global,
             visibility: Visibility::Global,
@@ -32,6 +34,9 @@ impl ObjectEntryBuilder {
     pub fn hide(&self) {
         let mut data = self.0.borrow_mut();
         data.visibility = Visibility::Static;
+    }
+    pub fn friend(&self, friend : &str) {
+        self.0.borrow_mut().friend = Some(friend.to_owned());
     }
     pub fn add_description(&self, description: &str) {
         let mut data = self.0.borrow_mut();

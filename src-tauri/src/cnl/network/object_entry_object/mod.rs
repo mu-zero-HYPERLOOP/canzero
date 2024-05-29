@@ -411,6 +411,7 @@ impl ObjectEntryObject {
         ObjectEntryInformation::new(
             self.object_entry_ref.name().to_owned(),
             self.object_entry_ref.description().map(str::to_owned),
+            self.object_entry_ref.friend().map(str::to_owned),
             self.object_entry_ref.id() as u16,
             self.object_entry_ref.unit().map(str::to_owned),
             ObjectEntryType::new(self.object_entry_ref.ty()),

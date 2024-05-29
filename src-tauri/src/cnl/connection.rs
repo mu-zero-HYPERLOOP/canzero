@@ -1,9 +1,10 @@
 use std::sync::Mutex;
 
+use color_print::cprintln;
 use serde::Serialize;
 use tauri::Manager;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum ConnectionStatus {
     NetworkConnected,
     HeartbeatMiss {
@@ -38,7 +39,6 @@ pub struct ConnectionObject {
 }
 
 impl ConnectionObject {
-
     pub fn new(connection_status: ConnectionStatus, app_handle: &tauri::AppHandle) -> Self {
         // broadcast inital state!
         Self::emit_event(app_handle, &connection_status);
@@ -49,13 +49,25 @@ impl ConnectionObject {
     }
 
     pub fn set_status(&self, connection_status: ConnectionStatus) {
+        #[cfg(debug_assertions)]
+        match connection_status {
+            ConnectionStatus::HeartbeatMiss { node_id: _, bus_id : _ }
+            | ConnectionStatus::NetworkDisconnected
+            | ConnectionStatus::FrontendWdgTimeout
+            | ConnectionStatus::DeadlockWdgTimeout => {
+                cprintln!("<red>WatchdogTimeout = {connection_status:?}</red>");
+                return;
+            }
+            ConnectionStatus::NetworkConnected => (),
+        }
         *self
             .connection_status
             .lock()
             .expect("failed to acquire connection status lock") = connection_status;
         Self::emit_event(
             &self.app_handle,
-            &self.connection_status
+            &self
+                .connection_status
                 .lock()
                 .expect("failed to acquire connection status lock"),
         );

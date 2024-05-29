@@ -86,10 +86,11 @@ impl UdpNetworkBeacon {
         timebase: Instant,
         config_hash: u64,
     ) {
+        let addr = socket.peer_addr().unwrap_or(socket.local_addr().unwrap());
         loop {
             loop {
                 let mut rx_buffer = [0; 216];
-                println!("\u{1b}[34mUDP-Reflector: listening\u{1b}[0m");
+                println!("\u{1b}[34mUDP-Beacon: listening {}\u{1b}[0m", addr);
                 let (bytes_received, source_addr) = socket
                     .recv_from(&mut rx_buffer)
                     .await
@@ -101,10 +102,9 @@ impl UdpNetworkBeacon {
                 let server_name = beacon_name.to_owned();
                 let socket = socket.clone();
                 tokio::spawn(async move {
-                    let Ok(frame) = UdpFrame::from_bin(&rx_buffer)
-                    else {
+                    let Ok(frame) = UdpFrame::from_bin(&rx_buffer) else {
                         println!(
-                            "\u{1b}[34mUDP-Discover: Received ill formed frame [ignored]\u{1b}[0m"
+                            "\u{1b}[34mUDP-Beacon: Received ill formed frame [ignored]\u{1b}[0m"
                         );
                         return;
                     };
@@ -112,7 +112,7 @@ impl UdpNetworkBeacon {
                         return;
                     };
                     if hello_frame.service_name != service_name {
-                        println!("\u{1b}[34mUDP-Discover: Received hello from service {:?}. Expecting {:?} [ignored]\u{1b}[0m",
+                        println!("\u{1b}[34mUDP-Beacon: Received hello from service {:?}. Expecting {:?} [ignored]\u{1b}[0m",
                         hello_frame.service_name,
                         service_name);
                     }
@@ -124,12 +124,12 @@ impl UdpNetworkBeacon {
                         time_since_sor,
                         server_name,
                     };
-                    println!("\u{1b}[34mUDP-Reflector: responding to {source_addr}\u{1b}[33m");
-                    let mut ndf_buf = [0;216];
+                    println!("\u{1b}[34mUDP-Beacon: responding to {source_addr}\u{1b}[33m");
+                    let mut ndf_buf = [0; 216];
                     UdpFrame::NDF(ndf).into_bin(&mut ndf_buf);
                     let Ok(bytes_send) = socket.send_to(&ndf_buf, &source_addr).await else {
                         println!(
-                            "\u{1b}[34mUDP-Reflector: Failed to respond {source_addr}\u{1b}[33m"
+                            "\u{1b}[34mUDP-Beacon: Failed to respond {source_addr}\u{1b}[33m"
                         );
                         return;
                     };

@@ -152,7 +152,7 @@ pub fn generate_rx_handlers(
                                             offset,
                                             scale,
                                         } => {
-                                            let max_u32_value = 0xFFFFFFFFu32.overflowing_shr(32u32 - *size as u32).0;
+                                            let max_u32_value = u32::MAX >> (32u32 - *size as u32);
                                             let parse_dec = if *size <= 32 {
                                                 format!(
                                                     "{indent2}resp.m_data |= min_u32(({oe_name} \
@@ -273,15 +273,18 @@ pub fn generate_rx_handlers(
                                             offset,
                                             scale,
                                         } => {
-                                            let max_u32_value = 0xFFFFFFFFu32.overflowing_shr(32u32 - *size as u32).0;
-                                            let max_u64_value = 0xFFFFFFFFFFFFFFFFu64.overflowing_shr(64u32 - *size as u32).0;
+                                            println!("size = {size}");
                                             if *size <= 8 {
+                                                let max_u32_value = u32::MAX >> (32u32 - *size as u32);
                                                 format!("min_u32(({var} - ((float){offset})) / (float){scale}, 0x{max_u32_value:X}ul)")
                                             } else if *size <= 16 {
+                                                let max_u32_value = u32::MAX >> (32u32 - *size as u32);
                                                 format!("min_u32(({var} - ((float){offset})) / (float){scale}, 0x{max_u32_value:X}ul)")
                                             } else if *size <= 32 {
+                                                let max_u32_value = u32::MAX >> (32u32 - *size as u32);
                                                 format!("min_u32(({var} - ((float){offset})) / (float){scale}, 0x{max_u32_value:X}ul)")
                                             } else if *size <= 64 {
+                                                let max_u64_value = u64::MAX >> (64u32 - *size as u32);
                                                 format!("min_u64(({var} - ((double){offset})) / (double){scale}, 0x{max_u64_value:X}ull)")
                                             } else {
                                                 panic!("singed integer larger than 64 are not supported");
@@ -677,7 +680,7 @@ pub fn generate_rx_handlers(
                                         let upper_word = word_offset + 2;
                                         let middle_shift = 32 - bit_word_offset;
                                         let upper_len = size + bit_word_offset - 64;
-                                        let upper_mask = u32::MAX.overflowing_shr(32 - upper_len as u32).0;
+                                        let upper_mask = u32::MAX.checked_shr(32 - upper_len as u32).unwrap_or(0);
                                         let upper_shift = 64 - bit_word_offset;
                                         format!("((uint64_t)({buffer_name}[{word_offset}]) >> {bit_word_offset}) | ((uint64_t)({buffer_name}[{middle_word}]) << {middle_shift}) | ((uint64_t)({buffer_name}[{upper_word}] & 0x{upper_mask:X}) << {upper_shift})")
                                     };
@@ -748,7 +751,7 @@ pub fn generate_rx_handlers(
                                         let upper_word = word_offset + 2;
                                         let middle_shift = 32 - bit_word_offset;
                                         let upper_len = size + bit_word_offset - 64;
-                                        let upper_mask = u32::MAX.overflowing_shr(32 - upper_len as u32).0;
+                                        let upper_mask = u32::MAX.checked_shr(32 - upper_len as u32).unwrap_or(0);
                                         let upper_shift = 64 - bit_word_offset;
                                         format!("((uint64_t)({buffer_name}[{word_offset}]) >> {bit_word_offset}) | ((uint64_t)({buffer_name}[{middle_word}]) << {middle_shift}) | ((uint64_t)({buffer_name}[{upper_word}] & 0x{upper_mask:X}) << {upper_shift})")
                                     };
