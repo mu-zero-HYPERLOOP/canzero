@@ -88,7 +88,7 @@ const theme = responsiveFontSizes(createTheme({
       trace: "#e7e7e7",
       drawer: "#ffffff",
       default: "#f7f7f7",
-      main: "#f7f7f7",
+      main: "#f3f3f3",
       paper: "#ededed",
       paper2: "#f5f5f5",
       warn: "#f2e9ce",

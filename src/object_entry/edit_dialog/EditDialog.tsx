@@ -1,6 +1,6 @@
 import { Box, Button, Modal, Paper, Stack, Typography } from "@mui/material";
 import { ObjectEntryInformation } from "../types/ObjectEntryInformation";
-import { useEffect, useState } from "react";
+import {ReactElement, useEffect, useState} from "react";
 import { EnumTypeInfo, IntTypeInfo, RealTypeInfo, StructTypeInfo, Type, UIntTypeInfo } from "../types/Type";
 import UnsignedPropertyInputField from "./UnsignedPropertyInputField";
 import SignedPropertyInputField from "./SignedPropertyInputField";
@@ -45,7 +45,7 @@ function sendSetRequest(nodeName: string, objectEntryName: string, value: Option
       case "uint": case "int": case "real": case "enum":
         return (value ?? currentValue) as Value ?? null;
       case "struct":
-        if (value === undefined) {
+        if (value === undefined) { // TODO condition is always false
           return currentValue ?? null;
         } else {
           const structInfo = ty.info as StructTypeInfo;
@@ -74,7 +74,6 @@ function sendSetRequest(nodeName: string, objectEntryName: string, value: Option
     // therefor the set request was aborted
     return;
   }
-
   invoke("set_object_entry_value", {
     nodeName,
     objectEntryName,
@@ -133,10 +132,9 @@ function EditDialog({ open, onClose, nodeName, objectEntryInfo }: EditDialogProp
   }, [nodeName, objectEntryInfo]);
 
   const [value, setValue] = useState<OptionalValue>(undefined);
-
-  const [propertyInputFields, setPropertyInputFields] = useState<JSX.Element[]>([]);
+  const [propertyInputFields, setPropertyInputFields] = useState<ReactElement[]>([]);
   useEffect(() => {
-    const inputFields: JSX.Element[] = [];
+    const inputFields: ReactElement[] = [];
 
     function recBuildInputFields(ty: Type, onUpdate: SetterLambda, name: string, unit?: string, value?: Value) {
       console.log("unit", unit);
