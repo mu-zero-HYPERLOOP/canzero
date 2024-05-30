@@ -65,6 +65,7 @@ async fn main() {
             connection_status::heartbeat,
             connection_status::restart,
             connection_status::close,
+            connection_status::create_deadlock,
             commands::node_commands::listen_to_node_latest,
             commands::node_commands::unlisten_from_node_latest,
             commands::node_commands::get_heartbeat_status,

@@ -25,8 +25,6 @@ function stateToString(heartbeatState: HeartbeatState) {
     default:
       console.error();
   }
-
-
 }
 
 
@@ -47,7 +45,8 @@ function HeartbeatStatus({ nodeName, busName }: Readonly<HeartbeatProps>) {
 
       return () => {
         unlistenJs();
-        invoke("unlisten_from_heartbeat", { nodeName, busName }).catch(console.error);
+        invoke("unlisten_from_heartbeat", { nodeName, busName })
+          .catch(console.error);
       };
     }
 

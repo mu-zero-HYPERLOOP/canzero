@@ -107,7 +107,6 @@ impl CNL {
         // disable the frontend heartbeat only for release
         let mut external_watchdog = None;
         if frontend_lvl != WdgLevel::Disable {
-            println!("external disabled");
             external_watchdog =
                 Some(watchdog_overlord.register(WdgTag::FrontendWdg, Duration::from_millis(1000)));
         }
@@ -119,7 +118,7 @@ impl CNL {
             let trace_dead = trace.clone();
             let connection_object_dead = connection_object.clone();
             tokio::spawn(async move {
-                let mut deadlock_interval = tokio::time::interval(Duration::from_millis(200));
+                let mut deadlock_interval = tokio::time::interval(Duration::from_millis(500));
                 loop {
                     deadlock_interval.tick().await;
                     network_dead.deadlock_watchdog().await;

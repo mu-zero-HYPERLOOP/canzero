@@ -21,7 +21,7 @@ struct HeartbeatFrame {
 }
 
 impl HeartbeatFrame {
-    fn new(frame: &Frame) -> Self {
+    fn create(frame: &Frame) -> Self {
         let Some(Value::UnsignedValue(node_id)) = frame.attribute("node_id") else {
             panic!("DETECTED INVALID CONFIG: invalid format of heartbeat : node_id missing");
         };
@@ -54,13 +54,13 @@ impl HeartbeatFrameHandler {
         let frame = self
             .frame_deserializer
             .deserialize(can_frame.get_data_u64());
-        let heartbeat_frame = HeartbeatFrame::new(&frame);
+        let heartbeat_frame = HeartbeatFrame::create(&frame);
         let Some(node_object) = self
             .node_objects
             .iter()
             .find(|n| n.id() == heartbeat_frame.node_id)
         else {
-            return Err(Error::InvalidHeartbeatNodeId);
+            return Ok(can_frame.new_value(frame));
         };
         node_object
             .reset_heartbeat_wdg(

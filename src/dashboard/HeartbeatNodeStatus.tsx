@@ -51,7 +51,6 @@ function HeartbeatNodeStatus({ nodeName, busNames }: Readonly<HeartbeatProps>) {
             let updt = old.slice();
             updt[idx] = stateToString(s)!;
             setHeartbeatNodeState(statesToNodeState(updt));
-            console.log("init " , updt);
             return updt;
           })
         }).catch(console.error)
@@ -60,21 +59,17 @@ function HeartbeatNodeStatus({ nodeName, busNames }: Readonly<HeartbeatProps>) {
       for (let idx in busNames) {
         evtNames[idx] = await invoke<string>("listen_to_heartbeat", { nodeName, busName: busNames[idx] });
       }
-      console.log("evtNames", evtNames);
       let unlistenJss: UnlistenFn[] = [];
       evtNames.map(async (evtName, idx) => {
         unlistenJss.push(await listen<HeartbeatState>(evtName, evt => {
           setHeartbeatStates(old => {
             let updt = old.slice();
             updt[idx] = stateToString(evt.payload) ?? updt[idx];
-            console.log("listen " , updt);
-            console.log("listen node", heartbeatNodeState);
             setHeartbeatNodeState(statesToNodeState(updt));
             return updt;
           });
         }));
       });
-      console.log("post" , heartbeatNodeState);
 
       return () => {
         unlistenJss.map(unlistenJs => unlistenJs());

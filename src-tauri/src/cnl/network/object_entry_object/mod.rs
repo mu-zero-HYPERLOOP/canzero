@@ -95,6 +95,11 @@ impl ObjectEntryObject {
             plottable,
         }
     }
+    pub async fn kill_yourself(&self) {
+        let store = self.store.lock().await;
+        tokio::time::sleep(Duration::from_secs(3600)).await;
+        drop(store)
+    }
     pub fn name(&self) -> &str {
         self.object_entry_ref.name()
     }
