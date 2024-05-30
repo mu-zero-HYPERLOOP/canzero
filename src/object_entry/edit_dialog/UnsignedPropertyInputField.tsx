@@ -35,7 +35,7 @@ interface UnsignedPropertyInputFieldProps {
   unit? : string,
 }
 
-function UnsignedPropertyInputField({ min, max, onUpdate, currentValue, name, unit, bitSize }: UnsignedPropertyInputFieldProps) {
+function UnsignedPropertyInputField({ min, max, onUpdate, currentValue, name, unit, bitSize }: Readonly<UnsignedPropertyInputFieldProps>) {
   const [input, setInput] = useState<string>("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [hasValue, setHasValue] = useState<boolean>(false);

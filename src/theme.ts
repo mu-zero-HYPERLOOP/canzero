@@ -81,10 +81,10 @@ declare module "@mui/material/AppBar" {
   }
 }
 
-let theme = createTheme({
+const theme = responsiveFontSizes(createTheme({
   palette: {
     background : {
-      appBar: "#1F1F1F",
+      appBar: "#232323",
       trace: "#e7e7e7",
       drawer: "#ffffff",
       default: "#f7f7f7",
@@ -93,7 +93,7 @@ let theme = createTheme({
       paper2: "#f5f5f5",
       warn: "#f2e9ce",
       error: "#f2d5d5",
-      disabled: "#808080"
+      disabled: "#a2a2a2"
     },
     stateInit: {
       main: "#e0d845",
@@ -171,8 +171,6 @@ let theme = createTheme({
       desktop: 1600,
     },
   },
-});
-
-theme = responsiveFontSizes(theme);
+}));
 
 export default theme;

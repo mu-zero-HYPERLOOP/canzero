@@ -12,13 +12,7 @@ enum ConnectionState {
   Searching,
   FoundServers,
   Connecting,
-};
-
-// enum SetupState {
-//   Progess,
-//   Error,
-//   Success,
-// }
+}
 
 enum ConnectionType {
   SocketCan = 0,
@@ -97,7 +91,6 @@ function StartupContent() {
   }, [activeStep, connectionState]);
 
   function reset() {
-    null
     setActiveStep(-1);
     setConnectionState(ConnectionState.Init);
     setConfigError(null);
@@ -111,7 +104,7 @@ function StartupContent() {
     <Box id="content" component="div" display="flex">
       <CssBaseline />
       <AppBar position="absolute" sx={{
-        backgroundColor: theme.palette.background.appBar,
+        backgroundColor: theme.palette.background.paper2,
         height: "60px",
       }}>
         <Container component="div">
@@ -201,13 +194,13 @@ function StartupContent() {
                               Possible Connections
                             </Typography>
                             <List sx={{
-                              backgroundColor: theme.palette.background.appBar,
+                              backgroundColor: theme.palette.background.paper2,
                               margin: 0,
                             }} disablePadding>
                               {
                                 connections.map((connection, index) => {
                                   return (
-                                    <ListItem>
+                                    <ListItem key={index}>
                                       <ListItemButton key={index} onClick={() => {
                                         invoke("try_connect", { connectionIndex: index }).then(() => {
                                           setActiveConnection(connections[index].description);

@@ -103,7 +103,7 @@ function ErrorListItem({
       }}
         secondaryAction={
           <ListItemText>
-            {(value === undefined ? "?" : value.toString()) + (unit === undefined ? "" : unit)}
+            {(value === undefined ? "?" : value.toString()) + (unit ?? "")}
           </ListItemText>
         }>
         <ListItemIcon sx={{

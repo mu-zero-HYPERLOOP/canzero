@@ -12,7 +12,7 @@ interface NodesProps {
   // useGraphScrolling?: boolean,
 }
 
-function GuidanceControl({ }: NodesProps) {
+function GuidanceControl({ }: Readonly<NodesProps>) {
   return (
     <Stack direction="column">
       <Stack direction="row" spacing={2} sx={{

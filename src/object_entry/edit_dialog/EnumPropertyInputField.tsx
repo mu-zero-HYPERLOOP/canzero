@@ -10,7 +10,7 @@ interface EnumPropertyInputFieldProps {
 }
 
 
-function EnumPropertyInputField({ variants, onUpdate, currentValue, name }: EnumPropertyInputFieldProps) {
+function EnumPropertyInputField({ variants, onUpdate, currentValue, name }: Readonly<EnumPropertyInputFieldProps>) {
   const [value, setValue] = useState<string | undefined>(undefined);
   return (
     <TextField

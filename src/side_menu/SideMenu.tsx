@@ -6,7 +6,7 @@ import IconButton from '@mui/material/IconButton';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import { ListEntries } from '../dashboard/PageList';
 import { Box } from '@mui/material';
-import StateIndiciatorBar from '../app_bar/StateIndiciatorBar';
+import StateIndicatorBar from '../app_bar/StateIndicatorBar.tsx';
 import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api';
 import { listen } from '@tauri-apps/api/event';
@@ -64,7 +64,7 @@ function SideMenu({ open, toggleOpen }: Readonly<SideMenuProps>) {
         }
         listen<ObjectEntryEvent>(resp.event_name, event => {
           setState(event.payload.value as string);
-        });
+        }).catch(console.error);
       } catch {
         console.error(`Failed to register listener for SideMenu component: Object entry ${STATE_OE.nodeName}:${STATE_OE.objectEntryName} not found`)
       }
@@ -116,7 +116,7 @@ function SideMenu({ open, toggleOpen }: Readonly<SideMenuProps>) {
           <ChevronLeftIcon />
         </IconButton>
       </Toolbar>
-      <StateIndiciatorBar state={state} voffset="-5px" />
+      <StateIndicatorBar state={state} voffset="-5px" />
       <Box
         component="div"
         sx={{

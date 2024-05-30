@@ -4,7 +4,7 @@ interface NodesProps {
   nodes: NodeInformation[],
 }
 
-function LevitationControl({ nodes }: NodesProps) {
+function LevitationControl({ nodes }: Readonly<NodesProps>) {
 
   return (
     <>

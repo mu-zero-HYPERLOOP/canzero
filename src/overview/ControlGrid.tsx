@@ -1,9 +1,4 @@
-import { Grid, Paper, Stack, styled } from '@mui/material';
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCarBattery, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
-import Thermostat from '@mui/icons-material/Thermostat';
-import Bolt from '@mui/icons-material/Bolt';
-import Box from "@mui/material/Box";
+import { Grid, Paper, styled } from '@mui/material';
 import { NodeInformation } from "../nodes/types/NodeInformation.ts";
 import ObjectEntryGrid from "./ObjectEntryGrid.tsx";
 import { ObjectEntryGridInformation } from "./types/ObjectEntryGridInformation.tsx";
@@ -22,39 +17,6 @@ const Item = styled(Paper)(({ theme }) => ({
 
 interface ControlGridProps {
   nodes: NodeInformation[];
-}
-
-
-function ControlLights() {
-  return (
-    <Stack
-      direction="row"
-      justifyContent="space-evenly"
-      alignItems="top"
-      spacing={3}
-    >
-      <Box component="div">
-        <FontAwesomeIcon icon={faTriangleExclamation} fontSize="40px" />
-        <div />
-        Warning
-      </Box>
-      <Box component="div">
-        <FontAwesomeIcon icon={faCarBattery} fontSize="40px" />
-        <div />
-        Battery
-      </Box>
-      <Box component="div">
-        <Thermostat sx={{ fontSize: "42px" }} />
-        <div style={{ marginBottom: "-6px" }} />
-        Temperature
-      </Box>
-      <Box component="div">
-        <Bolt sx={{ fontSize: "42px" }} />
-        <div style={{ marginBottom: "-6px" }} />
-        Electric
-      </Box>
-    </Stack>
-  )
 }
 
 // function Model(props: JSX.IntrinsicAttributes & { [properties: string]: any; }) {
@@ -104,11 +66,6 @@ function createValueTableEntries(nodes: NodeInformation[]) {
 function ControlGrid({ nodes }: Readonly<ControlGridProps>) {
   return (
     <Grid container rowSpacing={2} columnSpacing={{ xs: 1, md: 2 }} sx={{ margin: "1%" }}>
-      <Grid item xs={6} md={12}>
-        <Item sx={{ width: "49.5%", height: "72px" }}>
-          <ControlLights />
-        </Item>
-      </Grid>
       <Grid item xs={6} md={6}>
         <Item sx={{ width: "100%", height: "300px" }}>
           3D Pod Model

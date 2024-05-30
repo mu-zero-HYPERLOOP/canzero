@@ -9,7 +9,7 @@ import theme from "../../../theme.ts";
 
 
 
-const OE = { nodeName: "master", objectEntryName: "error_over_temperatuer" };
+const OE = { nodeName: "master", objectEntryName: "error_over_temperature" };
 
 function TemperatureIconDisplay() {
 

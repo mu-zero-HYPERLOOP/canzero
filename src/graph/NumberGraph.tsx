@@ -32,7 +32,7 @@ function NumberGraph<T>({
   refreshRate = 500,
   bounds,
   timeShiftMs = 0,
-}: NumberGraphProps<T>) {
+}: Readonly<NumberGraphProps<T>>) {
 
   console.log("render number graph");
   margin.left += 60;
@@ -41,7 +41,7 @@ function NumberGraph<T>({
 
   const svgRef = useRef(null) as any;
 
-  const [autoWidth, setWidth] = useState(200);
+  const [autoWidth, setAutoWidth] = useState(200);
 
 
   useEffect(() => {
@@ -59,7 +59,7 @@ function NumberGraph<T>({
           if (!entries.length) return;
           const entry = entries[0];
           if (trueWidth != entry.contentRect.width) {
-            setWidth(entry.contentRect.width);
+            setAutoWidth(entry.contentRect.width);
           }
         }
       );

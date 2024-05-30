@@ -3,12 +3,12 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { DRAWER_WIDTH } from "../side_menu/SideMenu";
 import AppBarButton from "./AppBarButton";
 import StateDisplay from "./StateDisplay";
-import { useEffect, useState } from "react";
+import {ReactElement, useEffect, useState} from "react";
 import { ObjectEntryListenLatestResponse } from "../object_entry/types/events/ObjectEntryListenLatestResponse";
 import { invoke } from "@tauri-apps/api";
 import { listen } from "@tauri-apps/api/event";
 import { ObjectEntryEvent } from "../object_entry/types/events/ObjectEntryEvent";
-import StateIndiciatorBar from "./StateIndiciatorBar";
+import StateIndicatorBar from "./StateIndicatorBar.tsx";
 import { sendAbortCommand, sendDisconnectCommand, sendEmergencyCommand, sendManualControlCommand, sendPrechargeCommand, sendStartLevitationCommand, sendStartPropulsionCommand, sendStopLevitationCommand, sendStopPropulsionCommand } from "./commands";
 import WarningIconDisplay from "../object_entry/vis/icons/WarningIconDisplay";
 import BatteryIconDisplay from "../object_entry/vis/icons/BatteryIconDisplay";
@@ -55,10 +55,10 @@ const START_PROP_LABEL = <p>Start<br />Propulsion [F1]</p>;
 const STOP_PROP_LABEL = <p>Stop<br />Propulsion [F2]</p>;
 
 interface CommandList {
-  startCommandLabel: JSX.Element;
+  startCommandLabel: ReactElement;
   disableStart: boolean,
   startCommand: () => void,
-  stopCommandLabel: JSX.Element;
+  stopCommandLabel: ReactElement;
   disableStop: boolean,
   stopCommand: () => void,
   disableAbort: boolean,
@@ -84,10 +84,10 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
   function updateState(state: string) {
     setState(state);
 
-    let startCommandLabel: JSX.Element;
+    let startCommandLabel: ReactElement;
     let disableStart: boolean;
     let startCommand: () => void;
-    let stopCommandLabel: JSX.Element;
+    let stopCommandLabel: ReactElement;
     let disableStop: boolean;
     let stopCommand: () => void;
 
@@ -102,7 +102,6 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
         stopCommandLabel = STOP_45V_LABEL;
         disableStop = true;
         stopCommand = () => { };
-        disableAbort = true;
         break;
       case "IDLE":
         startCommandLabel = START_45V_LABEL;
@@ -111,7 +110,6 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
         stopCommandLabel = STOP_45V_LABEL;
         disableStop = true;
         stopCommand = () => { };
-        disableAbort = true;
         break;
       case "DISCONNECTING":
         startCommandLabel = START_45V_LABEL;
@@ -120,7 +118,6 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
         stopCommandLabel = STOP_45V_LABEL;
         disableStop = true;
         stopCommand = sendDisconnectCommand;
-        disableAbort = true;
         break;
       case "PRECHARGE":
         startCommandLabel = START_45V_LABEL;
@@ -129,7 +126,6 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
         stopCommandLabel = STOP_45V_LABEL;
         disableStop = false;
         stopCommand = sendDisconnectCommand;
-        disableAbort = true;
         break;
       case "READY":
         startCommandLabel = START_LEVI_LABEL;
@@ -218,7 +214,6 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
         disableStop = false;
         disableStart = false;
         disableAbort = false;
-        disableManual = true;
         startCommand = sendEmergencyCommand;
         stopCommand = sendEmergencyCommand;
     }
@@ -385,7 +380,7 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
           </Stack>
         </Stack>
       </Toolbar>
-      <StateIndiciatorBar state={state} />
+      <StateIndicatorBar state={state} />
     </AppBar>)
 }
 

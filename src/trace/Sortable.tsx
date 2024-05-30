@@ -2,7 +2,7 @@
 import NorthIcon from '@mui/icons-material/North';
 import SouthIcon from '@mui/icons-material/South';
 import { IconButton, Stack } from '@mui/material';
-import { useState } from 'react';
+import {ReactElement, useState} from 'react';
 
 
 export enum Sorting {
@@ -15,14 +15,14 @@ export enum Sorting {
 }
 
 interface SortableProps {
-  children : JSX.Element,
+  children : ReactElement,
   sortAsc : boolean
   self : Sorting,
   value : Sorting,
   setSorting : (sorting : Sorting, toggleAsc : boolean) => void,
 }
 
-function Sortable({children, sortAsc, self, value, setSorting} : SortableProps) {
+function Sortable({children, sortAsc, self, value, setSorting} : Readonly<SortableProps>) {
   const [hover, setHover] = useState<boolean>(false);
 
   return <Stack

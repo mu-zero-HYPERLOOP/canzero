@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {ReactElement, useEffect, useState} from "react";
 import {ObjectEntryInformation} from "../object_entry/types/ObjectEntryInformation.ts";
 import {ObjectEntryEvent} from "../object_entry/types/events/ObjectEntryEvent.ts";
 import {invoke} from "@tauri-apps/api";
@@ -31,7 +31,7 @@ function getColorInterpolate(value: number, min: number, max: number) {
 }
 
 function displayEntryDiscrete(ty: Type, value: Value, name: string,
-                              warning: number[] | string[], ok: number[] | string[], tooGood: number[] | string[]): JSX.Element {
+                              warning: number[] | string[], ok: number[] | string[], tooGood: number[] | string[]): ReactElement {
     if (isEnum(ty.id)) {
         return <TextField InputProps={{readOnly: true}} value={value} label={name} sx={{
             '& .MuiOutlinedInput-root': {
@@ -76,7 +76,7 @@ function displayEntryDiscrete(ty: Type, value: Value, name: string,
 }
 
 
-function displayEntryInterpolate(ty: Type, value: Value, name: string, min: number, max: number): JSX.Element {
+function displayEntryInterpolate(ty: Type, value: Value, name: string, min: number, max: number): ReactElement {
     if (isEnum(ty.id)) {
         return <TextField InputProps={{readOnly: true}} value={value} label={name} sx={{
             '& .MuiOutlinedInput-root': {
@@ -110,7 +110,7 @@ function displayEntryInterpolate(ty: Type, value: Value, name: string, min: numb
     }
 }
 
-function displayEntry(ty: Type, value: Value, name: string): JSX.Element {
+function displayEntry(ty: Type, value: Value, name: string): ReactElement {
     if (isEnum(ty.id)) {
         return <TextField InputProps={{readOnly: true}} value={value} label={name} sx={{
             '& .MuiOutlinedInput-root': {

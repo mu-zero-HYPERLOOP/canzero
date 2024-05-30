@@ -32,7 +32,7 @@ function StringGraph<T>({
   timeDomainMs = 5000,
   refreshRate = 500,
   timeShiftMs = 0,
-}: StringGraphProps<T>) {
+}: Readonly<StringGraphProps<T>>) {
   margin.left += 120;
   margin.bottom += 20;
   margin.top += 20;

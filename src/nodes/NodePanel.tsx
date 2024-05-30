@@ -124,7 +124,7 @@ function NodePanel({ node }: Readonly<NodePanelProps>) {
         <Typography variant="h5">{node.name}</Typography>
         {
           node.buses.map(bus => (
-          <Box position={"relative"} top={"-0.10em"}>
+          <Box position={"relative"} top={"-0.10em"} key={bus}>
             <HeartbeatStatus nodeName={node.name} busName={bus}>
             </HeartbeatStatus>
           </Box>

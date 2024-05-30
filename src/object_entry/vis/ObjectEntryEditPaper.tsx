@@ -1,5 +1,5 @@
 import { Input, Paper, Stack, Typography } from "@mui/material";
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 
 
 
@@ -56,7 +56,7 @@ interface ObjectEntryEditPaperProps {
   nodeName: string,
   objectEntryName: string
   title?: string
-};
+}
 
 
 function ObjectEntryEditPaper({ nodeName, objectEntryName, title }: Readonly<ObjectEntryEditPaperProps>) {

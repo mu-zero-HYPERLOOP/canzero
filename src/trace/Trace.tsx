@@ -259,11 +259,11 @@ function Trace() {
       <TableBody>
         {frames.map(event => {
           if (event.frame.ty == "normal") {
-            return <NormalRow open={open} setOpen={setOpen} event={event} useAbsoluteTime={useAbsoluteTime} />
+            return <NormalRow key={event.key} open={open} setOpen={setOpen} event={event} useAbsoluteTime={useAbsoluteTime} />
           }else if (event.frame.ty == "undefined") {
-            return <UndefinedRow event={event} useAbsoluteTime={useAbsoluteTime} />
+            return <UndefinedRow key={event.key} event={event} useAbsoluteTime={useAbsoluteTime} />
           } else if (event.frame.ty == "error") {
-            return <ErrorRow open={open} setOpen={setOpen} event={event} useAbsoluteTime={useAbsoluteTime} />
+            return <ErrorRow key={event.key} open={open} setOpen={setOpen} event={event} useAbsoluteTime={useAbsoluteTime} />
           }
         })}
 

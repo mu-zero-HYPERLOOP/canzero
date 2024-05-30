@@ -19,7 +19,7 @@ interface UndefinedRowProps {
   useAbsoluteTime: boolean,
 }
 
-function NormalRow({ useAbsoluteTime, open, setOpen, event }: UndefinedRowProps) {
+function NormalRow({ useAbsoluteTime, open, setOpen, event }: Readonly<UndefinedRowProps>) {
   let attributes = event.frame.detail as TraceFrameAttribute[];
 
   const theme = useTheme();
@@ -83,7 +83,7 @@ function NormalRow({ useAbsoluteTime, open, setOpen, event }: UndefinedRowProps)
             >
               <TableBody sx={{ maxWidth: "500px" }}>
                 {attributes.map(attrib => {
-                  return <TableRow sx={{ maxWidth: "500px" }}>
+                  return <TableRow sx={{ maxWidth: "500px" }} key={attrib.name}>
                     <TableCell align="right" sx={{ width: "200px", textAlign: "left" }}>
                       {attrib.name}
                     </TableCell>

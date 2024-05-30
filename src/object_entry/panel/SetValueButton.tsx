@@ -15,7 +15,7 @@ interface SetValueButtonProps {
 function SetValueButton({ nodeName, objectEntryInfo, objectEntryName, sx }: Readonly<SetValueButtonProps>) {
   const [showDialog, setShowDialog] = useState(false);
 
-  const [objectEntryInformation, setObjectEntryInfo]
+  const [objectEntryInformation, setObjectEntryInformation]
     = useState<ObjectEntryInformation | undefined>(objectEntryInfo);
 
   useEffect(() => {
@@ -24,7 +24,7 @@ function SetValueButton({ nodeName, objectEntryInfo, objectEntryName, sx }: Read
         const info = await invoke<ObjectEntryInformation>(
           "object_entry_information",
           { nodeName, objectEntryName: objectEntryName ?? objectEntryInfo?.name });
-        setObjectEntryInfo(info);
+        setObjectEntryInformation(info);
       }
       fetchInfo().catch(console.error);
     }

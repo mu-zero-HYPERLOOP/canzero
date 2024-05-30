@@ -6,7 +6,7 @@ interface NodesProps {
   nodes: NodeInformation[],
 }
 
-function MotorControl({ nodes : _ }: NodesProps) {
+function MotorControl({ nodes : _ }: Readonly<NodesProps>) {
 
   return (
     <Grid container spacing={2} padding={2}

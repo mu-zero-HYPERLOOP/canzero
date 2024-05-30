@@ -13,9 +13,8 @@ interface UndefinedRowProps {
   useAbsoluteTime: boolean,
 }
 
-function UndefinedRow({ useAbsoluteTime, event }: UndefinedRowProps) {
-  return (<>
-    <StyledTableRow>
+function UndefinedRow({ useAbsoluteTime, event }: Readonly<UndefinedRowProps>) {
+  return (<StyledTableRow>
       <TableCell sx={{ padding: 0, textAlign: "center", lineHeight: "100%" }}>
       </TableCell>
       <TableCell>
@@ -33,7 +32,7 @@ function UndefinedRow({ useAbsoluteTime, event }: UndefinedRowProps) {
       <TableCell>
         {event.frame.dlc}
       </TableCell>
-    </StyledTableRow></>);
+    </StyledTableRow>);
 
 }
 export default UndefinedRow;

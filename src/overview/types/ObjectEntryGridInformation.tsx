@@ -6,7 +6,7 @@ import {NodeInformation} from "../../nodes/types/NodeInformation.ts";
 // error -> red (All values that are not in the other ranges)
 // warning -> yellow
 // ok -> green
-// to good to be true -> blue
+// too good to be true -> blue
 // If interpolate is not specified the text field has no special color.
 export interface ObjectEntryGridInformation {
     node : NodeInformation,

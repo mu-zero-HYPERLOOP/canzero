@@ -10,7 +10,7 @@ import CustomTableCell from "./CustomTableCell.tsx";
 import {ValueTableCellInformation} from "./types/ValueTableCellInformation.tsx";
 import {Skeleton} from "@mui/material";
 
-interface ValueTableprops {
+interface ValueTableProps {
     entries: ValueTableCellInformation[];
     title: string;
     width: number;
@@ -21,7 +21,7 @@ interface ValueTableprops {
 
 // Only for numerical ObjectEntries
 // number of entries must equal rows * columns
-export default function ValueTable({entries, title, width, height, rows, columns}: Readonly<ValueTableprops>) {
+export default function ValueTable({entries, title, width, height, rows, columns}: Readonly<ValueTableProps>) {
     return (
         <div className="ControlTable">
             <TableContainer component={Paper}>
@@ -36,8 +36,8 @@ export default function ValueTable({entries, title, width, height, rows, columns
                     {(entries.length !== 0) ? <TableBody>
                             {Array.from(Array(rows).keys()).map((row, index) => (
                                 <TableRow key={index}>
-                                    {Array.from(Array(columns).keys()).map((col, index) => (
-                                        <CustomTableCell key={index} node={entries[columns * row + col].node}
+                                    {Array.from(Array(columns).keys()).map((col) => (
+                                        <CustomTableCell key={entries[columns * row + col].entry} node={entries[columns * row + col].node}
                                                          name={entries[columns * row + col].entry}
                                                          min={entries[columns * row + col].min}
                                                          max={entries[columns * row + col].max}/>

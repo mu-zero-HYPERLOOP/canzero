@@ -23,7 +23,7 @@ function Content() {
       if (connection == "network-connected") {
         setBackendError(undefined);
       } else if (connection == "heartbeat-miss") {
-        setBackendError("Heartbeated timed out");
+        setBackendError("Heartbeat timed out");
       } else if (connection == "network-disconnected") {
         setBackendError("Network disconnected");
       } else if (connection == "frontend-wdg-timeout") {

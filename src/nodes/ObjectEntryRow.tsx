@@ -25,7 +25,7 @@ interface ObjectEntryAttribRowProps {
 function ObjectEntryAttribRow({ name, value }: Readonly<ObjectEntryAttribRowProps>) {
   if (typeof value === "object") {
     return Object.entries(value).map(([attrib_name, attrib_value]) => {
-      return <ObjectEntryAttribRow name={`${name}.${attrib_name}`} value={attrib_value} />
+      return <ObjectEntryAttribRow name={`${name}.${attrib_name}`} value={attrib_value} key={`${name}.${attrib_name}`} />
     });
   } else {
     return (
@@ -51,7 +51,7 @@ function ObjectEntryAttribRow({ name, value }: Readonly<ObjectEntryAttribRowProp
   }
 }
 
-function ObjectEntryRow({ nodeName, objectEntryName, value }: ObjectEntryRowProps) {
+function ObjectEntryRow({ nodeName, objectEntryName, value }: Readonly<ObjectEntryRowProps>) {
   const [info, setInfo] = useState<ObjectEntryInformation>();
 
   useEffect(() => {
@@ -97,7 +97,7 @@ function ObjectEntryRow({ nodeName, objectEntryName, value }: ObjectEntryRowProp
       </TableRow >
       {value == undefined ? <></> :
         Object.entries(value).map(([attrib_name, attrib_value]) => {
-          return <ObjectEntryAttribRow name={attrib_name} value={attrib_value} />;
+          return <ObjectEntryAttribRow name={attrib_name} value={attrib_value} key={`${attrib_name}`} />;
         })
       }
     </>);

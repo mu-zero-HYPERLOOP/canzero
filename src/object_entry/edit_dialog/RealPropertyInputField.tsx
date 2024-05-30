@@ -35,7 +35,7 @@ interface RealPropertyInputFieldProps {
   name: string,
 }
 
-function RealPropertyInputField({ min, max, onUpdate, currentValue, name, unit , bitSize}: RealPropertyInputFieldProps) {
+function RealPropertyInputField({ min, max, onUpdate, currentValue, name, unit , bitSize}: Readonly<RealPropertyInputFieldProps>) {
   const [input, setInput] = useState<string>("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [hasValue, setHasValue] = useState<boolean>(false);

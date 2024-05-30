@@ -25,22 +25,9 @@ function Router(props: Readonly<{ children?: React.ReactNode }>) {
   );
 }
 
-// Augment the palette to include an ochre color
-declare module '@mui/material/styles' {
-  interface Palette {
-    ochre: Palette['primary'];
-  }
-
-  interface PaletteOptions {
-    backgroundAndIcons?: PaletteOptions['primary'];
-  }
-}
-
-//dialog.confirm({title?: string, message?: string, defaultCancel?: boolean})
-
 function App() {
   useEffect(() => {
-    invoke("close_startup", {});
+    invoke("close_startup", {}).catch(console.error);
   }, []);
 
   useEffect(() => {

@@ -3,6 +3,7 @@ import { TraceEvent } from "./types/TraceEvent";
 
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import React from "react";
 
 
 const StyledTableRow = styled(TableRow)(() => ({
@@ -18,7 +19,7 @@ interface ErrorRowProps {
   useAbsoluteTime: boolean,
 }
 
-function ErrorRow({ useAbsoluteTime, open, setOpen, event }: ErrorRowProps) {
+function ErrorRow({ useAbsoluteTime, open, setOpen, event }: Readonly<ErrorRowProps>) {
   let description = event.frame.detail as string;
   return (<>
     <StyledTableRow>

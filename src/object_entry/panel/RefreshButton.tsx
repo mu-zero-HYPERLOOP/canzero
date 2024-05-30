@@ -10,16 +10,16 @@ interface RefreshButtonProps {
 }
 
 function RefreshButton({nodeName, objectEntryName, sx}: Readonly<RefreshButtonProps>) {
-    const [getReqInProgess, setGetReqInProgess] = useState(false);
+    const [getReqInProgress, setGetReqInProgress] = useState(false);
 
     function handleRefreshClick() {
         console.log("sending get request");
-        setGetReqInProgess(true);
+        setGetReqInProgress(true);
         invoke("request_object_entry_value",
             {nodeName, objectEntryName}).then(() => {
-            setGetReqInProgess(false);
+            setGetReqInProgress(false);
         }).catch(() => {
-            setGetReqInProgess(false);
+            setGetReqInProgress(false);
         });
     }
 
@@ -27,7 +27,7 @@ function RefreshButton({nodeName, objectEntryName, sx}: Readonly<RefreshButtonPr
         size="small"
         onClick={handleRefreshClick}
         sx={sx}>
-        {getReqInProgess ?
+        {getReqInProgress ?
             <CircularProgress size={15} sx={{color: "grey"}}/> :
             <RefreshIcon fontSize="small"/>}
     </IconButton>

@@ -125,7 +125,7 @@ const Link = React.forwardRef<HTMLAnchorElement, RouterLinkProps>(function Link(
   return <RouterLink ref={ref} {...itemProps} role={undefined} />;
 });
 
-function ListItemButtonLink(props: ListItemLinkProps) {
+function ListItemButtonLink(props: Readonly<ListItemLinkProps>) {
   const { icon, primary, to } = props;
 
   return (

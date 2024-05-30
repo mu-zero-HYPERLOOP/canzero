@@ -32,7 +32,7 @@ function ObjectEntryGraph({
   buffering = true,
   smoothMode,
   interpolation = GraphInterpolation.Step,
-}: ObjectEntryGraph) {
+}: Readonly<ObjectEntryGraph>) {
 
   const [graphList, setGraphList] = useState<ReactElement[]>([]);
 
@@ -50,14 +50,12 @@ function ObjectEntryGraph({
       let updateIntervalMillis: number;
       if (!buffering) {
         updateIntervalMillis = 10;
+      } else if (timeDomainState < 5000) {
+        updateIntervalMillis = timeDomainState / 100;
+      } else if (timeDomain < 10000) {
+        updateIntervalMillis = timeDomainState / 50;
       } else {
-        if (timeDomainState < 5000) {
-          updateIntervalMillis = timeDomainState / 100;
-        } else if (timeDomain < 10000) {
-          updateIntervalMillis = timeDomainState / 50;
-        } else {
-          updateIntervalMillis = timeDomainState / 10;
-        }
+        updateIntervalMillis = timeDomainState / 10;
       }
       updateIntervalMillis ??= buffering ? timeDomainState / 25 : 10;
       updateIntervalMillis = Math.floor(updateIntervalMillis);
@@ -138,8 +136,8 @@ function ObjectEntryGraph({
           for (const [attrib_name, attrib_type] of Object.entries(structInfo.attributes)) {
             buildGraphList(now, attrib_type, (event) => {
               return (property(event) as { [name: string]: Value })[attrib_name];
-            }, undefined);
-          };
+            });
+          }
         } else {
           console.error("INVALID TYPE ID");
         }

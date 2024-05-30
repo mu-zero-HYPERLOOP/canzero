@@ -4,4 +4,4 @@ import { ObjectEntryEvent } from "../../object_entry/types/events/ObjectEntryEve
 
 export interface NodeEvent {
   object_entry_values : (ObjectEntryEvent | null)[],
-};
+}

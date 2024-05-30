@@ -25,7 +25,7 @@ function useInterval(callback: () => void, delay: number) {
 export function Heartbeat() {
 
     useInterval(() => {
-        invoke("heartbeat")
+        invoke("heartbeat").catch(console.error)
     }, 100);
 
     return <></>

@@ -35,7 +35,7 @@ interface SignedPropertyInputFieldProps {
   unit?: string,
 }
 
-function SignedPropertyInputField({ min, max, onUpdate, currentValue, name, unit, bitSize}: SignedPropertyInputFieldProps) {
+function SignedPropertyInputField({ min, max, onUpdate, currentValue, name, unit, bitSize}: Readonly<SignedPropertyInputFieldProps>) {
   const [input, setInput] = useState<string>("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [hasValue, setHasValue] = useState<boolean>(false);
