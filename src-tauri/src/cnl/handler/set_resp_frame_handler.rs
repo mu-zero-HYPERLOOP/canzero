@@ -47,7 +47,7 @@ impl SetResponseFrame {
         };
         Self {
             server_id: *server_id as u8,
-            client_id: *server_id as u8,
+            client_id: *client_id as u8,
             oe_index: *object_entry_id as u32,
             result,
         }
