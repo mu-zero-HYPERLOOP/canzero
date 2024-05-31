@@ -235,7 +235,7 @@ function EditDialog({ open, onClose, nodeName, objectEntryInfo }: Readonly<EditD
             }
             let full_name = `${name}.${attrib_name}`;
             if (currentValue === undefined) {
-              recBuildInputFields(attrib_type, attribOnUpdate, full_name, unit, undefined);
+              recBuildInputFields(attrib_type, attribOnUpdate, full_name, unit);
             } else {
               const currentValueAsStruct = currentValue as { [name: string]: Value };
               recBuildInputFields(attrib_type, attribOnUpdate, full_name, unit, currentValueAsStruct[attrib_name]);
