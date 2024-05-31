@@ -40,24 +40,22 @@ function sendSetRequest(nodeName: string, objectEntryName: string, value: Option
   // NOTE: construct a new value, where all undefined attributes 
   // are replaced with the currentValue to 
   function autocompleteRec(value: OptionalValue, currentValue: Value | undefined, ty: Type): Value | null {
-    if (value == null) return null;
+    if (value === null) return null;
     switch (ty.id) {
       case "uint": case "int": case "real": case "enum":
         return (value ?? currentValue) as Value ?? null;
       case "struct":
-        if (value === undefined) { // TODO condition is always false
+        if (value === undefined) {
           return currentValue ?? null;
         } else {
           const structInfo = ty.info as StructTypeInfo;
           const valueAsStruct = value as { [name: string]: OptionalValue };
-          const currentValueAsStruct = value as { [name: string]: Value };
+          const currentValueAsStruct = currentValue as { [name: string]: Value } | undefined;
           const autocompletedStruct: { [name: string]: Value } | null = {};
           for (const [attrib_name, attrib_type] of Object.entries(structInfo.attributes)) {
             const auto =
-              autocompleteRec(valueAsStruct[attrib_name], currentValueAsStruct[attrib_name], attrib_type);
-            if (!auto) {
-              return null;
-            }
+              autocompleteRec(valueAsStruct[attrib_name], (currentValueAsStruct !== undefined) ? currentValueAsStruct[attrib_name] : undefined, attrib_type);
+            if (auto === null) return null;
             autocompletedStruct[attrib_name] = auto;
           }
           return autocompletedStruct;
@@ -68,10 +66,14 @@ function sendSetRequest(nodeName: string, objectEntryName: string, value: Option
   }
 
   let autocompletedValue: Value | null = autocompleteRec(value, currentValue, ty);
-  if (autocompletedValue === null || autocompletedValue === undefined) {
-    // TODO error notification here plea=== null || autocompletedValue === undefined!
-    // there doesn't exist a current value and not all values where specified, 
+  if (autocompletedValue === null) {
+    // there doesn't exist a current value and not all values where specified,
     // therefor the set request was aborted
+    console.error("There doesn't exist a current value and not all values where specified.")
+    return;
+  }
+  if (autocompletedValue === undefined) {
+    console.error("Value is undefined. Should never happen.")
     return;
   }
   invoke("set_object_entry_value", {
@@ -266,7 +268,6 @@ function EditDialog({ open, onClose, nodeName, objectEntryInfo }: Readonly<EditD
   }, [open]);
 
   const enableUpload = value != undefined && isValidValue(objectEntryInfo.ty, value);
-
   return <Modal
     open={open}
     onClose={onClose}>
