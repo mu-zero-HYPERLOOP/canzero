@@ -1,9 +1,10 @@
 
-import { Collapse, IconButton, Table, TableBody, TableCell, TableRow, styled, useTheme } from "@mui/material";
+import {Collapse, IconButton, Table, TableBody, TableCell, TableRow, styled, useTheme, Typography} from "@mui/material";
 import { TraceEvent, TraceFrameAttribute } from "./types/TraceEvent";
 
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import React from "react";
 
 
 const StyledTableRow = styled(TableRow)(({theme}) => ({
@@ -52,19 +53,29 @@ function NormalRow({ useAbsoluteTime, open, setOpen, event }: Readonly<Undefined
         }
       </TableCell>
       <TableCell>
-        {useAbsoluteTime ? `${event.absoluteTime}` : `${event.deltaTime}`}
+        <Typography style={{ opacity: event.timeSinceLast > 5000 ? "20%" : "100%" }} variant="body2">
+          {useAbsoluteTime ? `${event.absoluteTime}` : `${event.deltaTime}`}
+        </Typography>
       </TableCell>
       <TableCell>
-        {event.frame.id}
+        <Typography style={{ opacity: event.timeSinceLast > 5000 ? "20%" : "100%" }} variant="body2">
+          {event.frame.id}
+        </Typography>
       </TableCell>
       <TableCell>
-        {event.frame.name}
+        <Typography style={{ opacity: event.timeSinceLast > 5000 ? "20%" : "100%" }} variant="body2">
+          {event.frame.name}
+        </Typography>
       </TableCell>
       <TableCell>
-        {event.bus}
+        <Typography style={{ opacity: event.timeSinceLast > 5000 ? "20%" : "100%" }} variant="body2">
+          {event.bus}
+        </Typography>
       </TableCell>
       <TableCell>
-        {event.frame.dlc}
+        <Typography style={{ opacity: event.timeSinceLast > 5000 ? "20%" : "100%" }} variant="body2">
+          {event.frame.dlc}
+        </Typography>
       </TableCell>
     </StyledTableRow>
     {attributes ?

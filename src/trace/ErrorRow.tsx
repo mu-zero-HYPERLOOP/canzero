@@ -47,27 +47,27 @@ function ErrorRow({ useAbsoluteTime, open, setOpen, event }: Readonly<ErrorRowPr
         </IconButton>
       </TableCell>
       <TableCell>
-        <Typography style={{ opacity: event.timeSinceLast > 2500 ? "20%" : "100%" }} variant="body2">
+        <Typography style={{ opacity: event.timeSinceLast > 5000 ? "20%" : "100%" }} variant="body2">
           {useAbsoluteTime ? `${event.absoluteTime}s` : `${event.deltaTime}ms`}
         </Typography>
       </TableCell>
       <TableCell>
-        <Typography style={{ opacity: event.timeSinceLast > 2500 ? "20%" : "100%" }} variant="body2">
+        <Typography style={{ opacity: event.timeSinceLast > 5000 ? "20%" : "100%" }} variant="body2">
           -
         </Typography>
       </TableCell>
       <TableCell>
-        <Typography style={{ opacity: event.timeSinceLast > 2500 ? "20%" : "100%" }} variant="body2">
+        <Typography style={{ opacity: event.timeSinceLast > 5000 ? "20%" : "100%" }} variant="body2">
           {event.frame.name}
         </Typography>
       </TableCell>
       <TableCell>
-        <Typography style={{ opacity: event.timeSinceLast > 2500 ? "20%" : "100%" }} variant="body2">
+        <Typography style={{ opacity: event.timeSinceLast > 5000 ? "20%" : "100%" }} variant="body2">
           {event.bus}
         </Typography>
       </TableCell>
       <TableCell>
-        <Typography style={{ opacity: event.timeSinceLast > 2500 ? "20%" : "100%" }} variant="body2">
+        <Typography style={{ opacity: event.timeSinceLast > 5000 ? "20%" : "100%" }} variant="body2">
           {event.frame.dlc}
         </Typography>
       </TableCell>
