@@ -37,7 +37,7 @@ async function notifyBackendAboutSorting(sorting: Sorting, sortAsc: boolean, abs
       break;
     case Sorting.ByBus:
       criteria = "bus";
-    break;
+      break;
     case Sorting.ByDlc:
       criteria = "dlc";
       break;
@@ -53,6 +53,7 @@ function Trace() {
   const [sortAsc, setSortAsc] = useState<boolean>(false);
 
   const [open, setOpen] = useState<{ [key: number]: boolean }>({});
+  const [searchString, setSearchString] = useState<string>("");
 
   function updateSorting(sorting: Sorting, toggleAsc: boolean) {
     setSorting(sorting);
@@ -78,6 +79,9 @@ function Trace() {
 
   useEffect(() => {
     async function asyncSetup() {
+      const storedSearchString = await invoke<string>("get_stored_search_string", {page: "trace"});
+      setSearchString(storedSearchString)
+      updateFilter(storedSearchString)
       const eventName = await invoke<string>("listen_to_trace");
       const unlisten = await listen<TraceEvent[]>(eventName, event => {
         setFrames(event.payload);
@@ -87,6 +91,7 @@ function Trace() {
         unlisten();
       };
     }
+    setSearchString("");
     const asyncCleanup = asyncSetup();
     return () => {
       asyncCleanup.then(f => f()).catch(console.error);
@@ -95,73 +100,73 @@ function Trace() {
 
 
   return <TableContainer
-    component={Paper}
-    sx={{
-      marginTop: "20px",
-      marginLeft: "10px",
-      width: "calc(100% - 20px)",
-      height: "calc(100%)",
-    }}
+      component={Paper}
+      sx={{
+        marginTop: "20px",
+        marginLeft: "10px",
+        width: "calc(100% - 20px)",
+        height: "calc(100%)",
+      }}
   >
     <Table
-      stickyHeader
-      aria-label="sticky table"
-      size="small"
+        stickyHeader
+        aria-label="sticky table"
+        size="small"
     >
       <TableHead>
         <StyledTableHeader>
           <TableCell
-            align="left"
-            sx={{
-              width: "30px",
-              borderRightWidth: 1,
-              borderRightColor: "lightgray",
-              borderRightStyle: "solid",
-            }}
+              align="left"
+              sx={{
+                width: "30px",
+                borderRightWidth: 1,
+                borderRightColor: "lightgray",
+                borderRightStyle: "solid",
+              }}
           >
           </TableCell>
           <TableCell
-            align="left"
-            sx={{
-              width: "110px",
-              borderRightWidth: 1,
-              borderRightColor: "lightgray",
-              borderRightStyle: "solid",
-            }}
+              align="left"
+              sx={{
+                width: "110px",
+                borderRightWidth: 1,
+                borderRightColor: "lightgray",
+                borderRightStyle: "solid",
+              }}
           >
             <Sortable
-              sortAsc={sortAsc}
-              self={Sorting.ByTime}
-              value={sorting}
-              setSorting={updateSorting}
+                sortAsc={sortAsc}
+                self={Sorting.ByTime}
+                value={sorting}
+                setSorting={updateSorting}
             >
               <IconButton
-                sx={{
-                  boxShadow: "none",
-                  color: "black",
-                }}
-                onClick={() => {
-                  setUseAbsoluteTime(prev => !prev);
-                }}
+                  sx={{
+                    boxShadow: "none",
+                    color: "black",
+                  }}
+                  onClick={() => {
+                    setUseAbsoluteTime(prev => !prev);
+                  }}
               >
                 {useAbsoluteTime ? <AccessTimeIcon fontSize="small" /> : <ChangeHistoryIcon fontSize="small" />}
               </IconButton>
             </Sortable>
           </TableCell >
           <TableCell
-            align="left"
-            sx={{
-              width: "10px",
-              borderRightWidth: 1,
-              borderRightColor: "lightgray",
-              borderRightStyle: "solid",
-            }}
+              align="left"
+              sx={{
+                width: "10px",
+                borderRightWidth: 1,
+                borderRightColor: "lightgray",
+                borderRightStyle: "solid",
+              }}
           >
             <Sortable
-              sortAsc={sortAsc}
-              self={Sorting.ById}
-              value={sorting}
-              setSorting={updateSorting}
+                sortAsc={sortAsc}
+                self={Sorting.ById}
+                value={sorting}
+                setSorting={updateSorting}
             >
               <Typography variant="subtitle1" >
                 ID
@@ -169,65 +174,67 @@ function Trace() {
             </Sortable>
           </TableCell>
           <TableCell
-            align="left"
-            sx={{
-              borderRightWidth: 1,
-              borderRightColor: "lightgray",
-              borderRightStyle: "solid",
-            }}
+              align="left"
+              sx={{
+                borderRightWidth: 1,
+                borderRightColor: "lightgray",
+                borderRightStyle: "solid",
+              }}
           >
             <Stack
-              direction="row"
-              alignItems="flex-start"
-              justifyContent="space-between"
+                direction="row"
+                alignItems="flex-start"
+                justifyContent="space-between"
             >
               <Sortable
-                sortAsc={sortAsc}
-                self={Sorting.ByName}
-                value={sorting}
-                setSorting={updateSorting}
+                  sortAsc={sortAsc}
+                  self={Sorting.ByName}
+                  value={sorting}
+                  setSorting={updateSorting}
               >
                 <Typography variant="subtitle1" >
                   Name
                 </Typography>
               </Sortable>
               <TextField
-                inputRef={searchFieldRef}
-                sx={{
-                  width: "50%",
-                  maxWidth: "400px",
-                }}
-                variant="standard"
-                inputProps={{
-                  style: {
-                    boxShadow: "none"
-                  }
-                }}
-                onChange={event => {
-                  updateFilter(event.target.value);
-                }}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" /></InputAdornment>,
-                }}
+                  inputRef={searchFieldRef}
+                  value={searchString}
+                  sx={{
+                    width: "50%",
+                    maxWidth: "400px",
+                  }}
+                  variant="standard"
+                  inputProps={{
+                    style: {
+                      boxShadow: "none"
+                    }
+                  }}
+                  onChange={event => {
+                    setSearchString(event.target.value);
+                    updateFilter(event.target.value);
+                  }}
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" /></InputAdornment>,
+                  }}
               >
               </TextField>
             </Stack>
 
           </TableCell>
           <TableCell
-            align="left"
-            sx={{
-              width: "100px",
-              borderRightWidth: 1,
-              borderRightColor: "lightgray",
-              borderRightStyle: "solid",
-            }}
+              align="left"
+              sx={{
+                width: "100px",
+                borderRightWidth: 1,
+                borderRightColor: "lightgray",
+                borderRightStyle: "solid",
+              }}
           >
             <Sortable
-              sortAsc={sortAsc}
-              self={Sorting.ByBus}
-              value={sorting}
-              setSorting={updateSorting}
+                sortAsc={sortAsc}
+                self={Sorting.ByBus}
+                value={sorting}
+                setSorting={updateSorting}
             >
               <Typography variant="subtitle1" >
                 Bus
@@ -235,19 +242,19 @@ function Trace() {
             </Sortable>
           </TableCell >
           <TableCell
-            align="left"
-            sx={{
-              width: "100px",
-              borderRightWidth: 1,
-              borderRightColor: "lightgray",
-              borderRightStyle: "solid",
-            }}
+              align="left"
+              sx={{
+                width: "100px",
+                borderRightWidth: 1,
+                borderRightColor: "lightgray",
+                borderRightStyle: "solid",
+              }}
           >
             <Sortable
-              sortAsc={sortAsc}
-              self={Sorting.ByDlc}
-              value={sorting}
-              setSorting={updateSorting}
+                sortAsc={sortAsc}
+                self={Sorting.ByDlc}
+                value={sorting}
+                setSorting={updateSorting}
             >
               <Typography variant="subtitle1" >
                 DLC

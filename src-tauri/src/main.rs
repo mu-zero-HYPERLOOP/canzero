@@ -83,6 +83,7 @@ async fn main() {
             commands::settings::get_settings,
             commands::settings::set_frontend_lvl,
             commands::settings::set_deadlock_lvl,
+            commands::search_string_storage::get_stored_search_string,
         ])
         .run(tauri::generate_context!())
         .expect("Error while running tauri application");

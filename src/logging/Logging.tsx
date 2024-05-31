@@ -44,7 +44,16 @@ interface TopBarProps {
 
 }
 
-function TopBar({nodes, filter, rowData, selected, setSelected, searchString, setSearchString, updateFilter}: Readonly<TopBarProps>) {
+function TopBar({
+                    nodes,
+                    filter,
+                    rowData,
+                    selected,
+                    setSelected,
+                    searchString,
+                    setSearchString,
+                    updateFilter
+                }: Readonly<TopBarProps>) {
     const theme = useTheme();
     const searchFieldRef = useRef() as any;
 
@@ -179,28 +188,32 @@ function Logging({nodes}: Readonly<ExportPanelProps>) {
         setFilter(filter);
     }
 
-    useEffect(()=> {
-      updateFilter(searchString);
+    useEffect(() => {
+        updateFilter(searchString);
     }, []);
 
-    
-    useEffect(() =>{
-      async function asyncSetup() {
-        let rowData : RowData[] = [];
-        for (let node of nodes) {
-          let nodeInformation = await invoke<NodeInformation>("node_information", {nodeName : node.name});
-          for (let objectEntryName of nodeInformation.object_entries) {
-            rowData.push({
-              nodeName : node.name,
-              objectEntryName,
-            });
-          }
+
+    useEffect(() => {
+        async function asyncSetup() {
+            const storedSearchString = await invoke<string>("get_stored_search_string", {page: "export"});
+            setSearchString(storedSearchString)
+            updateFilter(storedSearchString)
+            let rowData: RowData[] = [];
+            for (let node of nodes) {
+                let nodeInformation = await invoke<NodeInformation>("node_information", {nodeName: node.name});
+                for (let objectEntryName of nodeInformation.object_entries) {
+                    rowData.push({
+                        nodeName: node.name,
+                        objectEntryName,
+                    });
+                }
+            }
+            setRowData(rowData);
         }
-        setRowData(rowData);
-      }
-      asyncSetup().catch(console.error);
-      return () => {
-      }
+
+        asyncSetup().catch(console.error);
+        return () => {
+        }
     }, [nodes]);
 
     function rowContent(_index: number, row?: RowData) {
@@ -249,7 +262,8 @@ function Logging({nodes}: Readonly<ExportPanelProps>) {
         }}
         >
 
-            <TopBar nodes={nodes} filter={filter} rowData={rowData} selected={selected} setSelected={setSelected} searchString={searchString}
+            <TopBar nodes={nodes} filter={filter} rowData={rowData} selected={selected} setSelected={setSelected}
+                    searchString={searchString}
                     setSearchString={setSearchString} updateFilter={updateFilter}/>
 
             {rowData.length == 0 ? <Skeleton

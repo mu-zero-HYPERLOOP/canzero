@@ -9,7 +9,7 @@ function StateDisplay({ state }: Readonly<StateDisplayProps>) {
     return (
         <Paper sx={{
             paddingLeft: 1,
-            paddingTop: 0.5,
+            paddingTop: 1,
             paddingBottom: 0.5,
             paddingRight: 0.5,
             background: "white",
