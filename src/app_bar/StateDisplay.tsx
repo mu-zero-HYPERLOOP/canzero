@@ -1,4 +1,4 @@
-import { TextField } from "@mui/material";
+import {Paper, Stack, Typography} from "@mui/material";
 
 
 interface StateDisplayProps {
@@ -6,33 +6,25 @@ interface StateDisplayProps {
 }
 
 function StateDisplay({ state }: Readonly<StateDisplayProps>) {
-  return (
-    <TextField
-      id="state-display-button"
-      label="Current State"
-      variant="filled"
-      value={state}
-      sx={{
-        input: {
-          background: "white",
-          width: "100px",
-          height: "25px",
-        },
-      }}
-      InputProps={{
-        style: {
-          fontSize: "0.5em"
-        },
-        readOnly: true,
-        disableUnderline: true,
-      }}
-      InputLabelProps={{
-        style :{
-          fontSize: "1.2em"
-        }
-      }}
-    />
-  );
+    return (
+        <Paper sx={{
+            paddingLeft: 1,
+            paddingTop: 0.5,
+            paddingBottom: 0.5,
+            paddingRight: 0.5,
+            background: "white",
+            width: "150px",
+            height: "55px",
+        }}
+        >
+            <Stack direction="column" spacing={0}  fontSize={12}>
+                    <Typography variant="caption" color="grey" fontSize={10} >
+                        {`Current State`}
+                    </Typography>
+                {state}
+            </Stack>
+        </Paper>
+    );
 
 
 }

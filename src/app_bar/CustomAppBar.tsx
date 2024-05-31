@@ -313,7 +313,7 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
             aria-label="open drawer"
             onClick={toggleOpen}
             sx={{
-              marginRight: '36px',
+              marginRight: '100px',
               backgroundColor: theme.palette.background.drawer,
               '&:hover': {
                 backgroundColor: theme.palette.background.paper,
@@ -341,7 +341,7 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
           >
             <StateDisplay state={state} />
             {/* Buttons */}
-            <AppBarButton variant="contained" width="16em" color="stateError" onClick={sendEmergencyCommand} >
+            <AppBarButton variant="contained" width="18em" color="stateError" onClick={sendEmergencyCommand} >
               <p>Emergency <br />[Space bar]</p>
             </AppBarButton>
 

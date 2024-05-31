@@ -18,14 +18,14 @@ type OptionalValue = number | string | { [name: string]: OptionalValue } | null 
 type SetterLambda = (setter: ((old: OptionalValue) => OptionalValue)) => void;
 
 function isValidValue(ty: Type, value: OptionalValue): boolean {
+  const structInfo = ty.info as StructTypeInfo;
+  const valueAsStruct = value as { [name: string]: OptionalValue };
   switch (ty.id) {
     case "uint": case "int": case "real": case "enum":
       return value !== null;
     case "struct":
       if (value === null) return false;
       if (value == undefined) return true;
-      const structInfo = ty.info as StructTypeInfo;
-      const valueAsStruct = value as { [name: string]: OptionalValue };
       for (const [attrib_name, attrib_type] of Object.entries(structInfo.attributes)) {
         if (!isValidValue(attrib_type, valueAsStruct[attrib_name])) {
           return false;
@@ -36,7 +36,6 @@ function isValidValue(ty: Type, value: OptionalValue): boolean {
 }
 
 function sendSetRequest(nodeName: string, objectEntryName: string, value: OptionalValue, currentValue: Value | undefined, ty: Type) {
-
   // NOTE: construct a new value, where all undefined attributes 
   // are replaced with the currentValue to 
   function autocompleteRec(value: OptionalValue, currentValue: Value | undefined, ty: Type): Value | null {
@@ -60,8 +59,6 @@ function sendSetRequest(nodeName: string, objectEntryName: string, value: Option
           }
           return autocompletedStruct;
         }
-
-
     }
   }
 
@@ -81,8 +78,7 @@ function sendSetRequest(nodeName: string, objectEntryName: string, value: Option
     objectEntryName,
     newValueJson: JSON.stringify(autocompletedValue),
   }).catch((_) => {
-    // TODO: send a error notification!
-    console.error("TODO make be a notification");
+    console.error("Setter failed in the backend");
   });
 }
 
