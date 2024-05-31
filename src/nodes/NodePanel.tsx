@@ -104,13 +104,13 @@ function NodePanel({ node }: Readonly<NodePanelProps>) {
 
   return (
     <Paper sx={{
-      marginTop: "20px",
+      marginTop: "16px",
       marginLeft: "8px",
       marginRight: "10px",
       paddingLeft: "12px",
       paddingRight: "12px",
       width: "calc(100% - 16px)",
-      height: "calc(101vh - 115px)",
+      height: "calc(102vh - 120px)",
       paddingTop: "60px",
       paddingBottom: "8px",
       position: "relative"

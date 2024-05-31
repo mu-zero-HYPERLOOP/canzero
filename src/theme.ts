@@ -90,7 +90,7 @@ const theme = responsiveFontSizes(createTheme({
       default: "#f7f7f7",
       main: "#f3f3f3",
       paper: "#ededed",
-      paper2: "#f5f5f5",
+      paper2: "#f3f3f3",
       warn: "#f2e9ce",
       error: "#f2d5d5",
       disabled: "#a2a2a2"

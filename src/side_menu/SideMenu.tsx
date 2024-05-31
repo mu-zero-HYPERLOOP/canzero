@@ -100,7 +100,7 @@ function SideMenu({ open, toggleOpen }: Readonly<SideMenuProps>) {
           justifyContent: 'flex-start',
           px: [1],
           m: 0,
-          height: "80px",
+          height: "81px",
           backgroundColor: theme.palette.background.appBar
         }}
       >
@@ -116,7 +116,7 @@ function SideMenu({ open, toggleOpen }: Readonly<SideMenuProps>) {
           <ChevronLeftIcon />
         </IconButton>
       </Toolbar>
-      <StateIndicatorBar state={state} voffset="-5px" />
+      <StateIndicatorBar state={state} voffset="-6px" />
       <Box
         component="div"
         sx={{
