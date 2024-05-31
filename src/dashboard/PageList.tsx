@@ -243,6 +243,11 @@ export function ListEntries({ open }: Readonly<ListEntriesProps>) {
       </Box>
     </>;
   } else {
-    return RouterList;
+    return <>
+      {RouterList}
+      <Divider sx={{ my: 1 }} />
+      <ExportListButton />
+      <Divider sx={{ my: 1 }} />
+    </>;
   }
 }

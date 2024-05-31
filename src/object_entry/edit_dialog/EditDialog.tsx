@@ -106,7 +106,7 @@ interface EditDialogProps {
 }
 
 
-function EditDialog({ open, onClose, nodeName, objectEntryInfo }: EditDialogProps) {
+function EditDialog({ open, onClose, nodeName, objectEntryInfo }: Readonly<EditDialogProps>) {
 
   // NOTE: listeners to current values
   const [currentValue, setCurrentValue] = useState<Value | undefined>();
