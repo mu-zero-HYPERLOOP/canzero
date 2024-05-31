@@ -497,10 +497,10 @@ pub fn generate_rx_handlers(
                     }
                 }
                 case_logic += &format!("{indent}}}\n");
-                let node_id = node_config.id();
+                let node_name = node_config.name();
                 let resp_bus_name = network_config.get_resp_message().bus().name();
                 logic += &format!(
-                    "{indent}if (msg.m_header.m_server_id != {node_id}) {{
+                    "{indent}if (msg.m_header.m_server_id != node_id_{node_name}) {{
 {indent2}return;
 {indent}}}
 {indent}{namespace}_message_get_resp resp{{}};

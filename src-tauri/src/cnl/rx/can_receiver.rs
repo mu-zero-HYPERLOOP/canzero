@@ -94,7 +94,13 @@ impl CanReceiver {
         ) {
             loop {
                 let frame = match receiver_data.can_adapter.receive().await {
-                    Ok(frame) => frame,
+                    Ok(frame) => {
+                        let my_frame = frame.clone().expect("fucked up").value;
+                        if my_frame.get_id() == 0xbe {
+                            println!("received frame: {}", (my_frame.get_data_u64() & 0x70000) >> 16);
+                        }
+                        frame
+                    }
                     Err(_) => {
                         connection_object.set_status(ConnectionStatus::NetworkDisconnected);
                         break;

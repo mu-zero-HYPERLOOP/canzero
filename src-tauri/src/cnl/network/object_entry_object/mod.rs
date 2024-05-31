@@ -156,6 +156,7 @@ impl ObjectEntryObject {
                 let mut new_req_num = get_requests.lock().await;
                 if *new_req_num == my_req_num {
                     *new_req_num += 1;
+                    drop(new_req_num);
                     notify_error(
                         &app_handle,
                         "get request timed out",

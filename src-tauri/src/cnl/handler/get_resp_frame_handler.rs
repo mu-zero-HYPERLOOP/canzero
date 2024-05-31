@@ -85,6 +85,7 @@ struct GetResp {
 
 impl GetResp {
     async fn receive(&mut self, frame: GetRespFrame, timestamp: &Duration) -> Result<()> {
+        println!("received get resp frame with: sof: {}, toggle: {}, eof: {}", frame.sof, frame.toggle, frame.eof);
         let (expected_sof, expected_toggle) = match &self.state {
             GetRespState::Ready => (true, false),
             GetRespState::FragmentationToggleLow => (false, false),
