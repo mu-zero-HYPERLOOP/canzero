@@ -85,6 +85,7 @@ function NodePanel({node}: Readonly<NodePanelProps>) {
             return () => {
                 unlistenJs();
                 invoke("unlisten_from_node_latest", {nodeName: node.name}).catch(console.error);
+                invoke("store_search_string", {page: node.name, string: searchString}).catch(console.error);
             };
         }
 
@@ -94,7 +95,6 @@ function NodePanel({node}: Readonly<NodePanelProps>) {
         setFilter(node.object_entries.map((_, i) => i));
         setSearchString("");
         let asyncCleanup = asyncSetup();
-        setCurrNodeName(node.name);
         return () => {
             asyncCleanup.then(f => f()).catch(console.error);
         };

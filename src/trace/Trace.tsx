@@ -88,6 +88,7 @@ function Trace() {
       });
       return () => {
         invoke("unlisten_from_trace").catch(console.error);
+        invoke("store_search_string", {page: "trace", string: searchString}).catch(console.error);
         unlisten();
       };
     }

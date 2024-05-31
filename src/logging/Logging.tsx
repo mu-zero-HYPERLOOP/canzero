@@ -209,10 +209,15 @@ function Logging({nodes}: Readonly<ExportPanelProps>) {
                 }
             }
             setRowData(rowData);
+
+            return () => {
+                invoke("store_search_string", {page: "export", string: searchString}).catch(console.error);
+            };
         }
 
-        asyncSetup().catch(console.error);
+        let asyncCleanup = asyncSetup();
         return () => {
+            asyncCleanup.then(f => f()).catch(console.error);
         }
     }, [nodes]);
 
