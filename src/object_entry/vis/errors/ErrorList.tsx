@@ -22,7 +22,12 @@ export interface ErrorId {
   error: ObjectEntryId,
 }
 
-function ErrorList() {
+interface ErrorListProps {
+  width?: string,
+  height?: string,
+}
+
+function ErrorList({width, height} : Readonly<ErrorListProps>) {
   const theme = useTheme();
 
   const [errorIds, setErrorIds] = useState<ErrorId[]>([]);
@@ -142,12 +147,10 @@ function ErrorList() {
     };
   }, [errorIds]);
 
-  console.log(sortedErrors);
-
   return (
     <Paper component="div" sx={{
-      width: "500px",
-      height: "400px",
+      width,
+      height,
     }}>
       <Typography textAlign="center" paddingTop="0.5em" paddingBottom="0.5em" variant="h6">
         Status
@@ -158,7 +161,7 @@ function ErrorList() {
         marginRight: "0.5em",
         marginBottom: "0.5em",
         overflow: "auto",
-        height: "335px",
+        height: `calc(${height} - 65px)`,
       }}>
         <List sx={{
           padding: 0,

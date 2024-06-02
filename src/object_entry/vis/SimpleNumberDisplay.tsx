@@ -13,19 +13,22 @@ interface SimpleEnumDisplayProps {
   label?: string,
 }
 
-function SimpleEnumDisplay({ nodeName, objectEntryName, label}: Readonly<SimpleEnumDisplayProps>) {
+function SimpleEnumDisplay({ nodeName, objectEntryName, label }: Readonly<SimpleEnumDisplayProps>) {
 
   const [value, setValue] = useState<number>();
   const [information, setInformation] = useState<ObjectEntryInformation>();
 
   useEffect(() => {
     async function asyncSetup() {
-      const info = await invoke<ObjectEntryInformation>("object_entry_information");
+      const info = await invoke<ObjectEntryInformation>("object_entry_information",
+        { nodeName, objectEntryName });
       setInformation(info);
 
       const resp = await invoke<ObjectEntryListenLatestResponse>("listen_to_latest_object_entry_value", {
         nodeName, objectEntryName
       });
+
+      console.log(objectEntryName, info, resp);
       if (resp.latest !== undefined && resp.latest !== null) {
         setValue(resp.latest.value as number);
       }
@@ -34,7 +37,7 @@ function SimpleEnumDisplay({ nodeName, objectEntryName, label}: Readonly<SimpleE
       });
 
       return () => {
-        invoke("unlisten_from_latest_object_entry_value", {nodeName, objectEntryName}).catch(console.error);
+        invoke("unlisten_from_latest_object_entry_value", { nodeName, objectEntryName }).catch(console.error);
         unlistenJs();
       };
     }
@@ -49,7 +52,7 @@ function SimpleEnumDisplay({ nodeName, objectEntryName, label}: Readonly<SimpleE
       id="state-display-button"
       label={label ?? `${nodeName}::${objectEntryName}`}
       variant="filled"
-      value={(value ? value.toString() : "-") + information?.unit ?? ""}
+      value={((value !== undefined && value !== null)  ? value.toFixed(5) : "-") + (information?.unit !== null ? information?.unit : "")}
       sx={{
         input: {
           background: "white",
