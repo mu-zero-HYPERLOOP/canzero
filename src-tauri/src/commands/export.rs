@@ -1,102 +1,198 @@
-use canzero_config::config::Type;
 
-use crate::{cnl::frame::Value, notification::notify_error, notification::notify_info, state::cnl_state::CNLState};
+use canzero_config::config::{Type, TypeRef};
+use std::io::Write;
+use chrono::{Datelike, Timelike};
+use tauri::api::dialog::FileDialogBuilder;
 
-const EXPORT_PATH: &'static str = "./log";
+use crate::{
+    cnl::{frame::Value, network::object_entry_object::latest::event::OwnedObjectEntryEvent},
+    state::cnl_state::CNLState,
+};
 
 #[tauri::command]
 pub async fn export(
-    app_handle: tauri::AppHandle,
     state: tauri::State<'_, CNLState>,
 ) -> Result<(), ()> {
-    #[cfg(feature = "logging-invoke")]
     println!("invoke: export()");
+
     let cnl = state.lock().await;
 
-    // ensure that log directory exists.
-    let export_dir = std::path::Path::new(EXPORT_PATH);
-    if !export_dir.exists() {
-        std::fs::create_dir(&export_dir)
-            .expect(&format!("Failed to create directory {export_dir:?}"))
+    struct ObjectEntryExport {
+        pub name: String,
+        pub ty: TypeRef,
+        pub values: Vec<OwnedObjectEntryEvent>,
     }
-    let time = chrono::offset::Local::now();
 
-    let log_dir = export_dir.join(std::path::Path::new(&time.to_string()));
-    if log_dir.exists() {
-        notify_error(
-            &app_handle,
-            "LogFile already exits",
-            &format!("LogFile {log_dir:?} already exists"),
-            time,
-        );
-        return Result::Err(());
-    };
+    struct NodeExport {
+        pub name: String,
+        pub object_entry_export: Vec<ObjectEntryExport>,
+    }
 
-    std::fs::create_dir(&log_dir).expect(&format!("Failed to create directory {log_dir:?}"));
-
+    let mut export_data: Vec<NodeExport> = vec![];
     for node in cnl.nodes() {
-        let node_log_dir = log_dir.join(node.name());
-        std::fs::create_dir(&node_log_dir).expect("Failed to create directory {node_log_dir:?}");
-
-        for object_entry in node.object_entries() {
-            let oe_log_path = node_log_dir.join(&format!("{}.csv", object_entry.name()));
-            let history = object_entry.complete_history().await;
-            let mut csv_writer = csv::Writer::from_writer(vec![]);
-            fn write_header(csv_writer: &mut csv::Writer<Vec<u8>>, ty: &Type, name : &str) -> csv::Result<()> {
-                match ty {
-                    Type::Enum {
-                        name : _,
-                        description : _,
-                        size : _,
-                        entries : _,
-                        visibility : _,
-                    } |
-                    Type::Primitive(_) => csv_writer.write_field(name),
-                    Type::Struct {
-                        name,
-                        description : _,
-                        attribs,
-                        visibility : _,
-                    } => {
-                        for (attrib_name, attrib_ty) in attribs {
-                            write_header(csv_writer, attrib_ty.as_ref(), &format!("{name}.{attrib_name}"))?;
-                        }
-                        Ok(())
-                    }
-                    Type::Array { len : _, ty : _ } => panic!(),
-                }
-            }
-
-            fn write_record(
-                csv_writer: &mut csv::Writer<Vec<u8>>,
-                event: &Value,
-            ) -> csv::Result<()> {
-                match event {
-                    Value::UnsignedValue(v) => csv_writer.write_field(v.to_string()),
-                    Value::SignedValue(v) => csv_writer.write_field(v.to_string()),
-                    Value::RealValue(v) => csv_writer.write_field(v.to_string()),
-                    Value::StructValue(attribs) => {
-                        for attrib in attribs {
-                            write_record(csv_writer, attrib.value())?;
-                        }
-                        Ok(())
-                    }
-                    Value::EnumValue(v) => csv_writer.write_field(v.to_string()),
-                }
-            }
-            csv_writer.write_field("timestamp").unwrap();
-            write_header(&mut csv_writer, object_entry.ty(), "value").unwrap();
-            csv_writer.write_record(None::<&[u8]>).unwrap();
-            for event in history {
-                csv_writer
-                    .write_field(event.timestamp.as_millis().to_string())
-                    .unwrap();
-                write_record(&mut csv_writer, &event.value).unwrap();
-                csv_writer.write_record(None::<&[u8]>).unwrap();
-            }
-            std::fs::write(oe_log_path, csv_writer.into_inner().unwrap()).unwrap();
+        let mut object_entry_export = vec![];
+        for oe in node.object_entries() {
+            object_entry_export.push(ObjectEntryExport {
+                name: oe.name().to_owned(),
+                ty: oe.ty().clone(),
+                values: oe.complete_history().await,
+            });
         }
+        export_data.push(NodeExport {
+            name: node.name().to_owned(),
+            object_entry_export,
+        });
     }
-    notify_info(&app_handle, "Export successful", &format!("Exported log files to {log_dir:?}"), time);
+
+    tokio::task::spawn_blocking(move || {
+        FileDialogBuilder::new()
+            .set_title("Select export directory")
+            .pick_folder(move |folder| {
+                let Some(mut folder) = folder else {
+                    return;
+                };
+                let time = chrono::Local::now();
+                let year = time.year();
+                let month = time.month();
+                let day = time.day();
+                let hour = time.hour();
+                let min = time.minute();
+                let sec = time.second();
+
+                folder.push(format!("{year}-{month}-{day}_{hour}_{min}_{sec}"));
+                std::fs::create_dir(folder.clone())
+                    .expect(&format!("Failed to create directory {folder:?}"));
+
+                for node in export_data {
+                    let mut node_dir = folder.clone();
+                    node_dir.push(&node.name);
+                    std::fs::create_dir(node_dir.clone()).expect("Failed to create node directory");
+                    // create directory
+                    for oe in node.object_entry_export {
+                        let mut path = node_dir.clone();
+                        path.push(oe.name);
+                        path.set_extension("csv");
+                        let mut file = std::fs::File::create(path.clone())
+                            .expect(&format!("Failed to create file {path:?}"));
+                        struct Column {
+                            pub name: String,
+                            pub values: Vec<String>,
+                        }
+                        let mut columns: Vec<Column> = vec![];
+                        columns.push(Column {
+                            name: "timestamp".to_owned(),
+                            values: vec![],
+                        });
+                        fn create_columns(
+                            ty: &Type,
+                            column_name: Option<String>,
+                            columns: &mut Vec<Column>,
+                        ) {
+                            match ty {
+                                Type::Primitive(_) => {
+                                    columns.push(Column {
+                                        name: column_name.unwrap_or("value".to_owned()),
+                                        values: vec![],
+                                    });
+                                }
+                                Type::Struct {
+                                    name: _,
+                                    description: _,
+                                    attribs,
+                                    visibility: _,
+                                } => {
+                                    for (attrib_name, attrib_type) in attribs {
+                                        let column_name = match &column_name {
+                                            Some(column_name) => {
+                                                format!("{column_name}.{attrib_name}")
+                                            }
+                                            None => attrib_name.to_owned(),
+                                        };
+                                        create_columns(attrib_type, Some(column_name), columns);
+                                    }
+                                }
+                                Type::Enum {
+                                    name: _,
+                                    description: _,
+                                    size: _,
+                                    entries: _,
+                                    visibility: _,
+                                } => {
+                                    columns.push(Column {
+                                        name: column_name.unwrap_or("value".to_owned()),
+                                        values: vec![],
+                                    });
+                                }
+                                Type::Array { len: _, ty: _ } => panic!("Arrays not implemented"),
+                            }
+                        }
+                        create_columns(&&oe.ty, None, &mut columns);
+
+                        fn add_value_to_columns(
+                            value: &Value,
+                            c: &mut usize,
+                            columns: &mut Vec<Column>,
+                        ) {
+                            match value {
+                                Value::UnsignedValue(v) => {
+                                    columns[*c].values.push(format!("{v}"));
+                                    *c += 1;
+                                }
+                                Value::SignedValue(v) => {
+                                    columns[*c].values.push(format!("{v}"));
+                                    *c += 1;
+                                }
+                                Value::RealValue(v) => {
+                                    columns[*c].values.push(format!("{v}"));
+                                    *c += 1;
+                                }
+                                Value::StructValue(attribs) => {
+                                    for attrib in attribs {
+                                        add_value_to_columns(attrib.value(), c, columns);
+                                    }
+                                }
+                                Value::EnumValue(v) => {
+                                    columns[*c].values.push(format!("{v}"));
+                                    *c += 1;
+                                }
+                            }
+                        }
+
+                        for value in &oe.values {
+                            let us = value.timestamp.as_micros();
+                            columns[0].values.push(format!("{us}"));
+                            add_value_to_columns(&value.value, &mut 1, &mut columns);
+                        }
+
+                        // write headers
+                        let mut first = true;
+                        for column in &columns {
+                            if !first {
+                                write!(file, ",").expect("Failed to write to file");
+                            }
+                            first = false;
+                            write!(file, "{}", column.name).expect("Failed to write to file");
+                        }
+                        writeln!(file).expect("Failed to write to file");
+
+                        // write values
+                        for i in 0..oe.values.len() {
+                            let mut first = true;
+                            for column in &columns {
+                                if !first {
+                                    write!(file, ",").expect("Failed to write to file");
+                                }
+                                first = false;
+                                write!(file, "{}", column.values[i]).expect("Failed to write to file");
+                            }
+                            writeln!(file).expect("Failed to write to file");
+                        }
+                    }
+                }
+            })
+    })
+    .await
+    .expect("Failed to join blocking io task");
+
     Ok(())
 }
