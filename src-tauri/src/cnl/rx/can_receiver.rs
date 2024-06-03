@@ -97,7 +97,7 @@ impl CanReceiver {
                     Ok(frame) => {
                         let my_frame = frame.clone().expect("fucked up").value;
                         if my_frame.get_id() == 0xbe {
-                            println!("received frame: {}", (my_frame.get_data_u64() & 0x70000) >> 16);
+                            println!("received frame: {}", (my_frame.get_data_u64() & 0x7) >> 0);
                         }
                         frame
                     }
