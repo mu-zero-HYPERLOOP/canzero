@@ -74,7 +74,9 @@ pub fn generate_messages(
         let mut serialize_def = format!(
 "static void {namespace}_{serialize_func_name}({message_type_name}* msg, {namespace}_frame* frame) {{
 {indent}uint8_t* data = frame->data;
-{indent}*((uint64_t*)data) = 0;
+{indent}for(uint8_t i = 0; i < 8; ++i){{
+{indent}{indent}data[i] = 0;
+{indent}}}
 {indent}frame->id = {id};
 {indent}frame->dlc = {dlc};
 ");
