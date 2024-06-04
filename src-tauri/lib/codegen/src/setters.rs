@@ -42,10 +42,10 @@ pub fn generate_setters(
             let mut setter_def = format!("static inline void {setter_name}({type_name} value){{\n");
             setter_def.push_str(&format!("{indent}extern {type_name} {oe_var};\n"));
             setter_def.push_str(&format!("{indent}{oe_var} = value;\n"));
-            setter_def.push_str("}\n");
+            setter_def.push_str("}\n\n");
             header.push_str(&setter_def);
         }else {
-            let setter_decl = format!("void {setter_name}({type_name} value);\n");
+            let setter_decl = format!("void {setter_name}({type_name} value);\n\n");
             header.push_str(&setter_decl);
 
 
@@ -70,7 +70,6 @@ pub fn generate_setters(
 "{indent}extern {type_name} {oe_var};
 {indent}if ({condition}) {{
 {indent2}{oe_var} = value;
-{indent2}uint32_t time = {namespace}_get_time();
 "));
 
             for stream in tx_streams {
