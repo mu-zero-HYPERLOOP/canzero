@@ -1,10 +1,6 @@
-import { Box, Button, List, Paper, Stack, useTheme, } from "@mui/material";
+import { Button, Paper, Stack, useTheme, } from "@mui/material";
 import { NodeInformation } from "../nodes/types/NodeInformation.ts";
 import PrechargeVis from "../visualizations/precharge/PrechargeVis.tsx";
-import TemperatureVis from "../visualizations/temperature/TemperatureVis.tsx";
-import StateVis from "../visualizations/state/StateVis.tsx";
-import SdcVis from "../visualizations/sdc/SdcVis.tsx";
-import PodSideView from "../visualizations/side/PodSideView.tsx";
 import ErrorList from "../object_entry/vis/errors/ErrorList.tsx";
 import SimpleEnumDisplay from "../object_entry/vis/SimpleEnumDisplay.tsx";
 import { invoke } from "@tauri-apps/api";
