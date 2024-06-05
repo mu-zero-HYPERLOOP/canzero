@@ -1,11 +1,14 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
+use std::sync::Mutex;
 use canzero_cli::run_cli;
 use tauri::Manager;
 
 use crate::{
-    commands::{connection_status, network_information, object_entry_commands},
+    commands::{connection_status, network_information, object_entry_commands, search_string_storage::SearchStringStorage},
     state::startup::StartupState,
 };
+use crate::commands::search_string_storage;
 
 mod cnl;
 mod commands;
@@ -19,6 +22,7 @@ async fn main() {
 
     // setup tauri
     tauri::Builder::default()
+        .manage(SearchStringStorage { store: Default::default() })
         .setup(|app| {
             let handle = app.handle();
             tokio::spawn(async move {
@@ -84,6 +88,7 @@ async fn main() {
             commands::settings::set_frontend_lvl,
             commands::settings::set_deadlock_lvl,
             commands::search_string_storage::get_stored_search_string,
+            commands::search_string_storage::store_search_string,
         ])
         .run(tauri::generate_context!())
         .expect("Error while running tauri application");
