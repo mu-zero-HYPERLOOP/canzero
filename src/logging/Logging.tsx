@@ -211,7 +211,7 @@ function Logging({nodes}: Readonly<ExportPanelProps>) {
             setRowData(rowData);
 
             return () => {
-                invoke("store_search_string", {page: "export", string: searchString}).catch(console.error);
+                if (searchString !== "") invoke("store_search_string", {page: "export", string: searchString}).catch(console.error);
             };
         }
 

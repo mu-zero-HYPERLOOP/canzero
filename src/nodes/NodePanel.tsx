@@ -85,7 +85,7 @@ function NodePanel({node}: Readonly<NodePanelProps>) {
             return () => {
                 unlistenJs();
                 invoke("unlisten_from_node_latest", {nodeName: node.name}).catch(console.error);
-                invoke("store_search_string", {page: node.name, string: searchString}).catch(console.error);
+                if (searchString !== "") invoke("store_search_string", {page: node.name, string: searchString}).catch(console.error);
             };
         }
 
