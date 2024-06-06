@@ -12,6 +12,8 @@ use crate::cnl::{
 
 use canzero_common::TCanFrame;
 
+const UNSOLICITED_ID: u8 = 0xff;
+
 struct GetRespFrame {
     sof: bool,
     eof: bool,
@@ -68,11 +70,10 @@ impl GetRespFrame {
     }
 }
 
-enum GetRespState {
-    Ready,
-    // NOTE expecting toggle low on the next frame!
-    FragmentationToggleLow,
-    FragmentationToggleHigh,
+// expecting toggle low on first frame
+struct GetRespState {
+    fragmentation_offset: usize,
+    single_lookahead: bool,
 }
 
 struct GetResp {
@@ -84,41 +85,80 @@ struct GetResp {
 }
 
 impl GetResp {
-    async fn receive(&mut self, frame: GetRespFrame, timestamp: &Duration) -> Result<()> {
-        let (expected_sof, expected_toggle) = match &self.state {
-            GetRespState::Ready => (true, false),
-            GetRespState::FragmentationToggleLow => (false, false),
-            GetRespState::FragmentationToggleHigh => (false, true),
-        };
-        let expected_eof = (self.buffer.len() + 1) as u32 == self.size.div_ceil(32);
-
-        if expected_sof != frame.sof {
-            return Err(Error::InvalidGetResponseSofFlag);
-        }
-        if expected_toggle != frame.toggle {
-            return Err(Error::InvalidGetResponseToggleFlag);
-        }
-        if expected_eof != frame.eof {
-            return Err(Error::InvalidGetResponseEofFlag);
-        }
-
+    async fn receive(&mut self, frame: GetRespFrame, timestamp: &Duration, unsolicited: bool) -> Result<()> {
         assert_eq!(frame.object_entry_id, self.object_entry.id() as u16);
-        self.buffer.push(frame.data);
+        println!(
+            "received get resp frame with: sof: {}, toggle: {}, eof: {}",
+            frame.sof, frame.toggle, frame.eof
+        );
 
-        if frame.eof {
+        if frame.sof {
+            let (expected_toggle, expected_eof) = (false, self.size.div_ceil(32) == 1);
+            if expected_toggle != frame.toggle {
+                return Err(Error::InvalidGetResponseToggleFlag);
+            }
+            if expected_eof != frame.eof {
+                return Err(Error::InvalidGetResponseEofFlag);
+            }
+            self.state.fragmentation_offset = 0;
+            self.buffer[self.state.fragmentation_offset] = frame.data;
+            match self.state.single_lookahead {
+                true => {
+                    self.state.fragmentation_offset += 2;
+                    self.state.single_lookahead = false;
+                }
+                false => self.state.fragmentation_offset += 1,
+            }
+        } else {
+            let expected_toggle = self.state.fragmentation_offset % 2 == 1;
+            let expected_eof =
+                self.state.fragmentation_offset + 1 == self.size.div_ceil(32) as usize;
+            if expected_toggle == frame.toggle
+                && expected_eof == frame.eof
+                && self.state.fragmentation_offset != 0
+            {
+                println!("regular receive");
+                // everything as expected
+                self.buffer[self.state.fragmentation_offset] = frame.data;
+                match self.state.single_lookahead {
+                    true => {
+                        self.state.fragmentation_offset += 2;
+                        self.state.single_lookahead = false;
+                    }
+                    false => self.state.fragmentation_offset += 1,
+                }
+            } else if !self.state.single_lookahead
+                && self.state.fragmentation_offset + 1 < self.size.div_ceil(32) as usize
+            {
+                let accepted_toggle = !expected_toggle;
+                let accepted_eof =
+                    self.state.fragmentation_offset + 2 == self.size.div_ceil(32) as usize;
+                if accepted_toggle == frame.toggle && accepted_eof == frame.eof {
+                    println!("single lookahead");
+                    // assume that this frame arrived before previous one
+                    self.buffer[self.state.fragmentation_offset + 1] = frame.data;
+                    self.state.single_lookahead = true;
+                }
+            } else {
+                // TODO: actually split this up for correct error
+                return Err(Error::InvalidGetResponseToggleFlag);
+            }
+            println!("offset: {}", self.state.fragmentation_offset);
+            println!("lookahead: {}", self.state.single_lookahead);
+        }
+
+        if self.state.fragmentation_offset >= self.size.div_ceil(32) as usize {
             let value = self
                 .type_deserializer
                 .deserialize(&self.buffer.as_slice().as_bits());
-            self.object_entry.push_get_response(value, timestamp).await;
-            self.state = GetRespState::Ready;
-            self.buffer.clear();
-        } else {
-            // update fragmentation state!
-            self.state = match self.state {
-                GetRespState::Ready => GetRespState::FragmentationToggleHigh,
-                GetRespState::FragmentationToggleLow => GetRespState::FragmentationToggleHigh,
-                GetRespState::FragmentationToggleHigh => GetRespState::FragmentationToggleLow,
+            if unsolicited {
+                self.object_entry.push_get_response_unsolicited(value, timestamp).await;
+            } else {
+                self.object_entry.push_get_response(value, timestamp).await;
             }
+            self.state.fragmentation_offset = 0;
+            self.state.single_lookahead = false;
+            self.buffer.fill(0);
         }
         Ok(())
     }
@@ -128,6 +168,7 @@ impl GetResp {
 struct GetRespIdentifier {
     server_id: u8,
     object_entry_id: u16,
+    unsolicited: bool
 }
 
 pub struct GetRespFrameHandler {
@@ -150,11 +191,26 @@ impl GetRespFrameHandler {
                     GetRespIdentifier {
                         server_id: node_id,
                         object_entry_id: object_entry.id() as u16,
+                        unsolicited: false,
                     },
                     tokio::sync::Mutex::new(GetResp {
                         object_entry: object_entry.clone(),
-                        buffer: vec![],
-                        state: GetRespState::Ready,
+                        buffer: vec![0; object_entry.ty().size().div_ceil(32) as usize],
+                        state: GetRespState { fragmentation_offset: 0, single_lookahead: false },
+                        size: object_entry.ty().size(),
+                        type_deserializer: TypeDeserializer::new(object_entry.ty()),
+                    }),
+                );
+                get_resp_lookup.insert(
+                    GetRespIdentifier {
+                        server_id: node_id,
+                        object_entry_id: object_entry.id() as u16,
+                        unsolicited: true,
+                    },
+                    tokio::sync::Mutex::new(GetResp {
+                        object_entry: object_entry.clone(),
+                        buffer: vec![0; object_entry.ty().size().div_ceil(32) as usize],
+                        state: GetRespState { fragmentation_offset: 0, single_lookahead: false },
                         size: object_entry.ty().size(),
                         type_deserializer: TypeDeserializer::new(object_entry.ty()),
                     }),
@@ -174,24 +230,29 @@ impl GetRespFrameHandler {
             .deserialize(can_frame.get_data_u64());
 
         let get_resp_frame = GetRespFrame::new(&frame);
+        println!("client: {}", get_resp_frame.client_id);
+        println!("server: {}", get_resp_frame.server_id);
 
-        if get_resp_frame.client_id == self.node_id {
-            let get_resp_identifier = GetRespIdentifier {
-                server_id: get_resp_frame.server_id,
-                object_entry_id: get_resp_frame.object_entry_id,
-            };
-
-            // lookup the correct GetResp "similar to handlers"
-            let Some(get_resp) = self.get_resp_lookup.get(&get_resp_identifier) else {
-                return Err(Error::InvalidGetResponseServerOrObjectEntryNotFound);
-            };
-
-            get_resp
-                .lock()
-                .await
-                .receive(get_resp_frame, &can_frame.timestamp)
-                .await?;
+        if get_resp_frame.client_id != self.node_id && get_resp_frame.client_id != UNSOLICITED_ID {
+            println!("early return");
+            return Ok(can_frame.new_value(frame));
         }
+        let get_resp_identifier = GetRespIdentifier {
+            server_id: get_resp_frame.server_id,
+            object_entry_id: get_resp_frame.object_entry_id,
+            unsolicited: get_resp_frame.client_id == UNSOLICITED_ID,
+        };
+
+        // lookup the correct GetResp "similar to handlers"
+        let Some(get_resp) = self.get_resp_lookup.get(&get_resp_identifier) else {
+            return Err(Error::InvalidGetResponseServerOrObjectEntryNotFound);
+        };
+
+        get_resp
+            .lock()
+            .await
+            .receive(get_resp_frame, &can_frame.timestamp, get_resp_identifier.unsolicited)
+            .await?;
 
         Ok(can_frame.new_value(frame))
     }

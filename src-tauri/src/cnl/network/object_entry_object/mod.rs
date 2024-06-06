@@ -1,11 +1,12 @@
 use std::{
-    sync::{atomic::AtomicU64, Arc},
+    ops::Deref,
+    sync::{atomic::AtomicU64, Arc, OnceLock},
     time::{Duration, Instant},
 };
 
 use canzero_config::config;
 use chrono;
-use tokio::sync::Mutex;
+use tokio::sync::{Mutex, OnceCell};
 
 use crate::{
     cnl::{
@@ -37,7 +38,7 @@ pub struct ObjectEntryObject {
     history_event_name_prefix: String,
     app_handle: tauri::AppHandle,
     tx_com: Arc<TxCom>,
-    open_set_request: Arc<Mutex<u64>>,
+    open_set_request: Arc<Mutex<(u64, Option<Value>)>>,
     open_get_request: Arc<Mutex<u64>>,
     set_request_timeout: Duration,
     get_request_timeout: Duration,
@@ -88,7 +89,7 @@ impl ObjectEntryObject {
             history_event_name_prefix: history_event_name,
             app_handle: app_handle.clone(),
             tx_com,
-            open_set_request: Arc::new(Mutex::new(0)),
+            open_set_request: Arc::new(Mutex::new((0, None))),
             open_get_request: Arc::new(Mutex::new(0)),
             set_request_timeout: Duration::from_millis(1000 + get_req_num_frames * 200),
             get_request_timeout: Duration::from_millis(1000 + get_req_num_frames * 200),
@@ -122,7 +123,7 @@ impl ObjectEntryObject {
                     notify_warning(
                         &self.app_handle,
                         "other get request still in progress -- ignoring",
-                        "An older set request is still waiting for a response. Ignoring current request.",
+                        "Other get request still in progress -- ignoring",
                         chrono::Local::now(),
                     );
                     return;
@@ -132,7 +133,7 @@ impl ObjectEntryObject {
                 notify_warning(
                     &self.app_handle,
                     "other get request still open -- ignoring",
-                    "An older set request is still in progess. Ignoring current request.",
+                    "Older set request still in progess -- ignoring",
                     chrono::Local::now(),
                 );
                 return;
@@ -146,8 +147,8 @@ impl ObjectEntryObject {
             .await;
         tokio::spawn({
             let timeout = self.get_request_timeout.clone();
-            let id = self.id();
-            let node_id = self.node_id();
+            let oe_name = self.name().to_owned();
+            let node_name = self.object_entry_ref.node().name().to_owned();
             let get_requests = self.open_get_request.clone();
             let app_handle = self.app_handle.clone();
 
@@ -156,12 +157,11 @@ impl ObjectEntryObject {
                 let mut new_req_num = get_requests.lock().await;
                 if *new_req_num == my_req_num {
                     *new_req_num += 1;
+                    drop(new_req_num);
                     notify_error(
                         &app_handle,
                         "get request timed out",
-                        &format!(
-                            "Get request for object entry with id {id} of node {node_id} timed out",
-                        ),
+                        &format!("Get request for {oe_name} of {node_name} timed out",),
                         chrono::Local::now(),
                     );
                 }
@@ -170,15 +170,16 @@ impl ObjectEntryObject {
     }
 
     pub async fn set_request(&self, value: Value) {
-        let mut set_req_num = match self.open_set_request.try_lock() {
-            Ok(n) => {
-                if *n % 2 == 0 {
-                    n
+        let mut set_req_data = match self.open_set_request.try_lock() {
+            Ok(set_req_data) => {
+                if set_req_data.0 % 2 == 0 {
+                    set_req_data
                 } else {
+                    drop(set_req_data);
                     notify_warning(
                         &self.app_handle,
                         "other set request still open -- ignoring",
-                        "Older set request is still waiting for a response -- ignoring",
+                        "Older set request still waiting for response -- ignoring",
                         chrono::Local::now(),
                     );
                     return;
@@ -194,11 +195,12 @@ impl ObjectEntryObject {
                 return;
             }
         };
-        *set_req_num += 1;
-        let my_req_num = *set_req_num;
-        drop(set_req_num);
-
+        set_req_data.0 += 1;
+        let my_req_num = set_req_data.0;
         let (bit_value, last_fill) = value.get_as_bin(self.ty());
+        set_req_data.1 = Some(value);
+        drop(set_req_data);
+
         let server_id = self.node_id();
         let oe_id = self.id();
         self.tx()
@@ -207,22 +209,21 @@ impl ObjectEntryObject {
 
         tokio::task::spawn({
             let timeout = self.set_request_timeout.clone();
-            let id = self.id();
-            let node_id = self.node_id();
+            let oe_name = self.name().to_owned();
+            let node_name = self.object_entry_ref.node().name().to_owned();
             let app_handle = self.app_handle.clone();
-            let set_requests = self.open_set_request.clone();
+            let set_req_data = self.open_set_request.clone();
 
             async move {
                 tokio::time::sleep(timeout).await;
-                let mut new_req_num = set_requests.lock().await;
-                if *new_req_num == my_req_num {
-                    *new_req_num += 1;
+                let mut curr_req = set_req_data.lock().await;
+                if curr_req.0 == my_req_num {
+                    *curr_req = (curr_req.0 + 1, None);
+                    drop(curr_req);
                     notify_error(
                         &app_handle,
                         "set request timed out",
-                        &format!(
-                            "Set request for object entry with id {id} of node {node_id} timed out",
-                        ),
+                        &format!("Set request for {oe_name} of {node_name} timed out",),
                         chrono::Local::now(),
                     );
                 }
@@ -251,6 +252,7 @@ impl ObjectEntryObject {
     pub async fn push_get_response(&self, value: Value, timestamp: &Duration) {
         let mut get_req_num = self.open_get_request.lock().await;
         if *get_req_num % 2 == 0 {
+            drop(get_req_num);
             notify_warning(
                 &self.app_handle,
                 "get response came in after timeout",
@@ -259,24 +261,39 @@ impl ObjectEntryObject {
             );
             return;
         }
-        self.push_value(value, timestamp).await;
         *get_req_num += 1;
         drop(get_req_num);
+        self.push_value(value, timestamp).await;
         notify_info(
             &self.app_handle,
             "get request returned successfully",
             &format!(
-                "The get request for object entry {} of node {} completed successfully",
-                self.id(),
-                self.node_id()
+                "Get request for {} of {} successfull",
+                self.name(),
+                self.object_entry_ref.node().name()
+            ),
+            chrono::Local::now(),
+        );
+    }
+
+    pub async fn push_get_response_unsolicited(&self, value: Value, timestamp: &Duration) {
+        self.push_value(value, timestamp).await;
+        notify_info(
+            &self.app_handle,
+            "unsolicited get response",
+            &format!(
+                "Received unsolicited get response for {} of {}",
+                self.name(),
+                self.object_entry_ref.node().name()
             ),
             chrono::Local::now(),
         );
     }
 
     pub async fn push_set_response(&self, result: cnl::errors::Result<()>) {
-        let mut set_req_num = self.open_set_request.lock().await;
-        if *set_req_num % 2 == 0 {
+        let mut set_req_data = self.open_set_request.lock().await;
+        if set_req_data.0 % 2 == 0 {
+            drop(set_req_data);
             notify_info(
                 &self.app_handle,
                 "set response came in after timeout",
@@ -289,10 +306,14 @@ impl ObjectEntryObject {
             );
             return;
         };
-        *set_req_num += 1;
-        drop(set_req_num);
+        set_req_data.0 += 1;
         match result {
             Ok(_) => {
+                if let Some(value) = set_req_data.1.as_ref() {
+                    self.push_value(value.clone(), &self.now()).await;
+                    *set_req_data = (set_req_data.0, None);
+                };
+                drop(set_req_data);
                 notify_info(
                     &self.app_handle,
                     "set request successfull",
@@ -305,6 +326,8 @@ impl ObjectEntryObject {
                 );
             }
             Err(err) => {
+                *set_req_data = (set_req_data.0, None);
+                drop(set_req_data);
                 notify_error(
                     &self.app_handle,
                     err.reason(),
@@ -420,7 +443,7 @@ impl ObjectEntryObject {
             self.object_entry_ref.id() as u16,
             self.object_entry_ref.unit().map(str::to_owned),
             ObjectEntryType::new(self.object_entry_ref.ty()),
-            self.plottable
+            self.plottable,
         )
     }
 

@@ -296,7 +296,7 @@ static void schedule_heartbeat_wdg_job() {{
 "));
     for heartbeat in network_config.heartbeat_messages() {
         source.push_str(&format!(
-"{indent2}heartbeat_wdg_job.job.wdg_job.{0}_static_tick_countdowns[i] = 4;
+"{indent2}heartbeat_wdg_job.job.wdg_job.{0}_static_tick_countdowns[i] = 10;
 {indent2}heartbeat_wdg_job.job.wdg_job.{0}_static_wdg_armed[i] = 0;
 ",
             heartbeat.bus().name()

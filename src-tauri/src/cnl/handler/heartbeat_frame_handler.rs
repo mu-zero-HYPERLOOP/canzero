@@ -4,7 +4,7 @@ use canzero_common::TCanFrame;
 use canzero_config::config::MessageRef;
 
 use crate::cnl::deserialize::FrameDeserializer;
-use crate::cnl::errors::{Error, Result};
+use crate::cnl::errors::Result;
 use crate::cnl::frame::{Frame, TFrame, Value};
 use crate::cnl::network::node_object::NodeObject;
 
