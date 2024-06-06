@@ -87,10 +87,6 @@ struct GetResp {
 impl GetResp {
     async fn receive(&mut self, frame: GetRespFrame, timestamp: &Duration, unsolicited: bool) -> Result<()> {
         assert_eq!(frame.object_entry_id, self.object_entry.id() as u16);
-        println!(
-            "received get resp frame with: sof: {}, toggle: {}, eof: {}",
-            frame.sof, frame.toggle, frame.eof
-        );
 
         if frame.sof {
             let (expected_toggle, expected_eof) = (false, self.size.div_ceil(32) == 1);
@@ -117,7 +113,6 @@ impl GetResp {
                 && expected_eof == frame.eof
                 && self.state.fragmentation_offset != 0
             {
-                println!("regular receive");
                 // everything as expected
                 self.buffer[self.state.fragmentation_offset] = frame.data;
                 match self.state.single_lookahead {
@@ -134,7 +129,6 @@ impl GetResp {
                 let accepted_eof =
                     self.state.fragmentation_offset + 2 == self.size.div_ceil(32) as usize;
                 if accepted_toggle == frame.toggle && accepted_eof == frame.eof {
-                    println!("single lookahead");
                     // assume that this frame arrived before previous one
                     self.buffer[self.state.fragmentation_offset + 1] = frame.data;
                     self.state.single_lookahead = true;
@@ -143,8 +137,6 @@ impl GetResp {
                 // TODO: actually split this up for correct error
                 return Err(Error::InvalidGetResponseToggleFlag);
             }
-            println!("offset: {}", self.state.fragmentation_offset);
-            println!("lookahead: {}", self.state.single_lookahead);
         }
 
         if self.state.fragmentation_offset >= self.size.div_ceil(32) as usize {
@@ -230,11 +222,8 @@ impl GetRespFrameHandler {
             .deserialize(can_frame.get_data_u64());
 
         let get_resp_frame = GetRespFrame::new(&frame);
-        println!("client: {}", get_resp_frame.client_id);
-        println!("server: {}", get_resp_frame.server_id);
 
         if get_resp_frame.client_id != self.node_id && get_resp_frame.client_id != UNSOLICITED_ID {
-            println!("early return");
             return Ok(can_frame.new_value(frame));
         }
         let get_resp_identifier = GetRespIdentifier {

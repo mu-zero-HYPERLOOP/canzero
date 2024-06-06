@@ -99,10 +99,6 @@ impl TxCom {
             };
             frame_data.push(CanFrame::new(set_request_id, ide, false, dlc, data_curr));
         }
-        println!(
-            "sending set request {{ oe_id: {oe_id}, client: {}, server: {server_id}, data{:?} }}",
-            self.my_node_id, &val
-        );
 
         fragmented_can_send(
             frame_data,
