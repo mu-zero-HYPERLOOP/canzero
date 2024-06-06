@@ -22,6 +22,18 @@ pub async fn heartbeat(state: tauri::State<'_, CNLState>) -> Result<(), ()> {
 }
 
 #[tauri::command]
+pub async fn unregister_from_heartbeat(state: tauri::State<'_, CNLState>) -> Result<(), ()> {
+    state.lock().await.unregister_from_heartbeat();
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn reregister_to_heartbeat(state: tauri::State<'_, CNLState>) -> Result<(), ()> {
+    state.lock().await.reregister_to_heartbeat();
+    Ok(())
+}
+
+#[tauri::command]
 pub fn restart(app_handle: tauri::AppHandle) {
     println!("Restarting...");
     app_handle.restart();

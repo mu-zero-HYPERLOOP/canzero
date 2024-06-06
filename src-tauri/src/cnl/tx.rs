@@ -135,12 +135,15 @@ impl TxCom {
         }
     }
 
-    pub async fn send_heartbeat(&self, ticks_next: u8) {
+    pub async fn send_heartbeat(&self, ticks_next: u8, unregister: bool) {
         let mut msg_data = self.my_node_id as u64;
         if ticks_next >> 7 != 0 {
             panic!("Invalid ticks_next value for heartbeat");
         }
         msg_data |= (ticks_next as u64) << 9;
+        if unregister {
+            msg_data |= 1 << 8;
+        }
 
         for can_adapter in self.can_adapters.iter() {
             let msg = self

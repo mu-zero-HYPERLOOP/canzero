@@ -157,4 +157,12 @@ impl CNL {
             wdg.reset(false, None).await;
         }
     }
+
+    pub fn unregister_from_heartbeat(&self) {
+        self._watchdog_overlord.unregister_from_heartbeat();
+    }
+
+    pub fn reregister_to_heartbeat(&self) {
+        self._watchdog_overlord.reregister_to_heartbeat();
+    }
 }

@@ -4,14 +4,14 @@ use std::{
 };
 
 use canzero_appdata::WdgLevel;
-use chrono::{DateTime, Local};
+use chrono::Local;
 use color_print::cprintln;
 use serde::Serialize;
 use tokio::{
     select,
-    sync::{mpsc, oneshot, watch},
+    sync::{mpsc, watch},
     task::AbortHandle,
-    time::{timeout, Instant},
+    time::Instant,
 };
 
 use crate::{cnl::connection::ConnectionStatus, notification::notify_warning};
@@ -157,6 +157,7 @@ impl Drop for Watchdog {
 enum OverlordTimeoutSignal {
     Good,
     Bad,
+    Unregister,
 }
 
 struct WatchdogOverlordInner {
@@ -248,26 +249,32 @@ impl WatchdogOverlord {
     ) {
         let sleep = tokio::time::sleep(timeout);
         tokio::pin!(sleep);
+        let mut active = true;
         loop {
             select! {
                 _ = status_rx.changed() => {
                     let x = *status_rx.borrow_and_update();
                     match x {
                         OverlordTimeoutSignal::Good => {
-                            tx_com.send_heartbeat(12).await;
+                            tx_com.send_heartbeat(12, false).await;
                             sleep.as_mut().reset(Instant::now() + timeout);
+                            active = true;
                         },
                         OverlordTimeoutSignal::Bad => {
                             // Send heartbeat with ticks_next = 0.
                             // Should react quicker than just letting
                             // heartbeats time out.
-                            tx_com.send_heartbeat(0).await;
+                            tx_com.send_heartbeat(0, false).await;
                             break;
+                        }
+                        OverlordTimeoutSignal::Unregister => {
+                            tx_com.send_heartbeat(12, true).await;
+                            active = false;
                         }
                     }
                 }
-                () = sleep.as_mut() => {
-                    tx_com.send_heartbeat(12).await;
+                () = sleep.as_mut(), if active => {
+                    tx_com.send_heartbeat(12, false).await;
                     sleep.as_mut().reset(Instant::now() + timeout);
                 }
             }
@@ -282,6 +289,14 @@ impl WatchdogOverlord {
             .expect("Failed to acquire WatchdogOverlord lock")
             .push(Watchdog(watchdog.0.clone()));
         watchdog
+    }
+
+    pub fn unregister_from_heartbeat(&self) {
+        let _ = self.0.status_tx.send(OverlordTimeoutSignal::Unregister);
+    }
+    
+    pub fn reregister_to_heartbeat(&self) {
+        let _ = self.0.status_tx.send(OverlordTimeoutSignal::Good);
     }
 
     // pub fn unregister(&self, watchdog: Watchdog) {

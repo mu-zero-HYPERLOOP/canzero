@@ -67,6 +67,8 @@ async fn main() {
             object_entry_commands::open_floating_object_entry_window,
             connection_status::get_connection_status,
             connection_status::heartbeat,
+            connection_status::unregister_from_heartbeat,
+            connection_status::reregister_to_heartbeat,
             connection_status::restart,
             connection_status::close,
             connection_status::create_deadlock,
