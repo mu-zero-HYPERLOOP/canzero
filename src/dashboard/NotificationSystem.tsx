@@ -4,6 +4,7 @@ import {listen} from "@tauri-apps/api/event";
 
 interface Notification {
     level : "info" | "debug" | "warning" | "error",
+    title: string,
     message : string,
 }
 
@@ -17,14 +18,16 @@ const action = (snackbarId: any) => (
 
 function NotificationSystem() {
     const {enqueueSnackbar} = useSnackbar()
+    const delimiter: string = ": "
 
     useEffect(() => {
         let unsubscribe = listen<Notification>("notification", (event) => {
             let notification = event.payload
+            let message = notification.title + delimiter + notification.message
 
             switch (notification.level) {
                 case "info" : {
-                    enqueueSnackbar(notification.message, {
+                    enqueueSnackbar(message, {
                         autoHideDuration: 2000,
                         preventDuplicate: true,
                         variant: "info"
@@ -32,7 +35,7 @@ function NotificationSystem() {
                     break
                 }
                 case "debug": {
-                    enqueueSnackbar(notification.message, {
+                    enqueueSnackbar(message, {
                         autoHideDuration: 3000,
                         preventDuplicate: true,
                         variant: "default"
@@ -40,7 +43,7 @@ function NotificationSystem() {
                     break
                 }
                 case "warning": {
-                    enqueueSnackbar(notification.message, {
+                    enqueueSnackbar(message, {
                         autoHideDuration: 5000,
                         preventDuplicate: true,
                         variant: "warning"
@@ -48,7 +51,7 @@ function NotificationSystem() {
                     break
                 }
                 case "error": {
-                    enqueueSnackbar(notification.message, {
+                    enqueueSnackbar(message, {
                         action,
                         persist: true,
                         preventDuplicate: true,
