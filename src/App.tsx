@@ -35,7 +35,7 @@ function App() {
       const unlisten = await appWindow.onCloseRequested(async () => {
         const saveLogs = await ask("Save logs before closing?");
         if (saveLogs) {
-          invoke("export").catch(console.error)
+          await invoke("export")
         }
       });
 
