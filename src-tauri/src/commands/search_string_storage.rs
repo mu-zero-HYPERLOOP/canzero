@@ -10,14 +10,8 @@ pub(crate) struct SearchStringStorage {
 pub fn get_stored_search_string(
     page: String,
     storage: State<SearchStringStorage>
-) -> Result<String, ()> {
-    let str = storage.store.lock().unwrap().remove(&page);
-    if str.is_none() {
-        Ok("".parse().unwrap())
-    }
-    else {
-        Ok("".parse().unwrap()) // TODO return string
-    }
+) -> Option<String> {
+    return storage.store.lock().unwrap().get(&page).cloned();
 }
 
 #[tauri::command]
@@ -25,7 +19,6 @@ pub fn store_search_string(
     page: String,
     string: String,
     storage: State<SearchStringStorage>
-) -> Result<(), ()> {
+) {
     storage.store.lock().unwrap().insert(page, string);
-    Ok(())
 }

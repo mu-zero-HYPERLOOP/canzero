@@ -68,9 +68,11 @@ function NodePanel({node}: Readonly<NodePanelProps>) {
     // register listener
     useEffect(() => {
         async function asyncSetup() {
-            const storedSearchString = await invoke<string>("get_stored_search_string", {page: node.name});
-            setSearchString(storedSearchString)
-            updateFilter(storedSearchString)
+            const storedSearchString = await invoke<string | null>("get_stored_search_string", {page: node.name});
+            if (storedSearchString !== null) {
+                setSearchString(storedSearchString)
+                updateFilter(storedSearchString)
+            }
             const event_name = await invoke<string>("listen_to_node_latest", {nodeName: node.name});
             const unlistenJs = await listen<NodeEvent>(event_name, event => {
                 const rowData = event.payload.object_entry_values.map((value, index) => {
@@ -85,7 +87,6 @@ function NodePanel({node}: Readonly<NodePanelProps>) {
             return () => {
                 unlistenJs();
                 invoke("unlisten_from_node_latest", {nodeName: node.name}).catch(console.error);
-                if (searchString !== "") invoke("store_search_string", {page: node.name, string: searchString}).catch(console.error);
             };
         }
 
@@ -178,6 +179,7 @@ function NodePanel({node}: Readonly<NodePanelProps>) {
                 onChange={event => {
                     setSearchString(event.target.value);
                     updateFilter(event.target.value);
+                    invoke("store_search_string", {page: node.name, string: event.target.value}).catch(console.error)
                 }}
                 InputProps={{
                     startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small"/></InputAdornment>,

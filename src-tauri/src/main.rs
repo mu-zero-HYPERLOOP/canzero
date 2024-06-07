@@ -8,7 +8,6 @@ use crate::{
     commands::{connection_status, network_information, object_entry_commands, search_string_storage::SearchStringStorage},
     state::startup::StartupState,
 };
-use crate::commands::search_string_storage;
 
 mod cnl;
 mod commands;

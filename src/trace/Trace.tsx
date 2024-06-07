@@ -79,16 +79,17 @@ function Trace() {
 
   useEffect(() => {
     async function asyncSetup() {
-      const storedSearchString = await invoke<string>("get_stored_search_string", {page: "trace"});
-      setSearchString(storedSearchString)
-      updateFilter(storedSearchString)
+      const storedSearchString = await invoke<string | null>("get_stored_search_string", {page: "trace"});
+      if (storedSearchString !== null) {
+          setSearchString(storedSearchString)
+          updateFilter(storedSearchString)
+      }
       const eventName = await invoke<string>("listen_to_trace");
       const unlisten = await listen<TraceEvent[]>(eventName, event => {
         setFrames(event.payload);
       });
       return () => {
         invoke("unlisten_from_trace").catch(console.error);
-        if (searchString !== "") invoke("store_search_string", {page: "trace", string: searchString}).catch(console.error);
         unlisten();
       };
     }
@@ -213,6 +214,7 @@ function Trace() {
                   onChange={event => {
                     setSearchString(event.target.value);
                     updateFilter(event.target.value);
+                    invoke("store_search_string", {page: "trace", string: event.target.value}).catch(console.error)
                   }}
                   InputProps={{
                     startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" /></InputAdornment>,
