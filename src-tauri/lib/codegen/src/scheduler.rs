@@ -34,6 +34,16 @@ pub fn generate_scheduler(
         ));
     }
 
+    let num_fragmentation_jobs = node_config
+            .object_entries()
+            .iter()
+            .filter(|oe| oe.ty().size().div_ceil(32) > 1)
+            .collect::<Vec<_>>().len(); // fragmented get/set requests and senders each
+    let allocator_pool_size = std::cmp::max(64, num_fragmentation_jobs * 2 / 3);
+    let scheduler_heap_size = 1 + 1 // heartbeat job + heartbeat wdg job
+        + node_config.tx_streams().len() // tx streams
+        + allocator_pool_size; // dynamic jobs
+
     let mut stream_case_logic = String::new();
     let mut schedule_stream_job_def = String::new();
     let mut stream_id = 0;
@@ -111,7 +121,8 @@ static void schedule_{stream_name}_interval_job(){{
     for heartbeat in network_config.heartbeat_messages() {
         source.push_str(&format!(
             "__attribute__((weak)) void {namespace}_{0}_wdg_timeout(uint8_t node_id) {{}}\n",
-            heartbeat.bus().name()));
+            heartbeat.bus().name()
+        ));
     }
 
     source.push_str(&format!(
@@ -142,10 +153,10 @@ typedef struct {{"
     for heartbeat in network_config.heartbeat_messages() {
         source.push_str(&format!(
             "
-{indent}unsigned int {0}_static_wdg_armed[node_id_count];
-{indent}int {0}_static_tick_countdowns[node_id_count];
-{indent}unsigned int {0}_dynamic_wdg_armed[MAX_DYN_HEARTBEATS];
-{indent}int {0}_dynamic_tick_countdowns[MAX_DYN_HEARTBEATS];
+{indent}unsigned int* {0}_static_wdg_armed;
+{indent}int* {0}_static_tick_countdowns;
+{indent}unsigned int* {0}_dynamic_wdg_armed;
+{indent}int* {0}_dynamic_tick_countdowns;
 ",
             heartbeat.bus().name()
         ));
@@ -170,7 +181,7 @@ union job_pool_allocator_entry {{
 }};
 
 typedef struct {{
-{indent}union job_pool_allocator_entry job[64];
+{indent}union job_pool_allocator_entry job[{allocator_pool_size}];
 {indent}union job_pool_allocator_entry *freelist;
 }} job_pool_allocator;
 
@@ -192,16 +203,19 @@ static job_t *job_pool_allocator_alloc() {{
 {indent2}return NULL;
 {indent}}}
 }}
+
 static void job_pool_allocator_free(job_t *job) {{
 {indent}union job_pool_allocator_entry *entry = (union job_pool_allocator_entry *)job;
 {indent}entry->next = job_allocator.freelist;
 {indent}job_allocator.freelist = entry;
 }}
-#define SCHEDULE_HEAP_SIZE 256
+
+#define SCHEDULER_HEAP_SIZE {scheduler_heap_size}
 typedef struct {{
-{indent}job_t *heap[SCHEDULE_HEAP_SIZE]; // job**
+{indent}job_t *heap[SCHEDULER_HEAP_SIZE]; // job**
 {indent}uint32_t size;
 }} job_scheduler_t;
+
 static job_scheduler_t DMAMEM scheduler;
 static void scheduler_promote_job(job_t *job) {{
 {indent}int index = job->position;
@@ -222,6 +236,7 @@ static void scheduler_promote_job(job_t *job) {{
 {indent2}{namespace}_request_update(job->climax);
 {indent}}}
 }}
+
 static void scheduler_schedule(job_t *job) {{
 {indent}if (scheduler.size >= SCHEDULE_HEAP_SIZE) {{
 {indent2}return;
@@ -231,10 +246,12 @@ static void scheduler_schedule(job_t *job) {{
 {indent}scheduler.size += 1;
 {indent}scheduler_promote_job(job);
 }}
+
 static int scheduler_continue(job_t **job, uint32_t time) {{
 {indent}*job = scheduler.heap[0];
 {indent}return scheduler.heap[0]->climax <= time;
 }}
+
 static void scheduler_reschedule(uint32_t climax) {{
 {indent}job_t *job = scheduler.heap[0];
 {indent}job->climax = climax;
@@ -289,34 +306,61 @@ static void schedule_heartbeat_job() {{
 
 static job_t heartbeat_wdg_job;
 static const uint32_t heartbeat_wdg_tick_duration = 50;
+"
+    ));
+    for heartbeat in network_config.heartbeat_messages() {
+        source.push_str(&format!(
+            "unsigned int wdg_job_{0}_static_wdg_armed[node_id_count];
+int wdg_job_{0}_static_tick_countdowns[node_id_count];
+unsigned int wdg_job_{0}_dynamic_wdg_armed[MAX_DYN_HEARTBEATS];
+int wdg_job_{0}_dynamic_tick_countdowns[MAX_DYN_HEARTBEATS];
+",
+            heartbeat.bus().name()
+        ));
+    }
+    source.push_str(&format!(
+        "
 static void schedule_heartbeat_wdg_job() {{
 {indent}heartbeat_wdg_job.climax = canzero_get_time() + 100;
 {indent}heartbeat_wdg_job.tag = HEARTBEAT_WDG_JOB_TAG;
-{indent}for (unsigned int i = 0; i < node_id_count; ++i) {{
-"));
+"
+    ));
     for heartbeat in network_config.heartbeat_messages() {
         source.push_str(&format!(
-"{indent2}heartbeat_wdg_job.job.wdg_job.{0}_static_tick_countdowns[i] = 10;
+"{indent}heartbeat_wdg_job.job.wdg_job.{0}_static_wdg_armed = wdg_job_{0}_static_wdg_armed;
+{indent}heartbeat_wdg_job.job.wdg_job.{0}_static_tick_countdowns = wdg_job_{0}_static_tick_countdowns;
+{indent}heartbeat_wdg_job.job.wdg_job.{0}_dynamic_wdg_armed = wdg_job_{0}_dynamic_wdg_armed;
+{indent}heartbeat_wdg_job.job.wdg_job.{0}_dynamic_tick_countdowns = wdg_job_{0}_dynamic_tick_countdowns;
+", 
+            heartbeat.bus().name()));
+    }
+    source.push_str(&format!(
+        "{indent}for (unsigned int i = 0; i < node_id_count; ++i) {{
+"
+    ));
+    for heartbeat in network_config.heartbeat_messages() {
+        source.push_str(&format!(
+            "{indent2}heartbeat_wdg_job.job.wdg_job.{0}_static_tick_countdowns[i] = 10;
 {indent2}heartbeat_wdg_job.job.wdg_job.{0}_static_wdg_armed[i] = 0;
 ",
             heartbeat.bus().name()
         ));
     }
     source.push_str(&format!(
-"{indent}}}
+        "{indent}}}
 {indent}for (unsigned int i = 0; i < MAX_DYN_HEARTBEATS; ++i) {{
 "
     ));
     for heartbeat in network_config.heartbeat_messages() {
         source.push_str(&format!(
-"{indent2}heartbeat_wdg_job.job.wdg_job.{0}_dynamic_tick_countdowns[i] = 4;
+            "{indent2}heartbeat_wdg_job.job.wdg_job.{0}_dynamic_tick_countdowns[i] = 4;
 {indent2}heartbeat_wdg_job.job.wdg_job.{0}_dynamic_wdg_armed[i] = 0;
 ",
             heartbeat.bus().name()
         ));
     }
     source.push_str(&format!(
-"{indent}}}
+        "{indent}}}
 {indent}scheduler_schedule(&heartbeat_wdg_job);
 }}
 
@@ -343,67 +387,77 @@ static void schedule_jobs(uint32_t time) {{
 {indent4}scheduler_reschedule(time + heartbeat_interval);
 {indent4}{namespace}_exit_critical();
 {indent4}{namespace}_frame heartbeat_frame;
-"));
+"
+    ));
     for heartbeat in network_config.heartbeat_messages() {
         source.push_str(&format!(
-"{indent4}{namespace}_message_heartbeat_{0} heartbeat_{0};
+            "{indent4}{namespace}_message_heartbeat_{0} heartbeat_{0};
 {indent4}heartbeat_{0}.m_node_id = node_id_{node_name};
 {indent4}heartbeat_{0}.m_unregister = 0;
 {indent4}heartbeat_{0}.m_ticks_next = 4;
 {indent4}{namespace}_serialize_{namespace}_message_heartbeat_{0}(&heartbeat_{0}, &heartbeat_frame);
 {indent4}{namespace}_{}_send(&heartbeat_frame);
-", 
-            heartbeat.bus().name()));
+",
+            heartbeat.bus().name()
+        ));
     }
     source.push_str(&format!(
-"{indent4}break;
+        "{indent4}break;
 {indent3}}}
 {indent3}case HEARTBEAT_WDG_JOB_TAG: {{
 {indent4}scheduler_reschedule(time + heartbeat_wdg_tick_duration);
 {indent4}{namespace}_exit_critical();
 {indent4}for (unsigned int i = 0; i < node_id_count; ++i) {{
-"));
+"
+    ));
     for heartbeat in network_config.heartbeat_messages() {
         source.push_str(&format!(
-"{indent5}heartbeat_wdg_job.job.wdg_job.{0}_static_tick_countdowns[i] 
+            "{indent5}heartbeat_wdg_job.job.wdg_job.{0}_static_tick_countdowns[i] 
 {indent6}-= heartbeat_wdg_job.job.wdg_job.{0}_static_wdg_armed[i];
 ",
-            heartbeat.bus().name()));
+            heartbeat.bus().name()
+        ));
     }
     source.push_str(&format!(
-"{indent4}}}
+        "{indent4}}}
 {indent4}for (unsigned int i = 0; i < MAX_DYN_HEARTBEATS; ++i) {{
-"));
+"
+    ));
     for heartbeat in network_config.heartbeat_messages() {
         source.push_str(&format!(
-"{indent5}heartbeat_wdg_job.job.wdg_job.{0}_dynamic_tick_countdowns[i] 
+            "{indent5}heartbeat_wdg_job.job.wdg_job.{0}_dynamic_tick_countdowns[i] 
 {indent6}-= heartbeat_wdg_job.job.wdg_job.{0}_dynamic_wdg_armed[i];
-", 
-            heartbeat.bus().name()));
+",
+            heartbeat.bus().name()
+        ));
     }
     source.push_str(&format!(
-"{indent4}}}
+        "{indent4}}}
 {indent4}for (unsigned int i = 0; i < node_id_count; ++i) {{
-"));
+"
+    ));
     for heartbeat in network_config.heartbeat_messages() {
         source.push_str(&format!(
-"{indent5}if (heartbeat_wdg_job.job.wdg_job.{0}_static_tick_countdowns[i] <= 0) {{
+            "{indent5}if (heartbeat_wdg_job.job.wdg_job.{0}_static_tick_countdowns[i] <= 0) {{
 {indent6}{namespace}_{0}_wdg_timeout(i);
 {indent5}}}
 ",
-            heartbeat.bus().name()));
+            heartbeat.bus().name()
+        ));
     }
     source.push_str(&format!(
-"{indent4}}}
+        "{indent4}}}
 {indent4}for (unsigned int i = 0; i < MAX_DYN_HEARTBEATS; ++i) {{
-"));
+"
+    ));
     for heartbeat in network_config.heartbeat_messages() {
         source.push_str(&format!(
-"{indent5}if (heartbeat_wdg_job.job.wdg_job.{0}_dynamic_tick_countdowns[i] <= 0) {{
+            "{indent5}if (heartbeat_wdg_job.job.wdg_job.{0}_dynamic_tick_countdowns[i] <= 0) {{
 {indent6}{namespace}_{0}_wdg_timeout(node_id_count + i);
 {indent5}}}
 ",
-            heartbeat.bus().name()));
+            heartbeat.bus().name()
+        ));
     }
     source.push_str(&format!(
 "{indent4}}}
