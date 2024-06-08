@@ -4,6 +4,7 @@ use std::{
 };
 
 use canzero_appdata::WdgLevel;
+use canzero_config::config::NetworkRef;
 use chrono::Local;
 use color_print::cprintln;
 use serde::Serialize;
@@ -161,6 +162,7 @@ enum OverlordTimeoutSignal {
 }
 
 struct WatchdogOverlordInner {
+    network_config: NetworkRef,
     watchdogs: Mutex<Vec<Watchdog>>,
     connection_object: Arc<ConnectionObject>,
     status_tx: watch::Sender<OverlordTimeoutSignal>,
@@ -177,8 +179,8 @@ impl WatchdogOverlordInner {
                 if self.frontend_lvl == WdgLevel::Ignore {
                     notify_warning(
                         &self.app_handle,
-                        "Frontend Watchdog timed out",
-                        "This might the result of a frozen frontend, or a slow machine",
+                        "Frontend Watchdog Timeout",
+                        "This can be the result of a frozen frontend, or a slow machine",
                         Local::now(),
                     );
                 } else if self.frontend_lvl == WdgLevel::Active {
@@ -191,8 +193,8 @@ impl WatchdogOverlordInner {
                 if self.deadlock_lvl == WdgLevel::Ignore {
                     notify_warning(
                         &self.app_handle,
-                        "Deadlock Watchdog timed out",
-                        "This might the result of a deadlock in the backend",
+                        "Deadlock Watchdog Timeout",
+                        "This can be the result of a deadlock in the backend",
                         Local::now(),
                     );
                 } else if self.frontend_lvl == WdgLevel::Active {
@@ -204,10 +206,16 @@ impl WatchdogOverlordInner {
             WdgTag::Heartbeat { node_id, bus_id: _ } => {
                 //self.connection_object
                 //    .set_status(ConnectionStatus::HeartbeatMiss { node_id, bus_id });
+                let node = self
+                    .network_config
+                    .nodes()
+                    .iter()
+                    .find(|n| n.id() == node_id)
+                    .expect("Invalid Heartbeat Config Detected");
                 notify_warning(
                     &self.app_handle,
-                    &format!("Hearbeat timeout of node {node_id}"),
-                    "This might the result of a damaged CAN connection",
+                    &format!("Hearbeat Timeout"),
+                    &format!("Heartbeat of {} timed out", node.name()),
                     Local::now(),
                 );
             }
@@ -219,6 +227,7 @@ pub struct WatchdogOverlord(Arc<WatchdogOverlordInner>);
 
 impl WatchdogOverlord {
     pub fn new(
+        network_config: &NetworkRef,
         connection_object: &Arc<ConnectionObject>,
         tx_com: &Arc<TxCom>,
         deadlock_lvl: WdgLevel,
@@ -233,6 +242,7 @@ impl WatchdogOverlord {
         ));
 
         Self(Arc::new(WatchdogOverlordInner {
+            network_config: network_config.clone(),
             watchdogs: Mutex::new(vec![]),
             connection_object: connection_object.clone(),
             status_tx: over_status_tx,
@@ -294,7 +304,7 @@ impl WatchdogOverlord {
     pub fn unregister_from_heartbeat(&self) {
         let _ = self.0.status_tx.send(OverlordTimeoutSignal::Unregister);
     }
-    
+
     pub fn reregister_to_heartbeat(&self) {
         let _ = self.0.status_tx.send(OverlordTimeoutSignal::Good);
     }

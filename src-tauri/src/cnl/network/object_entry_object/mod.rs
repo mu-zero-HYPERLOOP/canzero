@@ -122,8 +122,12 @@ impl ObjectEntryObject {
                 } else {
                     notify_warning(
                         &self.app_handle,
-                        "other get request still in progress -- ignoring",
-                        "Other get request still in progress -- ignoring",
+                        "Ignoring Get Request",
+                        &format!(
+                            "Older get request for {}::{} still in progress",
+                            self.object_entry_ref.node().name(),
+                            self.name()
+                        ),
                         chrono::Local::now(),
                     );
                     return;
@@ -132,8 +136,12 @@ impl ObjectEntryObject {
             Err(_) => {
                 notify_warning(
                     &self.app_handle,
-                    "other get request still open -- ignoring",
-                    "Older set request still in progess -- ignoring",
+                    "Ignoring Get Request",
+                    &format!(
+                        "Older get request for {}::{} still in progress",
+                        self.object_entry_ref.node().name(),
+                        self.name()
+                    ),
                     chrono::Local::now(),
                 );
                 return;
@@ -160,8 +168,8 @@ impl ObjectEntryObject {
                     drop(new_req_num);
                     notify_error(
                         &app_handle,
-                        "get request timed out",
-                        &format!("Get request for {oe_name} of {node_name} timed out",),
+                        "Get Request Timeout",
+                        &format!("Get request for {node_name}::{oe_name} timed out",),
                         chrono::Local::now(),
                     );
                 }
@@ -178,8 +186,12 @@ impl ObjectEntryObject {
                     drop(set_req_data);
                     notify_warning(
                         &self.app_handle,
-                        "other set request still open -- ignoring",
-                        "Older set request still waiting for response -- ignoring",
+                        "Ignoring Set Request",
+                        &format!(
+                            "Older set request for {}::{} still in progress",
+                            self.object_entry_ref.node().name(),
+                            self.name()
+                        ),
                         chrono::Local::now(),
                     );
                     return;
@@ -188,8 +200,12 @@ impl ObjectEntryObject {
             Err(_) => {
                 notify_warning(
                     &self.app_handle,
-                    "other set request still open -- ignoring",
-                    "Older set request still in progress -- ignoring",
+                    "Ignoring Set Request",
+                    &format!(
+                        "Older set request for {}::{} still in progress",
+                        self.object_entry_ref.node().name(),
+                        self.name()
+                    ),
                     chrono::Local::now(),
                 );
                 return;
@@ -222,8 +238,8 @@ impl ObjectEntryObject {
                     drop(curr_req);
                     notify_error(
                         &app_handle,
-                        "set request timed out",
-                        &format!("Set request for {oe_name} of {node_name} timed out",),
+                        "Set Request Timeout",
+                        &format!("Set request for {node_name}::{oe_name} timed out",),
                         chrono::Local::now(),
                     );
                 }
@@ -255,8 +271,12 @@ impl ObjectEntryObject {
             drop(get_req_num);
             notify_warning(
                 &self.app_handle,
-                "get response came in after timeout",
-                "Response to get request came in after timeout -- ignoring",
+                "Ignoring Get Response",
+                &format!(
+                    "Get response for {}::{} came in after timeout",
+                    self.object_entry_ref.node().name(),
+                    self.name()
+                ),
                 chrono::Local::now(),
             );
             return;
@@ -266,11 +286,11 @@ impl ObjectEntryObject {
         self.push_value(value, timestamp).await;
         notify_info(
             &self.app_handle,
-            "get request returned successfully",
+            "Get Request Successfull",
             &format!(
-                "Get request for {} of {} successfull",
+                "Get request for {}::{} successfull",
+                self.object_entry_ref.node().name(),
                 self.name(),
-                self.object_entry_ref.node().name()
             ),
             chrono::Local::now(),
         );
@@ -280,11 +300,11 @@ impl ObjectEntryObject {
         self.push_value(value, timestamp).await;
         notify_info(
             &self.app_handle,
-            "unsolicited get response",
+            "Unsolicited Get Response",
             &format!(
-                "Received unsolicited get response for {} of {}",
+                "Received unsolicited get response for {}::{}",
+                self.object_entry_ref.node().name(),
                 self.name(),
-                self.object_entry_ref.node().name()
             ),
             chrono::Local::now(),
         );
@@ -296,11 +316,11 @@ impl ObjectEntryObject {
             drop(set_req_data);
             notify_info(
                 &self.app_handle,
-                "set response came in after timeout",
+                "Ignoring Set Response",
                 &format!(
-                    "Set response for object entry with id {} of node {} came in after timeout",
-                    self.id(),
-                    self.node_id()
+                    "Set response for {}::{} came in after timeout",
+                    self.object_entry_ref.node().name(),
+                    self.name(),
                 ),
                 chrono::Local::now(),
             );
@@ -316,11 +336,11 @@ impl ObjectEntryObject {
                 drop(set_req_data);
                 notify_info(
                     &self.app_handle,
-                    "set request successfull",
+                    "Set Request Successfull",
                     &format!(
-                        "Object entry with id {} of node {} was set",
-                        self.id(),
-                        self.node_id()
+                        "{}::{} was set successfully",
+                        self.object_entry_ref.node().name(),
+                        self.name(),
                     ),
                     chrono::Local::now(),
                 );

@@ -58,7 +58,7 @@ impl TcpClient {
                 else {
                     notify_warning(
                         &app_handle,
-                        "Failed to send frame",
+                        "Failed to Send Frame",
                         "Error during sending on the TCP connection to the network",
                         chrono::offset::Local::now(),
                     );

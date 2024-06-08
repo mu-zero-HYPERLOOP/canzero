@@ -78,6 +78,7 @@ impl CNL {
             Err(_) => (WdgLevel::Active, WdgLevel::Active),
         };
         let watchdog_overlord = WatchdogOverlord::new(
+            network_config,
             &connection_object,
             &tx,
             deadlock_lvl,

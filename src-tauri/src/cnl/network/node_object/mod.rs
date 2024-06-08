@@ -139,14 +139,8 @@ impl NodeObject {
         }
         notify_error(
             &self.app_handle,
-            &format!(
-                "received heartbeat for node {} on non-existent bus",
-                self.name()
-            ),
-            &format!(
-                "received heartbeat for node {} on non-existent bus",
-                self.name()
-            ),
+            "Heartbeat Error",
+            &format!("received heartbeat for node {} on wrong bus", self.name()),
             chrono::Local::now(),
         );
     }
