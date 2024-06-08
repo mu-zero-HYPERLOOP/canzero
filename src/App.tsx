@@ -33,9 +33,13 @@ function App() {
   useEffect(() => {
     async function close() {
       const unlisten = await appWindow.onCloseRequested(async () => {
+        const unregisterHeartbeat = await ask("Unregister from heartbeat before closing?");
+        if (unregisterHeartbeat) {
+          await invoke("unregister_from_heartbeat")
+        }
         const saveLogs = await ask("Save logs before closing?");
         if (saveLogs) {
-          invoke("export").catch(console.error)
+          await invoke("export")
         }
       });
 

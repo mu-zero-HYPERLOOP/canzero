@@ -132,6 +132,7 @@ function TopBar({
                 onChange={event => {
                     setSearchString(event.target.value);
                     updateFilter(event.target.value);
+                    invoke("store_search_string", {page: "export", string: event.target.value}).catch(console.error)
                 }}
                 InputProps={{
                     startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small"/></InputAdornment>,
@@ -195,9 +196,11 @@ function Logging({nodes}: Readonly<ExportPanelProps>) {
 
     useEffect(() => {
         async function asyncSetup() {
-            const storedSearchString = await invoke<string>("get_stored_search_string", {page: "export"});
-            setSearchString(storedSearchString)
-            updateFilter(storedSearchString)
+            const storedSearchString = await invoke<string | null>("get_stored_search_string", {page: "export"});
+            if (storedSearchString !== null) {
+                setSearchString(storedSearchString)
+                updateFilter(storedSearchString)
+            }
             let rowData: RowData[] = [];
             for (let node of nodes) {
                 let nodeInformation = await invoke<NodeInformation>("node_information", {nodeName: node.name});
@@ -209,16 +212,9 @@ function Logging({nodes}: Readonly<ExportPanelProps>) {
                 }
             }
             setRowData(rowData);
-
-            return () => {
-                if (searchString !== "") invoke("store_search_string", {page: "export", string: searchString}).catch(console.error);
-            };
         }
 
-        let asyncCleanup = asyncSetup();
-        return () => {
-            asyncCleanup.then(f => f()).catch(console.error);
-        }
+        asyncSetup().catch(console.error);
     }, [nodes]);
 
     function rowContent(_index: number, row?: RowData) {

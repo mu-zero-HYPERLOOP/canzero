@@ -37,7 +37,7 @@ function SettingsContent() {
     <Box id="content" component="div" display="flex">
       <CssBaseline />
       <AppBar position="absolute" sx={{
-        backgroundColor: theme.palette.background.appBar,
+        backgroundColor: theme.palette.background.paper,
         height: "60px",
       }}>
         <Container component="div">
