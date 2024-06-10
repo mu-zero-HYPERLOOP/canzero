@@ -5,13 +5,14 @@ import theme from "../theme.ts";
 
 interface AppBarButtonProps {
   children: ReactElement,
-  color: "stateError" | "stateIdle" | "statePrecharge"
-  | "stateReady" | "stateStart" | "stateStop" 
-  | "stateLevitation" | "stateRunning" | "stateManual" | "success",
   onClick: () => void,
+  color: "stateInit" | "stateIdle" | "stateArming45" | "statePrecharge"
+  | "stateReady" | "disconnected"
+  | "stateDisarming45" | "stateStartLevitation" | "stateLevitation" | "stateStartGuidance"
+  | "stateAccelerate" | "stateController" | "stateCruising" | "stateDeceleration"
   width?: number | string
   variant?: "outlined" | "contained" | "text",
-  disabled? : boolean,
+  disabled?: boolean,
 }
 
 function AppBarButton({
@@ -19,7 +20,7 @@ function AppBarButton({
   onClick,
   color,
   width = "15em",
-  variant = "outlined",
+  variant = "contained",
   disabled = false,
 }: Readonly<AppBarButtonProps>) {
   return (
@@ -35,9 +36,9 @@ function AppBarButton({
         minHeight: '57px',
       }}
       sx={{
-          ":disabled": {
-              backgroundColor: theme.palette.background.disabled
-          }
+        ":disabled": {
+          backgroundColor: theme.palette.background.disabled
+        }
 
       }}
       color={color}

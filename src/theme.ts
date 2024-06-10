@@ -3,7 +3,7 @@ import {
   responsiveFontSizes,
 } from "@mui/material/styles";
 
-    
+
 declare module "@mui/material/styles" {
   interface BreakpointOverrides {
     xs: true;
@@ -18,39 +18,83 @@ declare module "@mui/material/styles" {
   }
   interface Palette {
     stateInit: Palette["primary"],
-    stateIdle: Palette["primary"];
+    stateIdle: Palette["primary"],
+    stateArming45: Palette["primary"],
     statePrecharge: Palette["primary"],
-    stateReady : Palette["primary"],
-    stateStart: Palette["primary"],
+    stateDisarming45: Palette["primary"],
+    stateReady: Palette["primary"],
+    stateStartLevitation: Palette["primary"],
     stateLevitation: Palette["primary"],
-    stateRunning: Palette["primary"],
-    stateStop: Palette["primary"],
-    stateError: Palette["error"],
-    stateManual : Palette["primary"],
-    disconnected : Palette["primary"],
-    temperatureHot : Palette["primary"],
-    temperatureOk : Palette["primary"],
+    stateStartGuidance: Palette["primary"],
+    stateGuidance: Palette["primary"],
+    stateAccelerate: Palette["primary"],
+    stateController: Palette["primary"],
+    stateCruising: Palette["primary"],
+    stateDeceleration: Palette["primary"],
+
+    stateStopLevitation: Palette["primary"],
+    stateStopGuidance: Palette["primary"],
+
+    stateShutdown: Palette["primary"],
+    stateRestarting: Palette["primary"],
+    stateCalibrating: Palette["primary"],
+
+    subStateArm: Palette["primary"],
+    subStatePrecharge: Palette["primary"],
+    subStateDisarm: Palette["primary"],
+    subStateReady: Palette["primary"],
+    subStateStart: Palette["primary"],
+    subStateStop: Palette["primary"],
+    subStateControl: Palette["primary"],
+    subStateOther: Palette["primary"],
+
+    disconnected: Palette["primary"],
+
+    temperatureHot: Palette["primary"],
+    temperatureOk: Palette["primary"],
   }
   interface PaletteOptions {
     stateInit?: PaletteOptions["primary"],
     stateIdle?: PaletteOptions["primary"],
+    stateArming45?: PaletteOptions["primary"],
     statePrecharge?: PaletteOptions["primary"],
+    stateDisarming45?: PaletteOptions["primary"],
     stateReady?: PaletteOptions["primary"],
-    stateStart?: PaletteOptions["primary"],
+    stateStartLevitation?: PaletteOptions["primary"],
     stateLevitation?: PaletteOptions["primary"],
-    stateRunning?: PaletteOptions["primary"],
-    stateStop?: PaletteOptions["primary"],
-    stateError?: PaletteOptions["error"],
-    stateManual?: PaletteOptions["primary"],
+    stateStartGuidance?: PaletteOptions["primary"],
+    stateGuidance?: PaletteOptions["primary"],
+    stateAccelerate?: PaletteOptions["primary"],
+    stateController?: PaletteOptions["primary"],
+    stateCruising?: PaletteOptions["primary"],
+    stateDeceleration?: PaletteOptions["primary"],
+
+    stateStopLevitation?: PaletteOptions["primary"],
+    stateStopGuidance?: PaletteOptions["primary"],
+
+    stateShutdown?: PaletteOptions["primary"],
+    stateRestarting?: PaletteOptions["primary"],
+    stateCalibrating?: PaletteOptions["primary"],
+
+    subStateArm?: PaletteOptions["primary"],
+    subStatePrecharge?: PaletteOptions["primary"],
+    subStateDisarm?: PaletteOptions["primary"],
+    subStateReady?: PaletteOptions["primary"],
+    subStateStart?: PaletteOptions["primary"],
+    subStateStop?: PaletteOptions["primary"],
+    subStateControl?: PaletteOptions["primary"],
+    subStateOther?: PaletteOptions["primary"],
+
     disconnected?: PaletteOptions["primary"],
-    temperatureHot? : PaletteOptions["primary"],
-    temperatureOk? : PaletteOptions["primary"],
+
+    temperatureHot?: PaletteOptions["primary"],
+    temperatureOk?: PaletteOptions["primary"],
   }
   interface TypeBackground {
     drawer?: string,
     appBar?: string,
     trace?: string,
-    main? : string,
+    main?: string,
     paper2?: string,
     warn?: string,
     error?: string,
@@ -61,15 +105,36 @@ declare module "@mui/material/styles" {
 declare module '@mui/material/Button' {
   interface ButtonPropsColorOverrides {
     stateInit: true,
-    stateIdle : true;
+    stateIdle: true,
+    stateArming45: true,
     statePrecharge: true,
-    stateReady: true;
-    stateStart: true,
-    stateStop : true,
+    stateDisarming45: true,
+    stateReady: true,
+    stateStartLevitation: true,
     stateLevitation: true,
-    stateRunning: true,
-    stateError: true,
-    stateManual: true,
+    stateStartGuidance: true,
+    stateGuidance: true,
+    stateAccelerate: true,
+    stateController: true,
+    stateCruising: true,
+    stateDeceleration: true,
+
+    stateStopLevitation: true,
+    stateStopGuidance: true,
+
+    stateShutdown: true,
+    stateRestarting: true,
+    stateCalibrating: true,
+
+    subStateArm: true,
+    subStatePrecharge: true,
+    subStateDisarm: true,
+    subStateReady: true,
+    subStateStart: true,
+    subStateStop: true,
+    subStateControl: true,
+    subStateOther: true,
+
     disconnected: true,
   }
 }
@@ -83,7 +148,7 @@ declare module "@mui/material/AppBar" {
 
 const theme = responsiveFontSizes(createTheme({
   palette: {
-    background : {
+    background: {
       appBar: "#232323",
       trace: "#e7e7e7",
       drawer: "#ffffff",
@@ -95,67 +160,99 @@ const theme = responsiveFontSizes(createTheme({
       error: "#f2d5d5",
       disabled: "#a2a2a2"
     },
+
+
     stateInit: {
-      main: "#e0d845",
-      light: "#e0da69",
-      dark: "#ccc200",
-      contrastText: "#000000",
+      main: "#807e7e",
     },
     stateIdle: {
-      main: "#356dd7",
-      light: "#5481d7",
-      dark: "#144eba",
-      contrastText: "#ffffff",
+      main: "#4d4d4d",
+    },
+    stateArming45: {
+      main: "#ffff00",
     },
     statePrecharge: {
-      main : "#49c8de",
-      light: "#7fd0de",
-      dark: "#2ea3b8",
-      contrastText: "#ffffff",
+      main: "#b3ff00",
+    },
+    stateDisarming45: {
+      main: "#ff9100",
     },
     stateReady: {
-      main : "#43cb5e",
-      light: "#7acb8a",
-      dark: "#35aa4c",
-      contrastText: "#ffffff",
+      main: "#3cff00",
     },
-    stateStart: {
-      main: "#e0d845",
-      light: "#e0da69",
-      dark: "#ccc200",
+    stateStartLevitation: {
+      main: "#00ff91",
     },
     stateLevitation: {
-      main: "#f1ab2f",
-      light: "#f1bc5e",
-      dark: "#d89216",
+      main: "#00ffe1",
     },
-    stateRunning: {
-      main: "#b361e6",
-      light: "#c288e6",
-      dark: "#9d3fd8",
+    stateStartGuidance: {
+      main: "#00bbff",
     },
-    stateStop: {
-      main: "#e0d845",
-      light: "#e0da69",
-      dark: "#ccc200",
+    stateGuidance: {
+      main: "#0055ff",
     },
-    stateError: {
-      main: "#d83c35",
-      light: "#d85650",
-      dark: "#c91e16",
-      contrastText : "#FFFFFF",
+    stateAccelerate: {
+      main: "#7300ff"
     },
-    stateManual: {
-      main: "#df4ec7",
-      light: "#df6dcc",
-      dark: "#c92ba6",
+    stateController: {
+      main: "#2b00ff",
     },
-    text: {
-      primary: "#5F5049",
+    stateCruising: {
+      main: "#c800ff",
     },
-    temperatureHot : {
+    stateDeceleration: {
+      main: "#7300ff"
     },
-    temperatureOk : {
+    stateStopLevitation: {
+      main: "#00ff91",
+    },
+    stateStopGuidance: {
+      main: "#00bbff",
+    },
+    stateShutdown: {
+      main: "#4d4d4d",
+    },
+    stateRestarting: {
+      main: "#ff0aeb",
+    },
+    stateCalibrating: {
+      main: "#ff0aeb",
+    },
+    subStateArm: {
+      main: "#ffff00",
+    },
+    subStatePrecharge: {
+      main: "#b3ff00",
+    },
+    subStateDisarm: {
+      main: "#ff9100",
+    },
+    subStateReady: {
+      main: "#3cff00",
+    },
+    subStateStart: {
+      main: "#00bbff",
+    },
+    subStateStop: {
+      main: "#00ff91",
+    },
+    subStateControl: {
+      main: "#2b00ff",
+    },
+    subStateOther: {
+      main: "#ff0aeb",
+    },
+
+    disconnected: {
+      main: "#ff0a0a",
+    },
+
+    temperatureHot: {
+      main: "#ff0a0a",
+    },
+    temperatureOk: {
+      main: "#2b00ff",
     },
   },
   breakpoints: {

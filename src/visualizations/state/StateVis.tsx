@@ -9,11 +9,11 @@ import { ObjectEntryEvent } from "../../object_entry/types/events/ObjectEntryEve
 import { useEffect } from "react";
 
 
-const MLU_OE = { nodeName: "mlu1", objectEntryName: "state" };
-const MGU_OE = { nodeName: "mgu1", objectEntryName: "state" };
+const MLU_OE = { nodeName: "levitation_board1", objectEntryName: "state" };
+const MGU_OE = { nodeName: "guidance_board_front", objectEntryName: "state" };
 const DSLIM_OE = { nodeName: "motor_driver", objectEntryName: "state" };
-const STATE_OE = { nodeName: "master", objectEntryName: "global_state" };
-const AIRGAP_OE = { nodeName: "mlu1", objectEntryName: "air_gap" };
+const STATE_OE = { nodeName: "mother_board", objectEntryName: "state" };
+const AIRGAP_OE = { nodeName: "levitation_board1", objectEntryName: "airgap_left" };
 
 
 interface OeId {
@@ -48,59 +48,66 @@ function StateVis() {
       switch (state) {
         case "INIT": return theme.palette.stateInit.main;
         case "IDLE": return theme.palette.stateIdle.main;
-        case "PRECHARGE": return theme.palette.statePrecharge.main;
-        case "READY": return theme.palette.stateReady.main;
-        case "START": return theme.palette.stateStart.main;
-        case "CONTROL": return theme.palette.stateRunning.main;
-        case "STOP": return theme.palette.stateStop.main;
-        case "MANUAL": return theme.palette.stateManual.main;
-        case "ERROR": return theme.palette.stateError.main;
-        default: return "#000000";
+        case "ARMING45": return theme.palette.subStateArm.main;
+        case "PRECHARGE": return theme.palette.subStateArm.main;
+        case "READY": return theme.palette.subStateReady.main;
+        case "START": return theme.palette.subStateStart.main;
+        case "CONTROL": return theme.palette.subStateControl.main;
+        case "STOP": return theme.palette.subStateStop.main;
+        case "DISARMING45": return theme.palette.subStateDisarm.main;
+        default : return theme.palette.subStateOther.main;
       }
     }));
     cleanup.push(registerOe(MGU_OE, "--mgu_state", svg, state => {
       switch (state) {
         case "INIT": return theme.palette.stateInit.main;
         case "IDLE": return theme.palette.stateIdle.main;
-        case "PRECHARGE": return theme.palette.statePrecharge.main;
-        case "READY": return theme.palette.stateReady.main;
-        case "START": return theme.palette.stateStart.main;
-        case "CONTROL": return theme.palette.stateRunning.main;
-        case "STOP": return theme.palette.stateStop.main;
-        case "MANUAL": return theme.palette.stateManual.main;
-        case "ERROR": return theme.palette.stateError.main;
-        default: return "#000000";
+        case "ARMING45": return theme.palette.subStateArm.main;
+        case "PRECHARGE": return theme.palette.subStateArm.main;
+        case "READY": return theme.palette.subStateReady.main;
+        case "START": return theme.palette.subStateStart.main;
+        case "CONTROL": return theme.palette.subStateControl.main;
+        case "STOP": return theme.palette.subStateStop.main;
+        case "DISARMING45": return theme.palette.subStateDisarm.main;
+        default : return theme.palette.subStateOther.main;
       }
     }));
     cleanup.push(registerOe(DSLIM_OE, "--dslim_state", svg, state => {
       switch (state) {
         case "INIT": return theme.palette.stateInit.main;
         case "IDLE": return theme.palette.stateIdle.main;
-        case "PRECHARGE": return theme.palette.statePrecharge.main;
-        case "READY": return theme.palette.stateReady.main;
-        case "START": return theme.palette.stateStart.main;
-        case "CONTROL": return theme.palette.stateRunning.main;
-        case "STOP": return theme.palette.stateStop.main;
-        case "MANUAL": return theme.palette.stateManual.main;
-        case "ERROR": return theme.palette.stateError.main;
-        default: return "#000000";
+        case "ARMING45": return theme.palette.subStateArm.main;
+        case "PRECHARGE": return theme.palette.subStateArm.main;
+        case "READY": return theme.palette.subStateReady.main;
+        case "START": return theme.palette.subStateStart.main;
+        case "CONTROL": return theme.palette.subStateControl.main;
+        case "STOP": return theme.palette.subStateStop.main;
+        case "DISARMING45": return theme.palette.subStateDisarm.main;
+        default : return theme.palette.subStateOther.main;
       }
     }));
     cleanup.push(registerOe(STATE_OE, "--global_state", svg, state => {
       switch (state) {
         case "INIT": return theme.palette.stateInit.main;
         case "IDLE": return theme.palette.stateIdle.main;
+        case "ARMING45": return theme.palette.stateArming45.main;
         case "PRECHARGE": return theme.palette.statePrecharge.main;
-        case "DISCONNECTING": return theme.palette.stateError.main;
+        case "DISARMING45": return theme.palette.stateDisarming45.main;
         case "READY": return theme.palette.stateReady.main;
-        case "START_GUIDANCE":
-        case "START_LEVITATION": return theme.palette.stateStart.main;
-        case "STOP_LEVITATION": return theme.palette.stateStop.main;
-        case "GUIDANCE_STABLE": return theme.palette.stateLevitation.main;
-        case "ACCELERATION": return theme.palette.stateStart.main;
-        case "CRUISING": return theme.palette.stateRunning.main;
-        case "DECELERATION": return theme.palette.stateStop.main;
-        default: return "#000000";
+        case "START_LEVITATION": return theme.palette.stateStartLevitation.main
+        case "LEVITATION_STABLE" : return theme.palette.stateLevitation.main;
+        case "START_GUIDANCE": return theme.palette.stateStartGuidance.main;
+        case "GUIDANCE_STABLE": return theme.palette.stateGuidance.main;
+        case "ACCELERATION": return theme.palette.stateAccelerate.main;
+        case "CONTROLLER" : return theme.palette.stateController.main;
+        case "CRUISING": return theme.palette.stateCruising.main;
+        case "DECELERATE": return theme.palette.stateDeceleration.main;
+        case "STOP_LEVITATION": return theme.palette.stateStopLevitation.main;
+        case "STOP_GUIDANCE": return theme.palette.stateStopGuidance.main;
+        case "SHUTDOWN": return theme.palette.stateShutdown.main;
+        case "RESTARTING": return theme.palette.stateRestarting.main;
+        case "CALIBRATING": return theme.palette.stateCalibrating.main;
+        default: return theme.palette.disconnected.main;
       }
     }));
 

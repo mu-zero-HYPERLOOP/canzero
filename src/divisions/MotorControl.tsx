@@ -94,22 +94,22 @@ function MotorControl({ nodes: _ }: Readonly<NodesProps>) {
           <Paper sx={{ padding: 1 }}>
             <Stack direction="row" justifyContent="space-between" spacing={2}>
               <Button variant="contained"
-                fullWidth color="stateIdle" onClick={() => setMotorCommand("ARM45")}>
+                fullWidth color="subStateArm" onClick={() => setMotorCommand("ARM45")}>
                 Arm45
               </Button>
-              <Button variant="contained" fullWidth color="stateReady"
+              <Button variant="contained" fullWidth color="subStatePrecharge"
                 onClick={
                   () => setMotorCommand("PRECHARGE")
                 }>
                 Precharge
               </Button>
-              <Button variant="contained" fullWidth color="stateStart" onClick={() => setMotorCommand("START")}>
+              <Button variant="contained" fullWidth color="subStateStart" onClick={() => setMotorCommand("START")}>
                 Start
               </Button>
-              <Button variant="contained" fullWidth color="stateLevitation" onClick={() => setMotorCommand("STOP")}>
+              <Button variant="contained" fullWidth color="subStateStop" onClick={() => setMotorCommand("STOP")}>
                 Stop
               </Button>
-              <Button variant="contained" fullWidth color="stateError" onClick={() => setMotorCommand("DISARM45")}>
+              <Button variant="contained" fullWidth color="subStateDisarm" onClick={() => setMotorCommand("DISARM45")}>
                 Disarm45
               </Button>
             </Stack>

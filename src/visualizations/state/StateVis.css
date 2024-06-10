@@ -9,7 +9,7 @@
 
 #state_vis #pod {
   transform: translateY(var(--air_gap));
-  transition: transform 100ms linear;
+  /* transition: transform 50ms linear; */
 }
 
 
