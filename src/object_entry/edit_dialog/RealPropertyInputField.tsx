@@ -28,33 +28,34 @@ function checkInputForErrors(min: number, max: number, input: string): string | 
 interface RealPropertyInputFieldProps {
   min: number,
   max: number,
-  bitSize : number,
+  bitSize: number,
   currentValue?: number,
   onUpdate: (value: number | null | undefined) => void,
   unit?: string,
   name: string,
+  width?: string,
 }
 
-function RealPropertyInputField({ min, max, onUpdate, currentValue, name, unit , bitSize}: Readonly<RealPropertyInputFieldProps>) {
+function RealPropertyInputField({ min, max, onUpdate, currentValue, name, unit, bitSize, width = "75ch" }: Readonly<RealPropertyInputFieldProps>) {
   const [input, setInput] = useState<string>("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [hasValue, setHasValue] = useState<boolean>(false);
 
-  let unitAdornment : string;
+  let unitAdornment: string;
   if (unit) {
     unitAdornment = `[${unit}]`;
-  }else {
+  } else {
     unitAdornment = "";
   }
-  let adornment : string;
+  let adornment: string;
   if (hasValue) {
     adornment = `${name} ${unitAdornment} <=`;
-  }else {
+  } else {
     adornment = `${name} ${unitAdornment}   `;
   }
 
   return <TextField
-    sx={{ width: "75ch", boxShadow: 0, borderRadius: 0 }}
+    sx={{ width: width, boxShadow: 0, borderRadius: 0 }}
     id={`${name}-set-request-input-field`}
     variant="filled"
     label={errorMsg ?? `d${bitSize}<${min}..${max}>`}
@@ -62,7 +63,7 @@ function RealPropertyInputField({ min, max, onUpdate, currentValue, name, unit ,
     color={errorMsg ? "error" : "info"}
     placeholder={`<= ${currentValue}`}
     inputProps={{
-      style: {boxShadow:"none"}
+      style: { boxShadow: "none" }
     }}
     onChange={(event) => {
       const input = event.target.value;
