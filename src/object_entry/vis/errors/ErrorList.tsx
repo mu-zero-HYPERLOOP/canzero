@@ -153,7 +153,7 @@ function ErrorList({width, height} : Readonly<ErrorListProps>) {
       height,
     }}>
       <Typography textAlign="center" paddingTop="0.5em" paddingBottom="0.5em" variant="h6">
-        Status
+        Errors
       </Typography>
       <Paper sx={{
         backgroundColor: theme.palette.background.paper2,

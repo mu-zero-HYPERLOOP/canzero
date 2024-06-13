@@ -55,6 +55,7 @@ function LevitationControl({ }: Readonly<NodesProps>) {
         height: "500px",
         padding: 1,
       }}>
+      <PIGraph/>
       </Paper>
     </Stack>
   );
