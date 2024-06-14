@@ -1,6 +1,7 @@
 import {NodeInformation} from "../nodes/types/NodeInformation.ts";
 import {
-    Checkbox,
+    Backdrop,
+    Checkbox, CircularProgress,
     IconButton,
     InputAdornment,
     Paper,
@@ -41,7 +42,7 @@ interface TopBarProps {
     searchString: string,
     setSearchString: (str: string) => void,
     updateFilter: (str: string) => void,
-
+    setLoading: (value: boolean) => void
 }
 
 function TopBar({
@@ -52,7 +53,8 @@ function TopBar({
                     setSelected,
                     searchString,
                     setSearchString,
-                    updateFilter
+                    updateFilter,
+                    setLoading
                 }: Readonly<TopBarProps>) {
     const theme = useTheme();
     const searchFieldRef = useRef() as any;
@@ -105,10 +107,14 @@ function TopBar({
                             right: "435px",
                             backgroundColor: theme.palette.background.paper2
                         }}
-                        onClick={() => invoke("export", {
-                            nodes: selected.map((value: [string, string]) => value[0]),
-                            oes: selected.map((value: [string, string]) => value[1])
-                        }).catch(console.error)}
+                        onClick={() => {
+                            setLoading(true)
+                            invoke("export", {
+                                nodes: selected.map((value: [string, string]) => value[0]),
+                                oes: selected.map((value: [string, string]) => value[1])
+                            }).catch(console.error)
+                            setLoading(false)
+                        }}
             >
                 <SaveIcon/>
             </IconButton>
@@ -174,6 +180,7 @@ function Logging({nodes}: Readonly<ExportPanelProps>) {
     const [searchString, setSearchString] = useState<string>("");
     const [rowData, setRowData] = useState<RowData[]>([]);
     const [selected, setSelected] = React.useState<[string, string][]>([]);
+    const [loading, setLoading] = React.useState<boolean>(false);
 
     function updateFilter(filter_string: string) {
         const filter = [];
@@ -265,7 +272,7 @@ function Logging({nodes}: Readonly<ExportPanelProps>) {
 
             <TopBar nodes={nodes} filter={filter} rowData={rowData} selected={selected} setSelected={setSelected}
                     searchString={searchString}
-                    setSearchString={setSearchString} updateFilter={updateFilter}/>
+                    setSearchString={setSearchString} updateFilter={updateFilter} setLoading={setLoading}/>
 
             {rowData.length == 0 ? <Skeleton
 
@@ -291,6 +298,12 @@ function Logging({nodes}: Readonly<ExportPanelProps>) {
                 >
                 </TableVirtuoso>
             }
+            <Backdrop
+                sx={{color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1}}
+                open={loading}
+            >
+                <CircularProgress color="inherit"/>
+            </Backdrop>
         </Paper>
     );
 }
