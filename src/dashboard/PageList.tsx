@@ -7,6 +7,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import FlightTakeoff from '@mui/icons-material/FlightTakeoff';
 import Speed from '@mui/icons-material/Speed';
 import EditRoad from '@mui/icons-material/EditRoad';
+import BatteryChargingFullIcon from '@mui/icons-material/BatteryChargingFull';
 import clsx from 'clsx';
 import {Link as RouterLink, LinkProps as RouterLinkProps, useNavigate,} from 'react-router-dom';
 import {Divider, ListItemButton, Typography} from '@mui/material';
@@ -153,6 +154,7 @@ export const RouterList = (
         <ListItemButtonLink to="/LevitationControl" text="Levitation Control" icon={<FlightTakeoff/>}/>
         <ListItemButtonLink to="/GuidanceControl" text="Guidance Control" icon={<EditRoad/>}/>
         <ListItemButtonLink to="/MotorControl" text="Motor Control" icon={<Speed/>}/>
+        <ListItemButtonLink to="/PowerControl" text="Power Control" icon={<BatteryChargingFullIcon/>}/>
     </React.Fragment>
 );
 
