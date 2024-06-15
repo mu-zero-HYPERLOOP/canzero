@@ -12,6 +12,10 @@ function restart() {
   invoke("restart").catch(console.error);
 }
 
+function exportLog(){
+  invoke("export").catch(console.error);
+}
+
 
 function Content() {
   const [open, setOpen] = useState<boolean>(false);
@@ -76,6 +80,7 @@ function Content() {
         </DialogContent>
         <DialogActions>
           <Button onClick={restart}>Restart</Button>
+          <Button onClick={exportLog}>Export Logfiles</Button>
         </DialogActions>
       </Dialog>
     </Box>
