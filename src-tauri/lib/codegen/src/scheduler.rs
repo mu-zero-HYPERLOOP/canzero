@@ -238,7 +238,7 @@ static void scheduler_promote_job(job_t *job) {{
 }}
 
 static void scheduler_schedule(job_t *job) {{
-{indent}if (scheduler.size >= SCHEDULE_HEAP_SIZE) {{
+{indent}if (scheduler.size >= SCHEDULER_HEAP_SIZE) {{
 {indent2}return;
 {indent}}}
 {indent}job->position = scheduler.size;
