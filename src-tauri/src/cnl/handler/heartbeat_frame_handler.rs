@@ -66,7 +66,7 @@ impl HeartbeatFrameHandler {
             .reset_heartbeat_wdg(
                 self.bus_id,
                 heartbeat_frame.unregister,
-                Some(heartbeat_frame.ticks_next),
+                heartbeat_frame.ticks_next,
             )
             .await;
         Ok(can_frame.new_value(frame))

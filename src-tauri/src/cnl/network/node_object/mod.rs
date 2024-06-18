@@ -126,7 +126,7 @@ impl NodeObject {
         // let _ = self.latest_observable.deadlock_watchdog().await;
     }
 
-    pub async fn reset_heartbeat_wdg(&self, bus_id: u32, unregister: bool, ticks_next: Option<u8>) {
+    pub async fn reset_heartbeat_wdg(&self, bus_id: u32, unregister: bool, ticks_next: u8) {
         if let Some(wdg) = self.heartbeat_wdgs.iter().find(|wdg| {
             wdg.tag()
                 == &WdgTag::Heartbeat {
@@ -134,7 +134,9 @@ impl NodeObject {
                     bus_id,
                 }
         }) {
-            wdg.reset(unregister, ticks_next).await;
+            wdg.reset(unregister, Some(std::cmp::min(ticks_next + 20, 127))).await;
+                // the +10 helps with tcp buffering for control panel, while nodes themselves
+                // can still react quickly.
             return;
         }
         notify_error(

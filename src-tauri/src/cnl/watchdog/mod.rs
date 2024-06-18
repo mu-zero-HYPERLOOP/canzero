@@ -239,6 +239,7 @@ impl WatchdogOverlord {
             over_status_rx,
             tx_com.clone(),
             Duration::from_millis(400),
+            20
         ));
 
         Self(Arc::new(WatchdogOverlordInner {
@@ -256,6 +257,7 @@ impl WatchdogOverlord {
         mut status_rx: watch::Receiver<OverlordTimeoutSignal>,
         tx_com: Arc<TxCom>,
         timeout: Duration,
+        ticks_next: u8,
     ) {
         let sleep = tokio::time::sleep(timeout);
         tokio::pin!(sleep);
@@ -266,7 +268,7 @@ impl WatchdogOverlord {
                     let x = *status_rx.borrow_and_update();
                     match x {
                         OverlordTimeoutSignal::Good => {
-                            tx_com.send_heartbeat(12, false).await;
+                            tx_com.send_heartbeat(ticks_next, false).await;
                             sleep.as_mut().reset(Instant::now() + timeout);
                             active = true;
                         },
@@ -278,13 +280,13 @@ impl WatchdogOverlord {
                             break;
                         }
                         OverlordTimeoutSignal::Unregister => {
-                            tx_com.send_heartbeat(12, true).await;
+                            tx_com.send_heartbeat(ticks_next, true).await;
                             active = false;
                         }
                     }
                 }
                 () = sleep.as_mut(), if active => {
-                    tx_com.send_heartbeat(12, false).await;
+                    tx_com.send_heartbeat(ticks_next, false).await;
                     sleep.as_mut().reset(Instant::now() + timeout);
                 }
             }
