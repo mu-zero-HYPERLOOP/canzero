@@ -1,6 +1,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::sync::Mutex;
 use canzero_cli::run_cli;
 use tauri::Manager;
 
@@ -33,6 +32,7 @@ async fn main() {
                     std::process::exit(0);
                 }
                 handle.manage(StartupState::new());
+                handle.manage(SearchStringStorage{store : Default::default()});
                 tauri::WindowBuilder::new(
                     &handle,
                     "startup",

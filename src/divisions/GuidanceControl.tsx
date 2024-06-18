@@ -5,6 +5,7 @@ import StateVis from "../visualizations/state/StateVis.tsx";
 import SdcVis from "../visualizations/sdc/SdcVis.tsx";
 import PodSideView from "../visualizations/side/PodSideView.tsx";
 import ErrorList from "../object_entry/vis/errors/ErrorList.tsx";
+import GuidanceVis from "../visualizations/guidance/GuidanceVis.tsx";
 
 interface NodesProps {
   // we can probably remove this fetching data early is kind of unnecassary.
@@ -40,12 +41,18 @@ function GuidanceControl({ }: Readonly<NodesProps>) {
         </Stack>
       </Stack>
       <Stack direction="row" sx={{
-        justifyContent: "end",
+        justifyContent: "space-between",
         marginTop: 2,
         marginLeft : 2,
         marginRight : 2,
       }}>
-        <ErrorList/>
+        <Paper sx={{
+          width: "59%",
+          height: "40vh",
+        }}>
+          <GuidanceVis />
+        </Paper>
+        <ErrorList width="40%" height="40vh"/>
       </Stack>
     </Stack>
   );

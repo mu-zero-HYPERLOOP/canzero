@@ -13,17 +13,17 @@ interface OeId {
   objectEntryName: string,
 }
 
-const PDU12_OE = { nodeName: "pdu12", objectEntryName: "sdc_status" };
-const PDU24_OE = { nodeName: "pdu24", objectEntryName: "sdc_status" };
+const PDU12_OE = { nodeName: "power_board12", objectEntryName: "sdc_status" };
+const PDU24_OE = { nodeName: "power_board24", objectEntryName: "sdc_status" };
 const INPUT_BOARD_OE = { nodeName: "input_board", objectEntryName: "sdc_status" };
-const MLU1_OE = { nodeName: "mlu1", objectEntryName: "sdc_status" };
-const MLU2_OE = { nodeName: "mlu2", objectEntryName: "sdc_status" };
-const MLU3_OE = { nodeName: "mlu3", objectEntryName: "sdc_status" };
+const MLU1_OE = { nodeName: "levitation_board1", objectEntryName: "sdc_status" };
+const MLU2_OE = { nodeName: "levitation_board2", objectEntryName: "sdc_status" };
+const MLU3_OE = { nodeName: "levitation_board3", objectEntryName: "sdc_status" };
 const MLU4_OE = { nodeName: "mlu4", objectEntryName: "sdc_status" };
 const MLU5_OE = { nodeName: "mlu5", objectEntryName: "sdc_status" };
 const MLU6_OE = { nodeName: "mlu6", objectEntryName: "sdc_status" };
-const MGU1_OE = { nodeName: "mgu1", objectEntryName: "sdc_status" };
-const MGU2_OE = { nodeName: "mgu2", objectEntryName: "sdc_status" };
+const MGU1_OE = { nodeName: "guidance_board_front", objectEntryName: "sdc_status" };
+const MGU2_OE = { nodeName: "guidance_board_back", objectEntryName: "sdc_status" };
 const MOTOR_OE = { nodeName: "motor_driver", objectEntryName: "sdc_status" };
 
 async function registerOe(oe: OeId, property: string, element: HTMLElement) {

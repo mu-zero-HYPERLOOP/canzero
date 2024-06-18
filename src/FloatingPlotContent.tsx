@@ -59,7 +59,7 @@ function FloatingObjectEntryPanel({ node, name }: Readonly<FloatingObjectEntryPa
   }, [node, name]);
 
   return <Paper sx={{
-    marginTop: "20px",
+    marginTop: "8px",
     marginLeft: "8px",
     marginRight: "10px",
     paddingLeft: "12px",

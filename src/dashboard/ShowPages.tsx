@@ -9,6 +9,7 @@ import { NodeInformation } from "../nodes/types/NodeInformation.ts";
 import LevitationControl from "../divisions/LevitationControl.tsx";
 import GuidanceControl from "../divisions/GuidanceControl.tsx";
 import MotorControl from "../divisions/MotorControl.tsx";
+import PowerControl from "../divisions/PowerControl.tsx";
 import ObjectEntryPanel from "../object_entry/panel/ObjectEntryPanel.tsx";
 import Trace from '../trace/Trace.tsx';
 import Logging from "../logging/Logging.tsx";
@@ -57,6 +58,7 @@ function ShowPages() {
     routes.push(<Route key="LevitationControl" path="LevitationControl" element={<LevitationControl nodes={nodes} />} />);
     routes.push(<Route key="GuidanceControl" path="GuidanceControl" element={<GuidanceControl nodes={nodes} />} />);
     routes.push(<Route key="MotorControl" path="MotorControl" element={<MotorControl nodes={nodes} />} />);
+    routes.push(<Route key="PowerControl" path="PowerControl" element={<PowerControl nodes={nodes} />} />);
   }
   for (let node of nodes) {
     routes.push(<Route key={key++} path={node.name} element={<NodePanel node={node} />} />);

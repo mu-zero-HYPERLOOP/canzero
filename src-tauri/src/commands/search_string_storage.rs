@@ -1,8 +1,8 @@
 use std::{collections::HashMap, sync::Mutex};
 use tauri::State;
 
-pub(crate) struct SearchStringStorage {
-    pub(crate) store: Mutex<HashMap<String, String>>,
+pub struct SearchStringStorage {
+    pub store: Mutex<HashMap<String, String>>,
 }
 
 

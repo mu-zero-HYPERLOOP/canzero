@@ -3,17 +3,17 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { DRAWER_WIDTH } from "../side_menu/SideMenu";
 import AppBarButton from "./AppBarButton";
 import StateDisplay from "./StateDisplay";
-import {ReactElement, useEffect, useState} from "react";
+import { ReactElement, useEffect, useState } from "react";
 import { ObjectEntryListenLatestResponse } from "../object_entry/types/events/ObjectEntryListenLatestResponse";
 import { invoke } from "@tauri-apps/api";
 import { listen } from "@tauri-apps/api/event";
 import { ObjectEntryEvent } from "../object_entry/types/events/ObjectEntryEvent";
 import StateIndicatorBar from "./StateIndicatorBar.tsx";
-import { sendAbortCommand, sendDisconnectCommand, sendEmergencyCommand, sendManualControlCommand, sendPrechargeCommand, sendStartLevitationCommand, sendStartPropulsionCommand, sendStopLevitationCommand, sendStopPropulsionCommand } from "./commands";
 import WarningIconDisplay from "../object_entry/vis/icons/WarningIconDisplay";
 import BatteryIconDisplay from "../object_entry/vis/icons/BatteryIconDisplay";
 import TemperatureIconDisplay from "../object_entry/vis/icons/TemperatureIconDisplay";
 import ElectricIconDisplay from "../object_entry/vis/icons/ElectricIconDisplay";
+import { sendCalibrate, sendEmergencyCommand, sendShutdown, sendStart45Command, sendStartController, sendStartLevitationCommand, sendStartPropulsionCommand, sendStop45Command, sendStopController, sendStopLevitationCommand, sendStopPropulsionCommand } from "./commands.ts";
 
 interface AppBarProps extends MuiAppBarProps {
   open?: boolean;
@@ -45,7 +45,7 @@ interface CustomAppBarProps {
 }
 
 
-const STATE_OE = { nodeName: "master", objectEntryName: "global_state" };
+const STATE_OE = { nodeName: "mother_board", objectEntryName: "state" };
 
 const START_45V_LABEL = <p>Start<br />45V-System [F1]</p>;
 const STOP_45V_LABEL = <p>Stop<br />45V-System [F2]</p>;
@@ -54,15 +54,28 @@ const STOP_LEVI_LABEL = <p>Stop<br />Levitation [F2]</p>;
 const START_PROP_LABEL = <p>Start<br />Propulsion [F1]</p>;
 const STOP_PROP_LABEL = <p>Stop<br />Propulsion [F2]</p>;
 
+const GAMEPAD_CONTROL = <p>Gamepad<br />Control [F2]</p>;
+const STOP_GAMEPAD_CONTROL = <p>Stop<br />Gamepad [F2]</p>;
+
+const CALIBRATE_LABEL = <p>Calibrate<br />Sensors [F3]</p>;
+const SHUTDOWN_LABEL = <p>Shutdown<br />System [F2]</p>;
+
 interface CommandList {
   startCommandLabel: ReactElement;
   disableStart: boolean,
   startCommand: () => void,
+
   stopCommandLabel: ReactElement;
   disableStop: boolean,
   stopCommand: () => void,
-  disableAbort: boolean,
-  disableManual: boolean,
+
+  option1Label: ReactElement,
+  disableOption1: boolean,
+  option1Command: () => void,
+
+  option2Label: ReactElement,
+  disableOption2: boolean,
+  option2Command: () => void,
 
 }
 
@@ -74,11 +87,18 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
     startCommandLabel: <p>Setting up</p>,
     disableStart: true,
     startCommand: () => { },
+
     stopCommandLabel: <p>Setting up</p>,
     disableStop: true,
     stopCommand: () => { },
-    disableAbort: true,
-    disableManual: true,
+
+    option1Label: <></>,
+    disableOption1: true,
+    option1Command: () => { },
+
+    option2Label: <></>,
+    disableOption2: true,
+    option2Command: () => { },
   });
 
   function updateState(state: string) {
@@ -91,8 +111,15 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
     let disableStop: boolean;
     let stopCommand: () => void;
 
-    let disableManual: boolean = true;
-    let disableAbort: boolean = true;
+    let option1Label = <></>;
+    let disableOption1 = true;
+    let option1Command = () => { };
+
+    let option2Label = <></>;
+    let disableOption2 = true;
+    let option2Command = () => { };
+
+
     switch (state) {
       case "COM_DISCONNECTED":
       case "INIT":
@@ -102,22 +129,27 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
         stopCommandLabel = STOP_45V_LABEL;
         disableStop = true;
         stopCommand = () => { };
+
         break;
       case "IDLE":
         startCommandLabel = START_45V_LABEL;
         disableStart = false;
-        startCommand = sendPrechargeCommand;
-        stopCommandLabel = STOP_45V_LABEL;
-        disableStop = true;
-        stopCommand = () => { };
+        startCommand = sendStart45Command;
+        stopCommandLabel = SHUTDOWN_LABEL;
+        disableStop = false;
+        stopCommand = sendShutdown;
+
+        disableOption1 = false;
+        option1Label = CALIBRATE_LABEL;
+        option1Command = sendCalibrate;
         break;
-      case "DISCONNECTING":
+      case "ARMING45":
         startCommandLabel = START_45V_LABEL;
         disableStart = true;
-        startCommand = sendPrechargeCommand;
+        startCommand = () => { };
         stopCommandLabel = STOP_45V_LABEL;
-        disableStop = true;
-        stopCommand = sendDisconnectCommand;
+        disableStop = false;
+        stopCommand = sendStop45Command;
         break;
       case "PRECHARGE":
         startCommandLabel = START_45V_LABEL;
@@ -125,7 +157,15 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
         startCommand = () => { };
         stopCommandLabel = STOP_45V_LABEL;
         disableStop = false;
-        stopCommand = sendDisconnectCommand;
+        stopCommand = sendStop45Command;
+        break;
+      case "DISARMING45":
+        startCommandLabel = START_45V_LABEL;
+        disableStart = true;
+        startCommand = () => { };
+        stopCommandLabel = STOP_45V_LABEL;
+        disableStop = true;
+        stopCommand = () => { };
         break;
       case "READY":
         startCommandLabel = START_LEVI_LABEL;
@@ -133,27 +173,10 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
         startCommand = sendStartLevitationCommand;
         stopCommandLabel = STOP_45V_LABEL;
         disableStop = false;
-        stopCommand = sendDisconnectCommand;
-        disableAbort = false;
+        stopCommand = sendStop45Command;
         break;
       case "START_LEVITATION":
-        startCommandLabel = START_LEVI_LABEL;
-        disableStart = true;
-        startCommand = () => { };
-        stopCommandLabel = STOP_LEVI_LABEL;
-        disableStop = false;
-        stopCommand = sendStopLevitationCommand;
-        disableAbort = false;
-        break;
       case "LEVITATION_STABLE":
-        startCommandLabel = START_LEVI_LABEL;
-        disableStart = true;
-        startCommand = () => { };
-        stopCommandLabel = STOP_LEVI_LABEL;
-        disableStop = false;
-        stopCommand = sendStopLevitationCommand;
-        disableAbort = false;
-        break;
       case "START_GUIDANCE":
         startCommandLabel = START_LEVI_LABEL;
         disableStart = true;
@@ -161,7 +184,6 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
         stopCommandLabel = STOP_LEVI_LABEL;
         disableStop = false;
         stopCommand = sendStopLevitationCommand;
-        disableAbort = false;
         break;
       case "GUIDANCE_STABLE":
         startCommandLabel = START_PROP_LABEL;
@@ -170,52 +192,43 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
         stopCommandLabel = STOP_LEVI_LABEL;
         disableStop = false;
         stopCommand = sendStopLevitationCommand;
-        disableAbort = false;
-        break;
-      case "ACCELERATION":
-        startCommandLabel = START_PROP_LABEL;
-        disableStart = true;
-        startCommand = () => { };
-        stopCommandLabel = STOP_LEVI_LABEL;
-        disableStop = false;
-        stopCommand = sendStopPropulsionCommand;
-        disableAbort = false;
+
+        option1Label = GAMEPAD_CONTROL;
+        disableOption1 = false;
+        option1Command = sendStartController;
         break;
       case "CRUISING":
+      case "ACCELERATION":
         startCommandLabel = START_PROP_LABEL;
         disableStart = true;
         startCommand = () => { };
         stopCommandLabel = STOP_PROP_LABEL;
         disableStop = false;
         stopCommand = sendStopPropulsionCommand;
-        disableAbort = false;
+        break;
+      case "CONTROLLER":
+        startCommandLabel = GAMEPAD_CONTROL;
+        disableStart = true;
+        startCommand = () => { };
+        stopCommandLabel = STOP_GAMEPAD_CONTROL;
+        disableStop = false;
+        stopCommand = sendStopController;
         break;
       case "DECELERATION":
         startCommandLabel = START_PROP_LABEL;
         disableStart = true;
         startCommand = () => { };
-        stopCommandLabel = STOP_LEVI_LABEL;
+        stopCommandLabel = STOP_PROP_LABEL;
         disableStop = true;
         stopCommand = () => { };
-        disableAbort = false;
-        break;
-      case "STOP_LEVITATION":
-        startCommandLabel = START_PROP_LABEL;
-        disableStart = true;
-        startCommand = () => { };
-        stopCommandLabel = STOP_LEVI_LABEL;
-        disableStop = true;
-        stopCommand = () => { };
-        disableAbort = false;
         break;
       default:
         startCommandLabel = <p>Emergency</p>;
         stopCommandLabel = <p>Emergency</p>;
         disableStop = false;
         disableStart = false;
-        disableAbort = false;
-        startCommand = sendEmergencyCommand;
-        stopCommand = sendEmergencyCommand;
+        startCommand = () => { };
+        stopCommand = () => { };
     }
     setCommandList({
       startCommandLabel,
@@ -224,8 +237,14 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
       stopCommandLabel,
       disableStop,
       stopCommand,
-      disableManual,
-      disableAbort
+
+      option1Label,
+      disableOption1,
+      option1Command,
+
+      option2Label,
+      disableOption2,
+      option2Command,
     });
   }
 
@@ -243,7 +262,7 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
           invoke("unlisten_from_latest_object_entry_value", STATE_OE).catch(console.error);
           unlistenJs();
         }
-      }catch (e)  {
+      } catch (e) {
         console.error(`Failed to register listeners for CustomAppBar component: Object entry ${STATE_OE.nodeName}:${STATE_OE.objectEntryName} not found`);
         return () => {
         }
@@ -271,16 +290,6 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
         event.preventDefault()
         if (commandList !== undefined && !commandList.disableStop) {
           commandList.stopCommand();
-        }
-      } else if (event.key === "F3") {
-        event.preventDefault()
-        if (commandList !== undefined && !commandList.disableAbort) {
-          sendAbortCommand();
-        }
-      } else if (event.key === "F4") {
-        event.preventDefault()
-        if (commandList !== undefined && !commandList.disableManual) {
-          sendManualControlCommand();
         }
       }
     };
@@ -341,24 +350,24 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
           >
             <StateDisplay state={state} />
             {/* Buttons */}
-            <AppBarButton variant="contained" width="18em" color="stateError" onClick={sendEmergencyCommand} >
+            <AppBarButton variant="contained" width="18em" color="disconnected" onClick={sendEmergencyCommand} >
               <p>Emergency <br />[Space bar]</p>
             </AppBarButton>
 
-            <AppBarButton color="stateIdle" disabled={commandList.disableStart} onClick={commandList.startCommand} >
+            <AppBarButton color="stateReady" disabled={commandList.disableStart} onClick={commandList.startCommand} >
               {commandList.startCommandLabel}
             </AppBarButton>
 
-            <AppBarButton color="stateError" disabled={commandList.disableStop} onClick={commandList?.stopCommand} >
+            <AppBarButton color="stateDisarming45" disabled={commandList.disableStop} onClick={commandList?.stopCommand} >
               {commandList.stopCommandLabel}
             </AppBarButton>
 
-            <AppBarButton color="stateError" disabled={commandList.disableAbort} onClick={sendAbortCommand} >
-              <p>Abort [F3]</p>
+            <AppBarButton color="stateCruising" disabled={commandList.disableOption1} onClick={commandList?.option1Command} >
+              <p>{commandList.option1Label}</p>
             </AppBarButton>
 
-            <AppBarButton color="success" disabled={commandList.disableManual} onClick={sendManualControlCommand} >
-              <p>Manual [F4]</p>
+            <AppBarButton color="stateCruising" disabled={commandList.disableOption2} onClick={commandList?.option2Command} >
+              <p>{commandList.option2Label}</p>
             </AppBarButton>
 
           </Stack>
@@ -385,3 +394,5 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
 }
 
 export default CustomAppBar;
+
+

@@ -183,6 +183,7 @@ function NumberGraph<T>({
         .attr("d", line);
     }
 
+
     function updateTextValue() {
       value.text(datum.values.length === 0 ? "" : `${Math.round(
         datum.yValue(datum.values[datum.values.length - 1]) * 100.0)

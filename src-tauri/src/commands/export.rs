@@ -44,6 +44,8 @@ pub async fn export(
         });
     }
 
+    let (tx,rx) = tokio::sync::oneshot::channel::<()>();
+
     tokio::task::spawn_blocking(move || {
         FileDialogBuilder::new()
             .set_title("Select export directory")
@@ -189,10 +191,15 @@ pub async fn export(
                         }
                     }
                 }
+                tx.send(()).unwrap();
             })
     })
     .await
     .expect("Failed to join blocking io task");
+
+
+    rx.await.expect("Failed to await oneshot duing export");
+    println!("EXPORT EXIT");
 
     Ok(())
 }
