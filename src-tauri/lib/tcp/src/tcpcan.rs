@@ -100,6 +100,8 @@ impl TcpCan {
     }
 
     pub async fn new(tcp_stream: TcpStream, connection_id: ConnectionId) -> std::io::Result<Self> {
+
+        tcp_stream.set_nodelay(true).unwrap();
         let (mut rx, mut tx) = tcp_stream.into_split();
 
         let (sync_tx, sync_rx) = oneshot::channel();
