@@ -350,23 +350,24 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
           >
             <StateDisplay state={state} />
             {/* Buttons */}
-            <AppBarButton variant="contained" width="18em" color="disconnected" onClick={sendEmergencyCommand} >
+            <AppBarButton variant="contained" width="18em" 
+                color="cmdAbort" onClick={sendEmergencyCommand} >
               <p>Emergency <br />[Space bar]</p>
             </AppBarButton>
 
-            <AppBarButton color="stateReady" disabled={commandList.disableStart} onClick={commandList.startCommand} >
+            <AppBarButton color="cmdStart" disabled={commandList.disableStart} onClick={commandList.startCommand} >
               {commandList.startCommandLabel}
             </AppBarButton>
 
-            <AppBarButton color="stateDisarming45" disabled={commandList.disableStop} onClick={commandList?.stopCommand} >
+            <AppBarButton color="cmdStop" disabled={commandList.disableStop} onClick={commandList?.stopCommand} >
               {commandList.stopCommandLabel}
             </AppBarButton>
 
-            <AppBarButton color="stateCruising" disabled={commandList.disableOption1} onClick={commandList?.option1Command} >
+            <AppBarButton color="cmdExtra" disabled={commandList.disableOption1} onClick={commandList?.option1Command} >
               <p>{commandList.option1Label}</p>
             </AppBarButton>
 
-            <AppBarButton color="stateCruising" disabled={commandList.disableOption2} onClick={commandList?.option2Command} >
+            <AppBarButton color="cmdExtra" disabled={commandList.disableOption2} onClick={commandList?.option2Command} >
               <p>{commandList.option2Label}</p>
             </AppBarButton>
 

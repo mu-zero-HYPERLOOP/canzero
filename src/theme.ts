@@ -48,6 +48,11 @@ declare module "@mui/material/styles" {
     subStateControl: Palette["primary"],
     subStateOther: Palette["primary"],
 
+    cmdStart : Palette["primary"],
+    cmdStop : Palette["primary"],
+    cmdAbort : Palette["primary"],
+    cmdExtra : Palette["primary"],
+
     disconnected: Palette["primary"],
 
     temperatureHot: Palette["primary"],
@@ -84,6 +89,12 @@ declare module "@mui/material/styles" {
     subStateStop?: PaletteOptions["primary"],
     subStateControl?: PaletteOptions["primary"],
     subStateOther?: PaletteOptions["primary"],
+
+
+    cmdStart? : PaletteOptions["primary"],
+    cmdStop? : PaletteOptions["primary"],
+    cmdAbort? : PaletteOptions["primary"],
+    cmdExtra? : PaletteOptions["primary"],
 
     disconnected?: PaletteOptions["primary"],
 
@@ -135,6 +146,11 @@ declare module '@mui/material/Button' {
     subStateControl: true,
     subStateOther: true,
 
+    cmdStart : true,
+    cmdStop : true,
+    cmdAbort : true,
+    cmdExtra : true,
+
     disconnected: true,
   }
 }
@@ -163,61 +179,61 @@ const theme = responsiveFontSizes(createTheme({
 
 
     stateInit: {
-      main: "#807e7e",
+      main: "#B3EBFF",
     },
     stateIdle: {
-      main: "#4d4d4d",
+      main: "#568BE8",
     },
     stateArming45: {
-      main: "#ffff00",
+      main: "#AF5BC4",
     },
     statePrecharge: {
-      main: "#b3ff00",
+      main: "#D871D3",
     },
     stateDisarming45: {
-      main: "#ff9100",
+      main: "#F9A35D",
     },
     stateReady: {
-      main: "#3cff00",
+      main: "#8BE26F",
     },
     stateStartLevitation: {
-      main: "#00ff91",
+      main: "#BBEDFF",
     },
     stateLevitation: {
-      main: "#00ffe1",
+      main: "#89E0F4",
     },
     stateStartGuidance: {
-      main: "#00bbff",
+      main: "#98ACEA",
     },
     stateGuidance: {
-      main: "#0055ff",
+      main: "#6699FF",
     },
     stateAccelerate: {
-      main: "#7300ff"
+      main: "#7FD3B9"
     },
     stateController: {
-      main: "#2b00ff",
+      main: "#3AEFBB",
     },
     stateCruising: {
-      main: "#c800ff",
+      main: "#3AEFBB",
     },
     stateDeceleration: {
-      main: "#7300ff"
+      main: "#E5E567"
     },
     stateStopLevitation: {
-      main: "#00ff91",
+      main: "#FFE54A",
     },
     stateStopGuidance: {
-      main: "#00bbff",
+      main: "#FFFF99",
     },
     stateShutdown: {
-      main: "#4d4d4d",
+      main: "#F44A3D",
     },
     stateRestarting: {
-      main: "#ff0aeb",
+      main: "#F7C663",
     },
     stateCalibrating: {
-      main: "#ff0aeb",
+      main: "#67C1E5",
     },
     subStateArm: {
       main: "#ffff00",
@@ -229,30 +245,42 @@ const theme = responsiveFontSizes(createTheme({
       main: "#ff9100",
     },
     subStateReady: {
-      main: "#3cff00",
+      main: "#8BE26F",
     },
     subStateStart: {
-      main: "#00bbff",
+      main: "#89E0F4",
     },
     subStateStop: {
-      main: "#00ff91",
+      main: "#ffff00",
     },
     subStateControl: {
-      main: "#2b00ff",
+      main: "#3AEFBB",
     },
     subStateOther: {
-      main: "#ff0aeb",
+      main: "#D871D3",
+    },
+    cmdStart : {
+      main: "#57A355",
+    },
+    cmdStop : {
+      main: "#E0BC00",
+    },
+    cmdAbort : {
+      main: "#ff0a0a",
+    },
+    cmdExtra : {
+      main: "#D871D3",
     },
 
     disconnected: {
-      main: "#ff0a0a",
+      main: "#F44A3D",
     },
 
     temperatureHot: {
       main: "#ff0a0a",
     },
     temperatureOk: {
-      main: "#2b00ff",
+      main: "#89E0F4",
     },
   },
   breakpoints: {

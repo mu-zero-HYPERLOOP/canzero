@@ -5,8 +5,8 @@ import PodSideView from '../visualizations/side/PodSideView.tsx';
 import SdcVis from '../visualizations/sdc/SdcVis.tsx';
 import StateVis from '../visualizations/state/StateVis.tsx';
 import TemperatureVis from '../visualizations/temperature/TemperatureVis.tsx';
-import GuidanceVis from '../visualizations/guidance/GuidanceVis.tsx';
 import PositionEstimationVis from '../visualizations/position_estimation/PositionEstimationVis.tsx';
+import FsmVis from '../visualizations/fsm/FsmVis.tsx';
 
 interface OverviewProps {
     nodes: NodeInformation[];
@@ -44,8 +44,8 @@ function OverviewPanel({}: Readonly<OverviewProps>) {
         marginLeft : 2,
         marginRight : 2,
       }}>
-        <GuidanceVis/>
-        <ErrorList width="40%" height="27vh"/>
+        <FsmVis/>
+        <ErrorList width="50%" height="27vh"/>
       </Stack>
       <PositionEstimationVis/>
     </Stack>

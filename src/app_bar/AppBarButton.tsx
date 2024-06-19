@@ -6,10 +6,7 @@ import theme from "../theme.ts";
 interface AppBarButtonProps {
   children: ReactElement,
   onClick: () => void,
-  color: "stateInit" | "stateIdle" | "stateArming45" | "statePrecharge"
-  | "stateReady" | "disconnected"
-  | "stateDisarming45" | "stateStartLevitation" | "stateLevitation" | "stateStartGuidance"
-  | "stateAccelerate" | "stateController" | "stateCruising" | "stateDeceleration"
+  color: "cmdStart" | "cmdStop" | "cmdAbort" | "cmdExtra"
   width?: number | string
   variant?: "outlined" | "contained" | "text",
   disabled?: boolean,
