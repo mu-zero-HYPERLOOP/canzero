@@ -219,9 +219,12 @@ impl ObjectEntryObject {
 
         let server_id = self.node_id();
         let oe_id = self.id();
-        self.tx()
-            .send_set_request(server_id, oe_id, bit_value, last_fill)
-            .await;
+
+        let tx = self.tx().clone();
+        tokio::spawn(async move {
+            tx.send_set_request(server_id, oe_id, bit_value, last_fill)
+                .await;
+        });
 
         tokio::task::spawn({
             let timeout = self.set_request_timeout.clone();
