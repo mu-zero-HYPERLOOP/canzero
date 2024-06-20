@@ -1,6 +1,15 @@
 import {NodeInformation} from "../nodes/types/NodeInformation.ts";
 import {Box, Paper, Stack, Typography} from "@mui/material";
 import theme from "../theme.ts";
+import Speedometer, {
+    Background,
+    Arc,
+    Needle,
+    Progress,
+    Marks,
+    Indicator,
+} from 'react-speedometer';
+import {DangerPath} from "react-speedometer/dist";
 
 
 interface NodesProps {
@@ -52,9 +61,9 @@ function PowerConsumption() {
 
 function PowerControl({}: Readonly<NodesProps>) {
     return (
-        <Stack direction="column" justifyContent="start" spacing={2} sx={{margin: 2}}>
+        <Stack direction="column" sx={{margin: 2}}>
             <Stack direction="row"
-                   justifyItems="start"
+                   justifyContent="space-evenly"
                    spacing={2}>
                 <Paper sx={{
                     width: "65%",
@@ -67,18 +76,39 @@ function PowerControl({}: Readonly<NodesProps>) {
                     <PowerConsumption/>
 
                 </Paper>
-                <Stack direction="column" spacing={1.2} justifyItems="start">
+                <Stack direction="column" spacing={1.2} justifyContent="space-evenly" width="35%">
                     <Paper sx={{
-                        width: "48vh",
+                        width: "100%",
                         height: "44vh",
                         padding: 1,
                     }}>
                         <Typography textAlign={"center"} paddingBottom={1}>
-                            Speedometer
+                            Consumption
+                        </Typography>
+                        <Box paddingTop="70px" textAlign="center">
+                            <Speedometer
+                                width={400}
+                                value={20}
+                                max={20}
+                                angle={160}
+                                fontFamily='Arial'
+                            >
+                                <Background angle={180} color="#000000" />
+                                <Arc/>
+                                <Needle offset={40} circleRadius={30} circleColor={theme.palette.background.appBar}/>
+                                <DangerPath/>
+                                <Progress/>
+                                <Marks step={2}/>
+                                <Indicator color="#000000" y={280} x={175}>
+                                </Indicator>
+                            </Speedometer>
+                        </Box>
+                        <Typography marginTop="-170px" textAlign="center" fontSize="2.5em" marginLeft="70px">
+                            kW
                         </Typography>
                     </Paper>
                     <Paper sx={{
-                        width: "48vh",
+                        width: "100%",
                         height: "44vh",
                         padding: 1,
                     }}>
