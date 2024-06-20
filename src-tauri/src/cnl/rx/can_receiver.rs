@@ -103,7 +103,7 @@ impl CanReceiver {
 
                 let receiver_data = receiver_data.clone();
                 let bus_name = bus_name.to_owned();
-                tokio::spawn(pcall(frame, receiver_data, bus_name, bus_id));
+                pcall(frame, receiver_data, bus_name, bus_id).await;
             }
         }
 

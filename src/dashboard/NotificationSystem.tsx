@@ -28,7 +28,7 @@ function NotificationSystem() {
             switch (notification.level) {
                 case "info" : {
                     enqueueSnackbar(message, {
-                        autoHideDuration: 2000,
+                        autoHideDuration: 1000,
                         preventDuplicate: true,
                         variant: "info"
                     })
@@ -36,7 +36,7 @@ function NotificationSystem() {
                 }
                 case "debug": {
                     enqueueSnackbar(message, {
-                        autoHideDuration: 3000,
+                        autoHideDuration: 500,
                         preventDuplicate: true,
                         variant: "default"
                     })
@@ -44,7 +44,7 @@ function NotificationSystem() {
                 }
                 case "warning": {
                     enqueueSnackbar(message, {
-                        autoHideDuration: 5000,
+                        autoHideDuration: 2000,
                         preventDuplicate: true,
                         variant: "warning"
                     })
