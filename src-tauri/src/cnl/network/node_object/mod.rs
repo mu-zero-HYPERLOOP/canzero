@@ -134,7 +134,7 @@ impl NodeObject {
                     bus_id,
                 }
         }) {
-            wdg.reset(unregister, Some(std::cmp::min(ticks_next + 20, 127))).await;
+            wdg.reset(unregister, Some(std::cmp::min(ticks_next, 127))).await;
                 // the +10 helps with tcp buffering for control panel, while nodes themselves
                 // can still react quickly.
             return;
