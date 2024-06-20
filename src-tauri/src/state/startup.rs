@@ -1,5 +1,6 @@
 use std::{
-    sync::Arc,
+    future::IntoFuture,
+    sync::{Arc, OnceLock},
     time::Instant,
 };
 
@@ -21,7 +22,12 @@ pub enum NetworkConnectionCreateInfo {
 pub struct StartupState {
     network_config: Mutex<Option<NetworkRef>>,
     connections: Mutex<Vec<NetworkConnectionCreateInfo>>,
-    established_connection: Mutex<(Vec<Arc<CanAdapter>>, Option<Instant>, Option<u8>)>,
+    established_connection: Mutex<(
+        Vec<Arc<CanAdapter>>,
+        Option<Instant>,
+        Option<u8>,
+        Option<Mutex<tokio::sync::oneshot::Receiver<()>>>,
+    )>,
 }
 
 impl StartupState {
@@ -29,7 +35,7 @@ impl StartupState {
         StartupState {
             network_config: Mutex::new(None),
             connections: Mutex::new(vec![]),
-            established_connection: Mutex::new((vec![], None, None)),
+            established_connection: Mutex::new((vec![], None, None, None)),
         }
     }
 
@@ -65,11 +71,17 @@ impl StartupState {
 
         match connection {
             NetworkConnectionCreateInfo::Tcp(nd) => {
-                let (can_adapters, node_id) = CanAdapter::create_tcp_adapters(&network_ref, app_handle, nd)
-                    .await
-                    .map_err(|err| format!("{err:?}"))?;
+                let (can_adapters, node_id, sync_complete) =
+                    CanAdapter::create_tcp_adapters(&network_ref, app_handle, nd)
+                        .await
+                        .map_err(|err| format!("{err:?}"))?;
                 let adapters = can_adapters.into_iter().map(Arc::new).collect();
-                *self.established_connection.lock().await = (adapters, Some(nd.timebase), Some(node_id));
+                *self.established_connection.lock().await = (
+                    adapters,
+                    Some(nd.timebase),
+                    Some(node_id),
+                    Some(Mutex::new(sync_complete)),
+                );
             }
             #[cfg(feature = "socket-can")]
             NetworkConnectionCreateInfo::SocketCan => {
@@ -78,7 +90,7 @@ impl StartupState {
                 *self.established_connection.lock().await = (
                     can_adapter.into_iter().map(Arc::new).collect(),
                     Some(Instant::now()),
-                    None
+                    None,
                 );
             }
         };
@@ -89,14 +101,29 @@ impl StartupState {
         let Some(network_config) = self.network_config.lock().await.as_ref().cloned() else {
             return Err("Failed to complete setup. No network configuration avaiable".to_owned());
         };
-        let (can_adapters,_,node_id) = self.established_connection.lock().await.clone();
+
+        let mut lock =
+            self.established_connection.lock().await;
+        let can_adapters = lock.0.clone();
+        let timebase = lock.1.unwrap();
+        let node_id = lock.2.clone();
+        let sync_complete = lock.3.take();
+
+        let sync_complete = match sync_complete {
+            Some(x) => {
+                let y = x.into_inner();
+                Some(y)
+            }
+            None => None
+        };
 
         Ok(CNLState::create(
             network_config,
             app_handle,
             can_adapters,
-            self.established_connection.lock().await.1.unwrap(),
+            timebase,
             node_id,
+            sync_complete,
         )
         .await)
     }

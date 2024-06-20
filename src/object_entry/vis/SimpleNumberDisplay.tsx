@@ -28,7 +28,6 @@ function SimpleEnumDisplay({ nodeName, objectEntryName, label }: Readonly<Simple
         nodeName, objectEntryName
       });
 
-      console.log(objectEntryName, info, resp);
       if (resp.latest !== undefined && resp.latest !== null) {
         setValue(resp.latest.value as number);
       }

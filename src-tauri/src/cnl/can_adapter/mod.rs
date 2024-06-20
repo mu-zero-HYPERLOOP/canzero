@@ -25,22 +25,28 @@ impl CanAdapter {
         network_config: &NetworkRef,
         app_handle: &tauri::AppHandle,
         network_description: &NetworkDescription,
-    ) -> std::io::Result<(Vec<Self>,u8)> {
+    ) -> std::io::Result<(Vec<Self>,u8, tokio::sync::oneshot::Receiver<()>)> {
         let channels: Vec<(
-            tokio::sync::mpsc::Sender<Result<TCanFrame, TCanError>>,
-            tokio::sync::mpsc::Receiver<Result<TCanFrame, TCanError>>,
+            tokio::sync::mpsc::Sender<Option<Result<TCanFrame, TCanError>>>,
+            tokio::sync::mpsc::Receiver<Option<Result<TCanFrame, TCanError>>>,
         )> = network_config
             .buses()
             .iter()
             .map(|_| { tokio::sync::mpsc::channel(16) })
             .collect();
-        let tx_channels: Vec<tokio::sync::mpsc::Sender<Result<TCanFrame, TCanError>>> = channels
+        let tx_channels: Vec<tokio::sync::mpsc::Sender<Option<Result<TCanFrame, TCanError>>>> = channels
             .iter()
             .map(|(tx, _rx)| tx.clone())
             .collect();
         let tcp_client = std::sync::Arc::new(
             self::tcp::client::TcpClient::create(network_description, app_handle, tx_channels).await?,
         );
+        let tcp_sync = tcp_client.clone();
+        let (tx_sync_complete, sync_complete) = tokio::sync::oneshot::channel::<()>();
+        tokio::spawn(async move {
+            tcp_sync.sync_complete().await;
+            tx_sync_complete.send(()).expect("Failed to send tx_sync");
+        });
 
         let mut adapters = vec![];
         for (bus, (tx, rx)) in
@@ -57,7 +63,7 @@ impl CanAdapter {
                 )),
             });
         }
-        Ok((adapters, tcp_client.node_id()))
+        Ok((adapters, tcp_client.node_id(), sync_complete))
     }
 
     #[cfg(feature = "socket-can")]

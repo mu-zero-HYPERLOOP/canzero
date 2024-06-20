@@ -39,6 +39,8 @@ function Content() {
     function readBackendStatus(connection: string) {
       if (connection == "network-connected") {
         setBackendError(undefined);
+      } else if (connection == "sync-done") {
+        setBackendError(undefined);
       } else if (connection == "heartbeat-miss") {
         setBackendError("Heartbeat timed out");
       } else if (connection == "network-disconnected") {

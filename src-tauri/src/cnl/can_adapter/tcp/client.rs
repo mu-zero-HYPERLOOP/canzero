@@ -15,7 +15,7 @@ impl TcpClient {
     pub async fn create(
         network_description: &NetworkDescription,
         app_handle: &tauri::AppHandle,
-        can_rx_adapters: Vec<tokio::sync::mpsc::Sender<Result<TCanFrame, TCanError>>>,
+        can_rx_adapters: Vec<tokio::sync::mpsc::Sender<Option<Result<TCanFrame, TCanError>>>>,
     ) -> std::io::Result<Self> {
         let app_handle = app_handle.clone();
         let address = SocketAddr::new(
@@ -39,6 +39,9 @@ impl TcpClient {
         tokio::spawn(async move {
             loop {
                 let Some(tnetwork_frame) = tcpcan_rx.recv().await else {
+                    for adapter in can_rx_adapters {
+                        adapter.send(None).await.expect("Failed to forward error can frame");
+                    }
                     break;
                 };
 
@@ -53,7 +56,7 @@ impl TcpClient {
                 };
 
                 let Ok(_) = can_rx_adapter
-                    .send(Ok(Timestamped::new(timestamp, can_frame)))
+                    .send(Some(Ok(Timestamped::new(timestamp, can_frame))))
                     .await
                 else {
                     notify_warning(
@@ -70,6 +73,10 @@ impl TcpClient {
             tcpcan,
             timebase: network_description.timebase,
         })
+    }
+    
+    pub async fn sync_complete(&self) {
+        self.tcpcan.sync_complete().await;
     }
 
     pub async fn send(&self, frame: NetworkFrame) -> std::io::Result<()> {

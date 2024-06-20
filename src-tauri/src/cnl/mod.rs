@@ -2,13 +2,13 @@ pub mod connection;
 mod deserialize;
 pub mod errors;
 pub mod frame;
+mod gamepad;
 mod handler;
 pub mod network;
 mod rx;
 pub mod trace;
 mod tx;
 pub mod watchdog;
-mod gamepad;
 
 pub mod can_adapter;
 
@@ -18,11 +18,19 @@ use std::{
 };
 
 use self::{
-    can_adapter::CanAdapter, connection::{ConnectionObject, ConnectionStatus}, gamepad::Gamepad, network::{node_object::NodeObject, NetworkObject}, rx::RxCom, trace::TraceObject, tx::TxCom, watchdog::{Watchdog, WatchdogOverlord, WdgTag}
+    can_adapter::CanAdapter,
+    connection::{ConnectionObject, ConnectionStatus},
+    gamepad::Gamepad,
+    network::{node_object::NodeObject, NetworkObject},
+    rx::RxCom,
+    trace::TraceObject,
+    tx::TxCom,
+    watchdog::{Watchdog, WatchdogOverlord, WdgTag},
 };
 
 use canzero_appdata::{AppData, WdgLevel};
 use canzero_config::config;
+use color_print::cprintln;
 
 // Can Network Layer (CNL)
 pub struct CNL {
@@ -50,14 +58,16 @@ impl CNL {
         can_adapters: Vec<Arc<CanAdapter>>,
         timebase: Instant,
         node_id: Option<u8>,
+        sync_complete: Option<tokio::sync::oneshot::Receiver<()>>,
     ) -> Self {
+
+
         let connection_object = Arc::new(ConnectionObject::new(
             ConnectionStatus::NetworkConnected,
             app_handle,
         ));
 
         let node_id = node_id.unwrap_or(network_config.nodes().len() as u8);
-
 
         let trace = Arc::new(TraceObject::create(app_handle));
 
@@ -128,6 +138,18 @@ impl CNL {
                     deadlock_watchdog.reset(false, None).await;
                 }
             });
+        }
+
+
+        let connection_object_sync = connection_object.clone();
+        match sync_complete{
+            Some(sync_complete_signal) => {
+                tokio::spawn(async move {
+                    sync_complete_signal.await.expect("Failed to receive sync_complete signal");
+                    connection_object_sync.set_status(ConnectionStatus::SyncDone);
+                });
+            }
+            None => connection_object_sync.set_status(ConnectionStatus::SyncDone),
         }
 
         Self {

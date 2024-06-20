@@ -27,7 +27,6 @@ function ObjectEntryPropertyInputField({ }: Readonly<ObjectEntryPropertyInputFie
           v = e.target.value;
         }
         e.target.setSelectionRange(v.length - unit.length, v.length - unit.length);
-        console.log(e.target.selectionStart);
         setInput(v);
       }}
       onFocus={e => {
