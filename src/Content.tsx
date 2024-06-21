@@ -30,7 +30,7 @@ function Content() {
 
     function exportLog(){
         setLoading(true)
-        invoke("export").catch(console.error);
+        invoke("export").then();
         setLoading(false)
     }
 
