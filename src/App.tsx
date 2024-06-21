@@ -66,8 +66,7 @@ function App() {
           const saveLogs = await ask("Save logs before closing?");
           if (saveLogs) {
             setLoading(true)
-            await invoke("export")
-            setLoading(false)
+            invoke("export").then(() => setLoading(false));
           }
         }
       });
