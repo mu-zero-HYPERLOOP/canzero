@@ -44,6 +44,8 @@ pub async fn export(
         });
     }
 
+    drop(cnl);
+
     let (tx,rx) = tokio::sync::oneshot::channel::<()>();
 
     tokio::task::spawn_blocking(move || {
