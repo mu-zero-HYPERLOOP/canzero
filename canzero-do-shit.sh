@@ -7,6 +7,6 @@ npm run tauri build
 
 $path_to_exe config set network_config/config.yaml
 
-$path_to_exe server start
+$path_to_exe server start &
 
 $path_to_exe
