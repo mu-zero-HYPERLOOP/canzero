@@ -7,9 +7,10 @@ import Speedometer, {
     Needle,
     Progress,
     Marks,
+    DangerPath,
     Indicator,
 } from 'react-speedometer';
-import {DangerPath} from "react-speedometer/dist";
+import PowerVis from "../visualizations/power/PowerVis.tsx";
 
 
 interface NodesProps {
@@ -25,13 +26,12 @@ function LevitationConsumption() {
             <Stack direction="row" justifyContent={"space-between"} sx={{
                 paddingLeft : 2,
                 paddingRight : 2,
+                margin: 1,
             }}>
                 <Box>
                     <Typography> Levitation 1 </Typography>
                 </Box>
-                <Box>
-                    TODO
-                </Box>
+                <PowerVis/>
                 <Box>
                     <Typography textAlign="end"> 14kW </Typography>
                 </Box>
