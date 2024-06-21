@@ -112,8 +112,7 @@ function TopBar({
                              invoke("export", {
                                 nodes: selected.map((value: [string, string]) => value[0]),
                                 oes: selected.map((value: [string, string]) => value[1])
-                            }).then();
-                            setLoading(false)
+                            }).then(() => setLoading(false));
                         }}
             >
                 <SaveIcon/>

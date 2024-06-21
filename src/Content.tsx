@@ -30,8 +30,7 @@ function Content() {
 
     function exportLog(){
         setLoading(true)
-        invoke("export").then();
-        setLoading(false)
+        invoke("export").then(() => setLoading(false));
     }
 
     useEffect(() => {
