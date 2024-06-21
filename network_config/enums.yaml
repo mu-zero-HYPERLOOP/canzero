@@ -1,0 +1,169 @@
+# General types:
+bool_t:
+  FALSE: 0
+  TRUE: 1
+
+# Used for error flags
+error_flag:
+  OK : 0
+  ERROR : 1
+
+error_level:
+  OK : 0
+  INFO : 1
+  WARNING: 2
+  ERROR: 3
+
+# SDC status type
+sdc_status:
+  OPEN: 0
+  CLOSED: 1
+
+# PDU 12 or 24V
+pdu_channel_control:
+  OFF : 0
+  ON : 1
+
+pdu_channel_status:
+  OFF : 0
+  ON : 1
+  SHORT_CIRCUIT : 3
+
+# Global State Machine
+global_state:
+  INIT: ~
+  IDLE: ~
+  ARMING45 : ~
+  PRECHARGE : ~
+  DISARMING45: ~
+  READY: ~
+  START_LEVITATION : ~
+  LEVITATION_STABLE: ~
+  START_GUIDANCE : ~
+  GUIDANCE_STABLE : ~
+  ACCELERATION : ~
+  CONTROLLER: ~
+  CRUISING : ~
+  DECELERATION : ~
+  STOP_LEVITATION: ~
+  STOP_GUIDANCE: ~
+  SHUTDOWN: ~
+  RESTARTING: ~
+  CALIBRATING: ~
+
+global_command:
+  NONE: ~
+  START_45: ~
+  STOP_45: ~
+  START_LEVITATION: ~
+  STOP_LEVITATION: ~
+  START_PROPULSION: ~
+  STOP_PROPULSION: ~
+  START_CONTROLLER: ~
+  STOP_CONTROLLER: ~
+  ABORT: ~
+  EMERGENCY: ~
+  SHUTDOWN: ~
+  RESTART: ~
+  CALIBRATE: ~
+
+# MLU State Machine types
+levitation_state:
+  INIT: ~
+  IDLE: ~
+  ARMING45: ~
+  PRECHARGE: ~
+  READY: ~
+  START : ~
+  CONTROL : ~
+  STOP: ~
+  DISARMING45: ~
+
+levitation_command:
+  NONE: ~
+  ARM45: ~
+  PRECHARGE: ~
+  START: ~
+  STOP: ~
+  ABORT: ~
+  DISARM45: ~
+
+# MGU State Machine types
+guidance_state:
+  INIT: ~
+  IDLE: ~
+  ARMING45: ~
+  PRECHARGE: ~
+  READY: ~
+  CONTROL : ~
+  DISARMING45: ~
+
+guidance_command:
+  NONE: ~
+  ARM45: ~
+  PRECHARGE: ~
+  START: ~
+  STOP: ~
+  DISARM45: ~
+
+# Motor State Machine types
+motor_state:
+  INIT: ~
+  IDLE: ~
+  ARMING45: ~
+  PRECHARGE: ~
+  READY: ~
+  CONTROL : ~
+  DISARMING45: ~
+
+motor_command:
+  NONE: ~
+  ARM45 : ~
+  PRECHARGE: ~
+  START: ~
+  STOP: ~
+  ABORT: ~
+  DISARM45: ~
+
+input_board_state:
+  INIT: ~
+  CALIBRATION: ~
+  RUNNING : ~
+
+input_board_command:
+  NONE: ~
+  CALIBRATE: ~
+
+calibration_mode:
+  USE_OFFSET: ~
+  USE_TARGET: ~
+  DISABLE: ~
+
+pdu_24v_state:
+  INIT: ~
+  CHANNELS_OFF: ~
+  CHANNELS_IDLE: ~
+  CHANNELS_ON: ~
+
+pdu_24v_command:
+  NONE: ~
+  START: ~
+  IDLE: ~
+  STOP: ~
+
+pdu_12v_state:
+  INIT: ~
+  CHANNELS_OFF: ~
+  CHANNELS_TELEMETRY: ~
+  CHANNELS_ON: ~
+
+pdu_12v_command:
+  NONE: ~
+  START: ~
+  STOP: ~
+  TELEMETRY: ~
+
+perf_pattern:
+  LINEAR: ~
+  RANDOM: ~
+  COLD: ~

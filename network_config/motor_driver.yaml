@@ -1,0 +1,455 @@
+description: Motor driver board
+object_dictionary:
+
+  state:
+    type: motor_state
+    description: State of the motor state machine.
+    access: readonly
+      
+  sdc_status:
+    type: sdc_status
+    description: State of the motor driver SDC.
+    access: readonly
+  precharge_status:
+    type: sdc_status
+    description: State of the precharge mosfet.
+    access: readonly
+  feedthrough_status:
+    type: sdc_status
+    description: State of the feedthrough mosfet.
+    access: readonly
+
+  command:
+    type: motor_command
+    description: Command used by the motor state machine.
+    access: extern
+  
+
+  control_active:
+    type: bool_t
+    description: Set if the control loop is running.
+    access: readonly
+
+  error_arming_failed:
+    type: error_flag
+    description: Arming the 45V system failed.
+    friend: vdc_voltage
+    access: readonly
+  error_precharge_failed:
+    type: error_flag
+    description: The precharge failed.
+    friend: vdc_voltage
+    access: readonly
+
+  current_u1:
+    type: d16<-100..100>
+    unit: A
+    description: RMS current of phase u1.
+    access: readonly
+  current_v1:
+    type: d16<-100..100>
+    unit: A
+    description: RMS current of phase v1.
+    access: readonly
+  current_w1:
+    type: d16<-100..100>
+    unit: A
+    description: RMS current of phase w1.
+    access: readonly
+  current_u2:
+    type: d16<-100..100>
+    unit: A
+    description: RMS current of phase u2.
+    access: readonly
+  current_v2:
+    type: d16<-100..100>
+    unit: A
+    description: RMS current of phase v2.
+    access: readonly
+  current_w2:
+    type: d16<-100..100>
+    unit: A
+    description: RMS current of phase w2.
+    access: readonly
+  current_max:
+    type: d16<-100..100>
+    unit: A
+    description: max RMS current of all phases.
+    access: readonly
+  current_average:
+    type: d16<-100..100>
+    unit: A
+    description: average RMS current of all phases.
+    access: readonly
+  error_level_current_u1:
+    type: error_level
+    description: The current of phase u1 is to high.
+    friend: current_u1
+    access: readonly
+  error_level_current_v1:
+    type: error_level
+    description: The current of phase v1 is to high.
+    friend: current_v1
+    access: readonly
+  error_level_current_w1:
+    type: error_level
+    description: The current of phase w1 is to high.
+    friend: curret_w1
+    access: readonly
+  error_level_current_u2:
+    type: error_level
+    description: The current of phase u2 is to high.
+    friend: current_u2
+    access: readonly
+  error_level_current_v2:
+    type: error_level
+    description: The current of phase v2 is to high.
+    friend: current_v2
+    access: readonly
+  error_level_current_w2:
+    type: error_level
+    description: The current of phase w2 is to high.
+    friend: current_max
+    access: readonly
+  error_level_config_current_phase:
+    type: error_level_config
+    description: Error configuration of the phase currents.
+    access: readwrite.
+
+
+
+  frequency:
+    type: d16<0..50>
+    unit: Hz
+    description: Synchronous frequency of the DSLIM.
+    access: readonly
+  modulation_index:
+    type: d16<0..1>
+    description: Modulation index of the motor control.
+    access: readonly
+  
+  acceleration:
+    type: d16<-10..10>
+    unit: m/s²
+    description: Local estimation of the acceleration.
+    access: readonly
+  acceleration_calibration_variance:
+    type: d64<-1..1> 
+    unit: m/s²
+    description: Variance of the local acceleration reading
+    access: readonly
+  acceleration_calibration_offset:
+    type: d64<-1..1>
+    unit: m/s²
+    description: Calibration offset of the acceleration
+    access: readwrite
+  error_acceleration_out_of_range:
+    type: error_flag
+    description: The local acceleration reading on the motor driver is out of the expected range.
+    friend: acceleration
+    access: readonly
+  error_acceleration_calibration_failed:
+    type: error_flag
+    description: The calibration of the accelerometer failed.
+    friend: acceleration
+    access: readonly
+  target_acceleration:
+    type: d32<-50..50>
+    unit: m/s²
+    access: extern
+  error_invalid_target_acceleration:
+    type: error_flag
+    description: The target acceleraiton is not valid.
+    access: readonly
+
+
+  external_acceleration:
+    type: d16<-10..10>
+    unit: m/s²
+    description: Exterenal estimation of the acceleration
+    access: extern
+  external_velocity:
+    type: d16<-10..10>
+    unit: m/s
+    description: External estimation of the velocity of the pod.
+    access: readonly
+  external_position:
+    type: d16<-50..50>
+    unit: m
+    description: External estimation of the positin of the pod.
+    access: extern
+
+  
+  vdc_voltage:
+    type: d16<0..100>
+    unit: V
+    description: Voltage of the VDC plane.
+    access: readonly
+  error_level_vdc_voltage:
+    type: error_level
+    description: The vdc voltage of the GDB is to high.
+    friend: vdc_voltage
+    access: readonly
+  error_level_config_vdc_voltage:
+    type: error_level_config
+    description: Error configuration of the vdc voltage.
+    access: readwrite
+
+
+  board_temperature1:
+    type: d8<-1..150>
+    unit: °C
+    description: On board NTC temperature (vdc connector).
+    access: readonly
+  board_temperature2:
+    type: d8<-1..150>
+    unit: °C
+    description: On board NTC temperature (v1 phase).
+    access: readonly
+  board_temperature3:
+    type: d8<-1..150>
+    unit: °C
+    description: On board NTC temperature (v2 phase).
+    access: readonly
+  board_avg_temperature:
+    type: d8<-1..150>
+    unit: °C
+    description: Average temperature of the on board NTCs.
+    access: readonly
+  board_max_temperature:
+    type: d8<-1..150>
+    unit: °C
+    description: Maximum temperature of the on board NTCs.
+    access: readonly
+  board_min_temperature:
+    type: d8<-1..150>
+    unit: °C
+    description: Mimimum temperature of the on board NTCs.
+    access: readonly
+  error_board_temperature1_invalid:
+    type: error_flag
+    description: The temperature readings of the on board NTC (vdc connector) is not sensible.
+    friend: board_temperature1
+    access: readonly
+  error_board_temperature2_invalid:
+    type: error_flag
+    description: The temperature readings of the on board NTC (v1 phase) is not sensible.
+    friend: board_temperature2
+    access: readonly
+  error_board_temperature3_invalid:
+    type: error_flag
+    description: The temperature readings of the on board NTC (v2 phase) is not sensible.
+    friend: board_temperature3
+    access: readonly
+  error_level_board_temperature:
+    type: error_level
+    description: The temperature on board temperature of the motor driver is to high.
+    friend: board_max_temperature
+    access: readonly
+  error_level_config_board_temperature:
+    type: error_level_config
+    description: The error configuration of the board temperature.
+    access: readwrite
+
+  mcu_temperature:
+    type: d8<-1..150>
+    unit: °C
+    description: Temperature of the input board
+    access: readonly
+  error_mcu_temperature_invalid:
+    type: error_flag
+    description: The motor drivers mcu temperature is not sensible.
+    friend: mcu_temperature
+  error_level_mcu_temperature:
+    type: error_level
+    description: Status of the mcu temperature.
+    friend: mcu_temperature
+    access: readonly
+  error_level_config_mcu_temperature:
+    type: error_level_config
+    description: Status configuration of the mcu temperature.
+    access: extern
+
+  lim_temperature1:
+    type: d8<-1..150>
+    unit: °C
+    description: Temperature of the double sided linear induction motor.
+    access: readonly
+  lim_temperature2:
+    type: d8<-1..150>
+    unit: °C
+    description: Temperature of the double sided linear induction motor.
+    access: readonly
+  lim_temperature3:
+    type: d8<-1..150>
+    unit: °C
+    description: Temperature of the double sided linear induction motor.
+    access: readonly
+  lim_temperature4:
+    type: d8<-1..150>
+    unit: °C
+    description: Temperature of the double sided linear induction motor.
+    access: readonly
+  lim_average_temperature:
+    type: d8<-1..150>
+    unit: °C
+    description: Average of the temperature of the DSLIM.
+    access: readonly
+  lim_max_temperature:
+    type: d8<-1..150>
+    unit: °C
+    description: Maximum temperature reading of the LIM.
+    access: readonly
+  lim_min_temperature:
+    type: d8<-1..150>
+    unit: °C
+    description: Minimum temperature of the LIM.
+    access: readonly
+  error_lim_temperature1_invalid:
+    type: error_flag
+    description: Temperature readings (sensor1) from the DSLIM are not sensible.
+    friend: lim_temperature1
+    access: readonly
+  error_lim_temperature2_invalid:
+    type: error_flag
+    description: Temperature readings (sensor2) from the DSLIM are not sensible.
+    friend: lim_temperature1
+    access: readonly
+  error_lim_temperature3_invalid:
+    type: error_flag
+    description: Temperature readings (sensor3) from the DSLIM are not sensible.
+    friend: lim_temperature1
+    access: readonly
+  error_lim_temperature4_invalid:
+    type: error_flag
+    description: Temperature readings (sensor4) from the DSLIM are not sensible.
+    friend: lim_temperature1
+    access: readonly
+  error_level_lim_temperature:
+    type: error_level
+    description: Temperature of the DSLIM is to high.
+    friend: lim_max_temperature
+    access: readonly
+  error_level_config_lim_temperature:
+    type: error_level_config
+    description: Lim temperature error configuration
+    access: readwrite
+
+  loop_frequency: 
+    type: d32<0..1000>
+    description: Frequency of the main loop
+    unit: kHz
+    access: readonly
+
+  assertion_fault:
+    type: error_flag
+    description: Error flag for cassert faults.
+    access: readonly
+
+  error_heartbeat_miss:
+    type: error_flag
+    description: Heartbeat of any node is missed.
+    access: readonly
+
+tx_streams:
+  state:
+    description: State of the motor driver
+    interval: 1ms-500ms
+    mapping:
+      - state
+      - command
+      - sdc_status
+      - control_active
+      - precharge_status
+      - feedthrough_status
+
+  debug:
+    description: Debugging information about the software
+    interval: 500ms
+    mapping:
+      - loop_frequency
+  currents_u1v1w1:
+    description: Currents of the motor phases.
+    interval: 50ms
+    mapping:
+      - current_u1
+      - current_v1
+      - current_w1
+      - current_max
+  current_u2v2w2:
+    description: Currents of the motor phases.
+    interval: 50ms
+    mapping:
+      - current_u2
+      - current_v2
+      - current_w2
+      - current_average
+
+  control_info:
+    description: Contains information about the control algorithm.
+    interval: 100ms
+    mapping:
+      - frequency
+      - modulation_index
+      - acceleration
+      - vdc_voltage
+
+  board_temperature:
+    description: Temperature readings of the on board ntcs.
+    interval: 250ms
+    mapping:
+      - board_temperature1
+      - board_temperature2
+      - board_temperature3
+      - board_avg_temperature
+      - board_max_temperature
+      - board_min_temperature
+      - mcu_temperature
+  
+  lim_temperature:
+    description: Temperature of the motor.
+    interval: 250ms
+    mapping:
+      - lim_temperature1
+      - lim_temperature2
+      - lim_temperature3
+      - lim_temperature4
+      - lim_average_temperature
+      - lim_max_temperature
+      - lim_min_temperature
+
+  errors:
+    description: All error flags of the motor driver.
+    interval: 1ms-1000ms
+    mapping:
+      - error_arming_failed
+      - error_precharge_failed
+      - error_level_current_u1
+      - error_level_current_v1
+      - error_level_current_w1
+      - error_level_current_u2
+      - error_level_current_v2
+      - error_level_current_w2
+      - error_acceleration_out_of_range
+      - error_acceleration_calibration_failed
+      - error_invalid_target_acceleration
+      - error_level_vdc_voltage
+      - error_board_temperature1_invalid
+      - error_board_temperature2_invalid
+      - error_board_temperature3_invalid
+      - error_level_board_temperature
+      - error_mcu_temperature_invalid
+      - error_level_mcu_temperature
+      - error_lim_temperature1_invalid
+      - error_lim_temperature2_invalid
+      - error_lim_temperature3_invalid
+      - error_lim_temperature4_invalid
+      - error_level_lim_temperature
+      - error_heartbeat_miss
+      - assertion_fault
+
+rx_streams:
+  mother_board:
+    motor_command:
+      motor_driver_command: command
+      target_acceleration: target_acceleration

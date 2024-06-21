@@ -1,0 +1,65 @@
+description: Gamepad. Runs locally on the control panel.
+
+object_dictionary:
+  lt2:
+    type: d8<0..1>
+    description: lt2 input
+  rt2:
+    type: d8<0..1>
+    description: rt2 input
+  lsb_x:
+    type: d8<-1..1>
+    description: Left stick x
+  lsb_y:
+    type: d8<-1..1>
+    description: Left stick y
+  rsb_x:
+    type: d8<-1..1>
+    description: Right stick x
+  rsb_y:
+    type: d8<-1..1>
+    description: Right stick y
+  lt1_down:
+    type: bool_t
+    description: lt1 input
+  rt1_down:
+    type: bool_t
+    description: rt1 input
+  x_down: 
+    type: bool_t
+    description: xbox x button
+  y_down: 
+    type: bool_t
+    description: xbox y button
+  b_down: 
+    type: bool_t
+    description: xbox b button
+  a_down: 
+    type: bool_t
+    description: xbox a button
+  lsb_down: 
+    type: bool_t
+    description: Pressing the left stick.
+  rsb_down: 
+    type: bool_t
+    description: Pressing the right stick.
+
+tx_streams:
+  input:
+    description: Controller input
+    interval: 50ms
+    mapping: 
+      - lt2
+      - rt2
+      - lsb_x
+      - lsb_y
+      - rsb_x
+      - rsb_y
+      - lt1_down
+      - rt1_down
+      - x_down
+      - y_down
+      - b_down
+      - a_down
+      - lsb_down
+      - rsb_down

@@ -1,0 +1,288 @@
+description: Motherboard (Raspberry pi)
+
+object_dictionary:
+  state:
+    type: global_state
+    description: State of the global FSM.
+    access : readonly
+  command:
+    type: global_command
+    description: Command send to the global FSM.
+    access: extern
+
+
+  track_length:
+    type: d32<0..50>
+    unit: m
+    access: readwrite
+
+  brake_margin:
+    type: d32<0..50>
+    unit: m
+    access: readwrite
+  emergency_brake_margin:
+    type: d32<0..50>
+    unit: m
+    access: readwrite
+  target_acceleration:
+    type: d32<-50..50>
+    unit: m/s²
+    access: readonly
+
+  acceleration_target_velocity:
+    type: d32<0..10>
+    unit: m/s
+    access: readwrite
+
+  velocity_pid:
+    type: pid_parameters
+    description: PID parameters of the velocity PID controller.
+    access: readwrite
+
+  position:
+    type: d16<-0..50>
+    unit: m
+    description: Estimated positin of the pod.
+    access: extern
+  velocity:
+    type: d16<-10..10>
+    unit: m/s
+    description: Estimated velocity of the pod.
+    access: readonly
+  acceleration: 
+    type: d16<-50..50>
+    unit: m/s²
+    description: Estimated acceleration of the pod.
+    access: readonly
+
+  motor_driver_state:
+    type: motor_state
+    description: Current state of the motor
+    access: extern
+  motor_driver_command:
+    type: motor_command
+    description: Command send to the motor
+    access: readonly
+  motor_driver_sdc_status:
+    type: sdc_status
+    access: extern
+
+
+  guidance_command:
+    type: guidance_command
+    description: Command send to the guidance
+    access: readonly
+
+  guidance_board_front_state:
+    type: guidance_state
+    access: extern
+  guidance_board_front_sdc_status:
+    type: sdc_status
+    access: extern
+
+  guidance_board_back_state:
+    type: guidance_state
+    access: extern
+  guidance_board_back_sdc_status:
+    type: sdc_status
+    access: extern
+
+
+  levitation_command:
+    type: levitation_command
+    description: Command send to the levitation
+    access: readonly
+
+  levitation_board1_state:
+    type: levitation_state
+    access: extern
+  levitation_board1_sdc_status:
+    type: sdc_status
+    access: extern
+
+  levitation_board2_state:
+    type: levitation_state
+    access: extern
+  levitation_board2_sdc_status:
+    type: sdc_status
+    access: extern
+
+  levitation_board3_state:
+    type: levitation_state
+    access: extern
+  levitation_board3_sdc_status:
+    type: sdc_status
+    access: extern
+
+
+  input_board_state:
+    type: input_board_state
+    description: State of the input board
+    access : extern
+  input_board_command:
+    type: input_board_command
+    description: Command send to the input board.
+    access: readonly
+  input_board_assert_45V_online:
+    type: bool_t
+    description: Asserts that the 45V system is online.
+    access: readonly
+  input_board_sdc_status:
+    type: sdc_status
+    access: extern
+
+  power_board12_state:
+    type: pdu_12v_state
+    access: extern
+  power_board12_command:
+    type: pdu_12v_command
+    description: Command send to the 12V pdu board.
+    access: readonly
+  power_board12_sdc_status:
+    type: sdc_status
+    access: extern
+
+  power_board24_state:
+    type: pdu_24v_state
+    access: extern
+  power_board24_command:
+    type: pdu_24v_command
+    description: Command send to the 24V pdu board.
+    access: readonly
+  power_board24_sdc_status:
+    type: sdc_status
+    access: extern
+
+
+  gamepad_max_acceleration:
+    type: d32<0..10>
+    unit: m/s²
+    decription: Maximum acceleration that can be controlled by the gampad.
+    access: readwrite
+
+  gamepad_lt2:
+    type: d8<0..1>
+    description: lt2 input
+  gamepad_rt2:
+    type: d8<0..1>
+    description: rt2 input
+
+  error_heartbeat_miss:
+    type: error_flag
+    description: Heartbeat from any node is missed.
+    access: readonly
+
+  
+
+tx_streams:
+  state:
+    description: State of the global FSM.
+    interval: 1ms-500ms
+    mapping:
+      - state
+      - command
+  motor_command:
+    description: Commands the motor driver
+    interval: 1ms-500ms
+    mapping:
+      - target_acceleration
+      - motor_driver_command
+  input_board_command:
+    description: Command send to the input board.
+    interval: 1ms-500ms
+    mapping:
+      - input_board_command
+      - input_board_assert_45V_online
+
+  guidance_command:
+    description: Commands the guidance system
+    interval: 1ms-500ms
+    mapping:
+      - guidance_command
+
+  levitation_command:
+    description: Commands the levitation system
+    interval: 1ms-500ms
+    mapping:
+      - levitation_command
+
+  pdu_12v_command:
+    description: Command send to the 12V pdu.
+    interval: 1ms-500ms
+    mapping:
+      - power_board12_command
+
+  pdu_24v_command:
+    description: Command send to the 24V pdu.
+    interval: 1ms-500ms
+    mapping:
+      - power_board24_command
+
+  errors:
+    description: All errors of the mother board.
+    interval: 1ms-1s
+    mapping:
+      - error_heartbeat_miss
+    
+  
+rx_streams:
+  motor_driver:
+    state:
+      state : motor_driver_state
+      sdc_status: motor_driver_sdc_status
+
+  guidance_board_front:
+    state:
+      state: guidance_board_front_state
+      sdc_status: guidance_board_front_sdc_status
+
+  guidance_board_back:
+    state:
+      state: guidance_board_back_state
+      sdc_status: guidance_board_back_sdc_status
+
+  levitation_board1:
+    state:
+      state: levitation_board1_state
+      sdc_status: levitation_board1_sdc_status
+
+  levitation_board2:
+    state:
+      state: levitation_board2_state
+      sdc_status: levitation_board2_sdc_status
+
+  levitation_board3:
+    state:
+      state: levitation_board3_state
+      sdc_status: levitation_board3_sdc_status
+
+  input_board:
+    state:
+      state: input_board_state
+      sdc_status: input_board_sdc_status
+    position_estimation:
+      position: position
+      velocity: velocity
+      acceleration: acceleration
+
+
+  power_board12:
+    state:
+      state: power_board12_state
+      sdc_status: power_board12_sdc_status
+
+  power_board24:
+    state:
+      state: power_board24_state
+      sdc_status: power_board24_sdc_status
+
+  gamepad:
+    input:
+      lt2 : gamepad_lt2
+      rt2 : gamepad_rt2
+
+  
+
+
+
+      

@@ -1,0 +1,104 @@
+description: test node
+object_dictionary:
+  d2word:
+    type : d2<-1..1>
+  d4word:
+    type : d4<-1..1>
+  d8word:
+    type : d8<-1..1>
+  d10word:
+    type : d10<-1..1>
+  d16word:
+    type : d16<-1..1>
+  d24word:
+    type : d24<-1..1>
+  d32word:
+    type : d32<-1..1>
+  d31word:
+    type : d31<-1..1>
+  d64word:
+    type : d64<-1..1>
+  u2word:
+    type : u2
+  u4word:
+    type : u4
+  u8word:
+    type : u8
+  u10word:
+    type : u10
+  u16word:
+    type : u16
+  u24word:
+    type : u24
+  u32word:
+    type : u32
+  u31word:
+    type : u31
+  u64word:
+    type : u64
+  i2word:
+    type : i2
+  i4word:
+    type : i4
+  i8word:
+    type : i8
+  i10word:
+    type : i10
+  i16word:
+    type : i16
+  i24word:
+    type : i24
+  i32word:
+    type : i32
+  i31word:
+    type : i31
+  i64word:
+    type : i64
+  s6:
+    type: s6
+  s16:
+    type: s16
+  s24:
+    type: s24
+  s32: 
+    type: s32
+  s64:
+    type: s64
+  unaligned32:
+    type: unaligned32
+  unaligned64:
+    type: unaligned64
+  unaligned72:
+    type: unaligned72
+  test1:
+    type: test1
+  test2_1:
+    type: test2_1
+  test2_2:
+    type: test2_2
+  test2_3:
+    type: test2_3
+  test2_4:
+    type: test2_4
+  test2_5:
+    type: test2_5
+  test3_1:
+    type: test3_1
+  test3_2:
+    type: test3_2
+  test3_3:
+    type: test3_3
+  test4_1:
+    type: test4_1
+  test4_2:
+    type: test4_2
+  test4_3:
+    type: test4_3
+  test4_4:
+    type: test4_4
+  test4_5:
+    type: test4_5
+  test5_1:
+    type: test5_1
+  test5_2:
+    type: test5_2

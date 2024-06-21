@@ -1,0 +1,16 @@
+buses: buses.yaml
+enum_types: enums.yaml
+struct_types: structs.yaml
+nodes:
+  gamepad : gamepad.yaml
+  mother_board: mother_board.yaml
+  motor_driver: motor_driver.yaml
+  input_board: input_board.yaml
+  guidance_board_front: guidance_board.yaml
+  guidance_board_back : guidance_board.yaml
+  levitation_board1: levitation_board.yaml
+  levitation_board2: levitation_board.yaml
+  levitation_board3: levitation_board.yaml
+  power_board12: power_board12.yaml
+  power_board24: power_board24.yaml
+

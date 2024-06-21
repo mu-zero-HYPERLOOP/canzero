@@ -1,0 +1,4 @@
+can0:
+  baudrate: 1000000
+can1:
+  baudrate: 1000000

@@ -1,0 +1,29 @@
+
+error_level_config:
+  info_thresh : d32<-1000..1000>
+  info_timeout: d32<0..60>
+  warning_thresh: d32<-1000..1000>
+  warning_timeout: d32<0..60>
+  error_thresh: d32<-1000..1000>
+  error_timeout: d32<0..60>
+  ignore_info: bool_t
+  ignore_warning: bool_t
+  ignore_error: bool_t
+
+pid_parameters:
+  Kp : d64<0..1000>
+  Ki : d64<0..1000>
+  Kd : d64<0..1000>
+pid_parameters_extra:
+  Ki_min : d64<-500..0>
+  Ki_max : d64<0..500>
+  ema_alpha : d64<0..1>
+  
+pi_parameters:
+  Kp : d64<0..100>
+  Ki : d64<0..100>
+
+pi_parameters_extra:
+  Ki_min : d64<-500..0>
+  Ki_max : d64<0..500>
+  ema_alpha : d64<0..1>

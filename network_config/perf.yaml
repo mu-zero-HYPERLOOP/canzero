@@ -1,0 +1,46 @@
+description: Performance testing node
+
+object_dictionary:
+  perf_pattern: 
+    type: perf_pattern
+    access: extern
+  perf_func:
+    type: perf_func
+    access: extern
+  perf_absolute_time:
+    type: d32<0..360>
+    unit: s
+    access: readonly
+  perf_relative_time: 
+    type: d32<0..1>
+    unit: s
+    access: readonl
+  func_in: 
+    type: complex_polar
+    access: readonly
+  func_out:
+    type: complex
+    access: readonly
+
+tx_streams:
+  settings:
+    interval: 0ms-1s
+    mapping:
+      - perf_pattern
+      - perf_func
+  perf:
+    interval: 50ms
+    mapping:
+      - perf_absolute_time
+      - perf_relative_time
+    
+  func_in:
+    interval: 10ms
+    mapping:
+      - func_in
+  func_out:
+    interval: 10ms
+    mapping:
+      - func_out
+
+

@@ -1,0 +1,387 @@
+description: Levitation board
+object_dictionary:
+  state: 
+    type: levitation_state
+    description: State of the levitation board state machine.
+    access : readonly
+
+  command:
+    type: levitation_command
+    description: Command for the levitation board state machine.
+    access : external
+
+  sdc_status: 
+    type: sdc_status
+    description: State of the levitation board SDC.
+    access : readonly
+  precharge_status:
+    type: sdc_status
+    description: State of the precharge mosfet.
+    access: readonly
+  feedthrough_status:
+    type: sdc_status
+    description: State of the feedthrough mosfet.
+    access: readonly
+
+  target_airgap:
+    type: d32<0..15>
+    description: Target airgap of the control.
+    access: readwrite
+
+  control_active:
+    type: bool_t
+    description: Set if the control loop is running.
+    access: readonly
+
+  error_arming_failed:
+    type: error_flag
+    description: Arming the 45V system failed.
+    friend: vdc_voltage
+    access: readonly
+  error_precharge_failed:
+    type: error_flag
+    description: The precharge failed.
+    friend: vdc_voltage
+    access: readonly
+
+  airgap_left:
+    type: d16<0..20>
+    unit: mm
+    description: Airgap of the left magnet facing the track.
+    access : readonly
+  airgap_left_variance:
+    type: d16<0..10>
+
+  airgap_right:
+    type: d16<0..20>
+    unit: mm
+    description: Airgap of the right magnet facing the track.
+    access : readonly
+  airgap_right_variance:
+    type: d16<0..10>
+
+  target_airgap_left:
+    type: d16<0..20>
+    unit: mm
+    description: Target airgap left.
+    access: readonly
+
+  target_airgap_right:
+    type: d16<0..20>
+    unit: mm
+    description: Target airgap right.
+    access: readonly
+
+  vdc_voltage:
+    type: d16<0..100>
+    unit: V
+    description: Voltage of the VDC plane.
+    access: readonly
+  error_level_vdc_voltage:
+    type: error_level
+    description: The vdc voltage of the GDB is to high.
+    friend: vdc_voltage
+    access: readonly
+  error_level_config_vdc_voltage:
+    type: error_level_config
+    description: Error configuration of the vdc voltage.
+    access: readwrite
+
+
+  current_left:
+    type: d16<-25..25>
+    unit: A
+    description: Current through the left magnet.
+    access: readonly
+  current_right:
+    type: d16<-25..25>
+    unit: A
+    description: Current through the right magnet.
+    access: readonly
+  input_current:
+    type: d16<-25..25>
+    unit: A
+    description: Current going into the board.
+    access: readonly
+
+  error_level_config_magnet_current:
+    type: error_level_config
+    description: Error configuration for the magnet currents.
+    access: readwrite
+  error_level_magnet_current_left:
+    type: error_level
+    description: Current through the left magnet is to high.
+    friend: current_left
+    access: readonly
+  error_level_magnet_current_right:
+    type: error_level
+    description: Current through the right magnet is to high.
+    friend: current_right
+    access: readonly
+  
+  error_level_config_input_current:
+    type: error_level_config
+    description: Error configuration for the input current.
+    access: readwrite
+  error_level_input_current:
+    type: error_level
+    description: The input current of the guidance board is to high.
+    friend: input_current
+    access: readonly
+
+  magnet_temperature_left1:
+    type: d8<-1..150>
+    aunit: °C
+    description: Temperature of the left magnet (sensor1)
+    access: readonly
+  magnet_temperature_left2:
+    type: d8<-1..150>
+    aunit: °C
+    description: Temperature of the left magnet (sensor2)
+    access: readonly
+  magnet_temperature_left_max:
+    type: d8<-1..150>
+    aunit: °C
+    description: Maximum measured temperature of the left magnet.
+    access: readonly
+  error_level_magnet_temperature_left:
+    type: error_level
+    description: Status of the left magnet temperature.
+    friend: magnet_temperature_left_max
+    access: readonly
+
+  magnet_temperature_right1:
+    type: d8<-1..150>
+    unit: °C
+    description: Temperature of the right magnet
+    access: readonly
+  magnet_temperature_right2:
+    type: d8<-1..150>
+    unit: °C
+    description: Temperature of the right magnet
+    access: readonly
+  magnet_temperature_right_max:
+    type: d8<-1..150>
+    unit: °C
+    description: Maximum temperature measured in the right magnet.
+    access: readonly
+  error_level_magnet_temperature_right:
+    type: error_level
+    description: Status of the left magnet temperature.
+    friend: magnet_temperature_right_max
+    access: readonly
+
+  error_level_config_magnet_temperature:
+    type: error_level_config
+    description: Status configuration of the left magnet temperature.
+    access: extern
+
+  mcu_temperature:
+    type: d8<-1..150>
+    unit: °C
+    description: Temperature of the input board
+    access: readonly
+  error_level_mcu_temperature:
+    type: error_level
+    description: Status of the mcu temperature.
+    access: readonly
+  error_level_config_mcu_temperature:
+    type: error_level_config
+    description: Status configuration of the mcu temperature.
+    access: extern
+
+  assertion_fault:
+    type: error_flag
+    description: Error flag for cassert faults.
+    access: readonly
+
+  error_heartbeat_miss:
+    type: error_flag
+    description: Heartbeat of any node is missed.
+    access: readonly
+
+  gamepad_lt2:
+    type: d8<0..1>
+    description: lt2 input
+  gamepad_rt2:
+    type: d8<0..1>
+    description: rt2 input
+  gamepad_lsb_x:
+    type: d8<-1..1>
+  gamepad_lsb_y:
+    type: d8<-1..1>
+  gamepad_rsb_x:
+    type: d8<-1..1>
+  gamepad_rsb_y:
+    type: d8<-1..1>
+  gamepad_lt1_down:
+    type: bool_t
+  gamepad_rt1_down:
+    type: bool_t
+  gamepad_x_down:
+    type: bool_t
+
+  airgap_pid:
+    type: pid_parameters
+    description: PID parameters of the airgap control
+    access: readwrite
+  airgap_pid_extra:
+    type: pid_parameters_extra
+    description: PID parameters of the airgap control
+    access: readwrite
+
+  current_pi:
+    type: pi_parameters
+    description: PI parameters of the current control
+    access: readwrite
+  current_pi_extra:
+    type: pi_parameters_extra
+    description: PI parameters of the current control
+    access: readwrite
+
+  left_airgap_controller_p_term:
+    type: d16<-200..200>
+    access: readonly
+  left_airgap_controller_i_term:
+    type: d16<0..600>
+    access: readonly
+  left_airgap_controller_d_term:
+    type: d16<-200..200>
+    access: readonly
+  left_airgap_controller_output:
+    type: d16<0..50>
+    access: readonly
+  left_airgap_controller_variance:
+    type: d16<0..10>
+    access: readonly
+
+  right_airgap_controller_p_term:
+    type: d16<-200..200>
+    access: readonly
+  right_airgap_controller_i_term:
+    type: d16<0..600>
+    access: readonly
+  right_airgap_controller_d_term:
+    type: d16<-200..200>
+    access: readonly
+  right_airgap_controller_output:
+    type: d16<0..50>
+    access: readonly
+  right_airgap_controller_variance:
+    type: d16<0..10>
+    access: readonly
+
+  left_current_controller_p_term:
+    type: d16<-100..100>
+    access: readonly
+  left_current_controller_i_term:
+    type: d16<-100..100>
+    access: readonly
+  left_current_controller_output:
+    type: d16<-100..100>
+    access: readonly
+
+  right_current_controller_p_term:
+    type: d16<-100..100>
+    access: readonly
+  right_current_controller_i_term:
+    type: d16<-100..100>
+    access: readonly
+  right_current_controller_output:
+    type: d16<-100..100>
+    access: readonly
+
+
+  airgap_controller_N:
+    type: u16
+    access: readwrite
+  isr_time:
+    type: u16
+    access: readwrite
+
+  
+
+tx_streams:
+  state:
+    description: State of the guidance.
+    interval: 1ms-500ms
+    mapping:
+      - state
+      - command
+      - sdc_status
+      - control_active
+      - precharge_status
+      - feedthrough_status
+
+  errors:
+    description: Errors of the guidance boards.
+    interval: 1ms-1s
+    mapping:
+      - error_level_vdc_voltage
+      - error_arming_failed
+      - error_precharge_failed
+      - error_level_magnet_current_left
+      - error_level_magnet_current_right
+      - error_level_input_current
+      - error_level_magnet_temperature_left
+      - error_level_magnet_temperature_right
+      - error_level_mcu_temperature
+      - error_heartbeat_miss
+      - assertion_fault
+  voltage_and_currents:
+    description: Voltage and current readings of the guidance board.
+    interval: 10ms
+    mapping:
+      - vdc_voltage
+      - current_left
+      - current_right
+      - input_current
+  airgaps:
+    description: Airgaps to the lim and the magnets.
+    interval: 10ms
+    mapping:
+      - airgap_left
+      - airgap_right
+      - target_airgap_left
+      - target_airgap_right
+  airgap_variance:
+    description: Airgap variances
+    interval: 15ms
+    mapping:
+      - airgap_left_variance
+      - airgap_right_variance
+      - left_airgap_controller_variance
+      - right_airgap_controller_variance
+  controller_debug_1:
+    interval: 10ms
+    mapping:
+      - left_airgap_controller_p_term
+      - left_airgap_controller_i_term
+      - left_airgap_controller_d_term
+      - left_airgap_controller_output
+  controller_debug_2:
+    interval: 10ms
+    mapping:
+      - right_airgap_controller_p_term
+      - right_airgap_controller_i_term
+      - right_airgap_controller_d_term
+      - right_airgap_controller_output
+  controller_debug_3:
+    interval: 10ms
+    mapping:
+      - left_current_controller_p_term
+      - left_current_controller_i_term
+      - left_current_controller_output
+  controller_debug_4:
+    interval: 10ms
+    mapping:
+      - right_current_controller_p_term
+      - right_current_controller_i_term
+      - right_current_controller_output
+
+
+
+rx_streams:
+  mother_board:
+    levitation_command:
+      levitation_command : command

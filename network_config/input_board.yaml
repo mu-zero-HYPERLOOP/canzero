@@ -1,0 +1,697 @@
+description: input board (teensy 4.1)
+object_dictionary:
+  state:
+    type : input_board_state
+    description: Current state of the input board
+    access: readonly
+  command: 
+    type: input_board_command
+    description: Manual commands to the input_board
+    access: readwrite 
+
+  # SDC Status
+  sdc_status: 
+    type: sdc_status
+    description: Status of the SDC-Switch
+
+  # System Control targets
+  target_acceleration:
+    type: d32<-50..50>
+    unit: m/s²
+    description: Target acceleration of the motor control.
+    access: extern
+  assert_45V_system_online:
+    type: bool_t
+    description: Tells the input board to assert that the 45V link is online.
+
+
+
+
+  # State estimation
+  position:
+    type: d16<-0..50>
+    unit: m
+    description: Estimated position of the pod.
+    access: readonly
+  velocity:
+    type : d16<-10..10>
+    description: Estimated velocity of the pod.
+    unit: m/s
+    access: readonly
+  acceleration:
+    type : d16<-50..50>
+    unit: m/s²
+    description: Estimated acceleration of the pod.
+    access: readonly
+  linear_encoder_count:
+    type: i16
+    description: Counted stripes by the linear encoder.
+    access: readonly
+
+  raw_acceleration:
+    type: d16<-50..50>
+    unit: m/s²
+    description: Raw acceleration from the ADXL313 accelerometer.
+    access: readonly
+  error_acceleration_out_of_range:
+    type: error_flag
+    description: The forward acceleration reading is out of range.
+    friend: raw_acceleration
+    access: readonly
+  acceleration_calibration_variance:
+    type: d64<-1..1>
+    unit: m/s²
+    description: Estimated variance during calibration.
+    access: readonly
+  acceleration_calibration_offset:
+    type: d64<-10..10>
+    unit: m/s²
+    description: Calibration offset of the acceleration.
+    access: readwrite
+  acceleration_calibration_target:
+    type: d64<-10..10>
+    unit: m/s²
+    description: Calibration target of the acceleration.
+    access: extern
+
+  raw_lateral_acceleration:
+    type: d16<-10..10>
+    unit: m/s²
+    description: The raw lateral acceleration readings of the ADXL313.
+    access: readonly
+  lateral_acceleration:
+    type: d16<-10..10>
+    unit: m/s²
+    description: Lateral acceleration
+    access: readonly
+  error_lateral_acceleration_out_of_range:
+    type: error_flag
+    description: The lateral acceleration readings are out of range.
+    friend: lateral_acceleration
+    access: readonly
+  lateral_acceleration_calibration_variance:
+    type: d64<-10..10>
+    unit: m/s²
+    description: Variance estimated during calibration.
+    access: readonly
+  lateral_acceleration_calibration_offset:
+    type: d64<-10..10>
+    unit: m/s²
+    description: Calibration offset of the lateral acceleration.
+    access: readonly
+  lateral_acceleration_calibration_target:
+    type: d64<-10..10>
+    unit: m/s²
+    description: Calibration target of the lateral acceleration.
+    access: readonly
+
+
+  raw_vertical_acceleration:
+    type: d16<-50..50>
+    unit: m/s²
+    description: Raw acceleration from the ADXL313 accelerometer.
+    access: readonly
+  vertical_acceleration:
+    type: d16<-10..10>
+    unit: m/s²
+    description: Vertical acceleration.
+    access: readonly
+  error_vertical_acceleration_out_of_range:
+    type: error_flag
+    description: The vertical acceleration is out of range.
+    friend: vertical_acceleration
+    access: readonly
+  vertical_acceleration_calibration_variance:
+    type: d64<-10..10>
+    unit: m/s²
+    description: Variance estimated during calibration.
+    access: readonly
+  vertical_acceleration_calibration_offset:
+    type: d64<-10..10>
+    unit: m/s²
+    description: Calibration offset of the vertical acceleration
+    access: readonly
+  vertical_acceleration_calibration_target:
+    type: d64<-10..10>
+    unit: m/s²
+    description: Calibration target of the vertical acceleration
+    access: readonly
+
+  error_acceleration_calibration_failed:
+    type: error_flag
+    description: The calibration of the accelerometer failed.
+    access: readonly
+
+
+  track_length:
+    type: d32<0..50>
+    unit : m
+    description: length of the track!
+    access: const
+
+  # Voltage / Current measurements
+  bat24_voltage:
+    type: d32<0..50>
+    unit: V
+    description: Voltage of the 24V Battery.
+    access: readonly
+  bat24_voltage_calibration_mode:
+    type: calibration_mode
+    description: The calibration mod of the bat24 voltage.
+    access: readwrite
+  bat24_voltage_calibration_offset:
+    type: d32<-10..10>
+    unit: V
+    description: Calibration offset of the isolated voltage measurement of the battery.
+    access: readwrite
+  bat24_voltage_calibration_target:
+    type: d32<0..50>
+    unit: V
+    description: Expected voltage during calibration of the battery voltage.
+    access: extern
+  error_bat24_voltage_invalid:
+    type: error_flag
+    description: The voltage of the 24V Battery is not sensible. Check sensor connection.
+    friend: bat24_voltage
+    access: readonly
+  error_level_bat24_under_voltage:
+    type: error_level
+    description: The voltage of the 24V Battery is to low.
+    friend: bat24_voltage
+    access: readonly
+  error_level_config_bat24_under_voltage:
+    type: error_level_config
+    description: Status configuration of the bat24 under voltage.
+    access: extern
+  error_level_bat24_over_voltage:
+    type: error_level
+    description: The voltage of the 24V Battery is to high.
+    friend: bat24_voltage
+    access: readonly
+  error_level_config_bat24_over_voltage:
+    type: error_level_config
+    description: Status configuration of the bat24 over voltage.
+    friend:  bat24_voltage
+    access: extern
+
+  bat24_current:
+    type: d32<-30..30>
+    unit: A
+    description: Current through the 24V Battery
+    access: readonly
+  bat24_current_calibration_offset:
+    type: d32<-30..30>
+    unit: A
+    description: Calibration offset of the 24V Battery current.
+    access: readwrite
+  bat24_current_calibration_target:
+    type: d32<-30..30>
+    unit: A
+    description: Expected voltage during calibration
+    access: readwrite
+  bat24_current_calibration_mode:
+    type: calibration_mode
+    description: Mode of the calibration.
+    access: readwrite
+  error_bat24_current_invalid:
+    type: error_flag
+    description: The current of the 24V Battery is not sensible. Check sensor connection.
+    friend: bat24_current
+    access: readonly
+  error_level_bat24_over_current:
+    type: error_level
+    description: The current of the 24V Battery is to high.
+    friend: bat24_current
+    access: readonly
+  error_level_config_bat24_over_current:
+    type: error_level_config
+    description: Status configuration of the bat24 over current.
+    access: extern
+
+
+  link24_voltage:
+    type: d32<0..50>
+    unit: V
+    description: Voltage of the 24V link
+    access: readonly
+  link24_voltage_calibration_mode:
+    type: calibration_mode
+    description: Calibration mode of the 24V link voltage.
+    access: readwrite
+  link24_voltage_calibration_offset:
+    type: d32<-10..10>
+    unit: V
+    description: Calibration offset of the 24V link voltage.
+    access: readwrite
+  link24_voltage_calibration_target:
+    type: d32<0..50>
+    unit: V
+    description: Expected voltage during calibration of the 24V link voltage.
+    access: extern
+  error_link24_voltage_invalid:
+    type: error_flag
+    description: The voltage of the 24V link is not sensible. Check sensor connection.
+    friend: link24_voltage
+    access: readonly
+  error_level_link24_under_voltage:
+    type: error_level
+    description: The voltage of the 24V link is to low.
+    friend: link24_voltage
+    access: readonly
+  error_level_config_link24_under_voltage:
+    type: error_level_config
+    description: Status configuration of the link24 under voltage.
+    access: extern
+  error_level_link24_over_voltage:
+    type: error_level
+    description: The voltage of the 24V link is to high.
+    friend: link24_voltage
+    access: readonly
+  error_level_config_link24_over_voltage:
+    type: error_level_config
+    description: Status configuration of the link24 over voltage.
+    access: extern
+
+  link24_current:
+    type: d32<-30..30>
+    unit: A
+    description: Current through the 24V link.
+    access: readonly
+  link24_current_calibration_mode:
+    type: calibration_mode
+    description: Calibration mode of the 24V link current.
+    access: readwrite
+  link24_current_calibration_offset:
+    type: d32<-10..10>
+    unit: A
+    description: Calibration offset of the 24V link current.
+    access: readwrite
+  link24_current_calibration_target:
+    type: d32<-30..30>
+    unit: A
+    description: Calibration target of the 24V link current.
+    access: extern
+  error_link24_current_invalid:
+    type: error_flag
+    description: The current of the 24V link is not sensible. Check sensor connection.
+    access: readonly
+  error_level_link24_over_current:
+    type: error_level
+    description: Status of the link24 over current.
+    friend: The current of the 24V link is to high.
+    access: readonly
+  error_level_config_link24_over_current:
+    type: error_level_config
+    description: Status configuration of the link24 over current.
+    access: extern
+
+  link45_voltage:
+    type: d32<0..1000>
+    unit: V
+    description: Voltage of the 45V link
+    access: readonly
+  link45_voltage_calibration_mode:
+    type: calibration_mode
+    description: Calibration mode of the 45V voltage link.
+    access: readonly
+  link45_voltage_calibration_offset:
+    type: d32<-100..100>
+    unit: V
+    description: Calibration offset of the 45V voltage link.
+    access: readwrite
+  link45_voltage_calibration_target:
+    type: d32<0..1000>
+    unit: V
+    description: Calibration target of the 45V voltage link
+    access: extern
+  error_link45_voltage_invalid:
+    type: error_flag
+    description: The voltage of the 45V link is not sensible. Check sensor connection.
+    friend: link45_voltage
+    access: readonly
+  error_level_link45_under_voltage:
+    type: error_level
+    description: The voltage of the 45V link is to low.
+    friend: link45_voltage
+    access: readonly
+  error_level_config_link45_under_voltage:
+    type: error_level_config
+    description: Status configuration of the link45 under voltage.
+    access: extern
+  error_level_link45_over_voltage:
+    type: error_level
+    description: The voltage of the 45V link is to high.
+    friend: link45_voltage
+    access: readonly
+  error_level_config_link45_over_voltage:
+    type: error_level_config
+    description: Status configuration of the link45 over voltage.
+    access: extern
+
+  link45_current:
+    type: d32<-1000..1000>
+    unit: A
+    description: Current through the 45V link.
+    access: readonly
+  link45_current_calibration_mode:
+    type: calibration_mode
+    description: Calibration mode of the 45V link current.
+    access: readwrite
+  link45_current_calibration_offset:
+    type: d32<-100..100>
+    unit: A
+    description: Calibration offset of the 45V link current.
+    access: readwrite
+  link45_current_calibration_target:
+    type: d32<-1000..1000>
+    unit: A
+    description: Calibration target of the 45V link current.
+    access: extern
+  error_link45_current_invalid:
+    type: error_flag
+    description: The current of the 45V link is not sensible. Check sensor connection.
+    access: readonly
+  error_level_link45_over_current:
+    type: error_level
+    description: The current of the 45V link is to high.
+    friend: link45_current
+    access: readonly
+  error_level_config_link45_over_current:
+    type: error_level_config
+    description: Status configuration of the link45 over current.
+    access: extern
+
+  # Pressure
+  cooling_cycle_pressure:
+    type: d8<-1..9>
+    unit: bar
+    description: Pressure of the cooling cycle.
+    access: readonly
+  cooling_cycle_pressure_calibration_mode:
+    type: calibration_mode
+    description: Calibration mode of the cooling cycle pressure.
+    access: readwrite
+  cooling_cycle_pressure_calibration_offset:
+    type: d32<-1..9>
+    unit: bar
+    description: Calibration offset of the cooling cycle pressure.
+    access: readwrite
+  cooling_cycle_pressure_calibration_target:
+    type: d32<-1..9>
+    unit: bar
+    description: Target of the calibration of the cooling cycle
+    access: extern
+  error_cooling_cycle_pressure_invalid:
+    type: error_flag
+    description: The pressure of the cooling cycle is not sensible. Check sensor connection.
+    friend: cooling_cycle_pressure
+    access: readonly
+  error_level_cooling_cycle_over_pressure:
+    type: error_level
+    description: The pressure inside of the cooling cycle is no high.
+    friend: cooling_cycle_pressure
+    access: readonly
+  error_level_config_cooling_cycle_over_pressure:
+    type: error_level_config
+    description: Status configuration of the cooling cycle over pressure.
+    access: extern
+
+  # Temperatures
+  mcu_temperature:
+    type: d8<-1..150>
+    unit: °C
+    description: Temperature of the input board
+    access: readonly
+  error_mcu_temperature_invalid:
+    type: error_flag
+    description: The input boards MCU temperature is not sensible. Check sensor connection.
+    friend: mcu_temperature
+    access: readonly
+  error_level_mcu_temperature:
+    type: error_level
+    description: The input boards MCU temperature is to hot. 
+    friend: mcu_temperature
+    access: readonly
+  error_level_config_mcu_temperature:
+    type: error_level_config
+    description: Status configuration of the mcu temperature.
+    access: extern
+
+  cooling_cycle_temperature:
+    type: d8<-1..150>
+    unit: °C
+    description: Temperature of the cooling cycle
+    access: readonly
+  error_cooling_cycle_temperature_invalid:
+    type: error_flag
+    description: The temperature of the cooling cycle is not sensible. Check sensor connection.
+    friend: cooling_cycle_temperature
+    access: readonly
+  error_level_cooling_cycle_temperature:
+    type: error_level
+    description: The temperature in the cooling cycle is to hot.
+    friend: cooling_cycle_temperature
+    access: readonly
+  error_level_config_cooling_temperature:
+    type: error_level_config
+    description: Status configuration of the cooling cycle temperature.
+    access: extern
+    
+
+  bat24_temperature:
+    type: d8<-1..150>
+    unit: °C
+    description: Temperature of the 24V-Battery
+    access: readonly
+  error_level_bat24_temperature:
+    type: error_level
+    description: The temperature of the 24V Battery is not sensible. Check sensor connection.
+    friend: bat24_temperature
+    access: readonly
+  error_level_config_bat24_temperature:
+    type: error_level_config
+    description: The 24V Battery is to hot.
+    friend: bat24_temperature
+    access: extern
+  error_bat24_temperature_invalid:
+    type: error_flag
+    description: The measured temperatures doesn't make sense. Probably not connected or to the wrong pin.
+    access: readonly
+
+  supercap_temperature:
+    type: d8<-1..150>
+    unit: °C
+    description: Temperature of the super caps.
+    access: readonly
+  error_supercap_temperature_invalid:
+    type: error_flag
+    description: The temperature of the super capacitors is not sensisble. Check sensor connection.
+    friend: supercap_temperature
+    access: readonly
+  error_level_supercap_temperature:
+    type: error_level
+    description: The super capacitors from SEW are to hot.
+    friend: supercap_temperature
+    access: readonly
+  error_level_config_supercap_temperature:
+    type: error_level_config
+    description: Status configuration of the supercap temperature.
+    access: extern
+
+  buck_temperature:
+    type: d8<-1..150>
+    unit: °C
+    description: Temperature of the 12V buck converter.
+    access: readonly
+  error_buck_temperature_invalid:
+    type: error_flag
+    description: The 12V buck converter temperature is not sensible. Check sensor connection.
+    friend: buck_temperature
+    access: readwrite
+  error_level_buck_temperature:
+    type: error_level
+    description: The 12V buck converter is to hot.
+    friend: buck_temperature
+    access: readonly
+  error_level_config_buck_temperature:
+    type: error_level_config
+    description: Status configuration of the buck temperature.
+    access: extern
+
+  ebox_temperature:
+    type: d8<-1..150>
+    unit: °C
+    description: Temperature inside of the ebox.
+    access: readonly
+  error_ebox_temperature_invalid:
+    type: error_flag
+    description: The ebox temperature is not sensible. Check sensor connection.
+    friend: ebox_temperature
+    access: readonly
+  error_level_ebox_temperature:
+    type: error_level
+    description: The ebox temperature is to hot.
+    friend: ebox_temperature
+    access: readonly
+  error_level_config_ebox_temperature:
+    type: error_level_config
+    description: Status configuration of the ebox temperature.
+    access: extern
+
+  ambient_temperature:
+    type: d8<-1..150>
+    unit: °C
+    description: Ambient temperature.
+    access: readonly
+  error_ambient_temperature_invalid:
+    type: error_flag
+    description: The ambient temperature is not sensible. Check sensor connection.
+    access: readonly
+  error_level_ambient_temperature:
+    type: error_level
+    description: The ambient temperature is to hot.
+    friend: ambient_temperature
+    access: readonly
+  error_level_config_ambient_temperature:
+    type: error_level_config
+    description: Status configuration of the ambient temperature.
+    access: extern
+
+
+  cooling_cycle_flow_rate:
+    type: d8<0..1>
+    description: Flow rate of the cooling cycle.
+    unit: l/s
+    access: readonly
+
+
+  loop_frequency: 
+    type: d32<0..1000>
+    description: Frequency of the main loop
+    unit: kHz
+    access: readonly
+
+  assertion_fault:
+    type: error_flag
+    description: The input board failed an assertion. Restart required.
+    access: readonly
+
+  error_heartbeat_miss:
+    type: error_flag
+    description: Heartbeat of any node is missed.
+    access: readonly
+
+
+tx_streams:
+  state:
+    description: State of the input board.
+    interval: 1ms-500ms
+    mapping: 
+      - state
+      - sdc_status
+  position_estimation:
+    description: All data related to the position estimation.
+    interval: 10ms
+    mapping:
+      - position
+      - velocity
+      - acceleration
+
+  linear_encoder:
+    description: Linear encoder count
+    interval: 50ms-1000ms
+    mapping:
+      - linear_encoder_count
+
+  accelerations:
+    description: Additionall acceleration data
+    interval: 50ms
+    mapping:
+      - raw_acceleration
+      - lateral_acceleration
+      - vertical_acceleration
+
+    
+  bat24:
+    description: Current and voltage of the 24V battery.
+    interval: 100ms
+    mapping:
+      - bat24_voltage
+      - bat24_current
+  link24:
+    description: Current and voltage of the link24.
+    interval: 100ms
+    mapping:
+      - link24_voltage
+      - link24_current
+  link45:
+    description: Current and voltage of the link45.
+    interval: 100ms
+    mapping:
+      - link45_voltage
+      - link45_current
+  cooling:
+    description: Cooling measurements
+    interval: 500ms
+    mapping:
+      - cooling_cycle_pressure
+      - cooling_cycle_temperature
+  temperatures:
+    description: Collection of measured temperatures.
+    interval: 500ms
+    mapping:
+      - mcu_temperature
+      - bat24_temperature
+      - supercap_temperature
+      - buck_temperature
+      - ebox_temperature
+      - ambient_temperature
+  errors:
+    description: All error flags from the input_board
+    interval: 1ms-1000ms
+    mapping:
+      - error_acceleration_out_of_range
+      - error_acceleration_calibration_failed
+      - error_lateral_acceleration_out_of_range
+      - error_vertical_acceleration_out_of_range
+      - error_bat24_voltage_invalid
+      - error_level_bat24_under_voltage
+      - error_level_bat24_over_voltage
+      - error_bat24_current_invalid
+      - error_level_bat24_over_current
+      - error_link24_voltage_invalid
+      - error_level_link24_under_voltage
+      - error_level_link24_over_voltage
+      - error_link24_current_invalid
+      - error_level_link24_over_current
+      - error_link45_voltage_invalid
+      - error_level_link45_under_voltage
+      - error_level_link45_over_voltage
+      - error_link45_current_invalid
+      - error_level_link45_over_current
+      - error_cooling_cycle_pressure_invalid
+      - error_level_cooling_cycle_over_pressure
+      - error_mcu_temperature_invalid
+      - error_level_mcu_temperature
+      - error_cooling_cycle_temperature_invalid
+      - error_level_cooling_cycle_temperature
+      - error_bat24_temperature_invalid
+      - error_level_bat24_temperature
+      - error_supercap_temperature_invalid
+      - error_level_supercap_temperature
+      - error_buck_temperature_invalid
+      - error_level_buck_temperature
+      - error_ebox_temperature_invalid
+      - error_level_ebox_temperature
+      - error_ambient_temperature_invalid
+      - error_level_ambient_temperature
+      - error_heartbeat_miss
+      - assertion_fault
+
+rx_streams:
+  mother_board:
+    motor_command:
+      target_acceleration: target_acceleration
+    input_board_command:
+      input_board_command : command
+      input_board_assert_45V_online: assert_45V_system_online
