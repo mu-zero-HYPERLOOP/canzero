@@ -120,7 +120,9 @@ static void schedule_{stream_name}_interval_job(){{
     let get_resp_bus_name = network_config.get_resp_message().bus().name();
     for heartbeat in network_config.heartbeat_messages() {
         source.push_str(&format!(
-            "__attribute__((weak)) void {namespace}_{0}_wdg_timeout(uint8_t node_id) {{}}\n",
+"__attribute__((weak)) void {namespace}_{0}_wdg_timeout(uint8_t node_id) {{}}
+__attribute__((weak)) void {namespace}_{0}_wdg_recovered(uint8_t node_id) {{}}
+",
             heartbeat.bus().name()
         ));
     }

@@ -827,7 +827,7 @@ pub fn generate_rx_handlers(
                 ));
                 logic.push_str(&format!(
 "{indent3}heartbeat_wdg_job.job.wdg_job.{0}_static_wdg_armed[msg.m_node_id] = 0;
-{indent2}}} else {{ // register registers all buses
+{indent2}}} else {{ // register registers for all buses
 ",
                     message.bus().name()
                 ));
@@ -839,6 +839,10 @@ pub fn generate_rx_handlers(
                 }
                 logic.push_str(&format!(
 "{indent2}}}
+{indent2}if (heartbeat_wdg_job.job.wdg_job.{0}_static_tick_countdowns[msg.m_node_id] <= 0 &&
+{indent4}msg.m_ticks_next > 0) {{
+{indent3}{namespace}_{0}_wdg_recovered(msg.m_node_id);
+{indent2}}}
 {indent2}heartbeat_wdg_job.job.wdg_job.{0}_static_tick_countdowns[msg.m_node_id] = msg.m_ticks_next;
 {indent}}} else {{  // dynamic heartbeat
 {indent2}if (msg.m_unregister != 0) {{ // unregister only unregisters this bus
@@ -855,6 +859,10 @@ pub fn generate_rx_handlers(
                 }
                 logic.push_str(&format!(
 "{indent2}}}
+{indent2}if (heartbeat_wdg_job.job.wdg_job.{0}_dynamic_tick_countdowns[msg.m_node_id - node_id_count] <= 0 
+{indent4}&& msg.m_ticks_next > 0) {{
+{indent3}{namespace}_{0}_wdg_recovered(msg.m_node_id);
+{indent2}}}
 {indent2}heartbeat_wdg_job.job.wdg_job.{0}_dynamic_tick_countdowns[msg.m_node_id - node_id_count]
 {indent3}= msg.m_ticks_next;
 {indent}}}
