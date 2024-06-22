@@ -20,6 +20,7 @@ pub struct NodeData {
     pub tx_streams: Vec<StreamBuilder>,
     pub rx_streams: Vec<ReceiveStreamBuilder>,
     pub buses : Vec<BusBuilder>,
+    pub heartbeat_timeout : Duration,
 }
 
 
@@ -39,6 +40,7 @@ impl NodeBuilder {
             tx_streams: vec![],
             rx_streams: vec![],
             buses : vec![],
+            heartbeat_timeout : Duration::from_millis(200),
         }));
         node_builder.add_rx_message(&network_builder._get_req_message());
         node_builder.add_tx_message(&network_builder._get_resp_message());
@@ -54,6 +56,10 @@ impl NodeBuilder {
         build_time.set_access(ObjectEntryAccess::Const);
 
         node_builder
+    }
+    pub fn heartbeat_timeout(&self, heartbeat_timeout : Duration){
+        let mut node_data = self.0.borrow_mut();
+        node_data.heartbeat_timeout = heartbeat_timeout;
     }
     pub fn assign_bus(&self, bus_name : &str) -> BusBuilder{
         let mut node_data = self.0.borrow_mut();       

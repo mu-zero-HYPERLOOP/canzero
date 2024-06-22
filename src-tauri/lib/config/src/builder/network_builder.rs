@@ -1059,6 +1059,7 @@ impl NetworkBuilder {
                 tx_messages,
                 object_entries,
                 node_buses,
+                node_data.heartbeat_timeout,
             )));
         }
 

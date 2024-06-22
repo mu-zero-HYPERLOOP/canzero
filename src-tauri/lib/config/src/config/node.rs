@@ -1,4 +1,4 @@
-use std::hash::Hash;
+use std::{hash::Hash, time::Duration};
 
 use super::{
     bus::BusRef, stream::StreamRef, CommandRef, ConfigRef, MessageRef, ObjectEntryRef, TypeRef,
@@ -25,6 +25,8 @@ pub struct Node {
 
     object_entries: Vec<ObjectEntryRef>,
     buses: Vec<BusRef>,
+
+    heartbeat_timeout : Duration,
 }
 
 impl Hash for Node {
@@ -68,6 +70,7 @@ impl Node {
         tx_messages: Vec<MessageRef>,
         object_entries: Vec<ObjectEntryRef>,
         buses: Vec<BusRef>,
+        heartbeat_timeout : Duration,
     ) -> Self {
         Self {
             name,
@@ -82,6 +85,7 @@ impl Node {
             tx_messages,
             object_entries,
             buses,
+            heartbeat_timeout,
         }
     }
 
@@ -123,6 +127,9 @@ impl Node {
             Some(some) => Some(&some),
             None => None,
         }
+    }
+    pub fn heartbeat_timeout(&self) -> Duration {
+        self.heartbeat_timeout
     }
     pub fn id(&self) -> u8 {
         self.id

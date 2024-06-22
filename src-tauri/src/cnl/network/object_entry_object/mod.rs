@@ -1,7 +1,7 @@
 use std::{
     ops::Deref,
     sync::{atomic::AtomicU64, Arc, OnceLock},
-    time::{Duration, Instant},
+    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 
 use canzero_config::config;
@@ -178,6 +178,11 @@ impl ObjectEntryObject {
     }
 
     pub async fn set_request(&self, value: Value) {
+        let start = SystemTime::now();
+        let since_the_epoch = start
+            .duration_since(UNIX_EPOCH)
+            .expect("Time went backwards");
+        println!("Sending set request: {:?}", since_the_epoch);
         let mut set_req_data = match self.open_set_request.try_lock() {
             Ok(set_req_data) => {
                 if set_req_data.0 % 2 == 0 {

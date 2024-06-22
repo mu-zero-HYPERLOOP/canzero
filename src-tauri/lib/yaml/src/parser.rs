@@ -296,6 +296,33 @@ pub fn parse_node(
         )));
     };
 
+    if map.contains_key(&yaml_rust::Yaml::String("heartbeat_timeout".to_owned())) {
+        let yaml_rust::Yaml::String(heartbeat_timeout) = &node_map["heartbeat_timeout"] else {
+            return Err(Error::YamlInvalidType(format!(
+                "heartbeat_timeout has to be a time literal [for example 100ms]"
+            )));
+        };
+        let single_interval = regex::Regex::new(r"(?<x>\d+)\s*(?<unit>(ms|s))").unwrap();
+        match single_interval.captures(heartbeat_timeout) {
+            Some(captures) => {
+                let interval = &captures["x"];
+                let unit = &captures["unit"];
+                let interval: u64 = interval.parse().unwrap();
+                let interval = if unit == "ms" {
+                    Duration::from_millis(interval)
+                } else if unit == "s" {
+                    Duration::from_secs(interval)
+                } else {
+                    panic!()
+                };
+                node_builder.heartbeat_timeout(interval);
+            }
+            None => {
+                panic!("intervals have to be defined as strings with \"\\d+(ms|s)\"");
+            }
+        };
+    }
+
     if map.contains_key(&yaml_rust::Yaml::String("description".to_owned())) {
         let yaml_rust::Yaml::String(description) = &node_map["description"] else {
             return Err(Error::YamlInvalidType(format!(

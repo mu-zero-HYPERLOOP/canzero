@@ -1,4 +1,4 @@
-use std::{collections::HashMap, sync::Arc};
+use std::{collections::HashMap, sync::Arc, time::{SystemTime, UNIX_EPOCH}};
 
 use canzero_config::config::MessageRef;
 
@@ -103,6 +103,11 @@ impl SetRespFrameHandler {
                 oe_index: set_resp.oe_index,
             };
             if let Some(oe_object) = self.set_resp_lookup.get(&set_resp_id) {
+                let start = SystemTime::now();
+                let since_the_epoch = start
+                    .duration_since(UNIX_EPOCH)
+                    .expect("Time went backwards");
+                println!("Received set request: {:?}", since_the_epoch);
                 oe_object.push_set_response(set_resp.result).await;
             } else {
                 return Err(Error::InvalidSetResponseServerOrObjectEntryNotFound);
