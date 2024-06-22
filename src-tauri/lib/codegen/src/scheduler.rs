@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use canzero_config::config;
 
 use crate::errors::Result;
@@ -391,12 +393,13 @@ static void schedule_jobs(uint32_t time) {{
 {indent4}{namespace}_frame heartbeat_frame;
 "
     ));
+    let ticks_next = node_config.heartbeat_timeout().as_millis().div_ceil(Duration::from_millis(50).as_millis()) as u32;
     for heartbeat in network_config.heartbeat_messages() {
         source.push_str(&format!(
             "{indent4}{namespace}_message_heartbeat_{0} heartbeat_{0};
 {indent4}heartbeat_{0}.m_node_id = node_id_{node_name};
 {indent4}heartbeat_{0}.m_unregister = 0;
-{indent4}heartbeat_{0}.m_ticks_next = 4;
+{indent4}heartbeat_{0}.m_ticks_next = {ticks_next};
 {indent4}{namespace}_serialize_{namespace}_message_heartbeat_{0}(&heartbeat_{0}, &heartbeat_frame);
 {indent4}{namespace}_{}_send(&heartbeat_frame);
 ",
