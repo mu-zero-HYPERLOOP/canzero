@@ -149,7 +149,6 @@ typedef struct {{
   uint32_t stream_id;
 }} stream_interval_job;
 
-#define MAX_DYN_HEARTBEATS 10
 typedef struct {{"
     ));
     for heartbeat in network_config.heartbeat_messages() {

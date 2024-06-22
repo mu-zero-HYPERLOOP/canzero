@@ -56,6 +56,7 @@ pub fn generate(
 
     generate_header_guard_top(&mut header)?;
     generate_includes(&mut src, &mut header, &options)?;
+    header += "#define MAX_DYN_HEARTBEATS 10\n";
     generate_types(node_config, &mut header, &options)?;
 
     header += &format!("static const node_id CANZERO_NODE_ID = node_id_{};\n", node_name);
