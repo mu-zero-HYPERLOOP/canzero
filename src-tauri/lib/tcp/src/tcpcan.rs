@@ -236,7 +236,7 @@ impl TcpCan {
         tokio::spawn(async move {
             let mut keep_alive_frame = [0u8; 24];
             TcpFrame::KeepAlive.into_bin(&mut keep_alive_frame);
-            let mut interval = tokio::time::interval(Duration::from_millis(1));
+            let mut interval = tokio::time::interval(Duration::from_millis(200));
             loop {
                 interval.tick().await;
                 if let Err(_) = keep_alive_sock
