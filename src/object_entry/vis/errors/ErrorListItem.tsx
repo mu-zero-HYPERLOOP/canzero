@@ -121,7 +121,7 @@ function ErrorListItem({
 
           }}
         >
-          {errorId.error.objectEntryName}
+          {`${errorId.error.nodeName}::${errorId.error.objectEntryName}`}
         </ListItemText>
       </ListItem>
     </Tooltip>
