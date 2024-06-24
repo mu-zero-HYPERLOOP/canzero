@@ -36,6 +36,9 @@
       },
       "window": {
         "all": true
+      },
+      "process": {
+        "all": true
       }
     },
     "bundle": {

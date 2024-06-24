@@ -1,17 +1,27 @@
 import { StaticRouter } from "react-router-dom/server";
 import "./App.css";
 import { MemoryRouter } from "react-router-dom";
-import { Backdrop, CircularProgress, ThemeProvider } from "@mui/material";
+import {
+  Backdrop,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle, IconButton, Stack, Switch,
+  ThemeProvider, Typography
+} from "@mui/material";
 import { SnackbarProvider } from "notistack";
 import NotificationSystem from "./dashboard/NotificationSystem.tsx";
 import React, { useEffect } from "react";
 import Content from "./Content.tsx";
 import theme from "./theme.ts"
-import { invoke } from "@tauri-apps/api";
+import { invoke } from "@tauri-apps/api/tauri";
 import { listen } from "@tauri-apps/api/event";
 import { Heartbeat } from "./heartbeat/Heartbeat.tsx";
 import { appWindow } from "@tauri-apps/api/window";
-import { ask, confirm } from "@tauri-apps/api/dialog";
+import SaveIcon from "@mui/icons-material/Save";
+import { exit } from '@tauri-apps/api/process';
 
 
 function Router(props: Readonly<{ children?: React.ReactNode }>) {
@@ -27,13 +37,76 @@ function Router(props: Readonly<{ children?: React.ReactNode }>) {
   );
 }
 
+interface CloseDialogProps {
+  setLoading: (value: boolean) => void,
+  open: boolean,
+  onClose: (close: boolean, unregister: boolean) => void,
+}
+function CloseDialog({setLoading, open, onClose}: Readonly<CloseDialogProps>) {
+  const [unregister, setUnregister] = React.useState(true);
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setUnregister(event.target.checked);
+  };
+
+  const handleCancel = () => {
+    onClose(false, unregister);
+  };
+
+  const handleOk = () => {
+    onClose(true, unregister);
+  };
+  return (
+      <Dialog
+          sx={{ '& .MuiDialog-paper': { width: '80%', maxHeight: 435 } }}
+          maxWidth="xs"
+          open={open}
+      >
+        <DialogTitle>Close Control Panel</DialogTitle>
+        <DialogContent dividers>
+          <Stack direction="row" margin={1}>
+            <Typography> Save log data: </Typography>
+            <IconButton color="primary" size="medium"
+                        sx={{
+                          position: "relative",
+                          top: "-8px",
+                          left: "20px",
+                          backgroundColor: theme.palette.background.paper2
+                        }}
+                        onClick={() => {
+                          setLoading(true)
+                          invoke("export", {}).then(() => setLoading(false));
+                        }}
+            >
+              <SaveIcon/>
+            </IconButton>
+          </Stack>
+          <Stack direction="row" margin={1}>
+            <Typography sx={{paddingTop: "6.5px"}}> Unregister heartbeat: </Typography>
+            <Switch
+                checked={unregister}
+                onChange={handleChange}
+                inputProps={{ 'aria-label': 'controlled' }}
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancel}>
+            Cancel
+          </Button>
+          <Button onClick={handleOk} variant="contained">Ok</Button>
+        </DialogActions>
+      </Dialog>
+  );
+
+}
+
 function App() {
   const [loading, setLoading] = React.useState<boolean>(false)
-
-  const [syncDone, setSyncDone] = React.useState<boolean>(false);
+  const [syncDone, setSyncDone] = React.useState<boolean>(false)
+  const [open, setOpen] = React.useState<boolean>(false)
 
   useEffect(() => {
-
     let unlistenJs = listen<string>("connection-status", event => {
       let state = event.payload;
       setSyncDone(state == "sync-done");
@@ -55,20 +128,8 @@ function App() {
   useEffect(() => {
     async function close() {
       const unlisten = await appWindow.onCloseRequested(async (event) => {
-        const confirmClose = await confirm("Close Control Panel?");
-        if (!confirmClose) {
-          event.preventDefault();
-        } else {
-          const unregisterHeartbeat = await ask("Unregister from heartbeat before closing?");
-          if (unregisterHeartbeat) {
-            await invoke("unregister_from_heartbeat")
-          }
-          const saveLogs = await ask("Save logs before closing?");
-          if (saveLogs) {
-            setLoading(true)
-            invoke("export").then(() => setLoading(false));
-          }
-        }
+        event.preventDefault()
+        setOpen(true)
       });
 
       return () => {
@@ -81,6 +142,23 @@ function App() {
       asyncCleanup.then(f => f()).catch(console.error);
     };
   }, []);
+
+  const handleCloseDialog = (close: boolean, unregister: boolean) => {
+    setOpen(false);
+
+    if (unregister) {
+      invoke("unregister_from_heartbeat").then(() => handleClose(close))
+    } else {
+      handleClose(close)
+    }
+
+  };
+
+  function handleClose(close: boolean) {
+    if (close) {
+       exit();
+    }
+  }
 
   return (
     <ThemeProvider theme={theme}>
@@ -96,6 +174,7 @@ function App() {
         >
           <CircularProgress color="inherit" />
         </Backdrop>
+        <CloseDialog setLoading={setLoading} open={open} onClose={handleCloseDialog}/>
       </SnackbarProvider>
     </ThemeProvider>
   );

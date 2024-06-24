@@ -85,7 +85,7 @@ function PowerControl({}: Readonly<NodesProps>) {
                         <Typography textAlign={"center"} paddingBottom={1}>
                             Consumption
                         </Typography>
-                        <Box paddingTop="70px" textAlign="center">
+                        <Box paddingTop="4vh" textAlign="center">
                             <Speedometer
                                 width={400}
                                 value={20}
