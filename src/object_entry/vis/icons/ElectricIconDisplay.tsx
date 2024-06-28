@@ -8,7 +8,7 @@ import { ObjectEntryEvent } from "../../types/events/ObjectEntryEvent";
 import theme from "../../../theme.ts";
 
 
-const OE = { nodeName: "master", objectEntryName: "sdc_status" };
+const OE = { nodeName: "mother_board", objectEntryName: "system_sdc_status" };
 
 function ElectricIconDisplay() {
 

@@ -4,7 +4,7 @@
 }
 
 #side-view #track {
-  transition: transform 10s ease-in;
+  transition: transform 100ms linear;
   transform: translateX(var(--position))
 }
 

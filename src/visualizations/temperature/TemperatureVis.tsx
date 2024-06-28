@@ -40,21 +40,25 @@ const cold: Color = {
   b: 203
 }
 
-const MLU1_OE = { nodeName: "mlu1", objectEntryName: "magnet_temperature" };
-const MLU2_OE = { nodeName: "mlu2", objectEntryName: "magnet_temperature" };
-const MLU3_OE = { nodeName: "mlu3", objectEntryName: "magnet_temperature" };
-const MLU4_OE = { nodeName: "mlu4", objectEntryName: "magnet_temperature" };
-const MLU5_OE = { nodeName: "mlu5", objectEntryName: "magnet_temperature" };
-const MLU6_OE = { nodeName: "mlu6", objectEntryName: "magnet_temperature" };
-const MGU1_STARBOARD_OE = { nodeName: "mgu1", objectEntryName: "magnet_temperature_starboard" };
-const MGU1_PORT_OE = { nodeName: "mgu1", objectEntryName: "magnet_temperature_port" };
-const MGU2_STARBOARD_OE = { nodeName: "mgu2", objectEntryName: "magnet_temperature_starboard" };
-const MGU2_PORT_OE = { nodeName: "mgu2", objectEntryName: "magnet_temperature_port" };
-const DSLIM_STARBOARD_OE = { nodeName: "motor_driver", objectEntryName: "motor_temperature_starboard" };
-const DSLIM_PORT_OE = { nodeName: "motor_driver", objectEntryName: "motor_temperature_port" };
+const MLU1_OE = { nodeName: "levitation_board1", objectEntryName: "magnet_temperature_left1" };
+const MLU2_OE = { nodeName: "levitation_board2", objectEntryName: "magnet_temperature_left1" };
+const MLU3_OE = { nodeName: "levitation_board3", objectEntryName: "magnet_temperature_left1" };
+const MLU4_OE = { nodeName: "levitation_board1", objectEntryName: "magnet_temperature_right1" };
+const MLU5_OE = { nodeName: "levitation_board2", objectEntryName: "magnet_temperature_right1" };
+const MLU6_OE = { nodeName: "levitation_board3", objectEntryName: "magnet_temperature_right1" };
+
+const MGU1_STARBOARD_OE = { nodeName: "guidance_board_front", objectEntryName: "magnet_temperature_left1" };
+const MGU1_PORT_OE = { nodeName: "guidance_board_front", objectEntryName: "magnet_temperature_right1" };
+const MGU2_STARBOARD_OE = { nodeName: "guidance_board_back", objectEntryName: "magnet_temperature_left1" };
+const MGU2_PORT_OE = { nodeName: "guidance_board_back", objectEntryName: "magnet_temperature_right1" };
+
+const DSLIM_STARBOARD_OE = { nodeName: "motor_driver", objectEntryName: "lim_temperature1" };
+const DSLIM_PORT_OE = { nodeName: "motor_driver", objectEntryName: "lim_temperature2" };
+
 const EBOX1_OE = { nodeName: "input_board", objectEntryName: "ebox_temperature" };
-const EBOX2_OE = { nodeName: "input_board", objectEntryName: "ebox_temperature" };
-const MOTOR_DRIVER_OR = { nodeName: "motor_driver", objectEntryName: "motor_temperature_starboard" }; // TODO
+const EBOX2_OE = { nodeName: "input_board", objectEntryName: "buck_temperature" };
+
+const MOTOR_DRIVER_OR = { nodeName: "motor_driver", objectEntryName: "board_max_temperature" }; // TODO
 const COOLING_RESERVOIR_OE = { nodeName: "input_board", objectEntryName: "cooling_cycle_temperature" };
 
 

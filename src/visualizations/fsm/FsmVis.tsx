@@ -10,87 +10,91 @@ function FsmVis() {
   const [aspect, setAspect] = useState(3.72);
   const [height, setHeight] = useState(0);
   const [width, setWidth] = useState(0);
-  const [x,setX] = useState(450 + 210 * 0);
-  const [y,setY] = useState(335 + 100 * 0);
+  const [x, setX] = useState(450 + 210 * 0);
+  const [y, setY] = useState(335 + 100 * 0);
 
   const globalState = useObjectEntryValue("mother_board", "state");
 
-  useEffect(()=>{
+  useEffect(() => {
     switch (globalState as string) {
       case "INIT":
         setX(340);
         setY(335);
-      break;
+        break;
       case "IDLE":
         setX(450);
         setY(335);
-      break;
+        break;
       case "ARMING45":
         setX(450 + 210);
         setY(335);
-      break;
+        break;
       case "PRECHARGE":
         setX(450 + 210 * 2);
         setY(335);
-      break;
+        break;
       case "DISARMING45":
         setX(450 + 210);
         setY(335 + 100);
-      break;
+        break;
       case "READY":
         setX(450 + 210 * 3);
         setY(335);
-      break;
+        break;
       case "START_LEVITATION":
         setX(450 + 210 * 4);
         setY(335);
-      break;
+        break;
       case "LEVITATION_STABLE":
         setX(450 + 210 * 5);
         setY(335);
-      break;
-      case "GUIDANCE_STABLE":
+        break;
+      case "START_GUIDANCE":
         setX(450 + 210 * 6);
         setY(335);
-      break;
+        break;
+      case "GUIDANCE_STABLE":
+        setX(450 + 210 * 7);
+        setY(335);
+        break;
       case "ACCELERATION":
-        setX(450 + 210 * 7);
-        setY(335);
-      break;
-      case "CONTROLLER":
-        setX(450 + 210 * 7);
-        setY(335);
-      break;
-      case "CRUISING":
         setX(450 + 210 * 8);
         setY(335);
-      break;
+        break;
+      case "CONTROLLER":
+        setX(450 + 210 * 9);
+        setY(335);
+        break;
+      case "CRUISING":
+        setX(450 + 210 * 10);
+        setY(335);
+        break;
       case "DECELERATION":
-        setX(450 + 210 * 7);
-        setY(335 + 100);
-      break;
+        setX(450 + 210 * 8);
+        setY(335 - 100);
+        break;
       case "STOP_LEVITATION":
-        setX(450 + 210 * 5);
-        setY(335 + 100);
-      break;
+        setX(450 + 210 * 4);
+        setY(335 - 100);
+        break;
       case "STOP_GUIDANCE":
-        setX(450 + 210 * 3);
-        setY(335 + 100);
-      break;
+        setX(450 + 210 * 6);
+        setY(335 - 100);
+        break;
       case "SHUTDOWN":
         setX(450);
         setY(335 - 100);
-      break;
+        break;
       case "RESTARTING":
         setX(340);
         setY(335 - 100);
-      break;
+        break;
       case "CALIBRATING":
         setX(450);
         setY(335 + 100);
-      break;
+        break;
     };
-  },[globalState]);
+  }, [globalState]);
 
   useEffect(() => {
     let current = ref.current;
@@ -113,7 +117,7 @@ function FsmVis() {
     };
   }, []);
 
-  useEffect(()=>{
+  useEffect(() => {
     const leftX = x - width / 2.0;
     const topY = y - height / 2.0;
 
@@ -121,7 +125,7 @@ function FsmVis() {
 
     svg.style.setProperty("--x", `-${leftX}px`);
     svg.style.setProperty("--y", `-${topY}px`);
-  },[height,width, x,y]);
+  }, [height, width, x, y]);
 
   return (
     <Paper sx={{

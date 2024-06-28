@@ -115,13 +115,13 @@ function StateVis() {
     async function setupAirgap() {
       const resp = await invoke<ObjectEntryListenLatestResponse>("listen_to_latest_object_entry_value", AIRGAP_OE);
       if (resp.latest !== undefined && resp.latest !== null) {
-        const airgap = resp.latest.value as number; // [6 - 12];
-        const offset = ((airgap - 12.0) / 6.0) * 10;
+        const airgap = resp.latest.value as number; 
+        const offset = ((airgap - 16.0) / 10.0) * 36 - 1;
         svg.style.setProperty("--air_gap", `${offset}px`);
       }
       const unlistenJs = await listen<ObjectEntryEvent>(resp.event_name, event => {
-        const airgap = event.payload.value as number; // [6 - 12];
-        const offset = ((airgap - 12.0) / 6.0) * 24;
+        const airgap = event.payload.value as number; 
+        const offset = ((airgap - 16.0) / 10.0) * 36 - 1;
         svg.style.setProperty("--air_gap", `${offset}px`);
       });
       return () => {

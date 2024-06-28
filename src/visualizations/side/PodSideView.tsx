@@ -6,8 +6,8 @@ import { listen } from "@tauri-apps/api/event";
 import { ObjectEntryEvent } from "../../object_entry/types/events/ObjectEntryEvent";
 
 
-const POSITION_OE = { nodeName: "master", objectEntryName: "global_state" };
-const AIRGAP_OE = {nodeName : "mlu1", objectEntryName: "air_gap"};
+const POSITION_OE = { nodeName: "input_board", objectEntryName: "position" };
+const AIRGAP_OE = {nodeName : "levitation_board1", objectEntryName: "airgap_left"};
 
 function PodSideView() {
 
@@ -17,31 +17,36 @@ function PodSideView() {
     async function asyncSetup() {
       const respPos = await invoke<ObjectEntryListenLatestResponse>("listen_to_latest_object_entry_value", POSITION_OE);
       if (respPos.latest !== undefined && respPos.latest !== null) {
-        if (respPos.latest.value as string == "ACCELERATION" 
-            || respPos.latest.value as string == "CRUISING") {
-          svg.style.setProperty("--position", "10000px");
-        }else {
-          svg.style.setProperty("--position", "0px");
+        let position = respPos.latest.value as number;
+        if (position < 0){
+          position = 0;
+        }else if (position > 20){
+          position = 20;
         }
+        let alpha = position / 20.0;
+        svg.style.setProperty("--position", `-${alpha * 10000}px`);
+
       }
       const unlistenPos = await listen<ObjectEntryEvent>(respPos.event_name, event => {
-        if (event.payload.value as string == "ACCELERATION" 
-            || event.payload.value as string == "CRUISING") {
-          svg.style.setProperty("--position", "-10000px");
-        }else {
-          svg.style.setProperty("--position", "0px");
+        let position = event.payload.value as number;
+        if (position < 0){
+          position = 0;
+        }else if (position > 20){
+          position = 20;
         }
+        let alpha = position / 20.0;
+        svg.style.setProperty("--position", `-${alpha * 10900}px`);
       });
 
       const respAirgap = await invoke<ObjectEntryListenLatestResponse>("listen_to_latest_object_entry_value", AIRGAP_OE);
       if (respAirgap.latest !== undefined && respAirgap.latest !== null) {
         const airgap = respAirgap.latest.value as number;
-        const offset = ((airgap - 12.0) / 6.0) * 17;
+        const offset = ((airgap - 16.0) / 10.0) * 30;
         svg.style.setProperty("--air-gap", `${offset}px`);
       }
       const unlistenAirgap = await listen<ObjectEntryEvent>(respAirgap.event_name, event => {
         const airgap = event.payload.value as number;
-        const offset = ((airgap - 12.0) / 6.0) * 17;
+        const offset = ((airgap - 16.0) / 10.0) * 30;
         svg.style.setProperty("--air-gap", `${offset}px`);
       });
 
