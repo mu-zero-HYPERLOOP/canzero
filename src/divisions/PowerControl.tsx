@@ -11,29 +11,42 @@ import Speedometer, {
     Indicator,
 } from 'react-speedometer';
 import PowerVis from "../visualizations/power/PowerVis.tsx";
+import useObjectEntryValue from "../hooks/object_entry_value.tsx";
 
 
 interface NodesProps {
     nodes: NodeInformation[],
 }
 
-function LevitationConsumption() {
+interface LevitationConsumptionProps {
+    node: string,
+    oe: string,
+}
+
+function LevitationConsumption({node, oe}: Readonly<LevitationConsumptionProps>) {
+    const power = useObjectEntryValue(node, oe);
     return (
         <Paper sx={{
             padding: 1,
             backgroundColor: theme.palette.background.paper2,
         }}>
-            <Stack direction="row" justifyContent={"space-between"} sx={{
+            <Stack direction="row" justifyContent="space-between" sx={{
                 paddingLeft : 2,
                 paddingRight : 2,
                 margin: 1,
             }}>
-                <Box>
-                    <Typography> Levitation 1 </Typography>
+                <Box sx={{
+                    width: "0%",
+                }}>
+                    <Typography> {node}::{oe} </Typography>
                 </Box>
-                <PowerVis/>
-                <Box>
-                    <Typography textAlign="end"> 14kW </Typography>
+                <Box width="100%" textAlign="right">
+                    <Stack direction="row" justifyContent="right">
+                        <PowerVis/>
+                        <Box>
+                            <Typography textAlign="end"> {power ? <Typography textAlign="end"> {power as number}W </Typography> : <Typography textAlign="end"> -W </Typography>} </Typography>
+                        </Box>
+                    </Stack>
                 </Box>
             </Stack>
         </Paper>
@@ -50,10 +63,9 @@ function PowerConsumption() {
                 height: "100%",
                 width: "100%",
             }} spacing={1}>
-                <LevitationConsumption/>
-                <LevitationConsumption/>
-                <LevitationConsumption/>
-                <LevitationConsumption/>
+                <LevitationConsumption node={"power_board12"} oe={"total_power"}/>
+                <LevitationConsumption node={"power_board24"} oe={"total_power"}/>
+                <LevitationConsumption node={"input_board"} oe={"system_power_consumption"}/>
             </Stack>
         </Stack>
     )
