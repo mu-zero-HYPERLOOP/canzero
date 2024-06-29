@@ -32,18 +32,18 @@
 
 .arrow-up {
     position: absolute;
-    border-left: 19px solid transparent;
-    border-right: 19px solid transparent;
-    border-bottom: 19px solid black;
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-bottom: 15px solid black;
     left: 43%;
-    top: 13px;
+    top: 15px;
 }
 
 .arrow-down {
     position: absolute;
-    border-left: 19px solid transparent;
-    border-right: 19px solid transparent;
-    border-top: 19px solid #000000;
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-top: 15px solid #000000;
     left: 43%;
     top: -6px;
 }

@@ -43,7 +43,7 @@ interface CloseDialogProps {
   onClose: (close: boolean, unregister: boolean) => void,
 }
 function CloseDialog({setLoading, open, onClose}: Readonly<CloseDialogProps>) {
-  const [unregister, setUnregister] = React.useState(true);
+  const [unregister, setUnregister] = React.useState(false);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setUnregister(event.target.checked);
