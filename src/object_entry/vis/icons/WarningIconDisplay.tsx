@@ -10,7 +10,7 @@ import theme from "../../../theme.ts";
 
 
 
-const OE = { nodeName: "master", objectEntryName: "error_any" };
+const OE = { nodeName: "mother_board", objectEntryName: "error_any" };
 
 function WarningIconDisplay() {
 

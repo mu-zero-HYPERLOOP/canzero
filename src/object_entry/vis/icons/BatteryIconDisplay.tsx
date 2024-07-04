@@ -9,7 +9,7 @@ import { ObjectEntryEvent } from "../../types/events/ObjectEntryEvent";
 import theme from "../../../theme.ts";
 
 
-const OE = {nodeName : "input_board", objectEntryName : "error_low_battery"};
+const OE = {nodeName : "input_board", objectEntryName : "error_level_bat24_under_voltage"};
 
 function BatteryIconDisplay() {
 

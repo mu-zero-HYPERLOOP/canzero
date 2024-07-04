@@ -44,7 +44,7 @@ function LevitationConsumption({node, oe}: Readonly<LevitationConsumptionProps>)
                     <Stack direction="row" justifyContent="right">
                         <PowerVis/>
                         <Box>
-                            <Typography textAlign="end"> {power ? <Typography textAlign="end"> {power as number}W </Typography> : <Typography textAlign="end"> -W </Typography>} </Typography>
+                            <Typography textAlign="end"> {(power !== undefined) ? <Typography textAlign="end"> {power as number}W </Typography> : <Typography textAlign="end"> -W </Typography>} </Typography>
                         </Box>
                     </Stack>
                 </Box>
@@ -69,6 +69,36 @@ function PowerConsumption() {
             </Stack>
         </Stack>
     )
+}
+
+function AnalogGauge() {
+    const power = useObjectEntryValue("input_board", "system_power_consumption");
+
+    return (
+        <>
+            <Box paddingTop="4vh" textAlign="center">
+            <Speedometer
+                width={400}
+                value={(power !== undefined) ? (power as number) / 1000 : 0}
+                max={5}
+                angle={160}
+                fontFamily='Arial'
+            >
+                <Background angle={180} color="#000000"/>
+                <Arc/>
+                <Needle offset={40} circleRadius={30} circleColor={theme.palette.background.appBar}/>
+                <DangerPath/>
+                <Progress/>
+                <Marks step={1}/>
+                <Indicator color="#000000" y={280} x={175}>
+                </Indicator>
+            </Speedometer>
+        </Box><Typography marginTop="-170px" textAlign="center" fontSize="2.5em" marginLeft="70px">
+            kW
+        </Typography>
+        </>
+    )
+
 }
 
 function PowerControl({}: Readonly<NodesProps>) {
@@ -97,27 +127,7 @@ function PowerControl({}: Readonly<NodesProps>) {
                         <Typography textAlign={"center"} paddingBottom={1}>
                             Consumption
                         </Typography>
-                        <Box paddingTop="4vh" textAlign="center">
-                            <Speedometer
-                                width={400}
-                                value={20}
-                                max={20}
-                                angle={160}
-                                fontFamily='Arial'
-                            >
-                                <Background angle={180} color="#000000" />
-                                <Arc/>
-                                <Needle offset={40} circleRadius={30} circleColor={theme.palette.background.appBar}/>
-                                <DangerPath/>
-                                <Progress/>
-                                <Marks step={2}/>
-                                <Indicator color="#000000" y={280} x={175}>
-                                </Indicator>
-                            </Speedometer>
-                        </Box>
-                        <Typography marginTop="-170px" textAlign="center" fontSize="2.5em" marginLeft="70px">
-                            kW
-                        </Typography>
+                        <AnalogGauge/>
                     </Paper>
                     <Paper sx={{
                         width: "100%",
