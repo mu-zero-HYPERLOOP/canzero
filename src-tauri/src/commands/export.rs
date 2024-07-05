@@ -53,6 +53,7 @@ pub async fn export(
             .set_title("Select export directory")
             .pick_folder(move |folder| {
                 let Some(mut folder) = folder else {
+                    tx.send(()).unwrap();
                     return;
                 };
                 let time = chrono::Local::now();
