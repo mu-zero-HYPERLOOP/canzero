@@ -4,6 +4,7 @@ import PIDControl from "./levitation/PIDControl.tsx";
 import PIControl from "./levitation/PIControl.tsx";
 import PIDGraph from "./levitation/PIDGraph.tsx";
 import PIGraph from "./levitation/PIGraph.tsx";
+import AirgapTransition from "./levitation/AirgapTransition.tsx";
 
 
 
@@ -37,6 +38,11 @@ function LevitationControl({ }: Readonly<NodesProps>) {
           padding: 1,
         }}>
           <Typography textAlign={"center"} paddingBottom={1}>
+            Airgap transition
+          </Typography>
+          <AirgapTransition />
+          <Typography textAlign={"center"} paddingBottom={1}
+          paddingTop={5}>
             Current PI Controller
           </Typography>
           <PIControl />

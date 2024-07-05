@@ -211,7 +211,7 @@ function PIControl() {
           <RealPropertyInputField
             name={"Kp"}
             min={0}
-            max={100}
+            max={10000}
             onUpdate={(x) => setKpInput(x)}
             currentValue={Kp}
             bitSize={64}
@@ -220,7 +220,7 @@ function PIControl() {
           <RealPropertyInputField
             name={"Ki"}
             min={0}
-            max={100}
+            max={10000}
             onUpdate={(x) => setKiInput(x)}
             currentValue={Ki}
             bitSize={64}
@@ -233,8 +233,8 @@ function PIControl() {
           }}>
           <RealPropertyInputField
             name={"Ki_min"}
-            min={-500}
-            max={500}
+            min={-10000}
+            max={0}
             onUpdate={(x) => setKiMinInput(x)}
             currentValue={KiMin}
             bitSize={64}
@@ -242,8 +242,8 @@ function PIControl() {
           />
           <RealPropertyInputField
             name={"Ki_max"}
-            min={-500}
-            max={500}
+            min={0}
+            max={10000}
             onUpdate={(x) => setKiMaxInput(x)}
             currentValue={KiMax}
             bitSize={64}

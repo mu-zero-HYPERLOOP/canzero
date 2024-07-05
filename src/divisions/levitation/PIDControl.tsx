@@ -12,6 +12,8 @@ import { listen } from "@tauri-apps/api/event";
 import UploadIcon from '@mui/icons-material/Upload';
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { ObjectEntryEvent } from "../../object_entry/types/events/ObjectEntryEvent";
+import UnsignedPropertyInputField from "../../object_entry/edit_dialog/UnsignedPropertyInputField";
+import EnumPropertyInputField from "../../object_entry/edit_dialog/EnumPropertyInputField";
 
 function PIDControl() {
 
@@ -20,14 +22,26 @@ function PIDControl() {
   const [Kd, setKd] = useState<number>();
   const [KiMin, setKiMin] = useState<number>();
   const [KiMax, setKiMax] = useState<number>();
-  const [emaAlpha, setEmaAlpha] = useState<number>();
+  const [maxForce, setMaxForce] = useState<number>();
+  const [errorFilterMode, setErrorFilterMode] = useState<string>();
+  const [errorBoxcarN, setErrorBoxcarN] = useState<number>();
+  const [errorEmaAlpha, setErrorEmaAlpha] = useState<number>();
+  const [convFilterMode, setConvFilterMode] = useState<string>();
+  const [convBoxcarN, setConvBoxcarN] = useState<number>();
+  const [convEmaAlpha, setConvEmaAlpha] = useState<number>();
 
   const [KpInput, setKpInput] = useState<number | null>();
   const [KiInput, setKiInput] = useState<number | null>();
   const [KdInput, setKdInput] = useState<number | null>();
   const [KiMinInput, setKiMinInput] = useState<number | null>();
   const [KiMaxInput, setKiMaxInput] = useState<number | null>();
-  const [emaAlphaInput, setEmaAlphaInput] = useState<number | null>();
+  const [maxForceInput, setMaxForceInput] = useState<number | null>();
+  const [errorFilterModeInput, setErrorFilterModeInput] = useState<string | null>();
+  const [errorBoxcarNInput, setErrorBoxcarNInput] = useState<number | null>();
+  const [errorEmaAlphaInput, setErrorEmaAlphaInput] = useState<number | null>();
+  const [convFilterModeInput, setConvFilterModeInput] = useState<string | null>();
+  const [convBoxcarNInput, setConvBoxcarNInput] = useState<number | null>();
+  const [convEmaAlphaInput, setConvEmaAlphaInput] = useState<number | null>();
 
 
   const [mode, setMode] = useState(Mode.All);
@@ -69,12 +83,12 @@ function PIDControl() {
   function uploadValid() {
     return KpInput !== null && KiInput !== null
       && KdInput !== null && KiMinInput !== null
-      && KiMaxInput !== null && emaAlphaInput !== null
+      && KiMaxInput !== null && errorEmaAlphaInput !== null
       && Ki !== undefined && KiMin !== undefined
       && (
         KpInput !== undefined || KiInput !== undefined
         || KdInput !== undefined || KiMaxInput !== undefined
-        || KiMinInput !== undefined || emaAlphaInput !== undefined
+        || KiMinInput !== undefined || errorEmaAlphaInput !== undefined
       );
   }
 
@@ -84,7 +98,14 @@ function PIDControl() {
     const KdValue = (KdInput === undefined ? Kd : KdInput)!;
     const KiMinValue = (KiMinInput === undefined ? KiMin : KiMinInput)!;
     const KiMaxValue = (KiMaxInput === undefined ? KiMax : KiMaxInput)!;
-    const emaAlphaValue = (emaAlphaInput === undefined ? emaAlpha : emaAlphaInput)!;
+    const maxForceValue = (maxForceInput === undefined ? maxForce : maxForceInput)!;
+    const errorFilterModeValue = (errorFilterModeInput === undefined ? errorFilterMode : errorFilterModeInput)!;
+    const errorBoxcarNValue = (errorBoxcarNInput === undefined ? errorBoxcarN : errorBoxcarNInput)!;
+    const errorEmaAlphaValue = (errorEmaAlphaInput === undefined ? errorEmaAlpha : errorEmaAlphaInput)!;
+    const convFilterModeValue = (convFilterModeInput === undefined ? convFilterMode : convFilterModeInput)!;
+    const convBoxcarNValue = (convBoxcarNInput === undefined ? convBoxcarN : convBoxcarNInput)!;
+    const convEmaAlphaValue = (convEmaAlphaInput === undefined ? convEmaAlpha : convEmaAlphaInput)!;
+
 
     const airgapPid = {
       Kp: KpValue,
@@ -94,7 +115,13 @@ function PIDControl() {
     const airgapPidExtra = {
       Ki_min: KiMinValue,
       Ki_max: KiMaxValue,
-      ema_alpha: emaAlphaValue,
+      force_max: maxForceValue,
+      filter_mode: errorFilterModeValue,
+      boxcar_n: errorBoxcarNValue,
+      ema_alpha: errorEmaAlphaValue,
+      conv_filter_mode: convFilterModeValue,
+      conv_boxcar_n: convBoxcarNValue,
+      conv_ema_alpha: convEmaAlphaValue,
     };
     switch (mode) {
       case Mode.Board1: {
@@ -152,13 +179,19 @@ function PIDControl() {
       const value = respExtra.latest.value as { [name: string]: Value };
       setKiMin(value["Ki_min"] as number);
       setKiMax(value["Ki_max"] as number);
-      setEmaAlpha(value["ema_alpha"] as number);
+      setMaxForce(value["force_max"] as number);
+      setErrorFilterMode(value["filter_mode"] as string);
+      setErrorBoxcarN(value["boxcar_n"] as number);
+      setErrorEmaAlpha(value["ema_alpha"] as number);
+      setConvFilterMode(value["conv_filter_mode"] as string);
+      setConvBoxcarN(value["conv_boxcar_n"] as number);
+      setConvEmaAlpha(value["conv_ema_alpha"] as number);
     }
     const unregisterExtra = await listen<ObjectEntryEvent>(respExtra.event_name, event => {
       const value = event.payload.value as { [name: string]: Value };
       setKiMin(value["Ki_min"] as number);
       setKiMax(value["Ki_max"] as number);
-      setEmaAlpha(value["ema_alpha"] as number);
+      setErrorEmaAlpha(value["ema_alpha"] as number);
     });
 
     return () => {
@@ -217,7 +250,7 @@ function PIDControl() {
           <RealPropertyInputField
             name={"Kp"}
             min={0}
-            max={100}
+            max={10000}
             onUpdate={(x) => setKpInput(x)}
             currentValue={Kp}
             bitSize={64}
@@ -226,7 +259,7 @@ function PIDControl() {
           <RealPropertyInputField
             name={"Ki"}
             min={0}
-            max={100}
+            max={10000}
             onUpdate={(x) => setKiInput(x)}
             currentValue={Ki}
             bitSize={64}
@@ -235,10 +268,35 @@ function PIDControl() {
           <RealPropertyInputField
             name={"Kd"}
             min={0}
-            max={100}
+            max={10000}
             onUpdate={(x) => setKdInput(x)}
             currentValue={Kd}
             bitSize={64}
+            width="100%"
+          />
+          <RealPropertyInputField
+            name={"MaxForce"}
+            min={0}
+            max={10000}
+            onUpdate={(x) => setMaxForceInput(x)}
+            currentValue={maxForce}
+            bitSize={16}
+            width="100%"
+          />
+          <EnumPropertyInputField
+            name={"conv-FilterMode"}
+            variants={["EMA", "BOXCAR"]}
+            currentValue={convFilterMode}
+            onUpdate={(x) => setConvFilterModeInput(x)}
+            width="100%"
+          />
+          <UnsignedPropertyInputField
+            name={"conv-BOX-N"}
+            min={0}
+            max={Math.pow(2.0, 15.0) - 1.0}
+            bitSize={15}
+            onUpdate={(x) => setConvBoxcarNInput(x)}
+            currentValue={convBoxcarN}
             width="100%"
           />
         </Stack>
@@ -248,8 +306,8 @@ function PIDControl() {
           }}>
           <RealPropertyInputField
             name={"Ki_min"}
-            min={-500}
-            max={500}
+            min={-10000}
+            max={0}
             onUpdate={(x) => setKiMinInput(x)}
             currentValue={KiMin}
             bitSize={64}
@@ -257,22 +315,48 @@ function PIDControl() {
           />
           <RealPropertyInputField
             name={"Ki_max"}
-            min={-500}
-            max={500}
+            min={0}
+            max={10000}
             onUpdate={(x) => setKiMaxInput(x)}
             currentValue={KiMax}
             bitSize={64}
             width="100%"
           />
+          <EnumPropertyInputField
+            name={"error-FilterMode"}
+            variants={["EMA", "BOXCAR"]}
+            currentValue={errorFilterMode}
+            onUpdate={(x) => setErrorFilterModeInput(x)}
+            width="100%"
+          />
           <RealPropertyInputField
-            name={"ema_alpha"}
+            name={"error-EMA-α"}
             min={0}
             max={1}
-            onUpdate={(x) => setEmaAlphaInput(x)}
-            currentValue={emaAlpha}
+            onUpdate={(x) => setErrorEmaAlphaInput(x)}
+            currentValue={errorEmaAlpha}
             bitSize={64}
             width="100%"
           />
+          <UnsignedPropertyInputField
+            name={"error-BOX-N"}
+            min={0}
+            max={Math.pow(2.0, 16.0) - 1.0}
+            bitSize={16}
+            onUpdate={(x) => setErrorBoxcarNInput(x)}
+            currentValue={errorBoxcarN}
+            width="100%"
+          />
+          <RealPropertyInputField
+            name={"conv-EMA-α"}
+            min={0}
+            max={1}
+            onUpdate={(x) => setConvEmaAlphaInput(x)}
+            currentValue={convEmaAlpha}
+            bitSize={64}
+            width="100%"
+          />
+
         </Stack>
       </Stack>
       <Stack direction="row" justifyContent="end" spacing={2} sx={{

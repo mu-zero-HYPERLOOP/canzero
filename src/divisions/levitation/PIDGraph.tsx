@@ -18,12 +18,11 @@ function PIDGraph() {
 
   const [nodeName, setNodeName] = useState("levitation_board1");
   const [airgapOe, setAirgapOe] = useState("airgap_left");
-  const [pTermOe, setPTermOe] = useState("left_airgap_controller_p_term");
+  const [targetOe, setTargetOe] = useState("target_airgap_left");
   const [iTermOe, setITermOe] = useState("left_airgap_controller_i_term");
-  const [dTermOe, setDTermOe] = useState("left_airgap_controller_d_term");
   const [outputOe, setOutputOe] = useState("left_airgap_controller_output");
 
-  const [maxY, setMaxY] = useState(125);
+  const [maxY, setMaxY] = useState(1600);
   const [minY, setMinY] = useState(-125);
   const [timeDomain, setTimeDomain] = useState(10 * 1000);
 
@@ -37,9 +36,8 @@ function PIDGraph() {
   const marginBottom = 50;
 
   const colorAirgap = "#fa0";
-  const colorPTerm = "#ff0000";
+  const colorTarget = "#ff0000";
   const colorITerm = "#00ff00";
-  const colorDTerm = "#90b";
   const colorOutput = "#0000ff";
 
   const refreshRate = 100;
@@ -50,18 +48,16 @@ function PIDGraph() {
   useEffect(() => {
     switch (side) {
       case Side.Left: {
-        setAirgapOe("airgap_left");
-        setPTermOe("left_airgap_controller_p_term");
+        setAirgapOe("left_airgap_controller_airgap");
+        setTargetOe("target_airgap_left");
         setITermOe("left_airgap_controller_i_term");
-        setDTermOe("left_airgap_controller_d_term");
         setOutputOe("left_airgap_controller_output");
         break;
       }
       case Side.Right: {
-        setAirgapOe("airgap_right");
-        setPTermOe("right_airgap_controller_p_term");
+        setAirgapOe("right_airgap_controller_airgap");
+        setTargetOe("target_airgap_right");
         setITermOe("right_airgap_controller_i_term");
-        setDTermOe("right_airgap_controller_d_term");
         setOutputOe("right_airgap_controller_output");
         break;
       }
@@ -106,9 +102,8 @@ function PIDGraph() {
     // REGISTER LISTENERS
 
     let airgap_data: ObjectEntryEvent[] = [];
-    let p_term_data: ObjectEntryEvent[] = [];
+    let target_term_data: ObjectEntryEvent[] = [];
     let i_term_data: ObjectEntryEvent[] = [];
-    let d_term_data: ObjectEntryEvent[] = [];
     let output_data: ObjectEntryEvent[] = [];
 
     let timestamp = 0; // initalized from listen history respnse!
@@ -128,16 +123,16 @@ function PIDGraph() {
       });
 
 
-      const respKpTerm = await invoke<ObjectEntryListenHistoryResponse>("listen_to_history_of_object_entry", {
+      const respTarget = await invoke<ObjectEntryListenHistoryResponse>("listen_to_history_of_object_entry", {
         nodeName,
-        objectEntryName: pTermOe,
+        objectEntryName: targetOe,
         frameSize: timeDomain,
         minInterval: interval // 24fps
       });
-      p_term_data = respKpTerm.history;
-      const unlistenKpTerm = await listen<ObjectEntryHistoryEvent>(respKpTerm.event_name, event => {
-        p_term_data.splice(0, event.payload.deprecated_count);
-        p_term_data.push(...event.payload.new_values);
+      target_term_data = respTarget.history;
+      const unlistenKpTerm = await listen<ObjectEntryHistoryEvent>(respTarget.event_name, event => {
+        target_term_data.splice(0, event.payload.deprecated_count);
+        target_term_data.push(...event.payload.new_values);
       });
 
 
@@ -151,18 +146,6 @@ function PIDGraph() {
       const unlistenKiTerm = await listen<ObjectEntryHistoryEvent>(respKiTerm.event_name, event => {
         i_term_data.splice(0, event.payload.deprecated_count);
         i_term_data.push(...event.payload.new_values);
-      });
-
-      const respKdTerm = await invoke<ObjectEntryListenHistoryResponse>("listen_to_history_of_object_entry", {
-        nodeName,
-        objectEntryName: dTermOe,
-        frameSize: timeDomain,
-        minInterval: interval // 24fps
-      });
-      d_term_data = respKdTerm.history;
-      const unlistenKdTerm = await listen<ObjectEntryHistoryEvent>(respKdTerm.event_name, event => {
-        d_term_data.splice(0, event.payload.deprecated_count);
-        d_term_data.push(...event.payload.new_values);
       });
 
       const respOutput = await invoke<ObjectEntryListenHistoryResponse>("listen_to_history_of_object_entry", {
@@ -181,7 +164,6 @@ function PIDGraph() {
         unlistenAirgap();
         unlistenKpTerm();
         unlistenKiTerm();
-        unlistenKdTerm();
         unlistenOutput();
         invoke("unlisten_from_history_of_object_entry", {
           nodeName,
@@ -190,18 +172,13 @@ function PIDGraph() {
         }).catch(console.error);
         invoke("unlisten_from_history_of_object_entry", {
           nodeName,
-          objectEntryName: pTermOe,
-          eventName: respKpTerm.event_name,
+          objectEntryName: targetOe,
+          eventName: respTarget.event_name,
         }).catch(console.error);
         invoke("unlisten_from_history_of_object_entry", {
           nodeName,
           objectEntryName: iTermOe,
           eventName: respKiTerm.event_name,
-        }).catch(console.error);
-        invoke("unlisten_from_history_of_object_entry", {
-          nodeName,
-          objectEntryName: dTermOe,
-          eventName: respKdTerm.event_name,
         }).catch(console.error);
         invoke("unlisten_from_history_of_object_entry", {
           nodeName,
@@ -219,22 +196,17 @@ function PIDGraph() {
     const airgapLine = d3.line();
     airgapLine.curve(d3.curveStepAfter);
     airgapLine.x((d: any) => xScale(d.timestamp));
-    airgapLine.y((d: any) => yScale(d.value));
+    airgapLine.y((d: any) => yScale(d.value * 100));
 
     const pTermLine = d3.line();
     pTermLine.curve(d3.curveStepAfter);
     pTermLine.x((d: any) => xScale(d.timestamp));
-    pTermLine.y((d: any) => yScale(d.value));
+    pTermLine.y((d: any) => yScale(d.value * 100));
 
     const iTermLine = d3.line();
     iTermLine.curve(d3.curveStepAfter);
     iTermLine.x((d: any) => xScale(d.timestamp));
     iTermLine.y((d: any) => yScale(d.value));
-
-    const dTermLine = d3.line();
-    dTermLine.curve(d3.curveStepAfter);
-    dTermLine.x((d: any) => xScale(d.timestamp));
-    dTermLine.y((d: any) => yScale(d.value));
 
     const outputLine = d3.line();
     outputLine.curve(d3.curveStepAfter);
@@ -289,20 +261,14 @@ function PIDGraph() {
       .attr("x", innerWidth - 20)
       .attr("y", 50)
       .attr("text-anchor", "end")
-      .attr("fill", colorPTerm)
-      .text("KpTerm");
+      .attr("fill", colorTarget)
+      .text("Target");
     svg.append("text")
       .attr("x", innerWidth - 20)
       .attr("y", 75)
       .attr("text-anchor", "end")
       .attr("fill", colorITerm)
       .text("KiTerm");
-    svg.append("text")
-      .attr("x", innerWidth - 20)
-      .attr("y", 100)
-      .attr("text-anchor", "end")
-      .attr("fill", colorDTerm)
-      .text("KdTerm");
     svg.append("text")
       .attr("x", innerWidth - 20)
       .attr("y", 125)
@@ -322,10 +288,10 @@ function PIDGraph() {
       .style("fill", "none")
 
     group.append("path")
-      .datum(p_term_data)
-      .attr("d", pTermLine(p_term_data as any))
+      .datum(target_term_data)
+      .attr("d", pTermLine(target_term_data as any))
       .attr("class", "p-term-line")
-      .style("stroke", colorPTerm)
+      .style("stroke", colorTarget)
       .style("stroke-width", 1.5)
       .style("opacity", 0.5)
       .style("fill", "none")
@@ -337,15 +303,6 @@ function PIDGraph() {
       .style("stroke", colorITerm)
       .style("stroke-width", 1.5)
       .style("opatimeDomainMscity", 0.5)
-      .style("fill", "none")
-
-    group.append("path")
-      .datum(d_term_data)
-      .attr("d", dTermLine(d_term_data as any))
-      .attr("class", "d-term-line")
-      .style("stroke", colorDTerm)
-      .style("stroke-width", 1.5)
-      .style("opacity", 0.5)
       .style("fill", "none")
 
     group.append("path")
@@ -379,16 +336,12 @@ function PIDGraph() {
         .attr("d", airgapLine);
 
       group.select(".p-term-line")
-        .datum(p_term_data as any)
+        .datum(target_term_data as any)
         .attr("d", pTermLine);
 
       group.select(".i-term-line")
         .datum(i_term_data as any)
         .attr("d", iTermLine);
-
-      group.select(".d-term-line")
-        .datum(d_term_data as any)
-        .attr("d", dTermLine);
 
       group.select(".output-line")
         .datum(output_data as any)
@@ -437,7 +390,7 @@ function PIDGraph() {
     };
 
   }, [autoWidth, nodeName, airgapOe,
-    pTermOe, iTermOe, dTermOe, dTermOe, outputOe, minY, maxY, timeDomain]);
+    targetOe, iTermOe, outputOe, minY, maxY, timeDomain]);
 
   const [yRange, setYRange] = useState([minY, maxY]);
 
@@ -527,7 +480,7 @@ function PIDGraph() {
         valueLabelDisplay="auto"
         orientation="vertical"
         min={-1000}
-        max={1000}
+        max={2000}
         onChange={handleChange}
         value={yRange}
       />

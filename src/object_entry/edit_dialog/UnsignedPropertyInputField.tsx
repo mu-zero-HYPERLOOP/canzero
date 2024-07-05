@@ -2,7 +2,7 @@ import { InputAdornment, TextField } from "@mui/material";
 import { useState } from "react";
 
 
-function parseInputToNumber(input : string) : number | null {
+function parseInputToNumber(input: string): number | null {
   const regex = /^\d+$/;
   if (!regex.test(input)) {
     return null;
@@ -10,7 +10,7 @@ function parseInputToNumber(input : string) : number | null {
   return Number(input);
 }
 
-function checkInputForErrors(min: number, max : number, input : string) : string | null {
+function checkInputForErrors(min: number, max: number, input: string): string | null {
   let inputAsNumber = Number(input);
   if (isNaN(inputAsNumber)) {
     return "Input has to be a number!";
@@ -28,33 +28,35 @@ function checkInputForErrors(min: number, max : number, input : string) : string
 interface UnsignedPropertyInputFieldProps {
   min: number,
   max: number,
-  bitSize : number
-  currentValue? : number,
+  bitSize: number
+  currentValue?: number,
   onUpdate: (value: number | null | undefined) => void,
-  name : string,
-  unit? : string,
+  name: string,
+  unit?: string,
+  width?: string,
 }
 
-function UnsignedPropertyInputField({ min, max, onUpdate, currentValue, name, unit, bitSize }: Readonly<UnsignedPropertyInputFieldProps>) {
+function UnsignedPropertyInputField({ min, max, onUpdate, currentValue, name, unit, bitSize,
+  width = "75ch" }: Readonly<UnsignedPropertyInputFieldProps>) {
   const [input, setInput] = useState<string>("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [hasValue, setHasValue] = useState<boolean>(false);
 
-  let unitAdornment : string;
+  let unitAdornment: string;
   if (unit) {
     unitAdornment = `[${unit}]`;
-  }else {
+  } else {
     unitAdornment = "";
   }
-  let adornment : string;
+  let adornment: string;
   if (hasValue) {
     adornment = `${name} ${unitAdornment} <=`;
-  }else {
+  } else {
     adornment = `${name} ${unitAdornment}   `;
   }
 
   return <TextField
-    sx={{ width: "75ch", boxShadow: 0, borderRadius: 0 }}
+    sx={{ width: width, boxShadow: 0, borderRadius: 0 }}
     id={`${name}-set-request-input-field`}
     variant="filled"
     label={errorMsg ?? `u${bitSize}<${min}..${max}>`}
@@ -62,7 +64,7 @@ function UnsignedPropertyInputField({ min, max, onUpdate, currentValue, name, un
     color={errorMsg ? "error" : "info"}
     placeholder={`<= ${currentValue}`}
     inputProps={{
-      style: {boxShadow:"none"}
+      style: { boxShadow: "none" }
     }}
     onChange={(event) => {
       const input = event.target.value;
