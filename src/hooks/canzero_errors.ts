@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api";
 import { listen } from "@tauri-apps/api/event";
 import { useEffect, useState } from "react";
-import ErrorEvent from "../object_entry/types/events/ErrorEvent";
+import { ErrorEvent } from "../object_entry/types/events/ErrorEvent";
 
 
 
