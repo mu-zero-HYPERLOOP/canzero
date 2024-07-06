@@ -7,3 +7,4 @@ pub mod export;
 pub mod startup;
 pub mod settings;
 pub mod search_string_storage;
+pub mod errors;

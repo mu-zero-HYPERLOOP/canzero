@@ -35,5 +35,11 @@ impl ObjectEntryInformation {
 
         }
     }
+    pub fn description(&self) -> Option<&str> {
+        match &self.description {
+            Some(s) => Some(&s),
+            None => None,
+        }
+    }
 }
 

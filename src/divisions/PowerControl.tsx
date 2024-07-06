@@ -11,7 +11,7 @@ import Speedometer, {
     Indicator,
 } from 'react-speedometer';
 import PowerVis from "../visualizations/power/PowerVis.tsx";
-import useObjectEntryValue from "../hooks/object_entry_value.tsx";
+import useObjectEntryValue from "../hooks/object_entry_value.ts";
 
 
 interface NodesProps {

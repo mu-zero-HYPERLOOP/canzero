@@ -4,7 +4,7 @@ use std::{
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 
-use canzero_config::config;
+use canzero_config::config::{self, NodeRef, ObjectEntryRef};
 use chrono;
 use tokio::sync::{Mutex, OnceCell};
 
@@ -20,12 +20,14 @@ use self::{
     history::ObjectEntryHistroyObservable,
     info::{ty::ObjectEntryType, ObjectEntryInformation},
     latest::{event::OwnedObjectEntryEvent, ObjectEntryLatestObservable},
+    vlistener::ObjectEntryListener,
 };
 
-mod database;
+pub mod database;
 pub mod history;
 pub mod info;
 pub mod latest;
+pub mod vlistener;
 
 pub struct ObjectEntryObject {
     object_entry_ref: config::ObjectEntryRef,
@@ -42,6 +44,7 @@ pub struct ObjectEntryObject {
     open_get_request: Arc<Mutex<u64>>,
     set_request_timeout: Duration,
     get_request_timeout: Duration,
+    vlisteners: Mutex<Vec<Option<Arc<dyn ObjectEntryListener + Send + Sync>>>>,
     plottable: bool,
 }
 
@@ -94,6 +97,7 @@ impl ObjectEntryObject {
             set_request_timeout: Duration::from_millis(1000 + get_req_num_frames * 200),
             get_request_timeout: Duration::from_millis(1000 + get_req_num_frames * 200),
             plottable,
+            vlisteners: Mutex::new(vec![]),
         }
     }
     pub async fn kill_yourself(&self) {
@@ -114,6 +118,19 @@ impl ObjectEntryObject {
         self.object_entry_ref.node().id() as u8
     }
 
+    pub fn node_ref(&self) -> &NodeRef {
+        self.object_entry_ref.node()
+    }
+
+    pub fn friend(&self) -> Option<ObjectEntryRef> {
+        match self.object_entry_ref.friend() {
+            Some(friend_name) => {
+                self.node_ref().object_entries().iter().find(|oe| oe.name() == friend_name).cloned()
+            }
+            None => None,
+        }
+    }
+
     pub async fn request_current_value(&self) {
         let mut get_req_num = match self.open_get_request.try_lock() {
             Ok(n) => {
@@ -124,7 +141,7 @@ impl ObjectEntryObject {
                         &self.app_handle,
                         "Ignoring Get Request",
                         &format!(
-                            "Older get request for {}::{} still in progress",
+                            "Older get reasync quest for {}::{} still in progress",
                             self.object_entry_ref.node().name(),
                             self.name()
                         ),
@@ -263,9 +280,13 @@ impl ObjectEntryObject {
             None => timestamp.clone(),
         };
 
+        let oe_value = ObjectEntryValue::new(value, timestamp.clone(), delta_time);
+        for vl in self.vlisteners.lock().await.iter().flatten() {
+            vl.notify(&oe_value);
+        }
         // The value has to be stored before notify because the observables
         // use the values in the store directly to reduce clones
-        store.push_value(ObjectEntryValue::new(value, timestamp.clone(), delta_time));
+        store.push_value(oe_value);
         drop(store); // <- Gentlemen we got him.
         self.latest_observable.notify().await;
         for history_observable in self.history_observables.lock().await.iter() {
@@ -290,6 +311,8 @@ impl ObjectEntryObject {
             return;
         }
         *get_req_num += 1;
+        // The value has to be stored before notify because the observables
+        // use the values in the store directly to reduce clones
         drop(get_req_num);
         self.push_value(value, timestamp).await;
         notify_info(
@@ -473,6 +496,31 @@ impl ObjectEntryObject {
             ObjectEntryType::new(self.object_entry_ref.ty()),
             self.plottable,
         )
+    }
+
+    pub async fn vlisten(&self, listener: Arc<dyn ObjectEntryListener + Send + Sync >) -> usize {
+        let mut lck = self.vlisteners.lock().await;
+        for (i, vl) in lck.iter_mut().enumerate() {
+            if vl.is_none() {
+                *vl = Some(listener);
+                return i;
+            }
+        }
+        let r = lck.len();
+        lck.push(Some(listener));
+        return r;
+    }
+
+    pub async fn vunlisten(&self, id: usize) {
+        let mut lck = self.vlisteners.lock().await;
+        if id == lck.len() - 1 {
+            lck.pop();
+        } else {
+            match lck.get_mut(id) {
+                Some(e) => *e = None,
+                None => (),
+            }
+        }
     }
 
     pub fn now(&self) -> Duration {

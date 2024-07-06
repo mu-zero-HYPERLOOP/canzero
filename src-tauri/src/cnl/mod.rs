@@ -9,6 +9,7 @@ mod rx;
 pub mod trace;
 mod tx;
 pub mod watchdog;
+pub mod error_observable;
 
 pub mod can_adapter;
 
@@ -18,19 +19,11 @@ use std::{
 };
 
 use self::{
-    can_adapter::CanAdapter,
-    connection::{ConnectionObject, ConnectionStatus},
-    gamepad::Gamepad,
-    network::{node_object::NodeObject, NetworkObject},
-    rx::RxCom,
-    trace::TraceObject,
-    tx::TxCom,
-    watchdog::{Watchdog, WatchdogOverlord, WdgTag},
+    can_adapter::CanAdapter, connection::{ConnectionObject, ConnectionStatus}, error_observable::ErrorObservable, gamepad::Gamepad, network::{node_object::NodeObject, NetworkObject}, rx::RxCom, trace::TraceObject, tx::TxCom, watchdog::{Watchdog, WatchdogOverlord, WdgTag}
 };
 
 use canzero_appdata::{AppData, WdgLevel};
 use canzero_config::config;
-use color_print::cprintln;
 
 // Can Network Layer (CNL)
 pub struct CNL {
@@ -49,6 +42,8 @@ pub struct CNL {
 
     _watchdog_overlord: WatchdogOverlord,
     external_watchdog: Option<Watchdog>,
+
+    error_observable : ErrorObservable,
 }
 
 impl CNL {
@@ -156,6 +151,7 @@ impl CNL {
             rx,
             tx,
             trace,
+            error_observable : ErrorObservable::new(&app_handle, &network).await,
             network,
             connection_object,
             _watchdog_overlord: watchdog_overlord,
@@ -187,5 +183,9 @@ impl CNL {
 
     pub fn reregister_to_heartbeat(&self) {
         self._watchdog_overlord.reregister_to_heartbeat();
+    }
+
+    pub fn error_observable(&self) -> &ErrorObservable {
+        &self.error_observable
     }
 }
