@@ -1,4 +1,4 @@
-use std::{net::SocketAddr, ops::DerefMut, sync::Arc, time::Duration};
+use std::{net::SocketAddr, ops::DerefMut, sync::Arc, time::{Duration, Instant}};
 
 use color_print::cprintln;
 use tokio::{
@@ -100,8 +100,7 @@ impl TcpCan {
     }
 
     pub async fn new(tcp_stream: TcpStream, connection_id: ConnectionId) -> std::io::Result<Self> {
-
-        tcp_stream.set_nodelay(true).unwrap();
+        // tcp_stream.set_nodelay(true).unwrap();
         let (mut rx, mut tx) = tcp_stream.into_split();
 
         let (sync_tx, sync_rx) = oneshot::channel();
@@ -299,8 +298,12 @@ impl TcpCan {
         let mut rx_lock = self.rx_stream.lock().await;
         let rx_stream = rx_lock.deref_mut();
         let mut rx_buffer = [0; 4094];
+        let mut last_send = Instant::now();
         loop {
+            println!("dt = {:?}", Instant::now() - last_send);
             rx_stream.read(&mut rx_buffer).await.unwrap();
+            last_send = Instant::now();
+
             // rx_stream.read_exact(&mut rx_buffer).await;
             // tokio::select! {
             //     rx_res = 

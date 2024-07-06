@@ -56,6 +56,7 @@ impl Network {
                 let Some(frame) = node.recv().await else {
                     break;
                 };
+                println!("rx");
                 for (id, node) in nodes.read().await.iter() {
                     if *id != node_id {
                         // ignore loop back!
