@@ -1,4 +1,4 @@
-use std::{net::SocketAddr, sync::Arc, time::Instant};
+use std::{net::SocketAddr, sync::Arc, time::{Duration, Instant}};
 
 use crate::notification::notify_warning;
 
@@ -44,6 +44,7 @@ impl TcpClient {
                     }
                     break;
                 };
+                continue;
 
                 let network_frame = tnetwork_frame.value;
                 let timestamp = tnetwork_frame.timestamp;

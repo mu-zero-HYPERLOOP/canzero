@@ -298,54 +298,56 @@ impl TcpCan {
     pub async fn recv(&self) -> Option<TNetworkFrame> {
         let mut rx_lock = self.rx_stream.lock().await;
         let rx_stream = rx_lock.deref_mut();
-        let mut rx_buffer = [0; 24];
+        let mut rx_buffer = [0; 4094];
         loop {
-            tokio::select! {
-                rx_res = rx_stream.read_exact(&mut rx_buffer) => {
-                    match rx_res {
-                        Ok(_) => match TcpFrame::from_bin(&rx_buffer).unwrap() {
-                            TcpFrame::NetworkFrame(network_frame) => return Some(network_frame),
-                            TcpFrame::KeepAlive => {
-                                self.wdg.reset().await;
-                            },
-                            TcpFrame::SyncEnd => {
-                                // what a clusterfuck
-                                let mut sync_swap : Option<oneshot::Sender<()>>= None;
-                                let mut sync_complete_signal_guard = self.sync_complete_signal.lock().await;
-                                let sync_complete_signal = sync_complete_signal_guard.deref_mut();
-                                std::mem::swap(sync_complete_signal, &mut sync_swap);
-                                if let Some(sync_signal) = sync_swap {
-                                    if let Err(_) = sync_signal.send(()) {
-                                        cprintln!("<yellow>Received unexpected SYNC_DONE frame.</yellow>");
-                                    }
-                                };
-
-
-
-
-                            },
-                        },
-                        Err(_) => {
-                            cprintln!("<red>TCP connection closed</red>");
-                            if let Some(host) = &self.id_host{
-                                if let Some(node_id) = &self.node_id {
-                                    host.free_id(*node_id);
-                                }
-                            }
-                            return None;
-                        }
-                    }
-                },
-                _wdg_timeout = self.wdg.timeout() =>  {
-                    cprintln!("<red>TCP connection watchdog timed out</red>");
-                    if let Some(host) = &self.id_host{
-                        if let Some(node_id) = &self.node_id {
-                            host.free_id(*node_id);
-                        }
-                    }
-                    return None;
-                },
-            }
+            rx_stream.read(&mut rx_buffer).await.unwrap();
+            // rx_stream.read_exact(&mut rx_buffer).await;
+            // tokio::select! {
+            //     rx_res = 
+            //         match rx_res {
+            //             Ok(_) => match TcpFrame::from_bin(&rx_buffer).unwrap() {
+            //                 TcpFrame::NetworkFrame(network_frame) => return Some(network_frame),
+            //                 TcpFrame::KeepAlive => {
+            //                     self.wdg.reset().await;
+            //                 },
+            //                 TcpFrame::SyncEnd => {
+            //                     // what a clusterfuck
+            //                     let mut sync_swap : Option<oneshot::Sender<()>>= None;
+            //                     let mut sync_complete_signal_guard = self.sync_complete_signal.lock().await;
+            //                     let sync_complete_signal = sync_complete_signal_guard.deref_mut();
+            //                     std::mem::swap(sync_complete_signal, &mut sync_swap);
+            //                     if let Some(sync_signal) = sync_swap {
+            //                         if let Err(_) = sync_signal.send(()) {
+            //                             cprintln!("<yellow>Received unexpected SYNC_DONE frame.</yellow>");
+            //                         }
+            //                     };
+            //
+            //
+            //
+            //
+            //                 },
+            //             },
+            //             Err(_) => {
+            //                 cprintln!("<red>TCP connection closed</red>");
+            //                 if let Some(host) = &self.id_host{
+            //                     if let Some(node_id) = &self.node_id {
+            //                         host.free_id(*node_id);
+            //                     }
+            //                 }
+            //                 return None;
+            //             }
+            //         }
+            //     },
+            //     _wdg_timeout = self.wdg.timeout() =>  {
+            //         cprintln!("<red>TCP connection watchdog timed out</red>");
+            //         if let Some(host) = &self.id_host{
+            //             if let Some(node_id) = &self.node_id {
+            //                 host.free_id(*node_id);
+            //             }
+            //         }
+            //         return None;
+            //     },
+            // }
         }
     }
     pub async fn addr(&self) -> std::io::Result<SocketAddr> {
