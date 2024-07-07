@@ -12,6 +12,7 @@ import Speedometer, {
 } from 'react-speedometer';
 import PowerVis from "../visualizations/power/PowerVis.tsx";
 import useObjectEntryValue from "../hooks/object_entry_value.ts";
+import PowerGraph from "./power/PowerGraph.tsx";
 
 
 interface NodesProps {
@@ -42,7 +43,7 @@ function LevitationConsumption({node, oe}: Readonly<LevitationConsumptionProps>)
                 </Box>
                 <Box width="100%" textAlign="right">
                     <Stack direction="row" justifyContent="right">
-                        <PowerVis/>
+                        <PowerVis value={power}/>
                         <Box>
                             <Typography textAlign="end"> {(power !== undefined) ? <Typography textAlign="end"> {power as number}W </Typography> : <Typography textAlign="end"> -W </Typography>} </Typography>
                         </Box>
@@ -113,7 +114,7 @@ function PowerControl({}: Readonly<NodesProps>) {
                     padding: 1,
                 }}>
                     <Typography textAlign={"left"} paddingTop={1} paddingLeft={2}>
-                        Power Consumption
+                        Individual Power Consumption
                     </Typography>
                     <PowerConsumption/>
 
@@ -125,7 +126,7 @@ function PowerControl({}: Readonly<NodesProps>) {
                         padding: 1,
                     }}>
                         <Typography textAlign={"center"} paddingBottom={1}>
-                            Consumption
+                            Total Power Consumption
                         </Typography>
                         <AnalogGauge/>
                     </Paper>
@@ -135,8 +136,9 @@ function PowerControl({}: Readonly<NodesProps>) {
                         padding: 1,
                     }}>
                         <Typography textAlign={"center"} paddingBottom={1}>
-                            Fancy graph
+                            Power Consumption
                         </Typography>
+                        <PowerGraph/>
                     </Paper>
                 </Stack>
             </Stack>

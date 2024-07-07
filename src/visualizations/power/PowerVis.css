@@ -2,6 +2,8 @@
     position: relative;
     height: 100%;
     width: 60%;
+    --x: 0;
+    container-type: size
 }
 
 #power-vis .red1 {
@@ -30,20 +32,25 @@
     height: 1.5vw;
 }
 
-.arrow-up {
+#power-vis .arrow-up {
     position: absolute;
     border-left: 15px solid transparent;
     border-right: 15px solid transparent;
     border-bottom: 15px solid black;
-    left: 43%;
     top: 15px;
+    left: 90%;
+    transform: translateX(var(--x));
+    transition: transform 200ms ease-out;
+
 }
 
-.arrow-down {
+#power-vis .arrow-down {
     position: absolute;
     border-left: 15px solid transparent;
     border-right: 15px solid transparent;
     border-top: 15px solid #000000;
-    left: 43%;
     top: -6px;
+    left: 90%;
+    transform: translateX(var(--x));
+    transition: transform 200ms ease-out;
 }
