@@ -5,17 +5,33 @@ import {Value} from "../../object_entry/types/Value.tsx";
 
 interface PowerVisProps {
     value: Value | undefined,
+    min: number,
+    max: number,
+    firstThreshold: number,
+    secondThreshold: number,
 }
 
-function PowerVis({value}: Readonly<PowerVisProps>) {
+function PowerVis({value, min, max, firstThreshold, secondThreshold}: Readonly<PowerVisProps>) {
 
     useEffect(() => {
         const arrow = document.getElementById("power-vis")!;
+        if (value !== undefined) {
+            value = value as number
+            let innerThreshold = 24.5
+            let outerThreshold = 48.5
+            let width: number = 0
 
-        if (value === undefined) {
-            arrow.style.setProperty("--x", `${-40}cqh`);
+            if (value <= firstThreshold) {
+                width = ((-outerThreshold) * (firstThreshold - value) + (-innerThreshold) * (value - min)) / (firstThreshold - min)
+            } else if (value <= secondThreshold) {
+                width = ((-innerThreshold) * (secondThreshold - value) + innerThreshold * (value - firstThreshold)) / (secondThreshold - firstThreshold)
+            } else {
+                width = (innerThreshold * (max - value) + outerThreshold * (value - secondThreshold)) / (max - secondThreshold)
+            }
+
+            arrow.style.setProperty("--x", `${width}cqw`);
         } else {
-            arrow.style.setProperty("--x", `${0}vh`);
+            arrow.style.setProperty("--x", `${0}cqw`);
         }
 
     }, []);

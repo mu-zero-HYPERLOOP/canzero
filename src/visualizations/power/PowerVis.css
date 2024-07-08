@@ -1,35 +1,37 @@
 #power-vis {
     position: relative;
-    height: 100%;
     width: 60%;
-    --x: 0;
-    container-type: size
+    --x: 0cqw;
+    container-type: inline-size;
 }
 
 #power-vis .red1 {
     position: absolute;
     border: 2px solid #000000;
-    background-color: #E20000;
+    background-color: #ad0000;
     width: 25%;
     height: 1.5vw;
+    box-shadow: inset 0 0 30px #ff0800;
 }
 
 #power-vis .green {
     position: absolute;
     border: 2px solid #000000;
-    background-color: #009007;
+    background-color: #008307;
     left: 24%;
-    width: 45%;
+    width: 50%;
     height: 1.5vw;
+    box-shadow: inset 0 0 40px #00c009;
 }
 
 #power-vis .red2 {
     position: absolute;
     border: 2px solid #000000;
-    background-color: #E20000;
-    left: 68%;
+    background-color: #ad0000;
+    left: 73%;
     width: 25%;
     height: 1.5vw;
+    box-shadow: inset 0 0 30px #ff0800;
 }
 
 #power-vis .arrow-up {
@@ -38,7 +40,7 @@
     border-right: 15px solid transparent;
     border-bottom: 15px solid black;
     top: 15px;
-    left: 90%;
+    left: 46%;
     transform: translateX(var(--x));
     transition: transform 200ms ease-out;
 
@@ -50,7 +52,7 @@
     border-right: 15px solid transparent;
     border-top: 15px solid #000000;
     top: -6px;
-    left: 90%;
+    left: 46%;
     transform: translateX(var(--x));
     transition: transform 200ms ease-out;
 }
