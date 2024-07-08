@@ -13,6 +13,7 @@ import Speedometer, {
 import PowerVis from "../visualizations/power/PowerVis.tsx";
 import useObjectEntryValue from "../hooks/object_entry_value.ts";
 import PowerGraph from "./power/PowerGraph.tsx";
+import useObjectEntryInfo from "../hooks/object_entry_info.ts";
 
 
 interface NodesProps {
@@ -26,12 +27,14 @@ interface LevitationConsumptionProps {
 
 function LevitationConsumption({node, oe}: Readonly<LevitationConsumptionProps>) {
     const power = useObjectEntryValue(node, oe);
+    const info = useObjectEntryInfo(node, oe);
+
     return (
         <Paper sx={{
             padding: 1,
             backgroundColor: theme.palette.background.paper2,
         }}>
-            <Stack direction="row" justifyContent="space-between" sx={{
+            <Stack direction="row" justifyContent="right" sx={{
                 paddingLeft : 2,
                 paddingRight : 2,
                 margin: 1,
@@ -39,13 +42,13 @@ function LevitationConsumption({node, oe}: Readonly<LevitationConsumptionProps>)
                 <Box sx={{
                     width: "0%",
                 }}>
-                    <Typography> {node}::{oe} </Typography>
+                    <Typography> {oe === "total_power" ? node : oe} </Typography>
                 </Box>
                 <Box width="100%" textAlign="right">
                     <Stack direction="row" justifyContent="right">
                         <PowerVis value={power}/>
                         <Box>
-                            <Typography textAlign="end"> {(power !== undefined) ? <Typography textAlign="end"> {power as number}W </Typography> : <Typography textAlign="end"> -W </Typography>} </Typography>
+                            <Typography textAlign="right" width="2.5vh"> {(power !== undefined) ? <Typography textAlign="end"> {power as number}{info?.unit} </Typography> : <Typography textAlign="end"> -{info?.unit} </Typography>} </Typography>
                         </Box>
                     </Stack>
                 </Box>
@@ -56,9 +59,9 @@ function LevitationConsumption({node, oe}: Readonly<LevitationConsumptionProps>)
 
 function PowerConsumption() {
     return (
-        <Stack direction="row" spacing={2} alignItems="center" sx={{
+        <Stack direction="row" spacing={1} alignItems="center" sx={{
             height: "100%",
-            padding: 2,
+            paddingTop: 1,
         }}>
             <Stack direction="column" justifyContent={"start"} sx={{
                 height: "100%",
@@ -67,21 +70,56 @@ function PowerConsumption() {
                 <LevitationConsumption node={"power_board12"} oe={"total_power"}/>
                 <LevitationConsumption node={"power_board24"} oe={"total_power"}/>
                 <LevitationConsumption node={"input_board"} oe={"system_power_consumption"}/>
+                <LevitationConsumption node={"power_board12"} oe={"levitation_boards_power_channel_current"}/>
+                <LevitationConsumption node={"power_board12"} oe={"guidance_boards_power_channel_current"}/>
+                <LevitationConsumption node={"power_board12"} oe={"motor_driver_power_channel_current"}/>
+                <LevitationConsumption node={"power_board24"} oe={"sdc_signal_channel_current"}/>
+                <LevitationConsumption node={"power_board24"} oe={"sdc_board_power_channel_current"}/>
+                <LevitationConsumption node={"input_board"} oe={"communication_power_consumption"}/>
             </Stack>
         </Stack>
     )
 }
 
-function AnalogGauge() {
+function CommunicationPowerAnalogGauge() {
+    const power = useObjectEntryValue("input_board", "communication_power_consumption");
+
+    return (
+        <>
+            <Box paddingTop="1vh" textAlign="center" >
+                <Speedometer
+                    width={290}
+                    value={(power !== undefined) ? (power as number) : 0}
+                    max={400}
+                    angle={160}
+                    fontFamily='Arial'
+                >
+                    <Background angle={180} color="#000000"/>
+                    <Arc/>
+                    <Needle offset={40} circleRadius={30} circleColor={theme.palette.background.appBar}/>
+                    <DangerPath/>
+                    <Progress/>
+                    <Marks step={50}/>
+                    <Indicator color="#ffffff" y={95} x={130}>
+                    </Indicator>
+                </Speedometer>
+            </Box><Typography marginTop="-235px" textAlign="center" fontSize="1.8em" marginLeft="50px" color="#ffffff">
+            W
+        </Typography>
+        </>
+    )
+}
+
+function SystemPowerAnalogGauge() {
     const power = useObjectEntryValue("input_board", "system_power_consumption");
 
     return (
         <>
-            <Box paddingTop="4vh" textAlign="center">
+            <Box paddingTop="1vh" textAlign="center" >
             <Speedometer
-                width={400}
+                width={290}
                 value={(power !== undefined) ? (power as number) / 1000 : 0}
-                max={5}
+                max={6}
                 angle={160}
                 fontFamily='Arial'
             >
@@ -91,15 +129,14 @@ function AnalogGauge() {
                 <DangerPath/>
                 <Progress/>
                 <Marks step={1}/>
-                <Indicator color="#000000" y={280} x={175}>
+                <Indicator color="#ffffff" y={95} x={125}>
                 </Indicator>
             </Speedometer>
-        </Box><Typography marginTop="-170px" textAlign="center" fontSize="2.5em" marginLeft="70px">
+        </Box><Typography marginTop="-235px" textAlign="center" fontSize="1.8em" marginLeft="55px" color="#ffffff">
             kW
         </Typography>
         </>
     )
-
 }
 
 function PowerControl({}: Readonly<NodesProps>) {
@@ -123,12 +160,16 @@ function PowerControl({}: Readonly<NodesProps>) {
                     <Paper sx={{
                         width: "100%",
                         height: "44vh",
-                        padding: 1,
+                        paddingTop: 1,
                     }}>
-                        <Typography textAlign={"center"} paddingBottom={1}>
+                        <Typography textAlign={"center"} >
                             Total Power Consumption
                         </Typography>
-                        <AnalogGauge/>
+                        <SystemPowerAnalogGauge/>
+                        <Typography textAlign={"center"} paddingTop="7.5vh">
+                            Communication Power Consumption
+                        </Typography>
+                        <CommunicationPowerAnalogGauge/>
                     </Paper>
                     <Paper sx={{
                         width: "100%",

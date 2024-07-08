@@ -14,7 +14,7 @@ function PowerGraph() {
 
     const [autoWidth, setAutoWidth] = useState(0);
 
-    const [maxY, setMaxY] = useState(125);
+    const [maxY, setMaxY] = useState(1600);
     const [minY, setMinY] = useState(-125);
     const [timeDomain, setTimeDomain] = useState(10 * 1000);
 
@@ -348,7 +348,7 @@ function PowerGraph() {
                 valueLabelDisplay="auto"
                 orientation="vertical"
                 min={0}
-                max={1000}
+                max={10000}
                 onChange={handleChange}
                 value={yRange}
                 sx={{top: "5vh",
