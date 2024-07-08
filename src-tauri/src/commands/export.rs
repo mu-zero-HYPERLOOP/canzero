@@ -1,7 +1,6 @@
-
 use canzero_config::config::{Type, TypeRef};
-use std::io::Write;
 use chrono::{Datelike, Timelike};
+use std::io::Write;
 use tauri::api::dialog::FileDialogBuilder;
 
 use crate::{
@@ -9,26 +8,21 @@ use crate::{
     state::cnl_state::CNLState,
 };
 
+struct ObjectEntryExport {
+    pub name: String,
+    pub ty: TypeRef,
+    pub values: Vec<OwnedObjectEntryEvent>,
+}
+
+struct NodeExport {
+    pub name: String,
+    pub object_entry_export: Vec<ObjectEntryExport>,
+}
+
 #[tauri::command]
-pub async fn export(
-    state: tauri::State<'_, CNLState>,
-) -> Result<(), ()> {
-    println!("invoke: export()");
-
-    let cnl = state.lock().await;
-
-    struct ObjectEntryExport {
-        pub name: String,
-        pub ty: TypeRef,
-        pub values: Vec<OwnedObjectEntryEvent>,
-    }
-
-    struct NodeExport {
-        pub name: String,
-        pub object_entry_export: Vec<ObjectEntryExport>,
-    }
-
+pub async fn export_all(state: tauri::State<'_, CNLState>) -> Result<(), ()> {
     let mut export_data: Vec<NodeExport> = vec![];
+    let cnl = state.lock().await;
     for node in cnl.nodes() {
         let mut object_entry_export = vec![];
         for oe in node.object_entries() {
@@ -46,7 +40,56 @@ pub async fn export(
 
     drop(cnl);
 
-    let (tx,rx) = tokio::sync::oneshot::channel::<()>();
+    write_to_fs(export_data).await
+}
+
+#[tauri::command]
+pub async fn export(
+    selected: Vec<(String, String)>,
+    state: tauri::State<'_, CNLState>,
+) -> Result<(), ()> {
+    println!("invoke: export()");
+
+    let cnl = state.lock().await;
+
+    let mut export_data: Vec<NodeExport> = vec![];
+
+    for (node_name, oe_name) in selected {
+        let node = cnl
+            .nodes()
+            .iter()
+            .find(|&n| n.name() == node_name)
+            .ok_or(())?;
+        let oe = node
+            .object_entries()
+            .iter()
+            .find(|&o| o.name() == oe_name)
+            .ok_or(())?;
+        let Some(node_export) = export_data.iter_mut().find(|e| e.name == node_name) else {
+            export_data.push(NodeExport {
+                name: node_name,
+                object_entry_export: vec![ObjectEntryExport {
+                    name: oe_name,
+                    ty: oe.ty().clone(),
+                    values: oe.complete_history().await,
+                }],
+            });
+            continue;
+        };
+        node_export.object_entry_export.push(ObjectEntryExport {
+            name: oe_name,
+            ty: oe.ty().clone(),
+            values: oe.complete_history().await,
+        })
+    }
+
+    drop(cnl);
+
+    write_to_fs(export_data).await
+}
+
+async fn write_to_fs(export_data: Vec<NodeExport>) -> Result<(), ()> {
+    let (tx, rx) = tokio::sync::oneshot::channel::<()>();
 
     tokio::task::spawn_blocking(move || {
         FileDialogBuilder::new()
@@ -188,7 +231,8 @@ pub async fn export(
                                     write!(file, ",").expect("Failed to write to file");
                                 }
                                 first = false;
-                                write!(file, "{}", column.values[i]).expect("Failed to write to file");
+                                write!(file, "{}", column.values[i])
+                                    .expect("Failed to write to file");
                             }
                             writeln!(file).expect("Failed to write to file");
                         }
@@ -199,7 +243,6 @@ pub async fn export(
     })
     .await
     .expect("Failed to join blocking io task");
-
 
     rx.await.expect("Failed to await oneshot duing export");
     println!("EXPORT EXIT");

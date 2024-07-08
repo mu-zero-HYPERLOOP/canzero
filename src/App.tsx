@@ -75,7 +75,7 @@ function CloseDialog({setLoading, open, onClose}: Readonly<CloseDialogProps>) {
                         }}
                         onClick={() => {
                           setLoading(true)
-                          invoke("export", {}).then(() => setLoading(false));
+                          invoke("export_all", {}).then(() => setLoading(false));
                         }}
             >
               <SaveIcon/>

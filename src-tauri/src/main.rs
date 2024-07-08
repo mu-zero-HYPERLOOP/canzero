@@ -77,6 +77,7 @@ async fn main() {
             commands::node_commands::listen_to_heartbeat,
             commands::node_commands::unlisten_from_heartbeat,
             commands::export::export,
+            commands::export::export_all,
             commands::startup::download_network_configuration,
             commands::startup::discover_servers,
             commands::startup::try_connect,

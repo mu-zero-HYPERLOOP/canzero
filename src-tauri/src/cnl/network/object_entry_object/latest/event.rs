@@ -1,4 +1,4 @@
-use std::ops::Deref;
+use std::{ops::Deref, time::Duration};
 
 use serde::{Serialize, ser::SerializeMap};
 
@@ -43,6 +43,10 @@ pub struct OwnedObjectEntryEvent(ObjectEntryValue);
 impl OwnedObjectEntryEvent {
     pub fn new(value : ObjectEntryValue) -> Self {
         Self(value)
+    }
+
+    pub fn timestamp(&self) -> Duration {
+        self.0.timestamp
     }
 }
 

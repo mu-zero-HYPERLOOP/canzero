@@ -110,8 +110,7 @@ function TopBar({
                         onClick={() => {
                             setLoading(true)
                              invoke("export", {
-                                nodes: selected.map((value: [string, string]) => value[0]),
-                                oes: selected.map((value: [string, string]) => value[1])
+                                selected: selected,
                             }).then(() => setLoading(false));
                         }}
             >

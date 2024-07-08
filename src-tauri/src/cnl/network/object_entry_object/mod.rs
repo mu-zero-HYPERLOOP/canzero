@@ -1,4 +1,5 @@
 use std::{
+    cmp::Ordering,
     ops::Deref,
     sync::{atomic::AtomicU64, Arc, OnceLock},
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
@@ -124,9 +125,12 @@ impl ObjectEntryObject {
 
     pub fn friend(&self) -> Option<ObjectEntryRef> {
         match self.object_entry_ref.friend() {
-            Some(friend_name) => {
-                self.node_ref().object_entries().iter().find(|oe| oe.name() == friend_name).cloned()
-            }
+            Some(friend_name) => self
+                .node_ref()
+                .object_entries()
+                .iter()
+                .find(|oe| oe.name() == friend_name)
+                .cloned(),
             None => None,
         }
     }
@@ -463,11 +467,13 @@ impl ObjectEntryObject {
     pub async fn complete_history(&self) -> Vec<OwnedObjectEntryEvent> {
         let store_lock = self.store.lock().await;
         let history = store_lock.history();
-        history
+        let mut history_data = history
             .iter()
             .map(ObjectEntryValue::clone)
             .map(OwnedObjectEntryEvent::new)
-            .collect()
+            .collect::<Vec<OwnedObjectEntryEvent>>();
+        history_data.sort_unstable_by(|val1, val2| val1.timestamp().cmp(&val2.timestamp()));
+        history_data
     }
 
     pub async fn unlisten_from_history(&self, event_name: &str) {
@@ -498,7 +504,7 @@ impl ObjectEntryObject {
         )
     }
 
-    pub async fn vlisten(&self, listener: Arc<dyn ObjectEntryListener + Send + Sync >) -> usize {
+    pub async fn vlisten(&self, listener: Arc<dyn ObjectEntryListener + Send + Sync>) -> usize {
         let mut lck = self.vlisteners.lock().await;
         for (i, vl) in lck.iter_mut().enumerate() {
             if vl.is_none() {
