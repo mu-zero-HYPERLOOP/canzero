@@ -70,6 +70,8 @@ impl TypeDeserializer {
             TypeDeserilaizeInfo::PrimitiveInfo(ty) => {
                 // NOTE get unsigned value from bitslice.
                 let mut bitvec = bitslice[0..self.bit_size].to_bitvec();
+                // NOTE bitvec adopts underlying bit alignment from slice!!! (not wanted here)
+                bitvec.force_align();
                 let byte_padding = 8 * ((bitvec.len() + 7) / 8) - bitvec.len();
                 for _ in 0..byte_padding {
                     bitvec.push(false);
@@ -106,6 +108,8 @@ impl TypeDeserializer {
 
                 // NOTE get unsigned value from bitslice.
                 let mut bitvec = bitslice[0..self.bit_size].to_bitvec();
+                // NOTE bitvec adopts underlying bit alignment from slice!!! (not wanted here)
+                bitvec.force_align();
                 // NOTE pad bits for alignment
                 let byte_padding = 8 * ((bitvec.len() + 7) / 8) - bitvec.len();
                 for _ in 0..byte_padding {
