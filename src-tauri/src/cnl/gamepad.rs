@@ -25,7 +25,7 @@ impl Gamepad {
             Some(msg) => {
                 tokio::spawn(Self::gamepad_task(tx.clone(), gilrs, msg.clone()));
             }
-            None => (),
+            None => cprintln!("<red>no gamepad stream message found!</red>"),
         }
 
         Ok(Self {})
@@ -154,7 +154,7 @@ impl Gamepad {
         assert_eq!(*size, 8);
 
         let mut interval = tokio::time::interval(*stream.min_interval());
-        let mut connected_count = 0usize;
+        let mut connected_count = gilrs.gamepads().collect::<Vec<_>>().len();
         let mut left_trigger = 0f32;
         let mut right_trigger = 0f32;
         let mut x_down = false;
@@ -202,7 +202,7 @@ impl Gamepad {
                         lsb_y = 0f32;
                         rsb_x = 0f32;
                         rsb_y = 0f32;
-                        connected_count -= 1;
+                        connected_count = connected_count.saturating_sub(1);
                     }
                     gilrs::EventType::AxisChanged(axis, value, _) => match axis {
                         gilrs::Axis::LeftStickX => {
