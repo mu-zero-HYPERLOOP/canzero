@@ -286,7 +286,6 @@ impl Gamepad {
                 }
             }
             if connected_count == 1 {
-                println!("{}", rsb_x_signal.byte_offset());
                 let mut data = [0u8; 8];
                 data[0] = ((left_trigger as f64 - *lt2_offset) / *lt2_scale).round() as u8;
                 data[1] = ((right_trigger as f64 - *rt2_offset) / *rt2_scale).round() as u8;

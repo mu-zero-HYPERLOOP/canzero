@@ -1127,7 +1127,7 @@ impl NetworkBuilder {
                         Ordering::Greater
                     }
                 });
-                let oe_count = builder_mapping.len();
+                let oe_count = tx_stream_data.object_entries.len();
                 let mut mappings = vec![];
                 let mut j = 0;
                 let rx_node_data = rx_stream_data.rx_node.0.borrow();
@@ -1137,7 +1137,7 @@ impl NetworkBuilder {
                     .unwrap()
                     .borrow();
                 for i in 0..oe_count {
-                    if builder_mapping[j].0 == i {
+                    if j < builder_mapping.len() && builder_mapping[j].0 == i {
                         // search for object entry in rx_node
                         let oe = rx_node
                             .object_entries()
