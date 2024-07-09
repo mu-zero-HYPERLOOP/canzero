@@ -96,9 +96,9 @@ function CommunicationPowerAnalogGauge() {
 
     return (
         <>
-            <Box paddingTop="1vh" textAlign="center">
+            <Box paddingTop="1vh" textAlign="right" paddingRight="2vh">
                 <Speedometer
-                    width={290}
+                    width={260}
                     value={(power !== undefined) ? (power as number) : 0}
                     max={400}
                     angle={160}
@@ -106,14 +106,14 @@ function CommunicationPowerAnalogGauge() {
                 >
                     <Background angle={180} color="#000000"/>
                     <Arc/>
-                    <Needle offset={40} circleRadius={30} circleColor={theme.palette.background.appBar}/>
+                    <Needle offset={40} circleRadius={25} circleColor={theme.palette.background.appBar}/>
                     <DangerPath/>
                     <Progress/>
                     <Marks step={50}/>
-                    <Indicator color="#ffffff" y={95} x={130}>
+                    <Indicator color="#ffffff" y={90} x={115} fontSize={35}>
                     </Indicator>
                 </Speedometer>
-            </Box><Typography marginTop="-235px" textAlign="center" fontSize="1.8em" marginLeft="50px" color="#ffffff">
+            </Box><Typography marginTop="-205px" textAlign="right" fontSize="1.6em" marginRight="10.5vh" color="#ffffff">
             W
         </Typography>
         </>
@@ -125,9 +125,9 @@ function SystemPowerAnalogGauge() {
 
     return (
         <>
-            <Box paddingTop="1vh" textAlign="center">
+            <Box paddingTop="1vh" paddingLeft="2vh">
                 <Speedometer
-                    width={290}
+                    width={310}
                     value={(power !== undefined) ? (power as number) / 1000 : 0}
                     max={6}
                     angle={160}
@@ -139,10 +139,10 @@ function SystemPowerAnalogGauge() {
                     <DangerPath/>
                     <Progress/>
                     <Marks step={1}/>
-                    <Indicator color="#ffffff" y={95} x={125}>
+                    <Indicator color="#ffffff" y={110} x={125}>
                     </Indicator>
                 </Speedometer>
-            </Box><Typography marginTop="-235px" textAlign="center" fontSize="1.8em" marginLeft="55px" color="#ffffff">
+            </Box><Typography marginTop="-240px" textAlign="left" fontSize="1.8em" marginLeft="16.5vh" color="#ffffff">
             kW
         </Typography>
         </>
@@ -172,11 +172,11 @@ function PowerControl({}: Readonly<NodesProps>) {
                         height: "44vh",
                         paddingTop: 1,
                     }}>
-                        <Typography textAlign={"center"}>
+                        <Typography paddingLeft="7vh">
                             Total Power Consumption
                         </Typography>
                         <SystemPowerAnalogGauge/>
-                        <Typography textAlign={"center"} paddingTop="7.5vh">
+                        <Typography textAlign="right" paddingRight="2vh" paddingTop="7.5vh">
                             Communication Power Consumption
                         </Typography>
                         <CommunicationPowerAnalogGauge/>

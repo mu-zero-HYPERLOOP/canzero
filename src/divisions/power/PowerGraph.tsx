@@ -24,9 +24,15 @@ function PowerGraph() {
     const marginTop = 10;
     const marginBottom = 50;
 
-    const colorPowBoard12TotalPow = "#ff0000";
-    const colorPowBoard24TotalPow = "#00ff00";
-    const colorInputBoardSysPowCons = "#0000ff";
+    const colorPowBoard12TotalPow = "#E8020B";
+    const colorPowBoard24TotalPow = "#1AC938";
+    const colorInputBoardSysPowCons = "#023EFF";
+    const colorLevitationBoard = "#00D7FF";
+    const colorGuidanceBoard = "#FFC403";
+    const colorMotorDriver = "#9F4800";
+    const colorSdcSignal = "#F14CC2";
+    const colorSdcBoard = "#8B2BE2";
+    const colorCommunicationPowCons = "#FF7C01";
 
     const refreshRate = 100;
     const interval = 100;
@@ -59,6 +65,12 @@ function PowerGraph() {
         let pow_board_12_total_pow_data: ObjectEntryEvent[] = [];
         let pow_board_24__total_pow_data: ObjectEntryEvent[] = [];
         let input_board_sys_pow_cons_data: ObjectEntryEvent[] = [];
+        let levitation_board_data: ObjectEntryEvent[] = [];
+        let guidance_board_data: ObjectEntryEvent[] = [];
+        let motor_driver_data: ObjectEntryEvent[] = [];
+        let sdc_signal_data: ObjectEntryEvent[] = [];
+        let sdc_board_data: ObjectEntryEvent[] = [];
+        let communication_pow_cons_data: ObjectEntryEvent[] = [];
 
         let timestamp = 0; // initalized from listen history respnse!
 
@@ -87,22 +99,100 @@ function PowerGraph() {
                 pow_board_24__total_pow_data.push(...event.payload.new_values);
             });
 
-            const respInputBoardSysPowCons = await invoke<ObjectEntryListenHistoryResponse>("listen_to_history_of_object_entry", {
+            const respInputBoardSysPowConsTerm = await invoke<ObjectEntryListenHistoryResponse>("listen_to_history_of_object_entry", {
                 nodeName: "input_board",
                 objectEntryName: "system_power_consumption",
                 frameSize: timeDomain,
                 minInterval: interval // 24fps
             });
-            input_board_sys_pow_cons_data = respInputBoardSysPowCons.history;
-            const unlistenInputBoardSysPowCons = await listen<ObjectEntryHistoryEvent>(respInputBoardSysPowCons.event_name, event => {
+            input_board_sys_pow_cons_data = respInputBoardSysPowConsTerm.history;
+            const unlistenInputBoardSysPowConsTerm = await listen<ObjectEntryHistoryEvent>(respInputBoardSysPowConsTerm.event_name, event => {
                 input_board_sys_pow_cons_data.splice(0, event.payload.deprecated_count);
                 input_board_sys_pow_cons_data.push(...event.payload.new_values);
+            });
+
+            const respLevitationBoardTerm = await invoke<ObjectEntryListenHistoryResponse>("listen_to_history_of_object_entry", {
+                nodeName: "power_board12",
+                objectEntryName: "levitation_boards_power_channel_current",
+                frameSize: timeDomain,
+                minInterval: interval // 24fps
+            });
+            levitation_board_data = respLevitationBoardTerm.history.map((event: ObjectEntryEvent) => {return {value: (event.value as number * 12), timestamp: event.timestamp, delta_time: event.delta_time}});
+            const unlistenLevitationBoardTerm = await listen<ObjectEntryHistoryEvent>(respLevitationBoardTerm.event_name, event => {
+                levitation_board_data.splice(0, event.payload.deprecated_count);
+                levitation_board_data.push(...event.payload.new_values.map((event: ObjectEntryEvent) => {return {value: (event.value as number * 12), timestamp: event.timestamp, delta_time: event.delta_time}}));
+            });
+
+            const respGuidanceBoardTerm = await invoke<ObjectEntryListenHistoryResponse>("listen_to_history_of_object_entry", {
+                nodeName: "power_board12",
+                objectEntryName: "guidance_boards_power_channel_current",
+                frameSize: timeDomain,
+                minInterval: interval // 24fps
+            });
+            guidance_board_data = respGuidanceBoardTerm.history.map((event: ObjectEntryEvent) => {return {value: (event.value as number * 12), timestamp: event.timestamp, delta_time: event.delta_time}});
+            const unlistenGuidanceBoardTerm = await listen<ObjectEntryHistoryEvent>(respGuidanceBoardTerm.event_name, event => {
+                guidance_board_data.splice(0, event.payload.deprecated_count);
+                guidance_board_data.push(...event.payload.new_values.map((event: ObjectEntryEvent) => {return {value: (event.value as number * 12), timestamp: event.timestamp, delta_time: event.delta_time}}));
+            });
+
+            const respMotorDriverTerm = await invoke<ObjectEntryListenHistoryResponse>("listen_to_history_of_object_entry", {
+                nodeName: "power_board12",
+                objectEntryName: "motor_driver_power_channel_current",
+                frameSize: timeDomain,
+                minInterval: interval // 24fps
+            });
+            motor_driver_data = respMotorDriverTerm.history.map((event: ObjectEntryEvent) => {return {value: (event.value as number * 12), timestamp: event.timestamp, delta_time: event.delta_time}});
+            const unlistenMotorDriverTerm = await listen<ObjectEntryHistoryEvent>(respMotorDriverTerm.event_name, event => {
+                motor_driver_data.splice(0, event.payload.deprecated_count);
+                motor_driver_data.push(...event.payload.new_values.map((event: ObjectEntryEvent) => {return {value: (event.value as number * 12), timestamp: event.timestamp, delta_time: event.delta_time}}));
+            });
+
+            const respSdcSignalTerm = await invoke<ObjectEntryListenHistoryResponse>("listen_to_history_of_object_entry", {
+                nodeName: "power_board24",
+                objectEntryName: "sdc_signal_channel_current",
+                frameSize: timeDomain,
+                minInterval: interval // 24fps
+            });
+            sdc_signal_data = respSdcSignalTerm.history.map((event: ObjectEntryEvent) => {return {value: (event.value as number * 24), timestamp: event.timestamp, delta_time: event.delta_time}});
+            const unlistenSdcSignalTerm = await listen<ObjectEntryHistoryEvent>(respSdcSignalTerm.event_name, event => {
+                sdc_signal_data.splice(0, event.payload.deprecated_count);
+                sdc_signal_data.push(...event.payload.new_values.map((event: ObjectEntryEvent) => {return {value: (event.value as number * 24), timestamp: event.timestamp, delta_time: event.delta_time}}));
+            });
+
+            const respSdcBoardTerm = await invoke<ObjectEntryListenHistoryResponse>("listen_to_history_of_object_entry", {
+                nodeName: "power_board24",
+                objectEntryName: "sdc_board_power_channel_current",
+                frameSize: timeDomain,
+                minInterval: interval // 24fps
+            });
+            sdc_board_data = respSdcBoardTerm.history.map((event: ObjectEntryEvent) => {return {value: (event.value as number * 24), timestamp: event.timestamp, delta_time: event.delta_time}});
+            const unlistenSdcBoardTerm = await listen<ObjectEntryHistoryEvent>(respSdcBoardTerm.event_name, event => {
+                sdc_board_data.splice(0, event.payload.deprecated_count);
+                sdc_board_data.push(...event.payload.new_values.map((event: ObjectEntryEvent) => {return {value: (event.value as number * 24), timestamp: event.timestamp, delta_time: event.delta_time}}));
+            });
+
+            const respCommunicationPowConsTerm = await invoke<ObjectEntryListenHistoryResponse>("listen_to_history_of_object_entry", {
+                nodeName: "input_board",
+                objectEntryName: "communication_power_consumption",
+                frameSize: timeDomain,
+                minInterval: interval // 24fps
+            });
+            communication_pow_cons_data = respCommunicationPowConsTerm.history;
+            const unlistenCommunicationPowConsTerm = await listen<ObjectEntryHistoryEvent>(respCommunicationPowConsTerm.event_name, event => {
+                communication_pow_cons_data.splice(0, event.payload.deprecated_count);
+                communication_pow_cons_data.push(...event.payload.new_values);
             });
 
             return () => {
                 unlistenPowBoard12TotalPowTerm();
                 unlistenPowBoard24TotalPowTerm();
-                unlistenInputBoardSysPowCons();
+                unlistenInputBoardSysPowConsTerm();
+                unlistenLevitationBoardTerm();
+                unlistenGuidanceBoardTerm();
+                unlistenMotorDriverTerm();
+                unlistenSdcSignalTerm();
+                unlistenSdcBoardTerm();
+                unlistenCommunicationPowConsTerm();
                 invoke("unlisten_from_history_of_object_entry", {
                     nodeName: "power_board12",
                     objectEntryName: "total_power",
@@ -116,7 +206,37 @@ function PowerGraph() {
                 invoke("unlisten_from_history_of_object_entry", {
                     nodeName: "input_board",
                     objectEntryName: "system_power_consumption",
-                    eventName: respInputBoardSysPowCons.event_name,
+                    eventName: respInputBoardSysPowConsTerm.event_name,
+                }).catch(console.error);
+                invoke("unlisten_from_history_of_object_entry", {
+                    nodeName: "power_board12",
+                    objectEntryName: "levitation_boards_power_channel_current",
+                    eventName: respLevitationBoardTerm.event_name,
+                }).catch(console.error);
+                invoke("unlisten_from_history_of_object_entry", {
+                    nodeName: "power_board12",
+                    objectEntryName: "guidance_boards_power_channel_current",
+                    eventName: respGuidanceBoardTerm.event_name,
+                }).catch(console.error);
+                invoke("unlisten_from_history_of_object_entry", {
+                    nodeName: "power_board12",
+                    objectEntryName: "motor_driver_power_channel_current",
+                    eventName: respMotorDriverTerm.event_name,
+                }).catch(console.error);
+                invoke("unlisten_from_history_of_object_entry", {
+                    nodeName: "power_board24",
+                    objectEntryName: "sdc_signal_channel_current",
+                    eventName: respSdcSignalTerm.event_name,
+                }).catch(console.error);
+                invoke("unlisten_from_history_of_object_entry", {
+                    nodeName: "power_board24",
+                    objectEntryName: "sdc_board_power_channel_current",
+                    eventName: respSdcBoardTerm.event_name,
+                }).catch(console.error);
+                invoke("unlisten_from_history_of_object_entry", {
+                    nodeName: "input_board",
+                    objectEntryName: "communication_power_consumption",
+                    eventName: respCommunicationPowConsTerm.event_name,
                 }).catch(console.error);
             };
         }
@@ -140,6 +260,36 @@ function PowerGraph() {
         inputBoardSysPowConsLine.curve(d3.curveStepAfter);
         inputBoardSysPowConsLine.x((d: any) => xScale(d.timestamp));
         inputBoardSysPowConsLine.y((d: any) => yScale(d.value));
+
+        const levitationBoardLine = d3.line();
+        levitationBoardLine.curve(d3.curveStepAfter);
+        levitationBoardLine.x((d: any) => xScale(d.timestamp));
+        levitationBoardLine.y((d: any) => yScale(d.value));
+
+        const guidanceBoardLine = d3.line();
+        guidanceBoardLine.curve(d3.curveStepAfter);
+        guidanceBoardLine.x((d: any) => xScale(d.timestamp));
+        guidanceBoardLine.y((d: any) => yScale(d.value));
+
+        const motorDriverLine = d3.line();
+        motorDriverLine.curve(d3.curveStepAfter);
+        motorDriverLine.x((d: any) => xScale(d.timestamp));
+        motorDriverLine.y((d: any) => yScale(d.value));
+
+        const sdcSignalLine = d3.line();
+        sdcSignalLine.curve(d3.curveStepAfter);
+        sdcSignalLine.x((d: any) => xScale(d.timestamp));
+        sdcSignalLine.y((d: any) => yScale(d.value));
+
+        const sdcBoardLine = d3.line();
+        sdcBoardLine.curve(d3.curveStepAfter);
+        sdcBoardLine.x((d: any) => xScale(d.timestamp));
+        sdcBoardLine.y((d: any) => yScale(d.value));
+
+        const communicationPowConsLine = d3.line();
+        communicationPowConsLine.curve(d3.curveStepAfter);
+        communicationPowConsLine.x((d: any) => xScale(d.timestamp));
+        communicationPowConsLine.y((d: any) => yScale(d.value));
 
 
         const timeAxis = d3.axisBottom(xScale)
@@ -191,23 +341,59 @@ function PowerGraph() {
             .call(xAxisGrid);
 
         svg.append("text")
-            .attr("x", innerWidth - 20)
+            .attr("x", innerWidth)
             .attr("y", 25)
             .attr("text-anchor", "end")
             .attr("fill", colorPowBoard12TotalPow)
             .text("PowerBoard12");
         svg.append("text")
-            .attr("x", innerWidth - 20)
+            .attr("x", innerWidth)
             .attr("y", 50)
             .attr("text-anchor", "end")
             .attr("fill", colorPowBoard24TotalPow)
             .text("PowerBoard24");
         svg.append("text")
-            .attr("x", innerWidth - 20)
+            .attr("x", innerWidth)
             .attr("y", 75)
             .attr("text-anchor", "end")
             .attr("fill", colorInputBoardSysPowCons)
             .text("SystemPower");
+        svg.append("text")
+            .attr("x", innerWidth)
+            .attr("y", 100)
+            .attr("text-anchor", "end")
+            .attr("fill", colorLevitationBoard)
+            .text("LevitationBoard");
+        svg.append("text")
+            .attr("x", innerWidth)
+            .attr("y", 125)
+            .attr("text-anchor", "end")
+            .attr("fill", colorGuidanceBoard)
+            .text("GuidanceBoard");
+        svg.append("text")
+            .attr("x", innerWidth)
+            .attr("y", 150)
+            .attr("text-anchor", "end")
+            .attr("fill", colorMotorDriver)
+            .text("MotorDriver");
+        svg.append("text")
+            .attr("x", innerWidth)
+            .attr("y", 175)
+            .attr("text-anchor", "end")
+            .attr("fill", colorSdcSignal)
+            .text("SDC Signal");
+        svg.append("text")
+            .attr("x", innerWidth)
+            .attr("y", 200)
+            .attr("text-anchor", "end")
+            .attr("fill", colorSdcBoard)
+            .text("SDC Board");
+        svg.append("text")
+            .attr("x", innerWidth)
+            .attr("y", 225)
+            .attr("text-anchor", "end")
+            .attr("fill", colorCommunicationPowCons)
+            .text("Communication");
 
         const group = graph.append("g");
 
@@ -238,6 +424,60 @@ function PowerGraph() {
             .style("opatimeDomainMscity", 0.5)
             .style("fill", "none")
 
+        group.append("path")
+            .datum(levitation_board_data)
+            .attr("d", levitationBoardLine(levitation_board_data as any))
+            .attr("class", "levitationBoard-line")
+            .style("stroke", colorLevitationBoard)
+            .style("stroke-width", 1.5)
+            .style("opatimeDomainMscity", 0.5)
+            .style("fill", "none")
+
+        group.append("path")
+            .datum(guidance_board_data)
+            .attr("d", guidanceBoardLine(guidance_board_data as any))
+            .attr("class", "guidanceBoard-line")
+            .style("stroke", colorGuidanceBoard)
+            .style("stroke-width", 1.5)
+            .style("opatimeDomainMscity", 0.5)
+            .style("fill", "none")
+
+        group.append("path")
+            .datum(motor_driver_data)
+            .attr("d", motorDriverLine(motor_driver_data as any))
+            .attr("class", "motorDriver-line")
+            .style("stroke", colorMotorDriver)
+            .style("stroke-width", 1.5)
+            .style("opatimeDomainMscity", 0.5)
+            .style("fill", "none")
+
+        group.append("path")
+            .datum(sdc_signal_data)
+            .attr("d", sdcSignalLine(sdc_signal_data as any))
+            .attr("class", "sdcSignal-line")
+            .style("stroke", colorSdcSignal)
+            .style("stroke-width", 1.5)
+            .style("opatimeDomainMscity", 0.5)
+            .style("fill", "none")
+
+        group.append("path")
+            .datum(sdc_board_data)
+            .attr("d", sdcBoardLine(sdc_board_data as any))
+            .attr("class", "sdcBoard-line")
+            .style("stroke", colorSdcBoard)
+            .style("stroke-width", 1.5)
+            .style("opatimeDomainMscity", 0.5)
+            .style("fill", "none")
+
+        group.append("path")
+            .datum(communication_pow_cons_data)
+            .attr("d", communicationPowConsLine(communication_pow_cons_data as any))
+            .attr("class", "communicationPowCons-line")
+            .style("stroke", colorCommunicationPowCons)
+            .style("stroke-width", 1.5)
+            .style("opatimeDomainMscity", 0.5)
+            .style("fill", "none")
+
         let running = true;
         const timeShiftMs = 0;
 
@@ -263,6 +503,30 @@ function PowerGraph() {
             group.select(".inputBoardSysPowCons-line")
                 .datum(input_board_sys_pow_cons_data as any)
                 .attr("d", inputBoardSysPowConsLine);
+
+            group.select(".levitationBoard-line")
+                .datum(levitation_board_data as any)
+                .attr("d", levitationBoardLine);
+
+            group.select(".guidanceBoard-line")
+                .datum(guidance_board_data as any)
+                .attr("d", guidanceBoardLine);
+
+            group.select(".motorDriver-line")
+                .datum(motor_driver_data as any)
+                .attr("d", motorDriverLine);
+
+            group.select(".sdcSignal-line")
+                .datum(sdc_signal_data as any)
+                .attr("d", sdcSignalLine);
+
+            group.select(".sdcBoard-line")
+                .datum(sdc_board_data as any)
+                .attr("d", sdcBoardLine);
+
+            group.select(".communicationPowCons-line")
+                .datum(communication_pow_cons_data as any)
+                .attr("d", communicationPowConsLine);
 
         }
 
