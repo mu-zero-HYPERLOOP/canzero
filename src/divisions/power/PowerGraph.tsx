@@ -600,7 +600,7 @@ function PowerGraph() {
                         max={60}
                         value={xRange}
                         onChange={handleXChange}
-                        sx={{left: "1vh"}}
+                        sx={{width: "98%"}}
                     />
 
                 </Stack>

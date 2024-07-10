@@ -55,7 +55,7 @@ function LevitationConsumption({node, oe}: Readonly<LevitationConsumptionProps>)
         }}>
             <Stack direction="row" justifyContent="space-between" sx={{
                 paddingLeft: 1,
-                margin: 1,
+                margin: 0.75,
             }}>
                 <Typography width="31vh"> {oe === "total_power" ? node : oe} </Typography>
                 <PowerVis value={power} min={min} max={max} firstThreshold={0.1 * max} secondThreshold={0.8 * max}/>
@@ -69,23 +69,21 @@ function LevitationConsumption({node, oe}: Readonly<LevitationConsumptionProps>)
 
 function PowerConsumption() {
     return (
-        <Stack direction="row" spacing={1} alignItems="center" sx={{
+        <Stack direction="row" alignItems="center" sx={{
             height: "100%",
             paddingTop: 1,
         }}>
             <Stack direction="column" justifyContent={"start"} sx={{
                 height: "100%",
                 width: "100%",
-            }} spacing={1}>
+            }} spacing={0.8}>
                 <LevitationConsumption node={"power_board12"} oe={"total_power"}/>
                 <LevitationConsumption node={"power_board24"} oe={"total_power"}/>
-                <LevitationConsumption node={"input_board"} oe={"system_power_consumption"}/>
                 <LevitationConsumption node={"power_board12"} oe={"levitation_boards_power_channel_current"}/>
                 <LevitationConsumption node={"power_board12"} oe={"guidance_boards_power_channel_current"}/>
                 <LevitationConsumption node={"power_board12"} oe={"motor_driver_power_channel_current"}/>
                 <LevitationConsumption node={"power_board24"} oe={"sdc_signal_channel_current"}/>
                 <LevitationConsumption node={"power_board24"} oe={"sdc_board_power_channel_current"}/>
-                <LevitationConsumption node={"input_board"} oe={"communication_power_consumption"}/>
             </Stack>
         </Stack>
     )
@@ -151,13 +149,13 @@ function SystemPowerAnalogGauge() {
 
 function PowerControl({}: Readonly<NodesProps>) {
     return (
-        <Stack direction="column" sx={{margin: 2}}>
+        <Stack direction="column" spacing={2} sx={{margin: 2}}>
             <Stack direction="row"
                    justifyContent="space-evenly"
                    spacing={2}>
                 <Paper sx={{
                     width: "65%",
-                    height: "89vh",
+                    height: "44vh",
                     padding: 1,
                 }}>
                     <Typography textAlign={"left"} paddingTop={1} paddingLeft={2}>
@@ -181,18 +179,18 @@ function PowerControl({}: Readonly<NodesProps>) {
                         </Typography>
                         <CommunicationPowerAnalogGauge/>
                     </Paper>
-                    <Paper sx={{
-                        width: "100%",
-                        height: "44vh",
-                        padding: 1,
-                    }}>
-                        <Typography textAlign={"center"} paddingBottom={1}>
-                            Power Consumption
-                        </Typography>
-                        <PowerGraph/>
-                    </Paper>
                 </Stack>
             </Stack>
+            <Paper sx={{
+                width: "100%",
+                height: "44vh",
+                paddingTop: 2,
+            }}>
+                <Typography textAlign={"center"} paddingBottom={1}>
+                    Power Consumptions
+                </Typography>
+                <PowerGraph/>
+            </Paper>
         </Stack>
     );
 }
