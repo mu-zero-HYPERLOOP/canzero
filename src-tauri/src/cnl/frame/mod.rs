@@ -46,10 +46,8 @@ pub struct FrameValue {
 }
 
 impl FrameValue {
-    pub fn new(attributes : Vec<Attribute>) -> Self{
-        Self {
-            attributes
-        }
+    pub fn new(attributes: Vec<Attribute>) -> Self {
+        Self { attributes }
     }
 }
 
@@ -240,8 +238,8 @@ impl Serialize for Value {
         S: serde::Serializer,
     {
         match &self {
-            Value::UnsignedValue(value) => serializer.serialize_u64(*value),
-            Value::SignedValue(value) => serializer.serialize_i64(*value),
+            Value::UnsignedValue(value) => serializer.serialize_str(&value.to_string()),
+            Value::SignedValue(value) => serializer.serialize_str(&value.to_string()),
             Value::RealValue(value) => serializer.serialize_f64(*value),
             Value::StructValue(attributes) => {
                 let mut map = serializer.serialize_map(Some(attributes.len()))?;
