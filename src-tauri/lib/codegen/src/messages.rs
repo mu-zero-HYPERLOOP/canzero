@@ -356,7 +356,7 @@ pub fn generate_messages(
     // deserialize
     for message in rx_messages {
         let message_type_name = format!("{namespace}_message_{}", message.name());
-        // function to serialize the message struct into a can frame!
+        // function to de-serialize the can frame into a message struct!
         let deserialize_func_name = format!("{namespace}_deserialize_{message_type_name}");
         let mut deserialize_def = format!(
 "static void {deserialize_func_name}({namespace}_frame* frame, {message_type_name}* msg) {{

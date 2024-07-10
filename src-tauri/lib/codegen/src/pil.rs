@@ -20,7 +20,7 @@ pub fn generate_pil(
         "typedef struct {{
 {indent}uint32_t id;
 {indent}uint8_t dlc;
-{indent}uint8_t data[8];
+{indent}__attribute__((aligned(alignof(uint64_t)))) uint8_t data[8];
 }} {can_frame_name};\n"
     );
     header.push_str(&can_frame_type_def);
