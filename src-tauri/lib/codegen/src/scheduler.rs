@@ -5,6 +5,8 @@ use canzero_config::config;
 use crate::errors::Result;
 use crate::options::Options;
 
+const GET_RESP_FRAGMENTATION_INTERVAL: usize = 100usize;
+
 pub fn generate_scheduler(
     network_config: &config::NetworkRef,
     node_config: &config::NodeRef,
@@ -286,7 +288,7 @@ static void scheduler_unschedule() {{
 {indent}scheduler.size -= 1;
 {indent}scheduler_reschedule(scheduler.heap[0]->climax);
 }}
-static const uint32_t get_resp_fragmentation_interval = 10;
+static const uint32_t get_resp_fragmentation_interval = {GET_RESP_FRAGMENTATION_INTERVAL};
 static void schedule_get_resp_fragmentation_job(uint32_t *fragmentation_buffer, uint8_t size, uint8_t od_index, uint8_t client_id) {{
 {indent}job_t *fragmentation_job = job_pool_allocator_alloc();
 {indent}fragmentation_job->climax = canzero_get_time() + get_resp_fragmentation_interval;
