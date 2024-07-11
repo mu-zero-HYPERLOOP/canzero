@@ -184,7 +184,7 @@ function Graph() {
       .attr("transform", `translate(${marginLeft},${marginTop})`)
 
     svg.append("defs").append("clipPath").attr("id", "clip").append("rect")
-      .attr("width", innerWidth)
+      .attr("width", Math.max(innerWidth, 0))
       .attr("height", innerHeight);
 
     const graph = svg.append("g");

@@ -231,9 +231,7 @@ export function NodeList() {
 
 function ExportListButton() {
     return (
-        <li>
-            <ListItemButtonLink to="/Logging" text="Export" icon={<SaveIcon/>}/>
-        </li>
+        <ListItemButtonLink to="/Logging" text="Export" icon={<SaveIcon/>}/>
     );
 }
 

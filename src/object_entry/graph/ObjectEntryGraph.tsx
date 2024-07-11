@@ -113,6 +113,7 @@ function ObjectEntryGraph({
             refreshRate={refreshRate}
             timeDomainMs={timeDomainState}
             timeShiftMs={0}
+            key={acc}
           />);
         } else if (ty.id == "enum") {
           let enumInfo = ty.info as EnumTypeInfo;
@@ -130,6 +131,7 @@ function ObjectEntryGraph({
             refreshRate={refreshRate}
             timeDomainMs={timeDomainState}
             timeShiftMs={smoothMode ? updateIntervalMillis : 0}
+            key={acc}
           />);
         } else if (ty.id == "struct") {
           let structInfo = ty.info as StructTypeInfo;
