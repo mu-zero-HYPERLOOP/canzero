@@ -367,10 +367,6 @@ function CustomAppBar({ open, toggleOpen }: Readonly<CustomAppBarProps>) {
               <p>{commandList.option1Label}</p>
             </AppBarButton>
 
-            <AppBarButton color="cmdExtra" disabled={commandList.disableOption2} onClick={commandList?.option2Command} >
-              <p>{commandList.option2Label}</p>
-            </AppBarButton>
-
           </Stack>
           <Stack
             direction="row"

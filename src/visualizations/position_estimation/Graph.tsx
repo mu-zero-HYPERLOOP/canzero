@@ -7,7 +7,8 @@ import { invoke } from "@tauri-apps/api";
 import { ObjectEntryHistoryEvent } from "../../object_entry/types/events/ObjectEntryHistoryEvent";
 
 import * as d3 from "d3";
-import { Box, Button, ButtonGroup, Stack } from "@mui/material";
+import { Box, Button, ButtonGroup, Stack, Typography } from "@mui/material";
+import useObjectEntryValue from "../../hooks/object_entry_value";
 
 const nodeName = "input_board";
 const positionOe = "position";
@@ -205,14 +206,14 @@ function Graph() {
       .call(yAxisGrid);
 
 
-    for (let [i, oe] of oes.entries()) {
-      svg.append("text")
-        .attr("x", innerWidth - 20)
-        .attr("y", i * 25)
-        .attr("text-anchor", "end")
-        .attr("fill", lineColors[i])
-        .text(oe);
-    }
+    // for (let [i, oe] of oes.entries()) {
+    //   svg.append("text")
+    //     .attr("x", innerWidth - 150)
+    //     .attr("y", i * 25)
+    //     .attr("text-anchor", "start")
+    //     .attr("fill", lineColors[i])
+    //     .text(`${oe} : ${(1 as number)?.toFixed(2)}`);
+    // }
     const group = graph.append("g");
 
     for (let [i, oe] of oes.entries()) {
@@ -291,40 +292,64 @@ function Graph() {
 
   }, [autoWidth, nodeName, oes, minY, maxY, timeDomain]);
 
+  const pos = useObjectEntryValue("input_board", "position");
+  const vel = useObjectEntryValue("input_board", "velocity");
+  const acc = useObjectEntryValue("input_board", "acceleration");
+
   return (
     <Stack direction="row" spacing={2} sx={{
-      height: "100%",
+      width: "calc(100% + 9.8em)",
+      position: "absolute"
     }} alignItems="start">
       <svg ref={svgRef}></svg>
 
       <Box paddingTop={1} paddingRight={1}>
-      <ButtonGroup variant="contained" aria-label="Basic button group" orientation="vertical">
-        <Button variant={mode == Mode.Position ? "contained" : "text"}
-          onClick={() => setMode(Mode.Position)}
-          sx={{
-            width: "10em",
-          }}
-        >
-          Position
-        </Button>
-        <Button variant={mode == Mode.Velocity ? "contained" : "text"}
-          onClick={() => setMode(Mode.Velocity)}
-          sx={{
-            width: "10em",
-          }}
-        >
-          Velocity
-        </Button>
-        <Button variant={mode == Mode.Acceleration ? "contained" : "text"}
-          onClick={() => setMode(Mode.Acceleration)}
-          sx={{
-            width: "10em",
-          }}
-        >
-          Acceleration
-        </Button>
-      </ButtonGroup>
+        <ButtonGroup variant="contained" aria-label="Basic button group" orientation="vertical">
+          <Button variant={mode == Mode.Position ? "contained" : "text"}
+            onClick={() => setMode(Mode.Position)}
+            sx={{
+              width: "10em",
+            }}
+          >
+            Position
+          </Button>
+          <Button variant={mode == Mode.Velocity ? "contained" : "text"}
+            onClick={() => setMode(Mode.Velocity)}
+            sx={{
+              width: "10em",
+            }}
+          >
+            Velocity
+          </Button>
+          <Button variant={mode == Mode.Acceleration ? "contained" : "text"}
+            onClick={() => setMode(Mode.Acceleration)}
+            sx={{
+              width: "10em",
+            }}
+          >
+            Acceleration
+          </Button>
+        </ButtonGroup>
       </Box>
+      <Stack direction="column" sx={{
+        position: "relative",
+        right: "24em",
+        top: "1em",
+      }}>  
+        <Typography noWrap textAlign="right" sx={{
+          marginRight: "1.2rem"
+        }}>
+          {`Position:  ${(pos as number)?.toFixed(2)}m`}
+        </Typography>
+        <Typography noWrap textAlign="right" sx={{
+          marginRight: "0.3rem",
+        }}>
+          {`Velocity: ${(vel as number)?.toFixed(2)}m/s`}
+        </Typography>
+        <Typography noWrap textAlign="right">
+          {`Acceleration: ${(acc as number)?.toFixed(2)}m/s²`}
+        </Typography>
+      </Stack>
     </Stack>
   );
 }

@@ -15,11 +15,18 @@
   --dslim_port_temperature: #000000;
   --motor_driver_temperature: #000000;
   --cooling_reservoir_temperature: #000000;
+  --supercap_temperature: #000000;
 }
 
 #temperature_vis .mlu1 {
   fill: var(--mlu1_temperature);
-  transition: fill 1s linear;
+  transition: fill 100ms linear;
+  stroke: #000000;
+  stroke-miterlimit: 10;
+}
+
+#temperature_vis .scaps {
+  fill: var(--supercap_temperature);
   stroke: #000000;
   stroke-miterlimit: 10;
 }
@@ -27,84 +34,84 @@
 
 #temperature_vis .mlu2 {
   fill: var(--mlu2_temperature);
-  transition: fill 1s linear;
+  transition: fill 100ms linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }
 
 #temperature_vis .mlu3 {
   fill: var(--mlu3_temperature);
-  transition: fill 1s linear;
+  transition: fill 100ms linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }
 
 #temperature_vis .mlu4 {
   fill: var(--mlu4_temperature);
-  transition: fill 1s linear;
+  transition: fill 100ms linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }
 
 #temperature_vis .mlu5 {
   fill: var(--mlu5_temperature);
-  transition: fill 1s linear;
+  transition: fill 100ms linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }
 
 #temperature_vis .mlu6 {
   fill: var(--mlu6_temperature);
-  transition: fill 1s linear;
+  transition: fill 100ms linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }
 
 #temperature_vis .mgu1_starboard {
   fill: var(--mgu1_starboard_temperature);
-  transition: fill 1s linear;
+  transition: fill 100ms linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }
 
 #temperature_vis .mgu1_port {
   fill: var(--mgu1_port_temperature);
-  transition: fill 1s linear;
+  transition: fill 100ms linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }
 
 #temperature_vis .mgu2_starboard {
   fill: var(--mgu2_starboard_temperature);
-  transition: fill 1s linear;
+  transition: fill 100ms linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }
 
 #temperature_vis .mgu2_port {
   fill: var(--mgu2_port_temperature);
-  transition: fill 1s linear;
+  transition: fill 100ms linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }
 
 #temperature_vis .ebox1 {
   fill: var(--ebox1_temperature);
-  transition: fill 1s linear;
+  transition: fill 100ms linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }
 
 #temperature_vis .ebox2 {
   fill: var(--ebox2_temperature);
-  transition: fill 1s linear;
+  transition: fill 100ms linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }
 
 #temperature_vis .motor_driver_board {
   fill: var(--motor_driver_temperature);
-  transition: fill 1s linear;
+  transition: fill 100ms linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }
@@ -112,20 +119,20 @@
 #temperature_vis .cooling_reservoir {
   fill: var(--cooling_reservoir_temperature);
   stroke: #000000;
-  transition: fill 1s linear;
+  transition: fill 100ms linear;
   stroke-miterlimit: 10;
 }
 
 #temperature_vis .dslim_starboard {
   fill: var(--dslim_starboard_temperature);
-  transition: fill 1s linear;
+  transition: fill 100ms linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }
 
 #temperature_vis .dslim_port {
   fill: var(--dslim_port_temperature);
-  transition: fill 1s linear;
+  transition: fill 100ms linear;
   stroke: #000000;
   stroke-miterlimit: 10;
 }

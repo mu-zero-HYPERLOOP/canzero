@@ -1,14 +1,14 @@
-import { Paper } from "@mui/material";
+import { Box, Paper } from "@mui/material";
 import Graph from "./Graph";
 
 
-function PositionEstimationVis(){
+function PositionEstimationVis() {
   return (
     <Paper sx={{
-      width : "100%",
+      width: "100%",
       height: "26.5vh",
     }}>
-      <Graph/>
+      <Graph />
     </Paper>
   );
 
