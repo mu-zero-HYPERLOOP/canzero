@@ -7,6 +7,7 @@ import StateVis from '../visualizations/state/StateVis.tsx';
 import TemperatureVis from '../visualizations/temperature/TemperatureVis.tsx';
 import PositionEstimationVis from '../visualizations/position_estimation/PositionEstimationVis.tsx';
 import FsmVis from '../visualizations/fsm/FsmVis.tsx';
+import Link24Vis from '../visualizations/link24/Link24Vis.tsx';
 
 interface OverviewProps {
     nodes: NodeInformation[];
@@ -28,7 +29,7 @@ function OverviewPanel({}: Readonly<OverviewProps>) {
           <Paper sx={{
             width: "100%",
           }}>
-            <SdcVis />
+            <Link24Vis />
           </Paper>
           <Paper sx={{
             width: "100%",
@@ -47,7 +48,13 @@ function OverviewPanel({}: Readonly<OverviewProps>) {
         <FsmVis/>
         <ErrorList width="50%" height="27vh"/>
       </Stack>
+      <Stack direction="row" spacing={2}>
       <PositionEstimationVis/>
+      <Paper sx={{
+        width: "50%",
+      }}>
+      </Paper>
+      </Stack>
     </Stack>
   );
 }

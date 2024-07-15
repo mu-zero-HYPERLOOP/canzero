@@ -1,118 +1,8 @@
 
 import { useEffect } from "react";
 import "./TemperatureVis.css"
-import { invoke } from "@tauri-apps/api";
-import { ObjectEntryListenLatestResponse } from "../../object_entry/types/events/ObjectEntryListenLatestResponse";
-import { ObjectEntryEvent } from "../../object_entry/types/events/ObjectEntryEvent";
-import { listen } from "@tauri-apps/api/event";
-import { ObjectEntryInformation } from "../../object_entry/types/ObjectEntryInformation";
-import { IntTypeInfo, RealTypeInfo, UIntTypeInfo } from "../../object_entry/types/Type";
 import { Paper, Stack, Tooltip, Typography } from "@mui/material";
 import useObjectEntryValue from "../../hooks/object_entry_value";
-
-
-interface Color {
-  r: number,
-  g: number,
-  b: number,
-}
-
-function learpColor(alpha: number, colorA: Color, colorB: Color): Color {
-  return {
-    r: alpha * colorA.r + (1.0 - alpha) * colorB.r,
-    g: alpha * colorA.g + (1.0 - alpha) * colorB.g,
-    b: alpha * colorA.b + (1.0 - alpha) * colorB.b
-  }
-}
-
-function colorToCss(color: Color): string {
-  return `rgb(${color.r},${color.g},${color.b}`;
-}
-
-const hot: Color = {
-  r: 242,
-  g: 5,
-  b: 5,
-};
-
-const cold: Color = {
-  r: 195,
-  g: 197,
-  b: 203
-}
-
-const MLU1_OE = { nodeName: "levitation_board1", objectEntryName: "magnet_temperature_left1" };
-const MLU2_OE = { nodeName: "levitation_board2", objectEntryName: "magnet_temperature_left1" };
-const MLU3_OE = { nodeName: "levitation_board3", objectEntryName: "magnet_temperature_left1" };
-const MLU4_OE = { nodeName: "levitation_board1", objectEntryName: "magnet_temperature_right1" };
-const MLU5_OE = { nodeName: "levitation_board2", objectEntryName: "magnet_temperature_right1" };
-const MLU6_OE = { nodeName: "levitation_board3", objectEntryName: "magnet_temperature_right1" };
-
-const MGU1_STARBOARD_OE = { nodeName: "guidance_board_front", objectEntryName: "magnet_temperature_left1" };
-const MGU1_PORT_OE = { nodeName: "guidance_board_front", objectEntryName: "magnet_temperature_right1" };
-const MGU2_STARBOARD_OE = { nodeName: "guidance_board_back", objectEntryName: "magnet_temperature_left1" };
-const MGU2_PORT_OE = { nodeName: "guidance_board_back", objectEntryName: "magnet_temperature_right1" };
-
-const DSLIM_STARBOARD_OE = { nodeName: "motor_driver", objectEntryName: "lim_temperature1" };
-const DSLIM_PORT_OE = { nodeName: "motor_driver", objectEntryName: "lim_temperature2" };
-
-const EBOX1_OE = { nodeName: "input_board", objectEntryName: "ebox_temperature" };
-const EBOX2_OE = { nodeName: "input_board", objectEntryName: "buck_temperature" };
-
-const MOTOR_DRIVER_OR = { nodeName: "motor_driver", objectEntryName: "board_max_temperature" }; // TODO
-const COOLING_RESERVOIR_OE = { nodeName: "input_board", objectEntryName: "cooling_cycle_temperature" };
-
-
-// interface OeId {
-//   nodeName: string,
-//   objectEntryName: string,
-// }
-//
-// async function registerOe(oe: OeId, property: string, element: HTMLElement) {
-//   const info = await invoke<ObjectEntryInformation>("object_entry_information", oe as any);
-//   let min: number, max: number;
-//   switch (info.ty.id) {
-//     case "int": {
-//       const typeInfo = info.ty.info as IntTypeInfo;
-//       const bitSize = typeInfo.bit_size;
-//       max = Math.pow(2, bitSize / 2) - 1;
-//       min = -Math.pow(2, bitSize / 2);
-//       break;
-//     }
-//     case "uint": {
-//       const typeInfo = info.ty.info as UIntTypeInfo;
-//       const bitSize = typeInfo.bit_size;
-//       max = Math.pow(2, bitSize / 2) - 1;
-//       min = -Math.pow(2, bitSize / 2);
-//       break;
-//     }
-//     case "real": {
-//       const typeInfo = info.ty.info as RealTypeInfo;
-//       max = typeInfo.max;
-//       min = typeInfo.min;
-//       break;
-//     }
-//     case "enum":
-//     case "struct":
-//       return () => { };
-//   }
-//   const resp = await invoke<ObjectEntryListenLatestResponse>("listen_to_latest_object_entry_value", oe as any);
-//   if (resp.latest !== undefined && resp.latest !== null) {
-//     const alpha = ((resp.latest.value as number) + min) / (max - min);
-//     const cssColor = colorToCss(learpColor(alpha, hot, cold));
-//     element.style.setProperty(property, cssColor);
-//   }
-//   const unlistenJs = await listen<ObjectEntryEvent>(resp.event_name, event => {
-//     const alpha = ((event.payload.value as number) + min) / (max - min);
-//     const cssColor = colorToCss(learpColor(alpha, hot, cold));
-//     element.style.setProperty(property, cssColor);
-//   });
-//
-//   return () => {
-//     unlistenJs();
-//     invoke("unlisten_from_latest_object_entry_value", oe as any);
-//   }
-// }
 
 
 function TemperatureVis() {
@@ -225,11 +115,6 @@ function TemperatureVis() {
       svg.style.setProperty("--mlu6_temperature", "#00f");
     }
   }, [l3r]);
-
-  // --mgu1_starboard_temperature: #000000;
-  // --mgu1_port_temperature: #000000;
-  // --mgu2_starboard_temperature: #000000;
-  // --mgu2_port_temperature: #000000;
 
   useEffect(() => {
     const svg = document.getElementById("temperature_vis")!;

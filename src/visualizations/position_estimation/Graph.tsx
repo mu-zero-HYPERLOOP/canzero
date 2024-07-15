@@ -298,7 +298,7 @@ function Graph() {
 
   return (
     <Stack direction="row" spacing={2} sx={{
-      width: "calc(100% + 9.8em)",
+      width: "calc(50% + 9.8em)",
       position: "absolute"
     }} alignItems="start">
       <svg ref={svgRef}></svg>
