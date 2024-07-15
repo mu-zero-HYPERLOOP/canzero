@@ -8,6 +8,7 @@ import TemperatureVis from '../visualizations/temperature/TemperatureVis.tsx';
 import PositionEstimationVis from '../visualizations/position_estimation/PositionEstimationVis.tsx';
 import FsmVis from '../visualizations/fsm/FsmVis.tsx';
 import Link24Vis from '../visualizations/link24/Link24Vis.tsx';
+import VoltagesValues from "./VoltagesValues.tsx";
 
 interface OverviewProps {
     nodes: NodeInformation[];
@@ -19,6 +20,7 @@ function OverviewPanel({}: Readonly<OverviewProps>) {
       padding : 2,
     }}>
       <Stack direction="row" spacing={2} sx={{
+        height: "33vh",
         justifyContent: "space-around",
       }}>
         <TemperatureVis />
@@ -50,10 +52,7 @@ function OverviewPanel({}: Readonly<OverviewProps>) {
       </Stack>
       <Stack direction="row" spacing={2}>
       <PositionEstimationVis/>
-      <Paper sx={{
-        width: "50%",
-      }}>
-      </Paper>
+        <VoltagesValues width="50%" height="26.5vh"/>
       </Stack>
     </Stack>
   );

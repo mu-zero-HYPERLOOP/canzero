@@ -6,7 +6,7 @@ import PowerVis from "../visualizations/power/PowerVis.tsx";
 import useObjectEntryValue from "../hooks/object_entry_value.ts";
 import PowerGraph from "./power/PowerGraph.tsx";
 import useObjectEntryInfo from "../hooks/object_entry_info.ts";
-import {IntTypeInfo, RealTypeInfo, UIntTypeInfo} from "../object_entry/types/Type.tsx";
+import {getMax, getMin} from "../object_entry/types/ObjectEntryInformation.tsx";
 
 
 interface NodesProps {
@@ -22,29 +22,9 @@ function LevitationConsumption({node, oe}: Readonly<LevitationConsumptionProps>)
     const power = useObjectEntryValue(node, oe);
     const info = useObjectEntryInfo(node, oe);
 
-    let min: number = 0
-    let max: number = 0
+    let min: number = getMin(info)
+    let max: number = getMax(info)
 
-    switch (info?.ty.id) {
-        case "uint": {
-            const typeInfo = info?.ty.info as UIntTypeInfo;
-            const bitSize = typeInfo.bit_size;
-            max = Math.pow(2, bitSize) - 1; // NOTE might have some minor rounding errors.
-            break
-        }
-        case "int": {
-            const typeInfo = info?.ty.info as IntTypeInfo;
-            const bitSize = typeInfo.bit_size;
-            max = Math.pow(2, bitSize - 1) - 1; // NOTE might have some minor rounding errors.
-            min = -Math.pow(2, bitSize - 1); // NOTE might have some minor rounding errors.
-            break
-        }
-        case "real": {
-            const typeInfo = info?.ty.info as RealTypeInfo;
-            min = typeInfo.min
-            max = typeInfo.max
-        }
-    }
 
     return (
         <Paper sx={{
@@ -96,7 +76,7 @@ function CommunicationPowerAnalogGauge() {
         <>
             <Box paddingTop="1vh" textAlign="right" paddingRight="2vh">
                 <Speedometer
-                    width={260}
+                    width={240}
                     value={(power !== undefined) ? (power as number) : 0}
                     max={400}
                     angle={160}
@@ -108,10 +88,10 @@ function CommunicationPowerAnalogGauge() {
                     <DangerPath/>
                     <Progress/>
                     <Marks step={50}/>
-                    <Indicator color="#ffffff" y={90} x={115} fontSize={35}>
+                    <Indicator color="#ffffff" y={85} x={100} fontSize={35}>
                     </Indicator>
                 </Speedometer>
-            </Box><Typography marginTop="-205px" textAlign="right" fontSize="1.6em" marginRight="10.5vh" color="#ffffff">
+            </Box><Typography marginTop="-18vh" textAlign="right" fontSize="1.6em" marginRight="10vh" color="#ffffff">
             W
         </Typography>
         </>
@@ -125,7 +105,7 @@ function SystemPowerAnalogGauge() {
         <>
             <Box paddingTop="1vh" paddingLeft="2vh">
                 <Speedometer
-                    width={310}
+                    width={280}
                     value={(power !== undefined) ? (power as number) / 1000 : 0}
                     max={6}
                     angle={160}
@@ -137,10 +117,10 @@ function SystemPowerAnalogGauge() {
                     <DangerPath/>
                     <Progress/>
                     <Marks step={1}/>
-                    <Indicator color="#ffffff" y={110} x={125}>
+                    <Indicator color="#ffffff" y={95} x={120}>
                     </Indicator>
                 </Speedometer>
-            </Box><Typography marginTop="-240px" textAlign="left" fontSize="1.8em" marginLeft="16.5vh" color="#ffffff">
+            </Box><Typography marginTop="-21vh" textAlign="left" fontSize="1.8em" marginLeft="16vh" color="#ffffff">
             kW
         </Typography>
         </>
@@ -170,7 +150,7 @@ function PowerControl({}: Readonly<NodesProps>) {
                         height: "44vh",
                         paddingTop: 1,
                     }}>
-                        <Typography paddingLeft="7vh">
+                        <Typography paddingLeft="6vh">
                             Total Power Consumption
                         </Typography>
                         <SystemPowerAnalogGauge/>

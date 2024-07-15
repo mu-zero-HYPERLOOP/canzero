@@ -1,7 +1,7 @@
 
 import { useEffect } from "react";
 import "./TemperatureVis.css"
-import { Paper, Stack, Tooltip, Typography } from "@mui/material";
+import { Paper, Stack, Tooltip } from "@mui/material";
 import useObjectEntryValue from "../../hooks/object_entry_value";
 
 
@@ -265,13 +265,7 @@ function TemperatureVis() {
       width: "62%",
       padding: 1
     }}>
-      <Stack>
-        <Typography
-          style={{ textAlign: "center" }}
-          variant="h5"
-        >
-          Temperatures
-        </Typography>
+      <Stack paddingTop="3vh">
         <svg
           version="1.1"
           xmlns="http://www.w3.org/2000/svg"
