@@ -7,22 +7,15 @@ import { invoke } from "@tauri-apps/api";
 import { ObjectEntryHistoryEvent } from "../../object_entry/types/events/ObjectEntryHistoryEvent";
 
 import * as d3 from "d3";
-import { Box, Button, ButtonGroup, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import useObjectEntryValue from "../../hooks/object_entry_value";
 
 const nodeName = "input_board";
-const positionOe = "position";
-const velocityOe = "velocity";
-const accelerationOe = "acceleration";
+const oes = ["position", "velocity", "acceleration"]
 
-const minYPosition = -1;
-const maxYPosition = 21;
+const minY = -30;
+const maxY = 30;
 
-const minYVelocity = -3;
-const maxYVelocity = 3;
-
-const minYAcceleration = -30.1;
-const maxYAcceleration = 30.1;
 
 const timeDomain = 10 * 1000;
 
@@ -38,56 +31,23 @@ const height = 250;
 
 
 const lineColors = [
-  "#fa0",
-  "#f00",
-  "#0f0",
-  "#00f",
+  "#E8020B",
+  "#1AC938",
+  "#023EFF",
+  "#00D7FF",
+  "#FFC403",
+  "#9F4800",
+  "#F14CC2",
+  "#8B2BE2",
+  "#FF7C01",
 ];
 
-
-enum Mode {
-  Position,
-  Velocity,
-  Acceleration
-}
 
 function Graph() {
   const svgRef = useRef(null) as any;
 
   const [autoWidth, setAutoWidth] = useState(0);
 
-  const [oes, setOes] = useState<string[]>([]);
-
-  const [maxY, setMaxY] = useState(125);
-  const [minY, setMinY] = useState(-125);
-
-  const [mode, setMode] = useState(Mode.Position);
-
-
-
-
-  useEffect(() => {
-    switch (mode) {
-      case Mode.Position: {
-        setOes([positionOe]);
-        setMinY(minYPosition);
-        setMaxY(maxYPosition);
-        break;
-      }
-      case Mode.Velocity: {
-        setOes([velocityOe]);
-        setMinY(minYVelocity);
-        setMaxY(maxYVelocity);
-        break;
-      }
-      case Mode.Acceleration: {
-        setOes([accelerationOe]);
-        setMinY(minYAcceleration);
-        setMaxY(maxYAcceleration);
-        break;
-      }
-    }
-  }, [mode]);
 
   useEffect(() => {
 
@@ -130,13 +90,21 @@ function Graph() {
           frameSize: timeDomain,
           minInterval: interval // 24fps
         });
-        data[i] = resp.history;
+        if (oe !== "acceleration") {
+          data[i] = resp.history;
+        } else {
+          data[i] = resp.history.map((event: ObjectEntryEvent) => {return {value: (event.value as number * 10), timestamp: event.timestamp, delta_time: event.delta_time}});
+        }
         if (i == 0) {
           timestamp = resp.now;
         }
         const unlistenJs = await listen<ObjectEntryHistoryEvent>(resp.event_name, event => {
           data[i].splice(0, event.payload.deprecated_count);
-          data[i].push(...event.payload.new_values);
+          if (oe !== "acceleration") {
+            data[i].push(...event.payload.new_values);
+          } else {
+            data[i].push(...event.payload.new_values.map((event: ObjectEntryEvent) => {return {value: (event.value as number * 12), timestamp: event.timestamp, delta_time: event.delta_time}}))
+          }
         });
         unlisteners.push(() => {
           unlistenJs();
@@ -217,11 +185,12 @@ function Graph() {
     const group = graph.append("g");
 
     for (let [i, oe] of oes.entries()) {
+      let lineColor = (i<lineColors.length) ? lineColors[i] : "#000000"
       group.append("path")
         .datum(data[i])
         .attr("d", lines[i](data[i] as any))
         .attr("class", oe)
-        .style("stroke", lineColors[i])
+        .style("stroke", lineColor)
         .style("stroke-width", 1.5)
         .style("opacity", 0.5)
         .style("fill", "none")
@@ -290,11 +259,12 @@ function Graph() {
       svg.remove();
     };
 
-  }, [autoWidth, nodeName, oes, minY, maxY, timeDomain]);
+  }, [autoWidth, nodeName, timeDomain]);
 
   const pos = useObjectEntryValue("input_board", "position");
   const vel = useObjectEntryValue("input_board", "velocity");
-  const acc = useObjectEntryValue("input_board", "acceleration");
+  let acc = useObjectEntryValue("input_board", "acceleration");
+  if (acc !== undefined) acc = acc as number * 10;
 
   return (
     <Stack direction="row" spacing={2} sx={{
@@ -304,50 +274,24 @@ function Graph() {
       <svg ref={svgRef}></svg>
 
       <Box paddingTop={1} paddingRight={1}>
-        <ButtonGroup variant="contained" aria-label="Basic button group" orientation="vertical">
-          <Button variant={mode == Mode.Position ? "contained" : "text"}
-            onClick={() => setMode(Mode.Position)}
-            sx={{
-              width: "10em",
-            }}
-          >
-            Position
-          </Button>
-          <Button variant={mode == Mode.Velocity ? "contained" : "text"}
-            onClick={() => setMode(Mode.Velocity)}
-            sx={{
-              width: "10em",
-            }}
-          >
-            Velocity
-          </Button>
-          <Button variant={mode == Mode.Acceleration ? "contained" : "text"}
-            onClick={() => setMode(Mode.Acceleration)}
-            sx={{
-              width: "10em",
-            }}
-          >
-            Acceleration
-          </Button>
-        </ButtonGroup>
       </Box>
       <Stack direction="column" sx={{
         position: "relative",
-        right: "24em",
+        right: "15em",
         top: "1em",
       }}>  
-        <Typography noWrap textAlign="right" sx={{
+        <Typography noWrap textAlign="right" color={lineColors[0]} sx={{
           marginRight: "1.2rem"
         }}>
           {`Position:  ${(pos as number)?.toFixed(2)}m`}
         </Typography>
-        <Typography noWrap textAlign="right" sx={{
+        <Typography noWrap textAlign="right" color={lineColors[1]} sx={{
           marginRight: "0.3rem",
         }}>
           {`Velocity: ${(vel as number)?.toFixed(2)}m/s`}
         </Typography>
-        <Typography noWrap textAlign="right">
-          {`Acceleration: ${(acc as number)?.toFixed(2)}m/s²`}
+        <Typography noWrap textAlign="right" color={lineColors[2]}>
+          {`Acceleration*10: ${(acc as number)?.toFixed(2)}m/s²`}
         </Typography>
       </Stack>
     </Stack>
