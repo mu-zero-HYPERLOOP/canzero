@@ -6,7 +6,6 @@ import StateVis from '../visualizations/state/StateVis.tsx';
 import TemperatureVis from '../visualizations/temperature/TemperatureVis.tsx';
 import PositionEstimationVis from '../visualizations/position_estimation/PositionEstimationVis.tsx';
 import FsmVis from '../visualizations/fsm/FsmVis.tsx';
-import Link24Vis from '../visualizations/link24/Link24Vis.tsx';
 import VoltagesValues from "./VoltagesValues.tsx";
 import SdcVis from '../visualizations/sdc/SdcVis.tsx';
 
@@ -20,7 +19,6 @@ function OverviewPanel({ }: Readonly<OverviewProps>) {
       padding: 2,
     }}>
       <Stack direction="row" spacing={2} sx={{
-        height: "33vh",
         justifyContent: "space-around",
       }}>
         <TemperatureVis />
@@ -52,7 +50,7 @@ function OverviewPanel({ }: Readonly<OverviewProps>) {
       </Stack>
       <Stack direction="row" spacing={2}>
         <PositionEstimationVis />
-        <VoltagesValues width="50%" height="25.5vh" />
+        <VoltagesValues width="50%" />
       </Stack>
     </Stack>
   );

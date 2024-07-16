@@ -23,7 +23,7 @@ interface LevitationConsumptionProps {
     secondThreshold?: number,
 }
 
-function LevitationConsumption({node, oe, label, min, max, firstThreshold, secondThreshold}: Readonly<LevitationConsumptionProps>) {
+function IndividualConsumption({node, oe, label, min, max, firstThreshold, secondThreshold}: Readonly<LevitationConsumptionProps>) {
     const power = useObjectEntryValue(node, oe);
     const info = useObjectEntryInfo(node, oe);
 
@@ -47,7 +47,7 @@ function LevitationConsumption({node, oe, label, min, max, firstThreshold, secon
                 <Typography width="31vh" fontSize="0.8em"> {label} </Typography>
                 <PowerVis value={power} min={min} max={max} firstThreshold={firstThreshold} secondThreshold={secondThreshold}/>
                 {(power !== undefined) ?
-                    <Typography width="6vh" textAlign="right" fontSize="0.8em"> {power as number}{info?.unit} </Typography> :
+                    <Typography width="6vh" textAlign="right" fontSize="0.8em"> {(power as number).toFixed(2)}{info?.unit} </Typography> :
                     <Typography width="6vh" textAlign="right" fontSize="0.8em"> -{info?.unit} </Typography>}
             </Stack>
         </Paper>
@@ -64,13 +64,13 @@ function PowerConsumption() {
                 height: "100%",
                 width: "100%",
             }} spacing={0.8}>
-                <LevitationConsumption node={"power_board12"} oe={"total_power"} label={"Power Board 12V"}/>
-                <LevitationConsumption node={"power_board24"} oe={"total_power"} label={"Power Board 24V"}/>
-                <LevitationConsumption node={"power_board12"} oe={"levitation_boards_power_channel_current"} label={"Levitation Board Current"}/>
-                <LevitationConsumption node={"power_board12"} oe={"guidance_boards_power_channel_current"} label={"Guidance Board Current"}/>
-                <LevitationConsumption node={"power_board12"} oe={"motor_driver_power_channel_current"} label={"Motor Driver Board Current"}/>
-                <LevitationConsumption node={"power_board24"} oe={"sdc_signal_channel_current"} label={"SDC Signal Current"}/>
-                <LevitationConsumption node={"power_board24"} oe={"sdc_board_power_channel_current"} label={"SDC Board Current"}/>
+                <IndividualConsumption node={"power_board12"} oe={"total_power"} label={"Power Board 12V"}/>
+                <IndividualConsumption node={"power_board24"} oe={"total_power"} label={"Power Board 24V"}/>
+                <IndividualConsumption node={"power_board12"} oe={"levitation_boards_power_channel_current"} label={"Levitation Board Current"}/>
+                <IndividualConsumption node={"power_board12"} oe={"guidance_boards_power_channel_current"} label={"Guidance Board Current"}/>
+                <IndividualConsumption node={"power_board12"} oe={"motor_driver_power_channel_current"} label={"Motor Driver Board Current"}/>
+                <IndividualConsumption node={"power_board24"} oe={"sdc_signal_channel_current"} label={"SDC Signal Current"}/>
+                <IndividualConsumption node={"power_board24"} oe={"sdc_board_power_channel_current"} label={"SDC Board Current"}/>
             </Stack>
         </Stack>
     )

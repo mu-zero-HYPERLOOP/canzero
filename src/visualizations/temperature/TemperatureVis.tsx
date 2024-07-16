@@ -1,9 +1,34 @@
 
 import { useEffect } from "react";
 import "./TemperatureVis.css"
-import { Paper, Stack, Tooltip } from "@mui/material";
+import {alpha, Paper, Stack, styled, Tooltip, TooltipProps, tooltipClasses, Typography} from "@mui/material";
 import useObjectEntryValue from "../../hooks/object_entry_value";
+import theme from "../../theme.ts";
+import {Value} from "../../object_entry/types/Value.tsx";
 
+interface TemperatureCellProps {
+  value: Value | undefined,
+  top: string,
+  left: string,
+  width: string,
+}
+
+function TemperatureCell({value, top, left, width}: TemperatureCellProps) {
+  const unit = "°C"
+  let color = (theme.palette.background.paper2 !== undefined) ? alpha(theme.palette.background.paper2, 0.8) : theme.palette.background.paper2
+
+  return (
+      <Paper sx={{backgroundColor: color,
+        position: "absolute",
+        top: top,
+        left: left,
+        width: width}}>
+        <Typography variant="body2" fontSize="0.7em" textAlign="right">
+          {(value === undefined) ? `?${unit}` : `${(value as number).toFixed(2)}${unit}`}
+        </Typography>
+      </Paper>
+  )
+}
 
 function TemperatureVis() {
 
@@ -24,6 +49,7 @@ function TemperatureVis() {
   const sac_ebox = useObjectEntryValue("input_board", "sac_ebox_temperature");
   const power_ebox = useObjectEntryValue("input_board", "power_ebox_temperature");
   const supercaps = useObjectEntryValue("input_board", "supercap_temperature");
+  const unit = "°C"
 
   useEffect(() => {
 
@@ -265,7 +291,7 @@ function TemperatureVis() {
       width: "62%",
       padding: 1
     }}>
-      <Stack paddingTop="3vh">
+      <Stack paddingTop="4vh">
         <svg
           version="1.1"
           xmlns="http://www.w3.org/2000/svg"
@@ -276,19 +302,19 @@ function TemperatureVis() {
         >
           <g id="frame">
             <g id="mgu2">
-              <Tooltip title={`${(gfl as number)?.toFixed(2)}C`}>
+              <Tooltip title={`Guidance Front Left Min: ${0}${unit} Max: ${20}${unit}`}>
                 <path className="mgu1_starboard" d="M433.16,126.83h-70.66c-2.88,0-5.24-2.36-5.24-5.24v-7.07c0-2.88,2.36-5.24,5.24-5.24h70.66
 			c2.88,0,5.24,2.36,5.24,5.24v7.07C438.4,124.47,436.05,126.83,433.16,126.83z"/>
               </Tooltip>
-              <Tooltip title={`${(gfr as number)?.toFixed(2)}C`}>
+              <Tooltip title={`Guidance Front Right Min: ${0}${unit} Max: ${20}${unit}`}>
                 <path className="mgu1_port" d="M433.56,595.03h-70.66c-2.88,0-5.24,2.36-5.24,5.24v7.07c0,2.88,2.36,5.24,5.24,5.24h70.66
 			c2.88,0,5.24-2.36,5.24-5.24v-7.07C438.8,597.38,436.44,595.03,433.56,595.03z"/>
               </Tooltip>
-              <Tooltip title={`${(gbl as number)?.toFixed(2)}C`}>
+              <Tooltip title={`Guidance Back Left Min: ${0}${unit} Max: ${20}${unit}`}>
                 <path className="mgu2_starboard" d="M1019.94,126.55h-70.66c-2.88,0-5.24-2.36-5.24-5.24v-7.07c0-2.88,2.36-5.24,5.24-5.24h70.66
 			c2.88,0,5.24,2.36,5.24,5.24v7.07C1025.18,124.19,1022.82,126.55,1019.94,126.55z"/>
               </Tooltip>
-              <Tooltip title={`${(gbr as number)?.toFixed(2)}C`}>
+              <Tooltip title={`Guidance Back Right Min: ${0}${unit} Max: ${20}${unit}`}>
                 <path className="mgu2_port" d="M1020.34,594.74h-70.66c-2.88,0-5.24,2.36-5.24,5.24v7.07c0,2.88,2.36,5.24,5.24,5.24h70.66
 			c2.88,0,5.24-2.36,5.24-5.24v-7.07C1025.58,597.1,1023.22,594.74,1020.34,594.74z"/>
               </Tooltip>
@@ -325,7 +351,7 @@ function TemperatureVis() {
 			c4.91,0,8.88-3.98,8.88-8.88V300.24C838.62,295.33,834.64,291.36,829.73,291.36L829.73,291.36z"/>
             </g>
           </g>
-          <Tooltip title={`${(sac_ebox as number)?.toFixed(2)}C`}>
+          <Tooltip title={`Sac E Box Min: ${0}${unit} Max: ${20}${unit}`}>
             <g id="ebox1">
               <path className="ebox2" d="M524.83,437.52h-66.97c-6.6,0-12-5.4-12-12V294.66c0-6.6,5.4-12,12-12h66.97c6.6,0,12,5.4,12,12v130.86
 		C536.83,432.12,531.43,437.52,524.83,437.52z"/>
@@ -335,7 +361,7 @@ function TemperatureVis() {
               <rect x="452.75" y="398.16" className="st3" width="78.54" height="28.8" />
             </g>
           </Tooltip>
-          <Tooltip title={`${(power_ebox as number)?.toFixed(2)}C`}>
+          <Tooltip title={`Power E Box Min: ${0}${unit} Max: ${20}${unit}`}>
             <g id="ebox2">
               <path className="ebox1" d="M424.9,436.28h-66.97c-6.6,0-12-5.4-12-12V293.41c0-6.6,5.4-12,12-12h66.97c6.6,0,12,5.4,12,12v130.86
 		C436.9,430.88,431.5,436.28,424.9,436.28z"/>
@@ -345,7 +371,7 @@ function TemperatureVis() {
               <rect x="351.86" y="292.05" className="st3" width="79.77" height="30.32" />
             </g>
           </Tooltip>
-          <Tooltip title={`${(driver as number)?.toFixed(2)}C`}>
+          <Tooltip title={`Motor Driver Min: ${0}${unit} Max: ${20}${unit}`}>
             <g id="motor_x5F_driver">
               <path className="motor_driver_board" d="M899.15,441.07h-26.14c-6.6,0-12-5.4-12-12V288.02c0-6.6,5.4-12,12-12h26.14
 		c6.6,0,12,5.4,12,12v141.05C911.15,435.67,905.75,441.07,899.15,441.07z"/>
@@ -356,7 +382,7 @@ function TemperatureVis() {
               <circle className="cooling_reservoir" cx="1069.66" cy="323.45" r="50.92" />
             </g>
           </Tooltip>
-          <Tooltip title={`${(supercaps as number)?.toFixed(2)}C`}>
+          <Tooltip title={`Supercaps Min: ${0}${unit} Max: ${20}${unit}`}>
             <g id="supercaps">
               <path className="st4" d="M995.01,421.46h-58.74c-7.68,0-13.96-6.28-13.96-13.96v-98.4c0-7.68,6.28-13.96,13.96-13.96h58.74
 		c7.68,0,13.96,6.28,13.96,13.96v98.4C1008.97,415.18,1002.69,421.46,995.01,421.46z"/>
@@ -386,7 +412,7 @@ function TemperatureVis() {
               <circle className="st0" cx="994.39" cy="399.15" r="3.51" />
             </g>
           </Tooltip>
-          <Tooltip title={`${(dslim as number)?.toFixed(2)}`}>
+          <Tooltip title={`DSLim Min: ${0}${unit} Max: ${20}${unit}`}>
             <g id="DSLIM">
               <path className="st3" d="M838.54,406.12h-41.55c-2.38,0-4.64,1.03-6.2,2.83l-2.75,3.17h-17.43l-2.56-3.06
 		c-1.56-1.86-3.87-2.94-6.3-2.94h-43.99c-2.79,0-5.38,1.41-6.89,3.75l-1.46,2.25h-19.64l-1.43-2.22c-1.51-2.35-4.12-3.78-6.91-3.78
@@ -440,7 +466,7 @@ function TemperatureVis() {
           <g id="mlus">
             <path className="st6" d="M352.32,241.2" />
             <path className="st6" d="M344.87,240.56" />
-            <Tooltip title={`${(l1l as number)?.toFixed(2)}C`}>
+            <Tooltip title={`Levitation 1 Left Min: ${0}${unit} Max: ${20}${unit}`}>
               <g>
                 <path className="st3" d="M463.39,239.64l-9.99-3.53c-5-1.76-10.21-2.66-15.45-2.66h-92.9c-4.09,0-8.15,0.8-11.99,2.37l-8.31,3.4
 		c-9.31,3.81-19.68-3.1-20.35-14.06c-0.02-0.39-0.04-0.78-0.04-1.18v-69.63c0-0.4,0.01-0.79,0.04-1.18
@@ -478,7 +504,7 @@ function TemperatureVis() {
                 <circle className="st7" cx="318.2" cy="151.37" r="2.39" />
               </g>
             </Tooltip>
-            <Tooltip title={`${(l1r as number)?.toFixed(2)}C`}>
+            <Tooltip title={`Levitation 1 Right Min: ${0}${unit} Max: ${20}${unit}`}>
               <g>
                 <path className="st3" d="M758.75,240.09l-9.99-3.53c-5-1.76-10.21-2.66-15.45-2.66h-92.9c-4.09,0-8.15,0.8-11.99,2.37l-8.31,3.4
 		c-9.31,3.81-19.68-3.1-20.35-14.06c-0.02-0.39-0.04-0.78-0.04-1.18V154.8c0-0.4,0.01-0.79,0.04-1.18
@@ -515,7 +541,7 @@ function TemperatureVis() {
                 <circle className="st7" cx="613.56" cy="151.82" r="2.39" />
               </g>
             </Tooltip>
-            <Tooltip title={`${(l2l as number)?.toFixed(2)}C`}>
+            <Tooltip title={`Levitation 2 Left Min: ${0}${unit} Max: ${20}${unit}`}>
               <g>
                 <path className="st3" d="M1057.07,240.09l-9.99-3.53c-5-1.76-10.21-2.66-15.45-2.66h-92.9c-4.09,0-8.15,0.8-11.99,2.37l-8.31,3.4
 		c-9.31,3.81-19.68-3.1-20.35-14.06c-0.02-0.39-0.04-0.78-0.04-1.18v-69.63c0-0.4,0.01-0.79,0.04-1.18
@@ -552,7 +578,7 @@ function TemperatureVis() {
                 <circle className="st7" cx="911.88" cy="151.81" r="2.39" />
               </g>
             </Tooltip>
-            <Tooltip title={`${(l3l as number)?.toFixed(2)}C`}>
+            <Tooltip title={`Levitation 3 Left Min: ${0}${unit} Max: ${20}${unit}`}>
               <g>
                 <path className="st3" d="M463.82,583.83l-9.99-3.53c-5-1.76-10.21-2.66-15.45-2.66h-92.9c-4.09,0-8.15,0.8-11.99,2.37l-8.31,3.4
 		c-9.31,3.81-19.68-3.1-20.35-14.06c-0.02-0.39-0.04-0.78-0.04-1.18v-69.63c0-0.4,0.01-0.79,0.04-1.18
@@ -589,7 +615,7 @@ function TemperatureVis() {
                 <circle className="st7" cx="318.62" cy="495.56" r="2.39" />
               </g>
             </Tooltip>
-            <Tooltip title={`${(l2r as number)?.toFixed(2)}C`}>
+            <Tooltip title={`Levitation 3 Right Min: ${0}${unit} Max: ${20}${unit}`}>
               <g>
                 <path className="st3" d="M759.17,584.28l-9.99-3.53c-5-1.76-10.21-2.66-15.45-2.66h-92.9c-4.09,0-8.15,0.8-11.99,2.37l-8.31,3.4
 		c-9.31,3.81-19.68-3.1-20.35-14.06c-0.02-0.39-0.04-0.78-0.04-1.18v-69.63c0-0.4,0.01-0.79,0.04-1.18
@@ -626,7 +652,7 @@ function TemperatureVis() {
                 <circle className="st7" cx="613.98" cy="496.01" r="2.39" />
               </g>
             </Tooltip>
-            <Tooltip title={`${(l3r as number)?.toFixed(2)}C`}>
+            <Tooltip title={`Levitation 3 Right Min: ${0}${unit} Max: ${20}${unit}`}>
               <g>
                 <path className="st3" d="M1057.5,584.28l-9.99-3.53c-5-1.76-10.21-2.66-15.45-2.66h-92.9c-4.09,0-8.15,0.8-11.99,2.37l-8.31,3.4
 		c-9.31,3.81-19.68-3.1-20.35-14.06c-0.02-0.39-0.04-0.78-0.04-1.18v-69.63c0-0.4,0.01-0.79,0.04-1.18
@@ -666,6 +692,30 @@ function TemperatureVis() {
           </g>
         </svg>
       </Stack>
+        {/*Guidance*/}
+        <TemperatureCell value={dslim} top={"5.3em"} left={"8.8em"} width={"2em"}/>
+        <TemperatureCell value={dslim} top={"5.3em"} left={"21.1em"} width={"2em"}/>
+        <TemperatureCell value={dslim} top={"17.1em"} left={"8.8em"} width={"2em"}/>
+        <TemperatureCell value={dslim} top={"17.1em"} left={"21.1em"} width={"2em"}/>
+
+        {/*Levitation*/}
+        <TemperatureCell value={dslim} top={"7.6em"} left={"6.2em"} width={"2em"}/>
+        <TemperatureCell value={dslim} top={"7.6em"} left={"12.3em"} width={"2em"}/>
+        <TemperatureCell value={dslim} top={"7.6em"} left={"18.5em"} width={"2em"}/>
+
+        <TemperatureCell value={dslim} top={"14.8em"} left={"6.2em"} width={"2em"}/>
+        <TemperatureCell value={dslim} top={"14.8em"} left={"12.3em"} width={"2em"}/>
+        <TemperatureCell value={dslim} top={"14.8em"} left={"18.5em"} width={"2em"}/>
+
+
+        <TemperatureCell value={dslim} top={"12.2em"} left={"15em"} width={"2em"}/>
+
+        <TemperatureCell value={dslim} top={"10.2em"} left={"6.5em"} width={"2em"}/>
+        <TemperatureCell value={dslim} top={"12.2em"} left={"6.5em"} width={"2em"}/>
+
+        <TemperatureCell value={dslim} top={"9.8em"} left={"18.9em"} width={"2em"}/>
+        <TemperatureCell value={dslim} top={"12.6em"} left={"20.7em"} width={"2em"}/>
+
     </Paper>
   );
 }
