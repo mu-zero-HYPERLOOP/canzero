@@ -135,7 +135,6 @@ function PowerControl({}: Readonly<NodesProps>) {
                    spacing={2}>
                 <Paper sx={{
                     width: "65%",
-                    height: "44vh",
                     padding: 1,
                 }}>
                     <Typography textAlign={"left"} paddingTop={1} paddingLeft={2}>
@@ -147,7 +146,7 @@ function PowerControl({}: Readonly<NodesProps>) {
                 <Stack direction="column" spacing={1.2} justifyContent="space-evenly" width="35%">
                     <Paper sx={{
                         width: "100%",
-                        height: "44vh",
+                        height: "100%",
                         paddingTop: 1,
                     }}>
                         <Typography paddingLeft="6vh">
@@ -163,7 +162,6 @@ function PowerControl({}: Readonly<NodesProps>) {
             </Stack>
             <Paper sx={{
                 width: "100%",
-                height: "44vh",
                 paddingTop: 2,
             }}>
                 <Typography textAlign={"center"} paddingBottom={1}>
