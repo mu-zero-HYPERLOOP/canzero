@@ -1,5 +1,5 @@
-import {Paper, Stack} from '@mui/material';
-import {NodeInformation} from "../nodes/types/NodeInformation.ts";
+import { Paper, Stack } from '@mui/material';
+import { NodeInformation } from "../nodes/types/NodeInformation.ts";
 import ErrorList from '../object_entry/vis/errors/ErrorList.tsx';
 import PodSideView from '../visualizations/side/PodSideView.tsx';
 import StateVis from '../visualizations/state/StateVis.tsx';
@@ -8,15 +8,16 @@ import PositionEstimationVis from '../visualizations/position_estimation/Positio
 import FsmVis from '../visualizations/fsm/FsmVis.tsx';
 import Link24Vis from '../visualizations/link24/Link24Vis.tsx';
 import VoltagesValues from "./VoltagesValues.tsx";
+import SdcVis from '../visualizations/sdc/SdcVis.tsx';
 
 interface OverviewProps {
-    nodes: NodeInformation[];
+  nodes: NodeInformation[];
 }
-function OverviewPanel({}: Readonly<OverviewProps>) {
+function OverviewPanel({ }: Readonly<OverviewProps>) {
 
   return (
     <Stack direction="column" spacing={2} sx={{
-      padding : 2,
+      padding: 2,
     }}>
       <Stack direction="row" spacing={2} sx={{
         height: "33vh",
@@ -30,7 +31,7 @@ function OverviewPanel({}: Readonly<OverviewProps>) {
           <Paper sx={{
             width: "100%",
           }}>
-            <Link24Vis />
+            <SdcVis />
           </Paper>
           <Paper sx={{
             width: "100%",
@@ -43,15 +44,15 @@ function OverviewPanel({}: Readonly<OverviewProps>) {
       <Stack direction="row" spacing={2} sx={{
         justifyContent: "end",
         marginTop: 2,
-        marginLeft : 2,
-        marginRight : 2,
+        marginLeft: 2,
+        marginRight: 2,
       }}>
-        <FsmVis/>
-        <ErrorList width="50%" height="27vh"/>
+        <FsmVis />
+        <ErrorList width="50%" height="27vh" />
       </Stack>
       <Stack direction="row" spacing={2}>
-      <PositionEstimationVis/>
-        <VoltagesValues width="50%" height="26.5vh"/>
+        <PositionEstimationVis />
+        <VoltagesValues width="50%" height="25.5vh" />
       </Stack>
     </Stack>
   );

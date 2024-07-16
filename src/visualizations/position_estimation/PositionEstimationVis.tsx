@@ -6,7 +6,7 @@ function PositionEstimationVis() {
   return (
     <Paper sx={{
       width: "50%",
-      height: "26.5vh",
+      height: "25.5vh",
     }}>
       <Graph />
     </Paper>
