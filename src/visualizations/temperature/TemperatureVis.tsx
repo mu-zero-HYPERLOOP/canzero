@@ -1,7 +1,7 @@
 
 import { useEffect } from "react";
 import "./TemperatureVis.css"
-import {alpha, Paper, Stack, styled, Tooltip, TooltipProps, tooltipClasses, Typography} from "@mui/material";
+import {alpha, Paper, Stack, Tooltip, Typography} from "@mui/material";
 import useObjectEntryValue from "../../hooks/object_entry_value";
 import theme from "../../theme.ts";
 import {Value} from "../../object_entry/types/Value.tsx";
