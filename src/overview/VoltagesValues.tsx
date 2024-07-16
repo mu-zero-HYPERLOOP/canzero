@@ -1,7 +1,6 @@
 import { Paper, Stack, Typography, useTheme } from "@mui/material";
 import useObjectEntryValue from "../hooks/object_entry_value.ts";
 import useObjectEntryInfo from "../hooks/object_entry_info.ts";
-import { getMax, getMin } from "../object_entry/types/ObjectEntryInformation.tsx";
 
 
 interface VoltagesValuesProps {
@@ -13,8 +12,8 @@ interface EntryProps {
   label: string,
   nodeName: string,
   objectEntryName: string,
-  min: string,
-  max: string,
+  min: number,
+  max: number,
 }
 
 function Entry({ label, nodeName, objectEntryName, min, max }: Readonly<EntryProps>) {
@@ -24,10 +23,14 @@ function Entry({ label, nodeName, objectEntryName, min, max }: Readonly<EntryPro
   const info = useObjectEntryInfo(nodeName, objectEntryName);
 
   let unit = (info?.unit ?? "") as string;
+  let color = theme.palette.background.paper2
+  if (value !== undefined) {
+      if ((value as number) > max || (value as number) < min) color = theme.palette.temperatureHot.main
+  }
 
   return (
     <Paper sx={{
-      backgroundColor: theme.palette.background.paper2,
+      backgroundColor: color,
       marginLeft: "0.25em", marginRight: "0.25em",
       marginBottom: "0.25em",
       height: `2.5em`
@@ -49,10 +52,10 @@ function Entry({ label, nodeName, objectEntryName, min, max }: Readonly<EntryPro
         </Stack>
         <Stack direction="row" justifyContent="space-around" margin={0} padding={0} width="30%">
           <Typography variant="body2" fontSize={12} width="15vh" textAlign="left">
-            {`Min: ${min}`}
+            {`Min: ${min}${unit}`}
           </Typography>
           <Typography variant="body2" fontSize={12} width="15vh" textAlign="left">
-            {`Max: ${max}`}
+            {`Max: ${max}${unit}`}
           </Typography>
         </Stack>
       </Stack>
@@ -71,11 +74,11 @@ function VoltagesValues({ width, height }: Readonly<VoltagesValuesProps>) {
         padding: 0,
         paddingTop: "0.25em",
       }} direction="column" justifyContent="space-between">
-        <Entry label="Battery-Voltage:" nodeName="input_board" objectEntryName="bat24_voltage" min="22.2V" max="29V" />
-        <Entry label="Supercap-Voltage:" nodeName="input_board" objectEntryName="supercap_voltage" min="30V" max="50V" />
-        <Entry label="Link45-Voltage:" nodeName="input_board" objectEntryName="link45_voltage" min="0V" max="50V" />
-        <Entry label="Link24-Current:" nodeName="input_board" objectEntryName="link24_current" min="2A" max="20A" />
-        <Entry label="Link45-Current:" nodeName="input_board" objectEntryName="link45_current" min="0A" max="150A" />
+        <Entry label="Battery-Voltage:" nodeName="input_board" objectEntryName="bat24_voltage" min={22.2} max={29} />
+        <Entry label="Supercap-Voltage:" nodeName="input_board" objectEntryName="supercap_voltage" min={30} max={50} />
+        <Entry label="Link45-Voltage:" nodeName="input_board" objectEntryName="link45_voltage" min={0} max={50} />
+        <Entry label="Link24-Current:" nodeName="input_board" objectEntryName="link24_current" min={2} max={20} />
+        <Entry label="Link45-Current:" nodeName="input_board" objectEntryName="link45_current" min={0} max={150} />
       </Stack>
     </Paper>
   );
