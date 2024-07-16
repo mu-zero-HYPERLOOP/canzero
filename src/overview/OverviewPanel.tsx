@@ -2,7 +2,6 @@ import {Paper, Stack} from '@mui/material';
 import {NodeInformation} from "../nodes/types/NodeInformation.ts";
 import ErrorList from '../object_entry/vis/errors/ErrorList.tsx';
 import PodSideView from '../visualizations/side/PodSideView.tsx';
-import SdcVis from '../visualizations/sdc/SdcVis.tsx';
 import StateVis from '../visualizations/state/StateVis.tsx';
 import TemperatureVis from '../visualizations/temperature/TemperatureVis.tsx';
 import PositionEstimationVis from '../visualizations/position_estimation/PositionEstimationVis.tsx';
