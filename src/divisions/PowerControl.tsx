@@ -16,15 +16,21 @@ interface NodesProps {
 interface LevitationConsumptionProps {
     node: string,
     oe: string,
+    label: string,
+    min?: number,
+    max?: number,
+    firstThreshold?: number,
+    secondThreshold?: number,
 }
 
-function LevitationConsumption({node, oe}: Readonly<LevitationConsumptionProps>) {
+function LevitationConsumption({node, oe, label, min, max, firstThreshold, secondThreshold}: Readonly<LevitationConsumptionProps>) {
     const power = useObjectEntryValue(node, oe);
     const info = useObjectEntryInfo(node, oe);
 
-    let min: number = getMin(info)
-    let max: number = getMax(info)
-
+    if (min === undefined) min = getMin(info)
+    if (max === undefined) max = getMax(info)
+    if (firstThreshold === undefined) firstThreshold = min + 0.1 * (max - min)
+    if (secondThreshold === undefined) secondThreshold = min + 0.8 * (max - min)
 
     return (
         <Paper sx={{
@@ -35,13 +41,14 @@ function LevitationConsumption({node, oe}: Readonly<LevitationConsumptionProps>)
         }}>
             <Stack direction="row" justifyContent="space-between" sx={{
                 paddingLeft: 1,
+                paddingBottom: 0.3,
                 margin: 0.75,
             }}>
-                <Typography width="31vh"> {oe === "total_power" ? node : oe} </Typography>
-                <PowerVis value={power} min={min} max={max} firstThreshold={0.1 * max} secondThreshold={0.8 * max}/>
+                <Typography width="31vh" fontSize="0.8em"> {label} </Typography>
+                <PowerVis value={power} min={min} max={max} firstThreshold={firstThreshold} secondThreshold={secondThreshold}/>
                 {(power !== undefined) ?
-                    <Typography width="6vh" textAlign="right"> {power as number}{info?.unit} </Typography> :
-                    <Typography width="6vh" textAlign="right"> -{info?.unit} </Typography>}
+                    <Typography width="6vh" textAlign="right" fontSize="0.8em"> {power as number}{info?.unit} </Typography> :
+                    <Typography width="6vh" textAlign="right" fontSize="0.8em"> -{info?.unit} </Typography>}
             </Stack>
         </Paper>
     )
@@ -57,13 +64,13 @@ function PowerConsumption() {
                 height: "100%",
                 width: "100%",
             }} spacing={0.8}>
-                <LevitationConsumption node={"power_board12"} oe={"total_power"}/>
-                <LevitationConsumption node={"power_board24"} oe={"total_power"}/>
-                <LevitationConsumption node={"power_board12"} oe={"levitation_boards_power_channel_current"}/>
-                <LevitationConsumption node={"power_board12"} oe={"guidance_boards_power_channel_current"}/>
-                <LevitationConsumption node={"power_board12"} oe={"motor_driver_power_channel_current"}/>
-                <LevitationConsumption node={"power_board24"} oe={"sdc_signal_channel_current"}/>
-                <LevitationConsumption node={"power_board24"} oe={"sdc_board_power_channel_current"}/>
+                <LevitationConsumption node={"power_board12"} oe={"total_power"} label={"Power Board 12V"}/>
+                <LevitationConsumption node={"power_board24"} oe={"total_power"} label={"Power Board 24V"}/>
+                <LevitationConsumption node={"power_board12"} oe={"levitation_boards_power_channel_current"} label={"Levitation Board Current"}/>
+                <LevitationConsumption node={"power_board12"} oe={"guidance_boards_power_channel_current"} label={"Guidance Board Current"}/>
+                <LevitationConsumption node={"power_board12"} oe={"motor_driver_power_channel_current"} label={"Motor Driver Board Current"}/>
+                <LevitationConsumption node={"power_board24"} oe={"sdc_signal_channel_current"} label={"SDC Signal Current"}/>
+                <LevitationConsumption node={"power_board24"} oe={"sdc_board_power_channel_current"} label={"SDC Board Current"}/>
             </Stack>
         </Stack>
     )
@@ -88,10 +95,10 @@ function CommunicationPowerAnalogGauge() {
                     <DangerPath/>
                     <Progress/>
                     <Marks step={50}/>
-                    <Indicator color="#ffffff" y={85} x={100} fontSize={35}>
+                    <Indicator color="#ffffff" y={85} x={105} fontSize={35}>
                     </Indicator>
                 </Speedometer>
-            </Box><Typography marginTop="-18vh" textAlign="right" fontSize="1.6em" marginRight="10vh" color="#ffffff">
+            </Box><Typography marginTop="-7.4em" textAlign="right" fontSize="1.6em" marginRight="4em" color="#ffffff">
             W
         </Typography>
         </>
@@ -120,7 +127,7 @@ function SystemPowerAnalogGauge() {
                     <Indicator color="#ffffff" y={95} x={120}>
                     </Indicator>
                 </Speedometer>
-            </Box><Typography marginTop="-21vh" textAlign="left" fontSize="1.8em" marginLeft="16vh" color="#ffffff">
+            </Box><Typography marginTop="-7.7em" textAlign="left" fontSize="1.8em" marginLeft="5.8em" color="#ffffff">
             kW
         </Typography>
         </>
@@ -165,7 +172,7 @@ function PowerControl({}: Readonly<NodesProps>) {
                 paddingTop: 2,
             }}>
                 <Typography textAlign={"center"} paddingBottom={1}>
-                    Power Consumptions
+                    Power Consumptions [W]
                 </Typography>
                 <PowerGraph/>
             </Paper>

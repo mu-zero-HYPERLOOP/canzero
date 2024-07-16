@@ -615,8 +615,8 @@ function PowerGraph() {
                 max={10000}
                 onChange={handleChange}
                 value={yRange}
-                sx={{top: "5vh",
-                    height: "75%"}}
+                sx={{top: "3em",
+                    height: "20em"}}
             />
         </Stack>
     );

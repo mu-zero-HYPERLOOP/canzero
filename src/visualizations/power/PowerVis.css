@@ -8,39 +8,39 @@
 #power-vis .red1 {
     position: absolute;
     border: 2px solid #000000;
-    background-color: #ad0000;
+    background-color: #DD3636;
     width: 25%;
     height: 1.5vw;
-    box-shadow: inset 0 0 30px #ff0800;
+    box-shadow: inset 0 0 30px #FF6464;
 }
 
 #power-vis .green {
     position: absolute;
     border: 2px solid #000000;
-    background-color: #008307;
+    background-color: #3DBE44;
     left: 24%;
     width: 50%;
     height: 1.5vw;
-    box-shadow: inset 0 0 40px #00c009;
+    box-shadow: inset 0 0 40px #61DA67;
 }
 
 #power-vis .red2 {
     position: absolute;
     border: 2px solid #000000;
-    background-color: #ad0000;
+    background-color: #DD3636;
     left: 73%;
     width: 25%;
     height: 1.5vw;
-    box-shadow: inset 0 0 30px #ff0800;
+    box-shadow: inset 0 0 30px #FF6464;
 }
 
 #power-vis .arrow-up {
     position: absolute;
-    border-left: 15px solid transparent;
-    border-right: 15px solid transparent;
-    border-bottom: 15px solid black;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-bottom: 7px solid black;
     top: 15px;
-    left: 46%;
+    left: 47.5%;
     transform: translateX(var(--x));
     transition: transform 200ms ease-out;
 
@@ -48,11 +48,11 @@
 
 #power-vis .arrow-down {
     position: absolute;
-    border-left: 15px solid transparent;
-    border-right: 15px solid transparent;
-    border-top: 15px solid #000000;
-    top: -6px;
-    left: 46%;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 7px solid #000000;
+    top: 4px;
+    left: 47.5%;
     transform: translateX(var(--x));
     transition: transform 200ms ease-out;
 }
