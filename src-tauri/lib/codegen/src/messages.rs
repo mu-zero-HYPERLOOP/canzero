@@ -73,7 +73,7 @@ pub fn generate_messages(
         let serialize_func_name = format!("serialize_{message_type_name}");
         let mut serialize_def = format!(
 "static void {namespace}_{serialize_func_name}({message_type_name}* msg, {namespace}_frame* frame) {{
-{indent}uint8_t* data = frame->data;
+{indent}volatile uint8_t* data = (volatile uint8_t*)frame->data;
 {indent}for(uint8_t i = 0; i < 8; ++i){{
 {indent}{indent}data[i] = 0;
 {indent}}}
@@ -173,23 +173,23 @@ pub fn generate_messages(
                                         // is asserted to be the first write to the word!
                                         let word_offset = *attrib_offset / 32; // intentional floor
                                         format!(
-                                            "{indent}((uint32_t*)data)[{word_offset}] = {val};\n"
+                                            "{indent}((volatile uint32_t*)data)[{word_offset}] = {val};\n"
                                         )
                                     } else if word_bit_offset == 0 && size > 32 {
                                         // long word aligned long wrd write
                                         // is asserted to be the first bit of the data frame
                                         assert!(*attrib_offset == 0);
-                                        format!("{indent}((uint64_t*)data)[0] = {val};\n")
+                                        format!("{indent}((volatile uint64_t*)data)[0] = {val};\n")
                                     } else if word_bit_offset + size as usize <= 32 {
                                         // unaligned word write (does't cross word boundary)
                                         // is asserted to not be the first write to the word!
                                         let word_offset = *attrib_offset / 32; // intentional floor
-                                        format!("{indent}((uint32_t*)data)[{word_offset}] |= {val} << {word_bit_offset};\n")
+                                        format!("{indent}((volatile uint32_t*)data)[{word_offset}] |= {val} << {word_bit_offset};\n")
                                     } else if word_bit_offset + size as usize >= 32 {
                                         // unaligned long word write (crosses word boundary)
                                         // is asserted to not be the first write to the word!
                                         assert!(*attrib_offset <= 32);
-                                        format!("{indent}((uint64_t*)data)[0] |= ((uint64_t){val}) << {word_bit_offset} ;\n")
+                                        format!("{indent}((volatile uint64_t*)data)[0] |= ((uint64_t){val}) << {word_bit_offset} ;\n")
                                     } else {
                                         panic!();
                                     };
@@ -231,23 +231,23 @@ pub fn generate_messages(
                                         // is asserted to be the first write to the word!
                                         let word_offset = *attrib_offset / 32; // intentional floor
                                         format!(
-                                            "{indent}((uint32_t*)data)[{word_offset}] = {val};\n"
+                                            "{indent}((volatile uint32_t*)data)[{word_offset}] = {val};\n"
                                         )
                                     } else if word_bit_offset == 0 && size > 32 {
                                         // long word aligned long wrd write
                                         // is asserted to be the first bit of the data frame
                                         assert!(*attrib_offset == 0);
-                                        format!("{indent}((uint64_t*)data)[0] = {val};\n")
+                                        format!("{indent}((volatile uint64_t*)data)[0] = {val};\n")
                                     } else if word_bit_offset + size as usize <= 32 {
                                         // unaligned word write (does't cross word boundary)
                                         // is asserted to not be the first write to the word!
                                         let word_offset = *attrib_offset / 32; // intentional floor
-                                        format!("{indent}((uint32_t*)data)[{word_offset}] |= {val} << {word_bit_offset};\n")
+                                        format!("{indent}((volatile uint32_t*)data)[{word_offset}] |= {val} << {word_bit_offset};\n")
                                     } else if word_bit_offset + size as usize >= 32 {
                                         // unaligned long word write (crosses word boundary)
                                         // is asserted to not be the first write to the word!
                                         assert!(*attrib_offset <= 32);
-                                        format!("{indent}((uint64_t*)data)[0] |= ((uint64_t){val}) << {word_bit_offset} ;\n")
+                                        format!("{indent}((volatile uint64_t*)data)[0] |= ((uint64_t){val}) << {word_bit_offset} ;\n")
                                     } else {
                                         panic!();
                                     };
@@ -326,22 +326,22 @@ pub fn generate_messages(
                         // word aligned word write
                         // is asserted to be the first write to the word!
                         let word_offset = attrib_offset / 32; // intentional floor
-                        format!("{indent}((uint32_t*)data)[{word_offset}] = {val};\n")
+                        format!("{indent}((volatile uint32_t*)data)[{word_offset}] = {val};\n")
                     } else if word_bit_offset == 0 && size > 32 {
                         // long word aligned long wrd write
                         // is asserted to be the first bit of the data frame
                         assert!(attrib_offset == 0);
-                        format!("{indent}((uint64_t*)data)[0] = {val};\n")
+                        format!("{indent}((volatile uint64_t*)data)[0] = {val};\n")
                     } else if word_bit_offset + size as usize <= 32 {
                         // unaligned word write (does't cross word boundary)
                         // is asserted to not be the first write to the word!
                         let word_offset = attrib_offset / 32; // intentional floor
-                        format!("{indent}((uint32_t*)data)[{word_offset}] |= {val} << {word_bit_offset};\n")
+                        format!("{indent}((volatile uint32_t*)data)[{word_offset}] |= {val} << {word_bit_offset};\n")
                     } else if word_bit_offset + size as usize >= 32 {
                         // unaligned long word write (crosses word boundary)
                         // is asserted to not be the first write to the word!
                         assert!(attrib_offset <= 32);
-                        format!("{indent}((uint64_t*)data)[0] |= ((uint64_t){val}) << {word_bit_offset} ;\n")
+                        format!("{indent}((volatile uint64_t*)data)[0] |= ((uint64_t){val}) << {word_bit_offset} ;\n")
                     } else {
                         panic!();
                     };
