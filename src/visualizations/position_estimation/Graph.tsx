@@ -283,15 +283,15 @@ function Graph() {
         <Typography noWrap textAlign="right" color={lineColors[0]} sx={{
           marginRight: "1.2rem"
         }}>
-          {`Position:  ${(pos as number)?.toFixed(2)}m`}
+          {`Position:  ${(pos === undefined) ? `?m` : `${(pos as number).toFixed(2)}m`}`}
         </Typography>
         <Typography noWrap textAlign="right" color={lineColors[1]} sx={{
           marginRight: "0.3rem",
         }}>
-          {`Velocity: ${(vel as number)?.toFixed(2)}m/s`}
+          {`Velocity: ${(vel === undefined) ? `?m/s` : `${(vel as number).toFixed(2)}m/s`}`}
         </Typography>
         <Typography noWrap textAlign="right" color={lineColors[2]}>
-          {`Acceleration*10: ${(acc as number)?.toFixed(2)}m/s²`}
+          {`Acceleration*10: ${(acc === undefined) ? `?m/s²` : `${(acc as number).toFixed(2)}m/s²`}`}
         </Typography>
       </Stack>
     </Stack>
