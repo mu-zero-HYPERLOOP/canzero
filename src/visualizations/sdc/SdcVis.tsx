@@ -1,4 +1,26 @@
+import useObjectEntryValue from "../../hooks/object_entry_value.ts";
+import {Value} from "../../object_entry/types/Value.tsx";
+
+function getY2(val: Value | undefined) {
+  const closed = "31"
+  const open = "16"
+
+  return (val === undefined || val == "open") ? open : closed
+}
+
 function SdcVis() {
+
+  const pdu12 = useObjectEntryValue("power_board12", "sdc_status");
+  const pdu24 = useObjectEntryValue("power_board24", "sdc_status")
+  const input_board = useObjectEntryValue("input_board", "sdc_status");
+  const lev1 = useObjectEntryValue("levitation_board1", "sdc_status");
+  const lev2 = useObjectEntryValue("levitation_board2", "sdc_status");
+  const lev3 = useObjectEntryValue("levitation_board3", "sdc_status");
+  const guidanceF = useObjectEntryValue("guidance_board_front", "sdc_status");
+  const guidanceB = useObjectEntryValue("guidance_board_back", "sdc_status");
+  const driver_board = useObjectEntryValue("motor_driver", "sdc_status");
+
+
   return (
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 682 62">
   <defs>
@@ -16,7 +38,7 @@ function SdcVis() {
     <circle className="cls-2" cx="325.22" cy="31" r="1.94"/>
     <text className="cls-1" transform="translate(81.38 50.68)"><tspan x="0" y="0" fontSize={8}>PDU24</tspan></text>
     <text className="cls-1" transform="translate(143.38 50.68)"><tspan x="0" y="0" fontSize={8}>PDU12</tspan></text>
-    <text className="cls-1" transform="translate(199.56 50.68)"><tspan x="0" y="0" fontSize={8}>LED-Board</tspan></text>
+    <text className="cls-1" transform="translate(199.56 50.68)"><tspan x="0" y="0" fontSize={8}>Motor-Driver</tspan></text>
     <text className="cls-1" transform="translate(261.56 50.68)"><tspan x="0" y="0" fontSize={8}>Input-Board</tspan></text>
     <text className="cls-1" transform="translate(317.75 50.68)"><tspan x="0" y="0" fontSize={8}>Guidance-Front</tspan></text>
     <line className="cls-3" x1="356.5" y1="31" x2="385.56" y2="31"/>
@@ -34,34 +56,31 @@ function SdcVis() {
     <text className="cls-1" transform="translate(571.56 50.68)"><tspan x="0" y="0" fontSize={8}>Levitation3</tspan></text>
   </g>
   <g id="led">
-    <line className="cls-3" x1="201.22px" y1="31px" x2="232.5" y2="31" style={{
-      transformOrigin: "232.5px, 31px",
-      rotate: "-5deg",
-    }}/>
+    <line className="cls-3" x1="201.22px" y1="31" x2="232.5" y2={getY2(driver_board)}/>
   </g>
   <g id="input">
-    <line className="cls-3" x1="263.22" y1="31" x2="294.5" y2="31"/>
+    <line className="cls-3" x1="263.22" y1="31" x2="294.5" y2={getY2(input_board)}/>
   </g>
   <g id="guidance-front">
-    <line className="cls-3" x1="325.22" y1="31" x2="356.5" y2="31"/>
+    <line className="cls-3" x1="325.22" y1="31" x2="356.5" y2={getY2(guidanceF)}/>
   </g>
   <g id="levi1">
-    <line className="cls-3" x1="387.22" y1="31" x2="418.5" y2="31"/>
+    <line className="cls-3" x1="387.22" y1="31" x2="418.5" y2={getY2(lev1)}/>
   </g>
   <g id="levi2">
-    <line className="cls-3" x1="449.22" y1="31" x2="480.5" y2="31"/>
+    <line className="cls-3" x1="449.22" y1="31" x2="480.5" y2={getY2(lev2)}/>
   </g>
   <g id="guidance-back">
-    <line className="cls-3" x1="511.22" y1="31" x2="542.5" y2="31"/>
+    <line className="cls-3" x1="511.22" y1="31" x2="542.5" y2={getY2(guidanceB)}/>
   </g>
   <g id="levi3">
-    <line className="cls-3" x1="573.22" y1="31" x2="604.5" y2="31"/>
+    <line className="cls-3" x1="573.22" y1="31" x2="604.5" y2={getY2(lev3)}/>
   </g>
   <g id="pdu24">
-    <line className="cls-3" x1="77.17" y1="31" x2="108.44" y2="31"/>
+    <line className="cls-3" x1="77.17" y1="31" x2="108.44" y2={getY2(pdu24)}/>
   </g>
   <g id="pdu12">
-    <line className="cls-3" x1="139.22" y1="31" x2="170.5" y2="31"/>
+    <line className="cls-3" x1="139.22" y1="31" x2="170.5" y2={getY2(pdu12)}/>
   </g>
 </svg>
   );
