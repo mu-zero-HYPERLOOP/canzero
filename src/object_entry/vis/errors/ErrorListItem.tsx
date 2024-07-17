@@ -24,7 +24,7 @@ function FriendItem({friend} : Readonly<FriendItemProps>) {
   if (value == undefined) {
     return <></>;
   }else {
-    return <Typography>{`${value} ${(info?.unit !== undefined && info?.unit !== null) ? info.unit : ""}`}</Typography>
+    return <Typography>{`${(value as number).toFixed(2)} ${(info?.unit !== undefined && info?.unit !== null) ? info.unit : ""}`}</Typography>
 
   }
 }
