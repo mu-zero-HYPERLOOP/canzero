@@ -1,19 +1,21 @@
 
 import { useEffect } from "react";
 import "./TemperatureVis.css"
-import {alpha, Paper, Stack, Tooltip, Typography} from "@mui/material";
+import {alpha, Box, Paper, Stack, Tooltip, Typography} from "@mui/material";
 import useObjectEntryValue from "../../hooks/object_entry_value";
 import theme from "../../theme.ts";
 import {Value} from "../../object_entry/types/Value.tsx";
 
 interface TemperatureCellProps {
   value: Value | undefined,
-  top: string,
-  left: string,
+  top?: string,
+  left?: string,
+  bottom?: string,
+  right?: string,
   width: string,
 }
 
-function TemperatureCell({value, top, left, width}: TemperatureCellProps) {
+function TemperatureCell({value, top, left, bottom, right, width}: TemperatureCellProps) {
   const unit = "°C"
   let color = (theme.palette.background.paper2 !== undefined) ? alpha(theme.palette.background.paper2, 0.8) : theme.palette.background.paper2
 
@@ -22,6 +24,8 @@ function TemperatureCell({value, top, left, width}: TemperatureCellProps) {
         position: "absolute",
         top: top,
         left: left,
+        bottom : bottom,
+        right : right,
         width: width}}>
         <Typography variant="body2" fontSize="0.7em" textAlign="right">
           {(value === undefined) ? `?${unit}` : `${(value as number).toFixed(2)}${unit}`}
@@ -692,32 +696,53 @@ function TemperatureVis() {
           </g>
         </svg>
       </Stack>
+      <Box sx={{
+        width: "100%",
+        height: "100%",
+      }}>
         {/*Guidance*/}
-        <TemperatureCell value={dslim} top={"5.3em"} left={"8.8em"} width={"2em"}/>
-        <TemperatureCell value={dslim} top={"5.3em"} left={"21.1em"} width={"2em"}/>
-        <TemperatureCell value={dslim} top={"17.1em"} left={"8.8em"} width={"2em"}/>
-        <TemperatureCell value={dslim} top={"17.1em"} left={"21.1em"} width={"2em"}/>
+        <TemperatureCell value={l3l} top={"13%"} left={"5.5%"} width={"2em"}/>
+        <TemperatureCell value={l3r} top={"23%"} left={"5.5%"} width={"2em"}/>
+        <TemperatureCell value={l2l} top={"13%"} left={"11.5%"} width={"2em"}/>
+        <TemperatureCell value={l2r} top={"23%"} left={"11.5%"} width={"2em"}/>
+        <TemperatureCell value={l1l} top={"13%"} left={"17.5%"} width={"2em"}/>
+        <TemperatureCell value={l1r} top={"23%"} left={"17.5%"} width={"2em"}/>
+        <TemperatureCell value={gfl} top={"8%"} left={"20%"} width={"2em"}/>
+        <TemperatureCell value={gfr} top={"26.5%"} left={"20%"} width={"2em"}/>
+        <TemperatureCell value={gbl} top={"8%"} left={"8.5%"} width={"2em"}/>
+        <TemperatureCell value={gbr} top={"26.5%"} left={"8.5%"} width={"2em"}/>
 
-        {/*Levitation*/}
-        <TemperatureCell value={dslim} top={"7.6em"} left={"6.2em"} width={"2em"}/>
-        <TemperatureCell value={dslim} top={"7.6em"} left={"12.3em"} width={"2em"}/>
-        <TemperatureCell value={dslim} top={"7.6em"} left={"18.5em"} width={"2em"}/>
-
-        <TemperatureCell value={dslim} top={"14.8em"} left={"6.2em"} width={"2em"}/>
-        <TemperatureCell value={dslim} top={"14.8em"} left={"12.3em"} width={"2em"}/>
-        <TemperatureCell value={dslim} top={"14.8em"} left={"18.5em"} width={"2em"}/>
-
-
-        <TemperatureCell value={dslim} top={"12.2em"} left={"15em"} width={"2em"}/>
-
-        <TemperatureCell value={dslim} top={"10.2em"} left={"6.5em"} width={"2em"}/>
-        <TemperatureCell value={dslim} top={"12.2em"} left={"6.5em"} width={"2em"}/>
-
-        <TemperatureCell value={dslim} top={"9.8em"} left={"18.9em"} width={"2em"}/>
-        <TemperatureCell value={dslim} top={"12.6em"} left={"20.7em"} width={"2em"}/>
+        <TemperatureCell value={dslim} top={"17%"} left={"14.5%"} width={"2em"}/>
+        <TemperatureCell value={sac_ebox} top={"16%"} left={"10%"} width={"2em"}/>
+        <TemperatureCell value={power_ebox} top={"18%"} left={"8%"} width={"2em"}/>
+        <TemperatureCell value={driver} top={"18%"} left={"18%"} width={"2em"}/>
+        <TemperatureCell value={supercaps} top={"16%"} left={"19.5%"} width={"2em"}/>
+      </Box>
 
     </Paper>
   );
 }
 
 export default TemperatureVis;
+
+        // <TemperatureCell value={dslim} top={"5.3em"} left={"21.1em"} width={"2em"}/>
+        // <TemperatureCell value={dslim} top={"17.1em"} left={"8.8em"} width={"2em"}/>
+        // <TemperatureCell value={dslim} top={"17.1em"} left={"21.1em"} width={"2em"}/>
+        //
+        // {/*Levitation*/}
+        // <TemperatureCell value={dslim} top={"7.6em"} left={"6.2em"} width={"2em"}/>
+        // <TemperatureCell value={dslim} top={"7.6em"} left={"12.3em"} width={"2em"}/>
+        // <TemperatureCell value={dslim} top={"7.6em"} left={"18.5em"} width={"2em"}/>
+        //
+        // <TemperatureCell value={dslim} top={"14.8em"} left={"6.2em"} width={"2em"}/>
+        // <TemperatureCell value={dslim} top={"14.8em"} left={"12.3em"} width={"2em"}/>
+        // <TemperatureCell value={dslim} top={"14.8em"} left={"18.5em"} width={"2em"}/>
+        //
+        //
+        // <TemperatureCell value={dslim} top={"12.2em"} left={"15em"} width={"2em"}/>
+        //
+        // <TemperatureCell value={dslim} top={"10.2em"} left={"6.5em"} width={"2em"}/>
+        // <TemperatureCell value={dslim} top={"12.2em"} left={"6.5em"} width={"2em"}/>
+        //
+        // <TemperatureCell value={dslim} top={"9.8em"} left={"18.9em"} width={"2em"}/>
+        // <TemperatureCell value={dslim} top={"12.6em"} left={"20.7em"} width={"2em"}/>
