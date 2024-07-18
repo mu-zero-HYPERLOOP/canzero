@@ -5,16 +5,27 @@ import interpolate from "color-interpolate";
 import "./ColorBar.css"
 import {useEffect} from "react";
 
-
-function getLightColorInterpolate(value: number, min: number, max: number) {
+function getLightColorInterpolate(rgb: boolean, value: number, min: number, max: number) {
   let colormap = interpolate(['#93ee9a', '#ffeb7b', '#ff816e']);
-  let percent = (value - min) / (max - min)
+  if (rgb) {
+    colormap = interpolate(['#ff816e', '#ffeb7b', '#93ee9a']);
+  }
+  let percent = (rgb) ? 1 : 0
+  if (max !== min) {
+    percent = (value - min) / (max - min)
+  }
   return colormap(percent)
 }
 
-function getMainColorInterpolate(value: number, min: number, max: number) {
+function getMainColorInterpolate(rgb: boolean, value: number, min: number, max: number) {
   let colormap = interpolate(['#2E9B33', '#FFD500', '#E32E13']);
-  let percent = (value - min) / (max - min)
+  if (rgb) {
+    colormap = interpolate(['#E32E13', '#FFD500', '#2E9B33']);
+  }
+  let percent = (rgb) ? 1 : 0
+  if (max !== min) {
+    percent = (value - min) / (max - min)
+  }
   return colormap(percent)
 }
 
@@ -24,9 +35,10 @@ interface EntryProps {
   objectEntryName: string,
   min: number,
   max: number,
+  target: number,
 }
 
-function Entry({ label, nodeName, objectEntryName, min, max }: Readonly<EntryProps>) {
+function Entry({ label, nodeName, objectEntryName, min, max, target}: Readonly<EntryProps>) {
   const theme = useTheme();
 
   let value = useObjectEntryValue(nodeName, objectEntryName);
@@ -34,8 +46,16 @@ function Entry({ label, nodeName, objectEntryName, min, max }: Readonly<EntryPro
 
   let unit = (info?.unit ?? "") as string;
   let color = theme.palette.background.paper2
+  value = 45
   if (value !== undefined) {
-      color = getLightColorInterpolate(value as number, min, max)
+      value = value as number;
+      value = Math.max(min, value)
+      value = Math.min(value, max)
+      if (target >= value) {
+        color = getLightColorInterpolate(true, value, min, target)
+      } else {
+        color = getLightColorInterpolate(false, value, target, max)
+      }
   }
 
   useEffect(() => {
@@ -45,8 +65,12 @@ function Entry({ label, nodeName, objectEntryName, min, max }: Readonly<EntryPro
       value = value as number;
       value = Math.max(min, value)
       value = Math.min(value, max)
-      bar.style.setProperty("--color", `${getMainColorInterpolate(value, min, max)}`);
       bar.style.setProperty("--width", `${(100) * (value - min) / (max - min)}%`);
+      if (target >= value) {
+        bar.style.setProperty("--color", `${getMainColorInterpolate(true, value, min, target)}`);
+      } else {
+        bar.style.setProperty("--color", `${getMainColorInterpolate(false, value, target, max)}`);
+      }
     } else {
       bar.style.setProperty("--width", `0%`);
     }
@@ -108,11 +132,11 @@ function VoltagesValues({ width, height }: Readonly<VoltagesValuesProps>) {
         padding: 0,
         paddingTop: "0.25em",
       }} direction="column" justifyContent="space-between">
-        <Entry label="Battery-Voltage:" nodeName="input_board" objectEntryName="bat24_voltage" min={22.2} max={29} />
-        <Entry label="Supercap-Voltage:" nodeName="input_board" objectEntryName="supercap_voltage" min={30} max={50} />
-        <Entry label="Battery-Temperature:" nodeName="input_board" objectEntryName="bat24_temperature_max" min={20} max={50} />
-        <Entry label="Link24-Current:" nodeName="input_board" objectEntryName="link24_current" min={2} max={20} />
-        <Entry label="Link45-Current:" nodeName="input_board" objectEntryName="link45_current" min={0} max={150} />
+        <Entry label="Battery-Voltage:" nodeName="input_board" objectEntryName="bat24_voltage" min={22.2} max={29} target={29}/>
+        <Entry label="Supercap-Voltage:" nodeName="input_board" objectEntryName="supercap_voltage" min={30} max={50} target={45}/>
+        <Entry label="Battery-Temperature:" nodeName="input_board" objectEntryName="bat24_temperature_max" min={20} max={50} target={20}/>
+        <Entry label="Link24-Current:" nodeName="input_board" objectEntryName="link24_current" min={0} max={20} target={0}/>
+        <Entry label="Link45-Current:" nodeName="input_board" objectEntryName="link45_current" min={0} max={150} target={0}/>
       </Stack>
     </Paper>
   );
