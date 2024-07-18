@@ -6,6 +6,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import useObjectEntryValue from "../../../hooks/object_entry_value";
 import useObjectEntryInfo from "../../../hooks/object_entry_info";
 import { ErrorEvent, Friend } from "../../types/events/ErrorEvent";
+import {isInt, isReal, isUInt} from "../../types/Type.tsx";
 
 
 
@@ -21,10 +22,14 @@ function FriendItem({friend} : Readonly<FriendItemProps>) {
   const value = useObjectEntryValue(friend.node_name, friend.object_entry_name);
   const info = useObjectEntryInfo(friend.node_name, friend.object_entry_name);
 
-  if (value === undefined || value === null) {
+  if (value === undefined || value === null || info === undefined) {
     return <></>;
   }else {
-    return <Typography>{`${(value as number).toFixed(2)} ${(info?.unit !== undefined && info?.unit !== null) ? info.unit : ""}`}</Typography>
+    if (info.ty !== undefined && (isInt(info.ty.id) || isUInt(info.ty.id) || isReal(info.ty.id))) {
+      return <Typography>{`${(value as number).toFixed(2)} ${(info?.unit !== undefined && info?.unit !== null) ? info.unit : ""}`}</Typography>
+    } else {
+      return <Typography>{`${value} ${(info?.unit !== undefined && info?.unit !== null) ? info.unit : ""}`}</Typography>
+    }
 
   }
 }
