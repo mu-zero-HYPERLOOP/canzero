@@ -1,6 +1,7 @@
 .color-bar {
     --color: 0;
-    --width: 0
+    --width: 0;
+    container-type: inline-size;
 }
 
 .color-bar .bar {

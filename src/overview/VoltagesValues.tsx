@@ -41,13 +41,14 @@ function Entry({ label, nodeName, objectEntryName, min, max }: Readonly<EntryPro
   useEffect(() => {
     const paper = document.getElementById(label)!;
     const bar = paper.getElementsByClassName("color-bar")[0] as HTMLElement;
-
     if (value !== undefined) {
       value = value as number;
       value = Math.max(min, value)
       value = Math.min(value, max)
       bar.style.setProperty("--color", `${getMainColorInterpolate(value, min, max)}`);
-      bar.style.setProperty("--width", `${(48.1) * (value - min) / (max - min)}%`);
+      bar.style.setProperty("--width", `${(100) * (value - min) / (max - min)}%`);
+    } else {
+      bar.style.setProperty("--width", `0%`);
     }
 
   }, []);
