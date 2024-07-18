@@ -7,7 +7,7 @@ async function sendSetReq(nodeName: string,
     nodeName,
     objectEntryName,
     newValueJson: JSON.stringify(value),
-  });
+  }).catch(console.error);
 }
 
 export default sendSetReq;

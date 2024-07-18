@@ -59,156 +59,156 @@ function TemperatureVis() {
 
     const svg = document.getElementById("temperature_vis")!;
     if (l1l === undefined) {
-      svg.style.setProperty("--mlu1_temperature", "#000");
+      svg.style.setProperty("--mlu3_temperature", "#000");
     }else if ((l1l as number) > 80) {
-      svg.style.setProperty("--mlu1_temperature", "#f00");
+      svg.style.setProperty("--mlu3_temperature", "#f00");
     } else if (l1l as number > 70) {
-      svg.style.setProperty("--mlu1_temperature", "#ff0");
+      svg.style.setProperty("--mlu3_temperature", "#ff0");
     } else if (l1l as number > 10) {
-      svg.style.setProperty("--mlu1_temperature", "#0f0");
+      svg.style.setProperty("--mlu3_temperature", "#0f0");
     } else {
-      svg.style.setProperty("--mlu1_temperature", "#00f");
+      svg.style.setProperty("--mlu3_temperature", "#00f");
     }
   }, [l1l]);
 
   useEffect(() => {
     const svg = document.getElementById("temperature_vis")!;
     if (l1r === undefined) {
-      svg.style.setProperty("--mlu2_temperature", "#000");
+      svg.style.setProperty("--mlu6_temperature", "#000");
     } else if ((l1r as number) > 80) {
-      svg.style.setProperty("--mlu2_temperature", "#f00");
+      svg.style.setProperty("--mlu6_temperature", "#f00");
     } else if (l1r as number > 70) {
-      svg.style.setProperty("--mlu2_temperature", "#ff0");
+      svg.style.setProperty("--mlu6_temperature", "#ff0");
     } else if (l1r as number > 10) {
-      svg.style.setProperty("--mlu2_temperature", "#0f0");
+      svg.style.setProperty("--mlu6_temperature", "#0f0");
     } else {
-      svg.style.setProperty("--mlu2_temperature", "#00f");
+      svg.style.setProperty("--mlu6_temperature", "#00f");
     }
   }, [l1r]);
 
   useEffect(() => {
     const svg = document.getElementById("temperature_vis")!;
     if (l2l === undefined) {
-      svg.style.setProperty("--mlu3_temperature", "#000");
+      svg.style.setProperty("--mlu2_temperature", "#000");
     } else if ((l2l as number) > 80) {
-      svg.style.setProperty("--mlu3_temperature", "#f00");
+      svg.style.setProperty("--mlu2_temperature", "#f00");
     } else if (l2l as number > 70) {
-      svg.style.setProperty("--mlu3_temperature", "#ff0");
+      svg.style.setProperty("--mlu2_temperature", "#ff0");
     } else if (l2l as number > 10) {
-      svg.style.setProperty("--mlu3_temperature", "#0f0");
+      svg.style.setProperty("--mlu2_temperature", "#0f0");
     } else {
-      svg.style.setProperty("--mlu3_temperature", "#00f");
+      svg.style.setProperty("--mlu2_temperature", "#00f");
     }
   }, [l2l]);
-
+  
   useEffect(() => {
     const svg = document.getElementById("temperature_vis")!;
     if (l2r === undefined) {
-      svg.style.setProperty("--mlu4_temperature", "#000");
-    } else if ((l2r as number) > 80) {
-      svg.style.setProperty("--mlu4_temperature", "#f00");
-    } else if (l2r as number > 70) {
-      svg.style.setProperty("--mlu4_temperature", "#ff0");
-    } else if (l2r as number > 10) {
-      svg.style.setProperty("--mlu4_temperature", "#0f0");
-    } else {
-      svg.style.setProperty("--mlu4_temperature", "#00f");
-    }
-  }, [l2r]);
-
-  useEffect(() => {
-    const svg = document.getElementById("temperature_vis")!;
-    if (l3l === undefined) {
       svg.style.setProperty("--mlu5_temperature", "#000");
-    } else if ((l3l as number) > 80) {
+    } else if ((l2r as number) > 80) {
       svg.style.setProperty("--mlu5_temperature", "#f00");
-    } else if (l3l as number > 70) {
+    } else if (l2r as number > 70) {
       svg.style.setProperty("--mlu5_temperature", "#ff0");
-    } else if (l3l as number > 10) {
+    } else if (l2r as number > 10) {
       svg.style.setProperty("--mlu5_temperature", "#0f0");
     } else {
       svg.style.setProperty("--mlu5_temperature", "#00f");
     }
+  }, [l2r]);
+  //
+  useEffect(() => {
+    const svg = document.getElementById("temperature_vis")!;
+    if (l3l === undefined) {
+      svg.style.setProperty("--mlu1_temperature", "#000");
+    } else if ((l3l as number) > 80) {
+      svg.style.setProperty("--mlu1_temperature", "#f00");
+    } else if (l3l as number > 70) {
+      svg.style.setProperty("--mlu1_temperature", "#ff0");
+    } else if (l3l as number > 10) {
+      svg.style.setProperty("--mlu1_temperature", "#0f0");
+    } else {
+      svg.style.setProperty("--mlu1_temperature", "#00f");
+    }
   }, [l3l]);
-
+  
   useEffect(() => {
     const svg = document.getElementById("temperature_vis")!;
     if (l3r === undefined) {
-      svg.style.setProperty("--mlu6_temperature", "#000");
+      svg.style.setProperty("--mlu4_temperature", "#000");
     } else if ((l3r as number) > 80) {
-      svg.style.setProperty("--mlu6_temperature", "#f00");
+      svg.style.setProperty("--mlu4_temperature", "#f00");
     } else if (l3r as number > 70) {
-      svg.style.setProperty("--mlu6_temperature", "#ff0");
+      svg.style.setProperty("--mlu4_temperature", "#ff0");
     } else if (l3r as number > 10) {
-      svg.style.setProperty("--mlu6_temperature", "#0f0");
+      svg.style.setProperty("--mlu4_temperature", "#0f0");
     } else {
-      svg.style.setProperty("--mlu6_temperature", "#00f");
+      svg.style.setProperty("--mlu4_temperature", "#00f");
     }
   }, [l3r]);
-
+  
   useEffect(() => {
     const svg = document.getElementById("temperature_vis")!;
     if (gfl === undefined) {
-      svg.style.setProperty("--mgu1_starboard_temperature", "#000");
-    }else if ((gfl as number) > 80) {
-      svg.style.setProperty("--mgu1_starboard_temperature", "#f00");
-    } else if (gfl as number > 70) {
-      svg.style.setProperty("--mgu1_starboard_temperature", "#ff0");
-    } else if (gfl as number > 10) {
-      svg.style.setProperty("--mgu1_starboard_temperature", "#0f0");
-    } else {
-      svg.style.setProperty("--mgu1_starboard_temperature", "#00f");
-    }
-  }, [gfl]);
-
-  useEffect(() => {
-    const svg = document.getElementById("temperature_vis")!;
-    if (gfr === undefined) {
-      svg.style.setProperty("--mgu1_port_temperature", "#000");
-    } else if ((gfr as number) > 80) {
-      svg.style.setProperty("--mgu1_port_temperature", "#f00");
-    } else if ((gfr as number) > 80) {
-      svg.style.setProperty("--mgu1_port_temperature", "#f00");
-    } else if (gfr as number > 70) {
-      svg.style.setProperty("--mgu1_port_temperature", "#ff0");
-    } else if (gfr as number > 10) {
-      svg.style.setProperty("--mgu1_port_temperature", "#0f0");
-    } else {
-      svg.style.setProperty("--mgu1_port_temperature", "#00f");
-    }
-  }, [gfr]);
-
-  useEffect(() => {
-    const svg = document.getElementById("temperature_vis")!;
-    if (gbl === undefined) {
       svg.style.setProperty("--mgu2_starboard_temperature", "#000");
-    } else if ((gbl as number) > 80) {
+    }else if ((gfl as number) > 80) {
       svg.style.setProperty("--mgu2_starboard_temperature", "#f00");
-    } else if (gbl as number > 70) {
+    } else if (gfl as number > 70) {
       svg.style.setProperty("--mgu2_starboard_temperature", "#ff0");
-    } else if (gbl as number > 10) {
+    } else if (gfl as number > 10) {
       svg.style.setProperty("--mgu2_starboard_temperature", "#0f0");
     } else {
       svg.style.setProperty("--mgu2_starboard_temperature", "#00f");
     }
-  }, [gbl]);
-
+  }, [gfl]);
+  //
   useEffect(() => {
     const svg = document.getElementById("temperature_vis")!;
-    if (gbr == undefined) {
+    if (gfr === undefined) {
       svg.style.setProperty("--mgu2_port_temperature", "#000");
-    } else if ((gbr as number) > 80) {
+    } else if ((gfr as number) > 80) {
       svg.style.setProperty("--mgu2_port_temperature", "#f00");
-    } else if (gbr as number > 70) {
+    } else if ((gfr as number) > 80) {
+      svg.style.setProperty("--mgu2_port_temperature", "#f00");
+    } else if (gfr as number > 70) {
       svg.style.setProperty("--mgu2_port_temperature", "#ff0");
-    } else if (gbr as number > 10) {
+    } else if (gfr as number > 10) {
       svg.style.setProperty("--mgu2_port_temperature", "#0f0");
     } else {
       svg.style.setProperty("--mgu2_port_temperature", "#00f");
     }
+  }, [gfr]);
+  
+  useEffect(() => {
+    const svg = document.getElementById("temperature_vis")!;
+    if (gbl === undefined) {
+      svg.style.setProperty("--mgu1_starboard_temperature", "#000");
+    } else if ((gbl as number) > 80) {
+      svg.style.setProperty("--mgu1_starboard_temperature", "#f00");
+    } else if (gbl as number > 70) {
+      svg.style.setProperty("--mgu1_starboard_temperature", "#ff0");
+    } else if (gbl as number > 10) {
+      svg.style.setProperty("--mgu1_starboard_temperature", "#0f0");
+    } else {
+      svg.style.setProperty("--mgu1_starboard_temperature", "#00f");
+    }
+  }, [gbl]);
+  
+  useEffect(() => {
+    const svg = document.getElementById("temperature_vis")!;
+    if (gbr == undefined) {
+      svg.style.setProperty("--mgu1_port_temperature", "#000");
+    } else if ((gbr as number) > 80) {
+      svg.style.setProperty("--mgu1_port_temperature", "#f00");
+    } else if (gbr as number > 70) {
+      svg.style.setProperty("--mgu1_port_temperature", "#ff0");
+    } else if (gbr as number > 10) {
+      svg.style.setProperty("--mgu1_port_temperature", "#0f0");
+    } else {
+      svg.style.setProperty("--mgu1_port_temperature", "#00f");
+    }
   }, [gbr]);
-
-
+  
+  
   useEffect(() => {
     const svg = document.getElementById("temperature_vis")!;
     if (sac_ebox === undefined) {
@@ -223,7 +223,7 @@ function TemperatureVis() {
       svg.style.setProperty("--ebox2_temperature", "#00f");
     }
   }, [sac_ebox]);
-
+  
   useEffect(() => {
     const svg = document.getElementById("temperature_vis")!;
     if (power_ebox === undefined) {
@@ -238,7 +238,7 @@ function TemperatureVis() {
       svg.style.setProperty("--ebox1_temperature", "#00f");
     }
   }, [power_ebox]);
-
+  
   useEffect(() =>{
     const svg = document.getElementById("temperature_vis")!;
     if (driver === undefined) {
@@ -253,7 +253,7 @@ function TemperatureVis() {
       svg.style.setProperty("--motor_driver_temperature", "#00f");
     }
   }, [driver]);
-
+  
   useEffect(() =>{
     const svg = document.getElementById("temperature_vis")!;
     if (driver === undefined) {
@@ -273,21 +273,21 @@ function TemperatureVis() {
       svg.style.setProperty("--dslim_port_temperature", "#00f");
     }
   }, [driver]);
-
-  useEffect(() =>{
-    const svg = document.getElementById("temperature_vis")!;
-    if (supercaps === undefined) {
-      svg.style.setProperty("--supercap_temperature", "#000");
-    } else if ((supercaps as number) > 80) {
-      svg.style.setProperty("--supercap_temperature", "#f00");
-    } else if (supercaps as number > 70) {
-      svg.style.setProperty("--supercap_temperature", "#ff0");
-    } else if (supercaps as number > 10) {
-      svg.style.setProperty("--supercap_temperature", "#0f0");
-    } else {
-      svg.style.setProperty("--supercap_temperature", "#00f");
-    }
-  }, [driver]);
+  //
+  // useEffect(() =>{
+  //   const svg = document.getElementById("temperature_vis")!;
+  //   if (supercaps === undefined) {
+  //     svg.style.setProperty("--supercap_temperature", "#000");
+  //   } else if ((supercaps as number) > 80) {
+  //     svg.style.setProperty("--supercap_temperature", "#f00");
+  //   } else if (supercaps as number > 70) {
+  //     svg.style.setProperty("--supercap_temperature", "#ff0");
+  //   } else if (supercaps as number > 10) {
+  //     svg.style.setProperty("--supercap_temperature", "#0f0");
+  //   } else {
+  //     svg.style.setProperty("--supercap_temperature", "#00f");
+  //   }
+  // }, [driver]);
 
 
   return (

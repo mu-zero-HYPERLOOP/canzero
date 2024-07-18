@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use serde::Serialize;
+use tauri::utils::config::parse::parse_value;
 use tauri::Manager;
 
 use crate::cnl::frame::{Attribute, Value};
@@ -21,27 +22,27 @@ pub async fn set_object_entry_value(
     node_name: String,
     object_entry_name: String,
     new_value_json: String,
-) -> Result<(), ()> {
+) -> Result<(), String> {
     let cnl = state.lock().await;
 
     let Some(node) = cnl.nodes().iter().find(|no| no.name() == &node_name) else {
-        return Err(());
+        return Err("Invalid node name".to_owned());
     };
     let Some(object_entry_object) = node
         .object_entries()
         .iter()
         .find(|oe| oe.name() == &object_entry_name)
     else {
-        return Err(());
+        return Err("Invalid object entry name".to_owned());
     };
     let oe_type = object_entry_object.ty();
 
     let json_value = match serde_json::from_str::<serde_json::Value>(&new_value_json) {
         Ok(v) => v,
-        Err(_) => return Err(()),
+        Err(_) => return Err("Failed to parse JSON.".to_owned()),
     };
 
-    fn parse_value(oe_type: &config::TypeRef, json_value: &serde_json::Value) -> Result<Value, ()> {
+    fn parse_value(oe_type: &config::TypeRef, json_value: &serde_json::Value) -> Result<Value, String> {
         match oe_type.as_ref() {
             Type::Primitive(SignalType::SignedInt { size }) => {
                 if let Some(val) = json_value.as_i64() {
@@ -53,10 +54,10 @@ pub async fn set_object_entry_value(
                     if val <= max_ivalue && val >= min_ivalue {
                         Ok(Value::SignedValue(val))
                     } else {
-                        return Err(());
+                        return Err("Expected Signed Value".to_owned());
                     }
                 } else {
-                    return Err(());
+                    return Err("Expected primitive value".to_owned());
                 }
             }
             Type::Primitive(SignalType::UnsignedInt { size }) => {
@@ -65,10 +66,10 @@ pub async fn set_object_entry_value(
                     if val <= max_uvalue {
                         Ok(Value::UnsignedValue(val))
                     } else {
-                        return Err(());
+                        return Err("Expected unsigned value".to_owned());
                     }
                 } else {
-                    return Err(());
+                    return Err("Expected primitive value".to_owned());
                 }
             }
             Type::Primitive(SignalType::Decimal {
@@ -83,10 +84,10 @@ pub async fn set_object_entry_value(
                     if val <= max && val >= min {
                         Ok(Value::RealValue(val))
                     } else {
-                        return Err(());
+                        return Err("Expected float value".to_owned());
                     }
                 } else {
-                    return Err(());
+                    return Err("Expected float value".to_owned());
                 }
             }
 
@@ -101,18 +102,19 @@ pub async fn set_object_entry_value(
 
                     for (name, attr_type) in attribs {
                         if let Some(val) = map.get(name) {
-                            if let Ok(type_val) = parse_value(attr_type, val) {
-                                attributes.push(Attribute::new(name, type_val));
-                            } else {
-                                return Err(());
-                            }
+                            let type_val = parse_value(attr_type,val)?;
+                            attributes.push(Attribute::new(name, type_val));
+                            // if let Ok(type_val) = parse_value(attr_type, val) {
+                            // } else {
+                            //     return Err("Failed to parse attr");
+                            // }
                         } else {
-                            return Err(());
+                            return Err(format!("Attribute {name} does not exist"));
                         }
                     }
                     Ok(Value::StructValue(attributes))
                 } else {
-                    return Err(());
+                    return Err("Expected Object".to_owned());
                 }
             }
             Type::Enum {
@@ -127,10 +129,10 @@ pub async fn set_object_entry_value(
                         Ok(Value::EnumValue(variant_str.to_string()))
                         // Ok(TypeValue::Enum(oe_type.clone(), variant_str.to_string()))
                     } else {
-                        return Err(());
+                        return Err("Invalid variant".to_owned());
                     }
                 } else {
-                    return Err(());
+                    return Err("Expected Enum value".to_owned());
                 }
             }
             Type::Array { len: _, ty: _ } => todo!(),
@@ -138,10 +140,7 @@ pub async fn set_object_entry_value(
     }
 
 
-    let value = match parse_value(oe_type, &json_value) {
-        Ok(x) => x,
-        Err(_) => return Err(()),
-    };
+    let value = parse_value(oe_type, &json_value)?;
 
     object_entry_object.set_request(value).await;
 

@@ -232,25 +232,25 @@ impl TcpCan {
 
         let tx = Arc::new(Mutex::new(tx));
 
-        let keep_alive_sock = tx.clone();
-        tokio::spawn(async move {
-            let mut keep_alive_frame = [0u8; 24];
-            TcpFrame::KeepAlive.into_bin(&mut keep_alive_frame);
-            let mut interval = tokio::time::interval(Duration::from_millis(200));
-            loop {
-                interval.tick().await;
-                if let Err(_) = keep_alive_sock
-                    .lock()
-                    .await
-                    .write_all(&keep_alive_frame)
-                    .await
-                {
-                    break; // Failed to send once -> stop sending keep alive completel! will
-                           // eventually lead to none beeing returned from the recv() function!
-                };
-                // failed to send keep alive!
-            }
-        });
+        // let keep_alive_sock = tx.clone();
+        // tokio::spawn(async move {
+        //     let mut keep_alive_frame = [0u8; 24];
+        //     TcpFrame::KeepAlive.into_bin(&mut keep_alive_frame);
+        //     let mut interval = tokio::time::interval(Duration::from_millis(200));
+        //     loop {
+        //         interval.tick().await;
+        //         if let Err(_) = keep_alive_sock
+        //             .lock()
+        //             .await
+        //             .write_all(&keep_alive_frame)
+        //             .await
+        //         {
+        //             break; // Failed to send once -> stop sending keep alive completel! will
+        //                    // eventually lead to none beeing returned from the recv() function!
+        //         };
+        //         // failed to send keep alive!
+        //     }
+        // });
 
         let wdg = Watchdog::create(Duration::from_millis(3000));
 
@@ -306,7 +306,7 @@ impl TcpCan {
                         Ok(_) => match TcpFrame::from_bin(&rx_buffer).unwrap() {
                             TcpFrame::NetworkFrame(network_frame) => return Some(network_frame),
                             TcpFrame::KeepAlive => {
-                                self.wdg.reset().await;
+                                // self.wdg.reset().await;
                             },
                             TcpFrame::SyncEnd => {
                                 // what a clusterfuck

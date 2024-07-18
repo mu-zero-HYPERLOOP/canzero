@@ -24,7 +24,7 @@ impl Network {
     }
 
     pub async fn sync_history(&self) -> Vec<TNetworkFrame> {
-        return self.history.lock().await.clone() //hopefully fast enough
+        return self.history.lock().await.clone(); //hopefully fast enough
     }
 
     pub async fn start(&self, node: NetworkNode) {
@@ -50,21 +50,25 @@ impl Network {
             .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
         let node = Arc::new(node);
         nodes.write().await.push((node_id, node.clone()));
-        let history = self.history.clone();
+        // let history = self.history.clone();
         tokio::spawn(async move {
             loop {
                 let Some(frame) = node.recv().await else {
                     break;
                 };
-                for (id, node) in nodes.read().await.iter() {
-                    if *id != node_id {
-                        // ignore loop back!
-                        if let Err(err) = node.send(&frame).await {
-                            eprintln!("{err:?}");
-                        };
+                let nodes = nodes.clone();
+                // let history = history.clone();
+                tokio::spawn(async move {
+                    for (id, node) in nodes.read().await.iter() {
+                        if *id != node_id {
+                            // ignore loop back!
+                            if let Err(err) = node.send(&frame).await {
+                                eprintln!("{err:?}");
+                            };
+                        }
                     }
-                }
-                history.lock().await.push(frame);
+                    // history.lock().await.push(frame);
+                });
             }
             // remove node
             let mut nodes_lock = nodes.write().await;
@@ -81,9 +85,7 @@ impl Network {
                     let addr = match tcp.addr().await {
                         Ok(addr) => addr,
                         Err(_) => {
-                            cprintln!(
-                                "???"
-                            );
+                            cprintln!("???");
                             return;
                         }
                     };

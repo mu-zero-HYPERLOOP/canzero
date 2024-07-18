@@ -81,6 +81,7 @@ function PIDControl() {
   }
 
   function uploadValid() {
+    return true;
     return KpInput !== null && KiInput !== null
       && KdInput !== null && KiMinInput !== null
       && KiMaxInput !== null && errorEmaAlphaInput !== null
@@ -100,10 +101,10 @@ function PIDControl() {
     const KiMaxValue = (KiMaxInput === undefined ? KiMax : KiMaxInput)!;
     const maxForceValue = (maxForceInput === undefined ? maxForce : maxForceInput)!;
     const errorFilterModeValue = (errorFilterModeInput === undefined ? errorFilterMode : errorFilterModeInput)!;
-    const errorBoxcarNValue = (errorBoxcarNInput === undefined ? errorBoxcarN : errorBoxcarNInput)!;
+    const errorBoxcarNValue = (errorBoxcarNInput === undefined ? Number.parseInt(errorBoxcarN as any) : errorBoxcarNInput)!;
     const errorEmaAlphaValue = (errorEmaAlphaInput === undefined ? errorEmaAlpha : errorEmaAlphaInput)!;
     const convFilterModeValue = (convFilterModeInput === undefined ? convFilterMode : convFilterModeInput)!;
-    const convBoxcarNValue = (convBoxcarNInput === undefined ? convBoxcarN : convBoxcarNInput)!;
+    const convBoxcarNValue = (convBoxcarNInput === undefined ? Number.parseInt(convBoxcarN as any) : convBoxcarNInput)!;
     const convEmaAlphaValue = (convEmaAlphaInput === undefined ? convEmaAlpha : convEmaAlphaInput)!;
 
 

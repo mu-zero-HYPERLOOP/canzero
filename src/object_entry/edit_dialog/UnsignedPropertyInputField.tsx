@@ -70,6 +70,7 @@ function UnsignedPropertyInputField({ min, max, onUpdate, currentValue, name, un
       const input = event.target.value;
       // NOTE special case for the empty string
       if (input.length === 0) {
+
         setInput(input);
         onUpdate(undefined);
         setHasValue(false);
