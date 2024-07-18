@@ -1,54 +1,25 @@
 import { faTriangleExclamation } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Box, Typography } from "@mui/material";
-import { invoke } from "@tauri-apps/api";
-import { listen } from "@tauri-apps/api/event";
-import { ObjectEntryEvent } from "../../types/events/ObjectEntryEvent";
-import { useEffect, useState } from "react";
-import { ObjectEntryListenLatestResponse } from "../../types/events/ObjectEntryListenLatestResponse";
+import useObjectEntryValue from "../../../hooks/object_entry_value.ts";
 import theme from "../../../theme.ts";
 
 
-
-const OE = { nodeName: "mother_board", objectEntryName: "error_any" };
-
 function WarningIconDisplay() {
 
-  const [state, setState] = useState<boolean>(false);
+  const state = useObjectEntryValue("mother_board", "error_any")
 
-  useEffect(() => {
-    async function asyncSetup() {
-      try {
-        const resp = await invoke<ObjectEntryListenLatestResponse>("listen_to_latest_object_entry_value", OE);
-        if (resp.latest !== undefined && resp.latest !== null) {
-          setState(resp.latest.value as string == "ERROR");
-        }
-        const unlisten = await listen<ObjectEntryEvent>(resp.event_name, event => {
-          setState(event.payload.value as string == "ERROR");
-        });
-        return () => {
-          unlisten();
-          invoke("unlisten_from_latest_object_entry_value", OE).catch(console.error);
-        };
-      } catch (e) {
-        console.error(`Failed to register listener for warning icon: Object entry ${OE.nodeName}:${OE.objectEntryName} not found`);
-        return () => {
-        }
-      }
-    }
-    const asyncCleanup = asyncSetup();
+  let color = theme.palette.background.disabled
 
-    return () => {
-      asyncCleanup.then(f => f()).catch(console.error);
-    };
-
-  }, []);
+  if (state === "INFO") color = "blue"
+  else if (state === "WARNING") color = "orange"
+  else if (state === "ERROR") color = "red"
 
   return (
     <Box component="div" sx={{
       textAlign: "center",
     }}>
-      <FontAwesomeIcon id="warning-icon" color={state ? "red" : theme.palette.background.disabled } icon={faTriangleExclamation} fontSize="30px" />
+      <FontAwesomeIcon id="warning-icon" color={color} icon={faTriangleExclamation} fontSize="30px" />
       <Typography color="white">
         Warning
       </Typography>

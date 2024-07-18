@@ -58,7 +58,7 @@ function ElectricIconDisplay() {
       <Box component="div" sx={{
         textAlign: "center",
       }}>
-        <Bolt id="electric-icon" sx={{ fontSize: "32px", color: state ? "yellow" : theme.palette.background.disabled }} />
+        <Bolt id="electric-icon" sx={{ fontSize: "32px", color: state ? "blue" : theme.palette.background.disabled }} />
         <div style={{ marginBottom: "-6px" }} />
         <Typography color="white">
           Electric

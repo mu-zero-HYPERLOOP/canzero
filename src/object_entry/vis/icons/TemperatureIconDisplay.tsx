@@ -43,17 +43,17 @@ function Popup() {
 
 function TemperatureIconDisplay() {
 
-  const [state, setState] = useState<boolean>(false);
+  const [state, setState] = useState<string>("");
 
   useEffect(() => {
     async function asyncSetup() {
       try {
         const resp = await invoke<ObjectEntryListenLatestResponse>("listen_to_latest_object_entry_value", OE);
         if (resp.latest !== undefined && resp.latest !== null) {
-          setState(resp.latest.value as string == "CLOSED");
+          setState(resp.latest.value as string);
         }
         const unlisten = await listen<ObjectEntryEvent>(resp.event_name, event => {
-          setState(event.payload.value as string == "CLOSED");
+          setState(event.payload.value as string);
         });
         return () => {
           unlisten();
@@ -72,12 +72,18 @@ function TemperatureIconDisplay() {
 
   }, []);
 
+    let color = theme.palette.background.disabled
+
+    if (state === "INFO") color = "blue"
+    else if (state === "WARNING") color = "orange"
+    else if (state === "ERROR") color = "red"
+
   return (
     <Tooltip title={Popup()}>
       <Box component="div" sx={{
         textAlign: "center",
       }}>
-        <Thermostat sx={{ fontSize: "32px", color: state ? "red" : theme.palette.background.disabled }} />
+        <Thermostat sx={{ fontSize: "32px", color: color }} />
         <div style={{ marginBottom: "-6px" }} />
         <Typography color="white">
           Temperature

@@ -17,7 +17,7 @@ const BAT24_TEMP = { nodeName: "input_board", objectEntryName: "bat24_temperatur
 
 function BatteryIconDisplay() {
 
-  const [state, setState] = useState<boolean>(false);
+  const [state, setState] = useState<string>("");
   const bat24Voltage = useObjectEntryValue(BAT24_VOLTAGE.nodeName,
     BAT24_VOLTAGE.objectEntryName);
   const bat24Current = useObjectEntryValue(BAT24_CURRENT.nodeName,
@@ -30,10 +30,10 @@ function BatteryIconDisplay() {
       try {
         const resp = await invoke<ObjectEntryListenLatestResponse>("listen_to_latest_object_entry_value", OE);
         if (resp.latest !== undefined && resp.latest !== null) {
-          setState(resp.latest.value as string == "ERROR");
+          setState(resp.latest.value as string);
         }
         const unlisten = await listen<ObjectEntryEvent>(resp.event_name, event => {
-          setState(event.payload.value as string == "ERROR");
+          setState(event.payload.value as string);
         });
         return () => {
           unlisten();
@@ -52,6 +52,13 @@ function BatteryIconDisplay() {
     };
 
   }, []);
+
+  let color = theme.palette.background.disabled
+
+  if (state === "INFO") color = "blue"
+  else if (state === "WARNING") color = "orange"
+  else if (state === "ERROR") color = "red"
+
   return (
     <Tooltip title={
         <div>
@@ -62,7 +69,7 @@ function BatteryIconDisplay() {
       <Box component="div" sx={{
         textAlign: "center",
       }}>
-        <FontAwesomeIcon color={state ? "red" : theme.palette.background.disabled} icon={faCarBattery} fontSize="30px" />
+        <FontAwesomeIcon color={color} icon={faCarBattery} fontSize="30px" />
         <Typography color="white">
           Battery
         </Typography>
