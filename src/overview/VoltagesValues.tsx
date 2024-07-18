@@ -110,7 +110,7 @@ function VoltagesValues({ width, height }: Readonly<VoltagesValuesProps>) {
       }} direction="column" justifyContent="space-between">
         <Entry label="Battery-Voltage:" nodeName="input_board" objectEntryName="bat24_voltage" min={22.2} max={29} />
         <Entry label="Supercap-Voltage:" nodeName="input_board" objectEntryName="supercap_voltage" min={30} max={50} />
-        <Entry label="Battery-Temperature:" nodeName="input_board" objectEntryName="bat24_temperature_max" min={0} max={50} />
+        <Entry label="Battery-Temperature:" nodeName="input_board" objectEntryName="bat24_temperature_max" min={20} max={50} />
         <Entry label="Link24-Current:" nodeName="input_board" objectEntryName="link24_current" min={2} max={20} />
         <Entry label="Link45-Current:" nodeName="input_board" objectEntryName="link45_current" min={0} max={150} />
       </Stack>
