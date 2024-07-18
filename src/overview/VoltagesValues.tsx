@@ -46,7 +46,7 @@ function Entry({ label, nodeName, objectEntryName, min, max, target}: Readonly<E
 
   let unit = (info?.unit ?? "") as string;
   let color = theme.palette.background.paper2
-  value = 45
+
   if (value !== undefined) {
       value = value as number;
       value = Math.max(min, value)
