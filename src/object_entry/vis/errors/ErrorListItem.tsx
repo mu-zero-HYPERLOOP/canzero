@@ -29,7 +29,7 @@ function FriendItem({ friend }: Readonly<FriendItemProps>) {
     if (info.ty !== undefined && (isInt(info.ty.id) || isUInt(info.ty.id))) {
       return <Typography>{`${(Number.parseInt(value as any) as number)} ${(info?.unit !== undefined && info?.unit !== null) ? info.unit : ""}`}</Typography>
     } else if (info.ty !== undefined && isReal(info.ty.id)) {
-      return <Typography>{`${((Number.parseFloat(value as any) as number).toFixed(2)} ${(info?.unit !== undefined && info?.unit !== null) ? info.unit : ""}`}</Typography>
+      return <Typography>{`${((Number.parseFloat(value as any)) as number).toFixed(2)} ${(info?.unit !== undefined && info?.unit !== null) ? info.unit : ""}`}</Typography>
     } else {
       return <Typography>{`${value} ${(info?.unit !== undefined && info?.unit !== null) ? info.unit : ""}`}</Typography>
     }
