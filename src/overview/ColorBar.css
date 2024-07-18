@@ -1,0 +1,12 @@
+#color-bar {
+    --color: 0;
+    --width: 0
+}
+
+#color-bar .bar {
+    position: absolute;
+    border-radius: 5px;
+    background-color: var(--color);
+    width: var(--width);
+    height: 2.5em;
+}

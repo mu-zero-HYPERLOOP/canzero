@@ -701,22 +701,22 @@ function TemperatureVis() {
         height: "100%",
       }}>
         {/*Guidance*/}
-        <TemperatureCell value={l3l} top={"13%"} left={"5.5%"} width={"2em"}/>
-        <TemperatureCell value={l3r} top={"23%"} left={"5.5%"} width={"2em"}/>
-        <TemperatureCell value={l2l} top={"13%"} left={"11.5%"} width={"2em"}/>
-        <TemperatureCell value={l2r} top={"23%"} left={"11.5%"} width={"2em"}/>
-        <TemperatureCell value={l1l} top={"13%"} left={"17.5%"} width={"2em"}/>
-        <TemperatureCell value={l1r} top={"23%"} left={"17.5%"} width={"2em"}/>
-        <TemperatureCell value={gfl} top={"8%"} left={"20%"} width={"2em"}/>
-        <TemperatureCell value={gfr} top={"26.5%"} left={"20%"} width={"2em"}/>
-        <TemperatureCell value={gbl} top={"8%"} left={"8.5%"} width={"2em"}/>
-        <TemperatureCell value={gbr} top={"26.5%"} left={"8.5%"} width={"2em"}/>
+        <TemperatureCell value={l3l} top={"13%"} left={"5.5%"} width={"2.65em"}/>
+        <TemperatureCell value={l3r} top={"23%"} left={"5.5%"} width={"2.65em"}/>
+        <TemperatureCell value={l2l} top={"13%"} left={"11.5%"} width={"2.65em"}/>
+        <TemperatureCell value={l2r} top={"23%"} left={"11.5%"} width={"2.65em"}/>
+        <TemperatureCell value={l1l} top={"13%"} left={"17.5%"} width={"2.65em"}/>
+        <TemperatureCell value={l1r} top={"23%"} left={"17.5%"} width={"2.65em"}/>
+        <TemperatureCell value={gfl} top={"8%"} left={"20%"} width={"2.65em"}/>
+        <TemperatureCell value={gfr} top={"26.5%"} left={"20%"} width={"2.65em"}/>
+        <TemperatureCell value={gbl} top={"8%"} left={"8.5%"} width={"2.65em"}/>
+        <TemperatureCell value={gbr} top={"26.5%"} left={"8.5%"} width={"2.65em"}/>
 
-        <TemperatureCell value={dslim} top={"17%"} left={"14.5%"} width={"2em"}/>
-        <TemperatureCell value={sac_ebox} top={"16%"} left={"10%"} width={"2em"}/>
-        <TemperatureCell value={power_ebox} top={"18%"} left={"8%"} width={"2em"}/>
-        <TemperatureCell value={driver} top={"18%"} left={"18%"} width={"2em"}/>
-        <TemperatureCell value={supercaps} top={"16%"} left={"19.5%"} width={"2em"}/>
+        <TemperatureCell value={dslim} top={"17%"} left={"14.5%"} width={"2.65em"}/>
+        <TemperatureCell value={sac_ebox} top={"16%"} left={"10%"} width={"2.65em"}/>
+        <TemperatureCell value={power_ebox} top={"18%"} left={"8%"} width={"2.65em"}/>
+        <TemperatureCell value={driver} top={"18%"} left={"18%"} width={"2.65em"}/>
+        <TemperatureCell value={supercaps} top={"16%"} left={"19.5%"} width={"2.65em"}/>
       </Box>
 
     </Paper>
