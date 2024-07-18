@@ -6,27 +6,30 @@ import WarningIcon from '@mui/icons-material/Warning';
 import useObjectEntryValue from "../../../hooks/object_entry_value";
 import useObjectEntryInfo from "../../../hooks/object_entry_info";
 import { ErrorEvent, Friend } from "../../types/events/ErrorEvent";
-import {isInt, isReal, isUInt} from "../../types/Type.tsx";
+import { isInt, isReal, isUInt } from "../../types/Type.tsx";
 
 
 
 interface ErrorListItemProps {
-  event : ErrorEvent
+  event: ErrorEvent
 }
 
 interface FriendItemProps {
-  friend : Friend,
+  friend: Friend,
 }
 
-function FriendItem({friend} : Readonly<FriendItemProps>) {
+function FriendItem({ friend }: Readonly<FriendItemProps>) {
   const value = useObjectEntryValue(friend.node_name, friend.object_entry_name);
   const info = useObjectEntryInfo(friend.node_name, friend.object_entry_name);
 
+  console.log("value", value);
   if (value === undefined || value === null || info === undefined) {
     return <></>;
-  }else {
-    if (info.ty !== undefined && (isInt(info.ty.id) || isUInt(info.ty.id) || isReal(info.ty.id))) {
-      return <Typography>{`${(value as number).toFixed(2)} ${(info?.unit !== undefined && info?.unit !== null) ? info.unit : ""}`}</Typography>
+  } else {
+    if (info.ty !== undefined && (isInt(info.ty.id) || isUInt(info.ty.id))) {
+      return <Typography>{`${(Number.parseInt(value as any) as number)} ${(info?.unit !== undefined && info?.unit !== null) ? info.unit : ""}`}</Typography>
+    } else if (info.ty !== undefined && isReal(info.ty.id)) {
+      return <Typography>{`${(value as number)} ${(info?.unit !== undefined && info?.unit !== null) ? info.unit : ""}`}</Typography>
     } else {
       return <Typography>{`${value} ${(info?.unit !== undefined && info?.unit !== null) ? info.unit : ""}`}</Typography>
     }
@@ -80,7 +83,7 @@ function ErrorListItem({
       }}
         secondaryAction={
           <ListItemText>
-             {(event.friend !== undefined && event.friend !== null) ? <FriendItem friend={event.friend}/> : <></>}
+            {(event.friend !== undefined && event.friend !== null) ? <FriendItem friend={event.friend} /> : <></>}
           </ListItemText>
         }
       >
