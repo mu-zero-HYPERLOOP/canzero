@@ -178,7 +178,7 @@ function EntryWithPercent({ label, nodeName, objectEntryName, min, max, target}:
               position: "relative",
               top: "-0.25em",
             }}>
-              {(value === undefined) ? `?${unit}` : `${(value as number).toFixed(2)}${unit} [${((100) * ((value as number) - min) / (max - min)).toFixed(2)}%]`}
+              {(value === undefined) ? `?${unit} [?%]` : `${(value as number).toFixed(2)}${unit} [${((100) * ((value as number) - min) / (max - min)).toFixed(2)}%]`}
             </Typography>
           </Stack>
           <Stack direction="row" justifyContent="space-around" margin={0} padding={0} width="30%">
