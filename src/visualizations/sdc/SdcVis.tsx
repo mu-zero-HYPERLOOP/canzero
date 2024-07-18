@@ -5,7 +5,7 @@ function getY2(val: Value | undefined) {
   const closed = "31"
   const open = "16"
 
-  return (val === undefined || val == "open") ? open : closed
+  return (val === undefined || val == "OPEN") ? open : closed
 }
 
 function SdcVis() {
