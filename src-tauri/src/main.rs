@@ -93,6 +93,7 @@ async fn main() {
             commands::search_string_storage::store_search_string,
             commands::errors::listen_to_errors,
             commands::errors::unlisten_from_errors,
+            commands::errors::reset_errors,
         ])
         .run(tauri::generate_context!())
         .expect("Error while running tauri application");

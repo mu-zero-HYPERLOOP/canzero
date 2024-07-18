@@ -45,7 +45,7 @@ enum ErrorTaskMsg {
 
 pub struct ErrorState {
     label: String,
-    level: Mutex<ErrorLevel>,
+    pub level: Mutex<ErrorLevel>,
     last_level_update_timestamp : Mutex<Duration>,
     max_level: Mutex<ErrorLevel>,
     last_max_level_update_timestamp : Mutex<Duration>,
@@ -159,6 +159,13 @@ impl ErrorObservable {
             listen_count: AtomicUsize::new(0),
             states: Arc::new(states),
             app_handle: app_handle.clone(),
+        }
+    }
+
+    pub async fn reset(&self) {
+        for s in self.states.iter() {
+            *s.level.lock().unwrap() = ErrorLevel::OK;
+            *s.max_level.lock().unwrap() = ErrorLevel::OK;
         }
     }
 

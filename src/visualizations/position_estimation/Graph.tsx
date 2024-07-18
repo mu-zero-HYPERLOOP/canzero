@@ -47,6 +47,7 @@ function Graph() {
   const svgRef = useRef(null) as any;
 
   const [autoWidth, setAutoWidth] = useState(0);
+  const positionConfidence = useObjectEntryValue("input_board", "absolute_position_known");
 
 
   useEffect(() => {
@@ -93,7 +94,8 @@ function Graph() {
         if (oe !== "acceleration") {
           data[i] = resp.history;
         } else {
-          data[i] = resp.history.map((event: ObjectEntryEvent) => {return {value: (event.value as number * 10), timestamp: event.timestamp, delta_time: event.delta_time}});
+          let factor = (i == 0) ? 1 : 10;
+          data[i] = resp.history.map((event: ObjectEntryEvent) => {return {value: (event.value as number * factor), timestamp: event.timestamp, delta_time: event.delta_time}});
         }
         if (i == 0) {
           timestamp = resp.now;
@@ -283,12 +285,12 @@ function Graph() {
         <Typography noWrap textAlign="right" color={lineColors[0]} sx={{
           marginRight: "1.2rem"
         }}>
-          {`Position:  ${(pos === undefined) ? `?m` : `${(pos as number).toFixed(2)}m`}`}
+          {`${positionConfidence == "TRUE" ? "absolute-Position" : "relative-Position"}:  ${(pos === undefined) ? `?m` : `${(pos as number).toFixed(2)}m`}`}
         </Typography>
         <Typography noWrap textAlign="right" color={lineColors[1]} sx={{
           marginRight: "0.3rem",
         }}>
-          {`Velocity: ${(vel === undefined) ? `?m/s` : `${(vel as number).toFixed(2)}m/s`}`}
+          {`Velocity*10: ${(vel === undefined) ? `?m/s` : `${(vel as number).toFixed(2)}m/s`}`}
         </Typography>
         <Typography noWrap textAlign="right" color={lineColors[2]}>
           {`Acceleration*10: ${(acc === undefined) ? `?m/s²` : `${(acc as number).toFixed(2)}m/s²`}`}

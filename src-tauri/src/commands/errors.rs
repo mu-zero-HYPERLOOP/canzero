@@ -11,6 +11,13 @@ pub async fn listen_to_errors(state: tauri::State<'_, CNLState>) -> Result<Vec<E
 }
 
 #[tauri::command]
+pub async fn reset_errors(state : tauri::State<'_, CNLState>) -> Result<(),()>{
+    let cnl = state.lock().await;
+    cnl.error_observable().reset().await;
+    Ok(())
+}
+
+#[tauri::command]
 pub async fn unlisten_from_errors(state : tauri::State<'_, CNLState>) -> Result<(),()> {
     let cnl = state.lock().await;
     cnl.error_observable().unlisten().await;
