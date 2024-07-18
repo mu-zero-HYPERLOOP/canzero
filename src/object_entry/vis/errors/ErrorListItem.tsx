@@ -21,7 +21,7 @@ function FriendItem({friend} : Readonly<FriendItemProps>) {
   const value = useObjectEntryValue(friend.node_name, friend.object_entry_name);
   const info = useObjectEntryInfo(friend.node_name, friend.object_entry_name);
 
-  if (value == undefined) {
+  if (value === undefined || value === null) {
     return <></>;
   }else {
     return <Typography>{`${(value as number).toFixed(2)} ${(info?.unit !== undefined && info?.unit !== null) ? info.unit : ""}`}</Typography>

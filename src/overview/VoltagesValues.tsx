@@ -39,9 +39,11 @@ function Entry({ label, nodeName, objectEntryName, min, max }: Readonly<EntryPro
   }
 
   useEffect(() => {
-    const bar = document.getElementById("color-bar")!;
+    const paper = document.getElementById(label)!;
+    const bar = paper.getElementsByClassName("color-bar")[0] as HTMLElement;
+
     if (value !== undefined) {
-      value = value as number
+      value = value as number;
       value = Math.max(min, value)
       value = Math.min(value, max)
       bar.style.setProperty("--color", `${getMainColorInterpolate(value, min, max)}`);
@@ -51,13 +53,13 @@ function Entry({ label, nodeName, objectEntryName, min, max }: Readonly<EntryPro
   }, []);
 
   return (
-    <Paper sx={{
+    <Paper id={label} sx={{
       backgroundColor: color,
       marginLeft: "0.25em", marginRight: "0.25em",
       marginBottom: "0.25em",
       height: `2.5em`
     }}>
-      <Box id="color-bar">
+      <Box className="color-bar">
         <div className="bar">
         </div>
       </Box>
