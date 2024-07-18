@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 canzero-config = { path = "../config/" }
+rand = "0.8.5"
 
 [dev-dependencies]
 canzero-yaml = { path = "../yaml/" }

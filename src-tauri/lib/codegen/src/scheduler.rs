@@ -1,4 +1,5 @@
 use std::time::Duration;
+use rand::Rng;
 
 use canzero_config::config;
 
@@ -37,6 +38,8 @@ pub fn generate_scheduler(
 "
         ));
     }
+
+    let heartbeat_interval = 100 + rand::thread_rng().gen_range(0..100);
 
     let num_fragmentation_jobs = node_config
             .object_entries()
@@ -302,7 +305,7 @@ static void schedule_get_resp_fragmentation_job(uint32_t *fragmentation_buffer, 
 }}
 
 static job_t heartbeat_job;
-static const uint32_t heartbeat_interval = 100;
+static const uint32_t heartbeat_interval = {heartbeat_interval};
 static void schedule_heartbeat_job() {{
 {indent}heartbeat_job.climax = canzero_get_time();
 {indent}heartbeat_job.tag = HEARTBEAT_JOB_TAG;
