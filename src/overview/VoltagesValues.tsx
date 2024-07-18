@@ -34,7 +34,6 @@ function Entry({ label, nodeName, objectEntryName, min, max }: Readonly<EntryPro
 
   let unit = (info?.unit ?? "") as string;
   let color = theme.palette.background.paper2
-  value = 150
   if (value !== undefined) {
       color = getLightColorInterpolate(value as number, min, max)
   }
