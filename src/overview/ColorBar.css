@@ -9,5 +9,6 @@
     border-radius: 5px;
     background-color: var(--color);
     width: var(--width);
+    transition: width ease-out 250ms;
     height: 2.5em;
 }

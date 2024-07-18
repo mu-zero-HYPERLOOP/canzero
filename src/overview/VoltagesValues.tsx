@@ -51,7 +51,7 @@ function Entry({ label, nodeName, objectEntryName, min, max }: Readonly<EntryPro
       bar.style.setProperty("--width", `0%`);
     }
 
-  }, []);
+  }, [value]);
 
   return (
     <Paper id={label} sx={{
