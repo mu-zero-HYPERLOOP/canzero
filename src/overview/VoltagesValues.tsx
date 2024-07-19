@@ -48,13 +48,13 @@ function Entry({ label, nodeName, objectEntryName, min, max, target}: Readonly<E
   let color = theme.palette.background.paper2
 
   if (value !== undefined) {
-      value = value as number;
-      value = Math.max(min, value)
-      value = Math.min(value, max)
-      if (target >= value) {
-        color = getLightColorInterpolate(true, value, min, target)
+      let cappedValue = value as number;
+      cappedValue = Math.max(min, cappedValue)
+      cappedValue = Math.min(cappedValue, max)
+      if (target >= cappedValue) {
+        color = getLightColorInterpolate(true, cappedValue, min, target)
       } else {
-        color = getLightColorInterpolate(false, value, target, max)
+        color = getLightColorInterpolate(false, cappedValue, target, max)
       }
   }
 
@@ -62,14 +62,14 @@ function Entry({ label, nodeName, objectEntryName, min, max, target}: Readonly<E
     const paper = document.getElementById(label)!;
     const bar = paper.getElementsByClassName("color-bar")[0] as HTMLElement;
     if (value !== undefined) {
-      value = value as number;
-      value = Math.max(min, value)
-      value = Math.min(value, max)
-      bar.style.setProperty("--width", `${(100) * (value - min) / (max - min)}%`);
-      if (target >= value) {
-        bar.style.setProperty("--color", `${getMainColorInterpolate(true, value, min, target)}`);
+      let cappedValue = value as number;
+      cappedValue = Math.max(min, cappedValue)
+      cappedValue = Math.min(cappedValue, max)
+      bar.style.setProperty("--width", `${(100) * (cappedValue - min) / (max - min)}%`);
+      if (target >= cappedValue) {
+        bar.style.setProperty("--color", `${getMainColorInterpolate(true, cappedValue, min, target)}`);
       } else {
-        bar.style.setProperty("--color", `${getMainColorInterpolate(false, value, target, max)}`);
+        bar.style.setProperty("--color", `${getMainColorInterpolate(false, cappedValue, target, max)}`);
       }
     } else {
       bar.style.setProperty("--width", `0%`);
@@ -119,20 +119,20 @@ function Entry({ label, nodeName, objectEntryName, min, max, target}: Readonly<E
 function EntryWithPercent({ label, nodeName, objectEntryName, min, max, target}: Readonly<EntryProps>) {
   const theme = useTheme();
 
-  let value = useObjectEntryValue(nodeName, objectEntryName);
+  const value = useObjectEntryValue(nodeName, objectEntryName);
   const info = useObjectEntryInfo(nodeName, objectEntryName);
 
   let unit = (info?.unit ?? "") as string;
   let color = theme.palette.background.paper2
 
   if (value !== undefined) {
-    value = value as number;
-    value = Math.max(min, value)
-    value = Math.min(value, max)
-    if (target >= value) {
-      color = getLightColorInterpolate(true, value, min, target)
+    let cappedValue = value as number;
+    cappedValue = Math.max(min, cappedValue)
+    cappedValue = Math.min(cappedValue, max)
+    if (target >= cappedValue) {
+      color = getLightColorInterpolate(true, cappedValue, min, target)
     } else {
-      color = getLightColorInterpolate(false, value, target, max)
+      color = getLightColorInterpolate(false, cappedValue, target, max)
     }
   }
 
@@ -140,14 +140,14 @@ function EntryWithPercent({ label, nodeName, objectEntryName, min, max, target}:
     const paper = document.getElementById(label)!;
     const bar = paper.getElementsByClassName("color-bar")[0] as HTMLElement;
     if (value !== undefined) {
-      value = value as number;
-      value = Math.max(min, value)
-      value = Math.min(value, max)
-      bar.style.setProperty("--width", `${(100) * (value - min) / (max - min)}%`);
-      if (target >= value) {
-        bar.style.setProperty("--color", `${getMainColorInterpolate(true, value, min, target)}`);
+      let cappedValue = value as number;
+      cappedValue = Math.max(min, cappedValue)
+      cappedValue = Math.min(cappedValue, max)
+      bar.style.setProperty("--width", `${(100) * (cappedValue - min) / (max - min)}%`);
+      if (target >= cappedValue) {
+        bar.style.setProperty("--color", `${getMainColorInterpolate(true, cappedValue, min, target)}`);
       } else {
-        bar.style.setProperty("--color", `${getMainColorInterpolate(false, value, target, max)}`);
+        bar.style.setProperty("--color", `${getMainColorInterpolate(false, cappedValue, target, max)}`);
       }
     } else {
       bar.style.setProperty("--width", `0%`);
