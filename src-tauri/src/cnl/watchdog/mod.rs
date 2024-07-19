@@ -239,7 +239,7 @@ impl WatchdogOverlord {
             over_status_rx,
             tx_com.clone(),
             Duration::from_millis(100),
-            30
+            60
         ));
 
         Self(Arc::new(WatchdogOverlordInner {
