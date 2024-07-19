@@ -238,8 +238,8 @@ impl WatchdogOverlord {
         let _ = tokio::spawn(Self::over_timeout_task(
             over_status_rx,
             tx_com.clone(),
-            Duration::from_millis(400),
-            20
+            Duration::from_millis(100),
+            30
         ));
 
         Self(Arc::new(WatchdogOverlordInner {
