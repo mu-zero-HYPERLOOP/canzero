@@ -8,7 +8,6 @@ import { invoke } from "@tauri-apps/api";
 import { useEffect, useState } from "react";
 
 import { Checkbox } from "@mui/material";
-import CloseIcon from '@mui/icons-material/Close';
 import SettingsApplicationsIcon from '@mui/icons-material/SettingsApplications';
 
 enum ConnectionState {
