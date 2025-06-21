@@ -29,7 +29,7 @@ impl TcpClient {
                 stream,
                 ConnectionId::Client {
                     request_id: true,
-                    sync_history: true,
+                    sync_history: false,
                 },
             )
             .await
