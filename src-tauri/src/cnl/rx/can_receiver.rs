@@ -43,9 +43,21 @@ impl CanReceiver {
             bus_name: String,
             bus_id: u32,
         ) -> Result<()> {
+            let mut talk = false;
+            if frame.is_ok() {
+                let f = frame.clone().unwrap();
+                if (f.get_id() == 0x1BD) {
+                    println!("Received get response");
+                    talk = true;
+                }
+            }
+
             match frame {
                 Ok(frame) => match receiver_data.lookup.get_handler(frame.key()) {
                     Some(handler) => {
+                        if talk {
+                            println!("We have a handler");
+                        }
                         let frame = handler.handle(&frame).await?;
                         receiver_data
                             .trace

@@ -117,7 +117,7 @@ impl TxCom {
     pub async fn send_get_req(&self, server_id: u8, object_entry_id: u16) {
         let mut data: u64 = 0;
         data |= object_entry_id as u64;
-        data |= (self.network_ref.nodes().len() as u64) << 13;
+        data |= (self.my_node_id as u64) << 13;
         data |= (server_id as u64) << 21;
 
         let get_req_frame = CanFrame::new(

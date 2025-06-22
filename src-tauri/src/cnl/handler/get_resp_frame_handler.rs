@@ -217,6 +217,7 @@ impl GetRespFrameHandler {
     }
 
     pub async fn handle(&self, can_frame: &TCanFrame) -> Result<TFrame> {
+        println!("Handling get response");
         let frame = self
             .frame_deserializer
             .deserialize(can_frame.get_data_u64());
@@ -224,6 +225,7 @@ impl GetRespFrameHandler {
         let get_resp_frame = GetRespFrame::new(&frame);
 
         if get_resp_frame.client_id != self.node_id && get_resp_frame.client_id != UNSOLICITED_ID {
+            println!("Not addressed to me {} {}", get_resp_frame.client_id, self.node_id);
             return Ok(can_frame.new_value(frame));
         }
         let get_resp_identifier = GetRespIdentifier {
@@ -234,8 +236,10 @@ impl GetRespFrameHandler {
 
         // lookup the correct GetResp "similar to handlers"
         let Some(get_resp) = self.get_resp_lookup.get(&get_resp_identifier) else {
+            println!("Object entry not found");
             return Err(Error::InvalidGetResponseServerOrObjectEntryNotFound);
         };
+        println!("Forwarded get response");
 
         get_resp
             .lock()

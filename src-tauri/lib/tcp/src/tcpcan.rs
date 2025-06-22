@@ -101,7 +101,7 @@ impl TcpCan {
 
     pub async fn new(tcp_stream: TcpStream, connection_id: ConnectionId) -> std::io::Result<Self> {
 
-        // tcp_stream.set_nodelay(true).unwrap();
+        tcp_stream.set_nodelay(true)?;
         let (mut rx, mut tx) = tcp_stream.into_split();
 
         let (sync_tx, sync_rx) = oneshot::channel();
@@ -252,7 +252,7 @@ impl TcpCan {
         //     }
         // });
 
-        let wdg = Watchdog::create(Duration::from_millis(3000));
+        let wdg = Watchdog::create(Duration::from_millis(1500));
 
         Ok(Self {
             sync_complete: Mutex::new(Some(sync_rx)),
@@ -306,7 +306,7 @@ impl TcpCan {
                         Ok(_) => match TcpFrame::from_bin(&rx_buffer).unwrap() {
                             TcpFrame::NetworkFrame(network_frame) => return Some(network_frame),
                             TcpFrame::KeepAlive => {
-                                // self.wdg.reset().await;
+                                self.wdg.reset().await;
                             },
                             TcpFrame::SyncEnd => {
                                 // what a clusterfuck

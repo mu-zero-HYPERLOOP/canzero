@@ -1,5 +1,6 @@
 pub mod connection;
 mod deserialize;
+pub mod error_observable;
 pub mod errors;
 pub mod frame;
 mod gamepad;
@@ -9,7 +10,6 @@ mod rx;
 pub mod trace;
 mod tx;
 pub mod watchdog;
-pub mod error_observable;
 
 pub mod can_adapter;
 
@@ -19,7 +19,15 @@ use std::{
 };
 
 use self::{
-    can_adapter::CanAdapter, connection::{ConnectionObject, ConnectionStatus}, error_observable::ErrorObservable, gamepad::Gamepad, network::{node_object::NodeObject, NetworkObject}, rx::RxCom, trace::TraceObject, tx::TxCom, watchdog::{Watchdog, WatchdogOverlord, WdgTag}
+    can_adapter::CanAdapter,
+    connection::{ConnectionObject, ConnectionStatus},
+    error_observable::ErrorObservable,
+    gamepad::Gamepad,
+    network::{node_object::NodeObject, NetworkObject},
+    rx::RxCom,
+    trace::TraceObject,
+    tx::TxCom,
+    watchdog::{Watchdog, WatchdogOverlord, WdgTag},
 };
 
 use canzero_appdata::{AppData, WdgLevel};
@@ -43,7 +51,7 @@ pub struct CNL {
     _watchdog_overlord: WatchdogOverlord,
     external_watchdog: Option<Watchdog>,
 
-    error_observable : ErrorObservable,
+    error_observable: ErrorObservable,
 }
 
 impl CNL {
@@ -55,8 +63,6 @@ impl CNL {
         node_id: Option<u8>,
         sync_complete: Option<tokio::sync::oneshot::Receiver<()>>,
     ) -> Self {
-
-
         let connection_object = Arc::new(ConnectionObject::new(
             ConnectionStatus::NetworkConnected,
             app_handle,
@@ -119,12 +125,12 @@ impl CNL {
 
         if deadlock_lvl != WdgLevel::Disable {
             let deadlock_watchdog =
-                watchdog_overlord.register(WdgTag::DeadlockWdg, Duration::from_millis(1000));
+                watchdog_overlord.register(WdgTag::DeadlockWdg, Duration::from_millis(1500));
             let network_dead = network.clone();
             let trace_dead = trace.clone();
             let connection_object_dead = connection_object.clone();
             tokio::spawn(async move {
-                let mut deadlock_interval = tokio::time::interval(Duration::from_millis(500));
+                let mut deadlock_interval = tokio::time::interval(Duration::from_millis(200));
                 loop {
                     deadlock_interval.tick().await;
                     network_dead.deadlock_watchdog().await;
@@ -135,12 +141,13 @@ impl CNL {
             });
         }
 
-
         let connection_object_sync = connection_object.clone();
-        match sync_complete{
+        match sync_complete {
             Some(sync_complete_signal) => {
                 tokio::spawn(async move {
-                    sync_complete_signal.await.expect("Failed to receive sync_complete signal");
+                    sync_complete_signal
+                        .await
+                        .expect("Failed to receive sync_complete signal");
                     connection_object_sync.set_status(ConnectionStatus::SyncDone);
                 });
             }
@@ -151,7 +158,7 @@ impl CNL {
             rx,
             tx,
             trace,
-            error_observable : ErrorObservable::new(&app_handle, &network).await,
+            error_observable: ErrorObservable::new(&app_handle, &network).await,
             network,
             connection_object,
             _watchdog_overlord: watchdog_overlord,
