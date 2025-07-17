@@ -36,17 +36,17 @@ function TemperatureCell({value, top, left, bottom, right, width}: TemperatureCe
 
 function TemperatureVis() {
 
-  const l1l = useObjectEntryValue("levitation_board1", "magnet_temperature_left");
-  const l1r = useObjectEntryValue("levitation_board1", "magnet_temperature_right");
-  const l2l = useObjectEntryValue("levitation_board2", "magnet_temperature_left");
-  const l2r = useObjectEntryValue("levitation_board2", "magnet_temperature_right");
-  const l3l = useObjectEntryValue("levitation_board3", "magnet_temperature_left");
-  const l3r = useObjectEntryValue("levitation_board3", "magnet_temperature_right");
+  const l1l = useObjectEntryValue("input_board", "levitation_front_magnet_temperature_left");
+  const l1r = useObjectEntryValue("input_board", "levitation_front_magnet_temperature_right");
+  const l2l = useObjectEntryValue("input_board", "levitation_middle_magnet_temperature_left");
+  const l2r = useObjectEntryValue("input_board", "levitation_middle_magnet_temperature_right");
+  const l3l = useObjectEntryValue("input_board", "levitation_back_magnet_temperature_left");
+  const l3r = useObjectEntryValue("input_board", "levitation_back_magnet_temperature_right");
 
-  const gfl = useObjectEntryValue("guidance_board_front", "magnet_temperature_left");
-  const gfr = useObjectEntryValue("guidance_board_front", "magnet_temperature_right");
-  const gbl = useObjectEntryValue("guidance_board_back", "magnet_temperature_left");
-  const gbr = useObjectEntryValue("guidance_board_back", "magnet_temperature_right");
+  const gfl = useObjectEntryValue("input_board", "guidance_front_magnet_temperature_left");
+  const gfr = useObjectEntryValue("input_board", "guidance_front_magnet_temperature_right");
+  const gbl = useObjectEntryValue("input_board", "guidance_back_magnet_temperature_left");
+  const gbr = useObjectEntryValue("input_board", "guidance_back_magnet_temperature_right");
 
   const driver = useObjectEntryValue("motor_driver", "board_max_temperature");
   const dslim = useObjectEntryValue("motor_driver", "lim_max_temperature");
