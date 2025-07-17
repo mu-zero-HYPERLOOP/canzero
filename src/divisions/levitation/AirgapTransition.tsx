@@ -10,19 +10,19 @@ function AirgapTransition() {
         width: "100%",
       }}>
       <RealPropertyField
-      nodeName={"mother_board"}
+      nodeName={"input_board"}
       objectEntryName={"target_airgap"}
       label={"target-airgap"}
       width="100%"
       />
       <EnumPropertyField
-      nodeName={"mother_board"}
+      nodeName={"input_board"}
       objectEntryName={"airgap_transition_mode"}
       label={"transition-function"}
       width="100%"
       />
       <RealPropertyField
-      nodeName={"mother_board"}
+      nodeName={"input_board"}
       objectEntryName={"airgap_transition_duration"}
       label={"transition-duration"}
       width="100%"

@@ -45,7 +45,7 @@ interface CustomAppBarProps {
 }
 
 
-const STATE_OE = { nodeName: "mother_board", objectEntryName: "state" };
+const STATE_OE = { nodeName: "input_board", objectEntryName: "global_state" };
 
 const START_45V_LABEL = <p>Start<br />45V-System [F1]</p>;
 const STOP_45V_LABEL = <p>Stop<br />45V-System [F2]</p>;

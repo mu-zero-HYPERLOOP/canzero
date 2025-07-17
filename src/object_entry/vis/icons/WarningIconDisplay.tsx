@@ -7,7 +7,7 @@ import theme from "../../../theme.ts";
 
 function WarningIconDisplay() {
 
-  const state = useObjectEntryValue("mother_board", "error_any")
+  const state = useObjectEntryValue("input_board", "error_any")
 
   let color = theme.palette.background.disabled
 

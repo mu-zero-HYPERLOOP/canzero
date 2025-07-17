@@ -12,7 +12,7 @@ import { useEffect } from "react";
 const MLU_OE = { nodeName: "levitation_board1", objectEntryName: "state" };
 const MGU_OE = { nodeName: "guidance_board_front", objectEntryName: "state" };
 const DSLIM_OE = { nodeName: "motor_driver", objectEntryName: "state" };
-const STATE_OE = { nodeName: "mother_board", objectEntryName: "state" };
+const STATE_OE = { nodeName: "input_board", objectEntryName: "global_state" };
 const AIRGAP_OE = { nodeName: "levitation_board1", objectEntryName: "airgap_left" };
 
 

@@ -13,7 +13,7 @@ function FsmVis() {
   const [x, setX] = useState(450 + 210 * 0);
   const [y, setY] = useState(335 + 100 * 0);
 
-  const globalState = useObjectEntryValue("mother_board", "state");
+  const globalState = useObjectEntryValue("input_board", "global_state");
 
   useEffect(() => {
     switch (globalState as string) {

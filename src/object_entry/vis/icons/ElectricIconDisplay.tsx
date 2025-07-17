@@ -9,7 +9,7 @@ import theme from "../../../theme.ts";
 import useObjectEntryValue from "../../../hooks/object_entry_value.ts";
 
 
-const OE = { nodeName: "mother_board", objectEntryName: "system_sdc_status" };
+const OE = { nodeName: "input_board", objectEntryName: "system_sdc_status" };
 
 function ElectricIconDisplay() {
 

@@ -10,7 +10,7 @@ import useObjectEntryValue from "../../../hooks/object_entry_value.ts";
 
 
 
-const OE = { nodeName: "mother_board", objectEntryName: "error_level_over_temperature_system" };
+const OE = { nodeName: "input_board", objectEntryName: "error_level_over_temperature_system" };
 
 
 function Popup() {

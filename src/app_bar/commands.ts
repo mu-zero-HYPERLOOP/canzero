@@ -2,8 +2,8 @@ import { invoke } from "@tauri-apps/api";
 import { Value } from "../object_entry/types/Value";
 
 
-const COMMAND_OE_NODE_NAME = "mother_board";
-const COMMAND_OE_NAME = "command";
+const COMMAND_OE_NODE_NAME = "input_board";
+const COMMAND_OE_NAME = "global_command";
 
 const EMERGENCY: Value = "EMERGENCY";
 const ABORT : Value = "ABORT";

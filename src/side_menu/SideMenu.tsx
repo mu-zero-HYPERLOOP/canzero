@@ -42,7 +42,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   }),
 );
 
-const STATE_OE = { nodeName: "mother_board", objectEntryName: "state" };
+const STATE_OE = { nodeName: "input_board", objectEntryName: "global_state" };
 
 interface SideMenuProps {
   open: boolean,
