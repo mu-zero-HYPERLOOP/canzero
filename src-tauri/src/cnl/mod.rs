@@ -68,7 +68,7 @@ impl CNL {
             app_handle,
         ));
 
-        let node_id = node_id.unwrap_or(network_config.nodes().len() as u8);
+        let node_id = node_id.unwrap();
 
         let trace = Arc::new(TraceObject::create(app_handle));
 
