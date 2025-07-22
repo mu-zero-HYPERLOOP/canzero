@@ -65,7 +65,7 @@ function Entry({ label, nodeName, objectEntryName, min, max, target}: Readonly<E
       let cappedValue = value as number;
       cappedValue = Math.max(min, cappedValue)
       cappedValue = Math.min(cappedValue, max)
-      bar.style.setProperty("--width", `${(100) * (cappedValue - min) / (max - min)}%`);
+      bar.style.setProperty("--width", `${(48.1) * (cappedValue - min) / (max - min)}%`);
       if (target >= cappedValue) {
         bar.style.setProperty("--color", `${getMainColorInterpolate(true, cappedValue, min, target)}`);
       } else {
@@ -85,7 +85,7 @@ function Entry({ label, nodeName, objectEntryName, min, max, target}: Readonly<E
       height: `2.5em`
     }}>
       <Box className="color-bar">
-        <div className="bar">
+        <div className="bar" >
         </div>
       </Box>
       <Stack direction="row" justifyContent="space-between" paddingTop="0.8em" paddingLeft="0.5em" paddingRight="0.5em">
@@ -143,7 +143,7 @@ function EntryWithPercent({ label, nodeName, objectEntryName, min, max, target}:
       let cappedValue = value as number;
       cappedValue = Math.max(min, cappedValue)
       cappedValue = Math.min(cappedValue, max)
-      bar.style.setProperty("--width", `${(100) * (cappedValue - min) / (max - min)}%`);
+      bar.style.setProperty("--width", `${(48.1) * (cappedValue - min) / (max - min)}%`);
       if (target >= cappedValue) {
         bar.style.setProperty("--color", `${getMainColorInterpolate(true, cappedValue, min, target)}`);
       } else {
@@ -178,7 +178,7 @@ function EntryWithPercent({ label, nodeName, objectEntryName, min, max, target}:
               position: "relative",
               top: "-0.25em",
             }}>
-              {(value === undefined) ? `?${unit} [?%]` : `${(value as number).toFixed(2)}${unit} [${((100) * ((value as number) - min) / (max - min)).toFixed(2)}%]`}
+              {(value === undefined) ? `?${unit} [?%]` : `${(value as number).toFixed(2)}${unit} [${((48.1) * ((value as number) - min) / (max - min)).toFixed(2)}%]`}
             </Typography>
           </Stack>
           <Stack direction="row" justifyContent="space-around" margin={0} padding={0} width="30%">
