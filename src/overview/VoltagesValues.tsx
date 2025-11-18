@@ -210,7 +210,7 @@ function VoltagesValues({ width, height }: Readonly<VoltagesValuesProps>) {
         padding: 0,
         paddingTop: "0.25em",
       }} direction="column" justifyContent="space-between">
-        <EntryWithPercent label="Battery-Voltage:" nodeName="input_board" objectEntryName="bat24_voltage" min={22.2} max={29} target={29}/>
+        <EntryWithPercent label="Battery-Voltage:" nodeName="input_board" objectEntryName="bat24_voltage" min={20} max={26} target={25}/>
         <Entry label="Supercap-Voltage:" nodeName="input_board" objectEntryName="supercap_voltage" min={30} max={50} target={45}/>
         <Entry label="Battery-Temperature:" nodeName="input_board" objectEntryName="bat24_temperature_max" min={20} max={50} target={20}/>
         <Entry label="Bat24-Current:" nodeName="input_board" objectEntryName="bat24_current" min={0} max={20} target={0}/>
