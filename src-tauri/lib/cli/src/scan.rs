@@ -5,8 +5,8 @@ use canzero_udp::scanner::UdpNetworkScanner;
 use crate::errors::Result;
 
 
-pub async fn command_scan() -> Result<()> {
-    let scanner = UdpNetworkScanner::create().await?;
+pub async fn command_scan(port : Option<u16>) -> Result<()> {
+    let scanner = UdpNetworkScanner::create(port.unwrap_or(9002)).await?;
     scanner.start();
     let mut networks = vec![];
     loop {

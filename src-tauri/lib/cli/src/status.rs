@@ -11,7 +11,7 @@ use canzero_tcp::tcpcan::{ConnectionId, TcpCan};
 use chrono::{DateTime, Datelike, NaiveDate, NaiveDateTime, NaiveTime, Timelike};
 use color_print::cprintln;
 
-use crate::{dump::discover, errors::Result};
+use crate::{utils::discover, errors::Result};
 
 async fn rx_get_req_hash_code(
     tcpcan: Arc<TcpCan>,
@@ -92,13 +92,12 @@ async fn rx_get_req_build_time(
     ))
 }
 
-pub async fn command_status() -> Result<()> {
+pub async fn command_status(port : Option<u16>) -> Result<()> {
     let appdata = AppData::read()?;
     let network_config = appdata.config()?;
     let network_hash = network_config.portable_hash();
 
-    let now = Instant::now();
-    let network = discover().await?;
+    let network = discover(port).await?;
     let timebase = network.timebase;
 
     let stream =

@@ -61,7 +61,7 @@ pub struct ConnectionDescription {
 pub async fn discover_servers(
     state: tauri::State<'_, StartupState>,
 ) -> Result<Vec<ConnectionDescription>, String> {
-    let scanner = UdpNetworkScanner::create()
+    let scanner = UdpNetworkScanner::create(9002)
         .await
         .map_err(|err| format!("{err:?}"))?;
     scanner.start();

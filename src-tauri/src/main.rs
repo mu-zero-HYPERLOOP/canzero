@@ -24,11 +24,7 @@ async fn main() {
         .setup(|app| {
             let handle = app.handle();
             tokio::spawn(async move {
-                let armv7_binary = handle
-                    .path_resolver()
-                    .resolve_resource("xcompl/canzero-cli-armv7-unknown-linux-gnueabihf")
-                    .unwrap();
-                if !run_cli(Some(armv7_binary)).await {
+                if !run_cli().await {
                     std::process::exit(0);
                 }
                 handle.manage(StartupState::new());

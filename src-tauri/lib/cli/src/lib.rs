@@ -1,42 +1,33 @@
 use std::path::PathBuf;
 
-use build_time::build_time_local; use clap::{Parser, Subcommand};
+use build_time::build_time_local;
+use clap::{Parser, Subcommand};
 use config::command_config_get;
 
 use crate::{
-    client::command_client,
     config::{
         command_config_check, command_config_hash, command_config_messages_list,
         command_config_nodes_list, command_config_object_entries_list, command_config_set,
         command_config_show,
     },
     dump::command_dump,
-    errors::Error,
     generate::command_generate,
     scan::command_scan,
     server::command_server,
-    ssh::{command_ssh, command_ssh_reboot},
     status::command_status,
-    update::{command_update_self, command_update_server},
 };
 
-mod client;
+mod utils;
 mod config;
 mod dump;
 mod errors;
 mod generate;
-mod get;
 mod scan;
 mod server;
-mod ssh;
 mod status;
-mod update;
 
 #[derive(Parser, Debug)]
-#[command(
-    version,
-    about = "Canzero is a CAN toolchain for fast prototyping",
-)]
+#[command(version, about = "Canzero is a CAN toolchain for fast prototyping")]
 struct Cli {
     #[command(subcommand)]
     command: Option<Command>,
@@ -65,10 +56,9 @@ enum Command {
         #[command(subcommand)]
         command: ServerCommand,
     },
-    #[command(about = "Connect to a network (SocketCAN).")]
-    Connect,
     #[command(about = "Print the CAN trace to the control.")]
     Dump {
+        port: Option<u16>,
         #[clap(alias = "msg")]
         #[arg(short, long, num_args=0..)]
         messages: Vec<String>,
@@ -77,13 +67,10 @@ enum Command {
         ids: Vec<String>,
     },
     #[command(about = "Check the status of all connected nodes.")]
-    Status,
-    #[command(about = "Update CANzero.")]
-    Update {
-        #[arg(short='s', long="socketcan", action = clap::ArgAction::SetTrue)]
-        socketcan: bool,
+    Status {
+        port: Option<u16>,
     },
-    Version
+    Version,
 }
 
 #[derive(Subcommand, Debug)]
@@ -92,7 +79,9 @@ enum ConfigCommand {
         about = "Set path to network configuration.",
         arg_required_else_help = true
     )]
-    Set { path: PathBuf },
+    Set {
+        path: PathBuf,
+    },
     #[command(
         about = "Display the network configuration.",
         arg_required_else_help = false
@@ -126,21 +115,12 @@ enum ConfigShowCommand {
 
 #[derive(Subcommand, Debug)]
 enum ServerCommand {
-    Start,
-    Scan,
-    Restart,
-    Reboot,
-    Ssh { host: Option<String> },
-    Update { host: Option<String> },
-}
-
-#[derive(Subcommand, Debug)]
-enum ClientCommand {
-    Start,
+    Start { port: Option<u16> },
+    Scan { port: Option<u16> },
 }
 
 /// returns true iff. the gui should be started!
-pub async fn run_cli(armv7_cli_binary : Option<PathBuf>) -> bool {
+pub async fn run_cli() -> bool {
     let cli = Cli::parse();
     let res = match cli.command {
         Some(cmd) => match cmd {
@@ -168,24 +148,16 @@ pub async fn run_cli(armv7_cli_binary : Option<PathBuf>) -> bool {
             } => command_generate(&node_name, &output_dir),
             Command::Gui => return true,
             Command::Server { command } => match command {
-                ServerCommand::Start => command_server().await,
-                ServerCommand::Scan => command_scan().await,
-                ServerCommand::Restart => Err(Error::NotYetImplemented),
-                ServerCommand::Reboot => command_ssh_reboot(None).await,
-                ServerCommand::Ssh { host } => command_ssh(host).await,
-                ServerCommand::Update { host } => {
-                    command_update_server(host, false, true, armv7_cli_binary).await
-                }
+                ServerCommand::Start { port } => command_server(port).await,
+                ServerCommand::Scan { port } => command_scan(port).await,
             },
-            Command::Connect => command_client().await,
-            Command::Dump { messages, ids } => command_dump(messages, ids).await,
-            Command::Status => command_status().await,
-            Command::Update { socketcan } => command_update_self(socketcan),
+            Command::Dump { port, messages, ids } => command_dump(port, messages, ids).await,
+            Command::Status {port} => command_status(port).await,
             Command::Version => {
                 println!("build-time : {}", build_time_local!());
-                if cfg!(feature="socket-can") {
+                if cfg!(feature = "socket-can") {
                     println!("socket-can : enabled");
-                }else {
+                } else {
                     println!("socket-can : disabled");
                 }
                 Ok(())
@@ -198,4 +170,3 @@ pub async fn run_cli(armv7_cli_binary : Option<PathBuf>) -> bool {
     }
     return false;
 }
-

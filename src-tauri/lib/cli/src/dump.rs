@@ -1,23 +1,14 @@
-use std::{net::SocketAddr, time::Duration};
+use std::net::SocketAddr;
 
 use canzero_appdata::AppData;
 use canzero_config::config::MessageId;
 use canzero_tcp::tcpcan::ConnectionId;
-use canzero_udp::{frame::NetworkDescription, scanner::UdpNetworkScanner};
 use color_print::cprintln;
 
-use crate::errors::{Error, Result};
+use crate::{errors::{Error, Result}, utils::discover};
 
-pub async fn discover() -> Result<NetworkDescription> {
-    let scanner = UdpNetworkScanner::create().await?;
-    scanner.start();
-    match scanner.next_timeout(Duration::from_millis(1000)).await {
-        Some(Ok(con)) => Ok(con),
-        _ => Err(Error::NoServerFound),
-    }
-}
 
-pub async fn command_dump(filter_msg_names: Vec<String>, filter_ids: Vec<String>) -> Result<()> {
+pub async fn command_dump(port : Option<u16>, filter_msg_names: Vec<String>, filter_ids: Vec<String>) -> Result<()> {
     if !filter_ids.is_empty() {
         return Err(Error::NotYetImplemented);
     }
@@ -25,7 +16,7 @@ pub async fn command_dump(filter_msg_names: Vec<String>, filter_ids: Vec<String>
     let appdata = AppData::read()?;
     let network_config = appdata.config()?;
 
-    let network = discover().await?;
+    let network = discover(port).await?;
 
     let connection =
         tokio::net::TcpStream::connect(SocketAddr::new(network.server_addr, network.service_port))

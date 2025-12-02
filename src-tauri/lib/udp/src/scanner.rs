@@ -1,5 +1,8 @@
 use std::{
-    collections::HashSet, net::SocketAddr, sync::Arc, time::{Duration, Instant}
+    collections::HashSet,
+    net::SocketAddr,
+    sync::Arc,
+    time::{Duration, Instant},
 };
 
 use color_print::cprintln;
@@ -10,17 +13,18 @@ use tokio::{
 };
 
 use crate::frame::{HelloFrame, NetworkDescription, UdpFrame};
-use crate::service_id::{BROADCAST_PORT, SERVICE_NAME};
+use crate::service_id::SERVICE_NAME;
 
 pub struct UdpNetworkScanner {
     socket: Arc<UdpSocket>,
     rx: Mutex<mpsc::Receiver<NetworkDescription>>,
     tx: mpsc::Sender<NetworkDescription>,
     task_handle: Arc<std::sync::Mutex<Option<AbortHandle>>>,
+    broadcast_port: u16,
 }
 
 impl UdpNetworkScanner {
-    pub async fn create() -> std::io::Result<UdpNetworkScanner> {
+    pub async fn create(broadcast_port: u16) -> std::io::Result<UdpNetworkScanner> {
         let socket = tokio::net::UdpSocket::bind(&format!("0.0.0.0:0"))
             .await
             .map_err(|_| {
@@ -37,6 +41,7 @@ impl UdpNetworkScanner {
             rx: Mutex::new(rx),
             tx,
             task_handle: Arc::new(std::sync::Mutex::new(None)),
+            broadcast_port,
         })
     }
 
@@ -46,15 +51,22 @@ impl UdpNetworkScanner {
             .lock()
             .expect("Failed to acquire task_handle lock for UdpNetworkScanner");
         if task_handle_lock.is_none() {
-            *task_handle_lock = Some(tokio::spawn(Self::broadcast_scanner_task(
-                self.socket.clone(),
-                self.tx.clone(),
-            )).abort_handle());
+            *task_handle_lock = Some(
+                tokio::spawn(Self::broadcast_scanner_task(
+                    self.socket.clone(),
+                    self.tx.clone(),
+                    self.broadcast_port,
+                ))
+                .abort_handle(),
+            );
         }
     }
 
     pub fn stop(&self) {
-        let mut task_handle_lock = self.task_handle.lock().expect("Failed to acquire task_handle lock for UdpNetworkScanner");
+        let mut task_handle_lock = self
+            .task_handle
+            .lock()
+            .expect("Failed to acquire task_handle lock for UdpNetworkScanner");
         if let Some(abort_handle) = task_handle_lock.as_ref() {
             abort_handle.abort();
             *task_handle_lock = None;
@@ -81,18 +93,21 @@ impl UdpNetworkScanner {
         }
     }
 
-
-    async fn broadcast_scanner_task(socket: Arc<UdpSocket>, tx: mpsc::Sender<NetworkDescription>) {
+    async fn broadcast_scanner_task(
+        socket: Arc<UdpSocket>,
+        tx: mpsc::Sender<NetworkDescription>,
+        broadcast_port: u16,
+    ) {
         let mut rx_buffer = [0u8; 216];
         let mut interval = tokio::time::interval(Duration::from_millis(1000));
 
-        let broadcast_addr = format!("255.255.255.255:{BROADCAST_PORT}");
+        let broadcast_addr = format!("255.255.255.255:{broadcast_port}");
 
-        let mut hello_frame = [0;216];
+        let mut hello_frame = [0; 216];
         UdpFrame::Hello(HelloFrame {
             service_name: SERVICE_NAME.to_owned(),
-        }).into_bin(&mut hello_frame);
-
+        })
+        .into_bin(&mut hello_frame);
 
         let mut discovered_networks: HashSet<SocketAddr> = HashSet::new();
         loop {
@@ -130,8 +145,8 @@ impl UdpNetworkScanner {
                 let nd = NetworkDescription {
                     server_addr: udp_server_addr.ip(),
                     server_name: ndf.server_name,
-                    config_hash : ndf.config_hash,
-                    build_time : ndf.build_time,
+                    config_hash: ndf.config_hash,
+                    build_time: ndf.build_time,
                     service_port: ndf.service_port,
                     timebase: local_timebase - ndf.time_since_sor,
                 };

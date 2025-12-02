@@ -21,10 +21,11 @@ pub struct Server {
     task_handle: Arc<Mutex<Option<AbortHandle>>>,
     config: NetworkRef,
     id_host: Arc<ConnectionIdHost>,
+    broadcast_port : u16,
 }
 
 impl Server {
-    pub async fn create(config: NetworkRef) -> std::io::Result<Self> {
+    pub async fn create(config: NetworkRef, broadcast_port: u16) -> std::io::Result<Self> {
         let timebase = Instant::now();
 
         let id_host = ConnectionIdHost::new((config.nodes().len() + 16) as u8);
@@ -55,6 +56,7 @@ impl Server {
             task_handle: Arc::new(Mutex::new(None)),
             config,
             id_host: Arc::new(id_host),
+            broadcast_port,
         })
     }
 
@@ -73,6 +75,7 @@ impl Server {
                     self.tcp_service_port,
                     self.config.clone(),
                     self.id_host.clone(),
+                    self.broadcast_port,
                 ))
                 .abort_handle(),
             );
@@ -99,6 +102,7 @@ impl Server {
         tcp_service_port: u16,
         config: NetworkRef,
         id_host: Arc<ConnectionIdHost>,
+        broadcast_port: u16,
     ) {
         async fn pserver_task(
             network: &Network,
@@ -107,10 +111,11 @@ impl Server {
             tcp_service_port: u16,
             config: NetworkRef,
             id_host: Arc<ConnectionIdHost>,
+            broadcast_port : u16,
         ) -> std::io::Result<()> {
             let server_name = format!("{}@{}", whoami::devicename(), whoami::username());
             let beacon =
-                UdpNetworkBeacon::create(tcp_service_port, timebase, &server_name, config).await?;
+                UdpNetworkBeacon::create(tcp_service_port, timebase, &server_name, config, broadcast_port).await?;
             beacon.start();
             cprintln!("<green>Successfully started UDP Beacon</green>");
 
@@ -139,6 +144,7 @@ impl Server {
                 tcp_service_port,
                 config.clone(),
                 id_host.clone(),
+                broadcast_port,
             )
             .await
             else {

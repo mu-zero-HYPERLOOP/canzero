@@ -9,7 +9,7 @@ use tokio::net::UdpSocket;
 
 use crate::frame::{NetworkDescriptionFrame, UdpFrame};
 
-use crate::service_id::{BROADCAST_PORT, SERVICE_NAME};
+use crate::service_id::SERVICE_NAME;
 
 pub struct UdpNetworkBeacon {
     beacon_name: String,
@@ -26,8 +26,9 @@ impl UdpNetworkBeacon {
         timebase: Instant,
         beacon_name: &str,
         config: NetworkRef,
+        broadcast_port:u16,
     ) -> std::io::Result<UdpNetworkBeacon> {
-        let socket = tokio::net::UdpSocket::bind(&format!("0.0.0.0:{BROADCAST_PORT}"))
+        let socket = tokio::net::UdpSocket::bind(&format!("0.0.0.0:{broadcast_port}"))
             .await
             .map_err(|_| {
                 std::io::Error::new(
